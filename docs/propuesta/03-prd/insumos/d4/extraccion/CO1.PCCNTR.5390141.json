@@ -1,0 +1,15 @@
+{
+  "id_contrato": "CO1.PCCNTR.5390141",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "El contrato corresponde al LOTE 3: CÁMARA DIGITAL (objeto en datos abiertos; valor $10.500.000). Los televisores eran el LOTE 2 de un proceso por lotes y no hacen parte de este contrato. Además, los documentos descargados son del LOTE 1 (sistema de sonido: reevaluación técnica, reevaluación económica y aceptación de oferta LOTE 1 a GRUPO CAF TECNOLOGIA SAS), así que no corresponden a este contrato. Sin televisores. Sin imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "REEVALUACION TECNICA LOTE 1OK.pdf",
+    "REEVALUACION ECONOMICA 188-COREC-2023 LOTE 1.pdf",
+    "ACEPTACION DE OFERTA LOTE 1.pdf"
+  ]
+}

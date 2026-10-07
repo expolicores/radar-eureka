@@ -1,0 +1,71 @@
+{
+  "id_contrato": "CO1.PCCNTR.4838434",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "TV LG UHD AI ThinQ 60\" LED 4K Smart tv webOS - Procesador inteligente α5 Gen5 (requerido: Televisor Smart TV UHD 4K 60 pulgadas)",
+      "marca": "LG",
+      "modelo": "60UQ7950PSB.AWC",
+      "tamano_pulgadas": 60,
+      "resolucion": "4K UHD",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 7,
+      "precio_unitario": 2483599,
+      "valor_total_item": 17385193,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "marca": "alta",
+        "modelo": "media",
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "tecnologia": "alta",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta",
+        "iva": "media"
+      },
+      "evidencia": {
+        "descripcion": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "marca": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "modelo": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "tamano_pulgadas": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "resolucion": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "tecnologia": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "smart": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "cantidad": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "precio_unitario": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "valor_total_item": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)",
+        "iva": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 3 (valor total $18.175.465 'INCLUIDO IMPUESTOS')"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "COMERCIVALLE",
+      "precio_unitario": 2483599,
+      "valor_propuesta": 18175465,
+      "adjudicado": true,
+      "evidencia": "1 PARTE COMITE Y EVALUACION IEAMM-06-2023.pdf | página 3; ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf | página 5 (imagen embebida en el PDF, cláusula DÉCIMA - oferta)"
+    },
+    {
+      "nombre": "AFERCOM DE COLOMBIA S.A.S.",
+      "precio_unitario": null,
+      "valor_propuesta": 18900000,
+      "adjudicado": false,
+      "evidencia": "1 PARTE COMITE Y EVALUACION IEAMM-06-2023.pdf | página 3",
+      "nota": "Solo se reporta el valor total de la propuesta"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "La tabla de ítems de la oferta no estaba en la capa de texto: es una imagen embebida en la página 5 del anexo de cláusulas (no venía como PNG en la carpeta). Se extrajo al scratchpad y se leyó visualmente (baja resolución, pero legible). Ítems: 1) TV LG 60\" 7 x $2.483.599 = $17.385.193; 2) soporte de pared 7 x $79.027 = $553.189; 3) instalación $33.869 x 7 = $237.083; total $18.175.465, que coincide con el contrato. La aritmética cuadra. Modelo ofertado '60UQ7950PSB.AWC' (EAN 8806091830210); el modelo sugerido por la entidad era 60UQ8050PSB. Presupuesto oficial: $19.369.000.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "1 PARTE COMITE Y EVALUACION IEAMM-06-2023.pdf",
+    "CO1_PCCNTR_4838434_Firmado.pdf",
+    "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf"
+  ]
+}

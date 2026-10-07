@@ -1,0 +1,46 @@
+{
+  "id_contrato": "CO1.PCCNTR.6138002",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor LED 75 pulgadas 4K Smart TV, TDT DVB-T2, HDMI/LAN/USB, parlantes 20W RMS, garantía 3 años",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 75,
+      "resolucion": "4K",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "descripcion": "alta",
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "tecnologia": "alta",
+        "smart": "alta",
+        "cantidad": "alta"
+      },
+      "evidencia": {
+        "descripcion": "Contrato.pdf | páginas 3-4",
+        "tamano_pulgadas": "Contrato.pdf | página 3",
+        "resolucion": "Contrato.pdf | página 3",
+        "tecnologia": "Contrato.pdf | página 3",
+        "smart": "Contrato.pdf | página 3",
+        "cantidad": "Contrato.pdf | página 2"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Contratación directa con COMERCIALIZADORA EXPO SOLUCIONES S.A.S por 13.750.000 global que incluye 1 aire acondicionado 18.000 BTU, 1 televisor e instalación; no hay desglose del precio del TV (SECOP: 1 línea UN 13.750.000). Se leyeron 5 imágenes del soporte de pago (524202526_p1..p5: transferencia, comprobante bancario y causación contable), todas legibles: base gravable 11.554.622 + IVA 2.195.378 = 13.750.000 (valor global con IVA), neto pagado 12.022.588 tras retenciones; tampoco desglosan el TV. Sin marca ni modelo.",
+  "imagenes_leidas": 5,
+  "documentos_revisados": [
+    "Contrato.pdf",
+    "CO1_PCCNTR_6138002_Firmado.pdf",
+    "Pago fra # CE 2097 CTO 63 COMERCIALIZADORA EXPOSOLUCIONES SAS.pdf (imágenes p1-p5)"
+  ]
+}

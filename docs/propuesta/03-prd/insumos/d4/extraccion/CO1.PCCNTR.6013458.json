@@ -1,0 +1,35 @@
+{
+  "id_contrato": "CO1.PCCNTR.6013458",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor UHD 65 (1 unidad), dentro de contrato de 12 equipos de escritorio, 1 televisor UHD 65 y 3 tablets Android 10",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 65,
+      "resolucion": "UHD",
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 1,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "media", "cantidad": "media", "precio_unitario": null},
+      "evidencia": {
+        "descripcion": "CO1_PCCNTR_6013458_Firmado.pdf | página 1 (objeto del contrato) y página 3 (línea de artículo)",
+        "tamano_pulgadas": "CO1_PCCNTR_6013458_Firmado.pdf | página 1 ('1 TELEVISORES UHD 65', sin unidad explícita)",
+        "resolucion": "CO1_PCCNTR_6013458_Firmado.pdf | página 1",
+        "cantidad": "CO1_PCCNTR_6013458_Firmado.pdf | página 1 ('1 TELEVISORES', redacción en plural ambigua)"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [
+    "El objeto dice '1 TELEVISORES UHD 65' (cantidad en singular con sustantivo en plural); la cantidad 1 se toma con confianza media."
+  ],
+  "observaciones": "Único documento disponible: el contrato electrónico SECOP firmado (régimen especial, contratista PARTNER TECH S.A.S., NIT 901353043), con una sola línea global de $65.000.000 (1 UN) para todo el objeto. No hay oferta, cotización ni anexo con precio por ítem; el documento 'JUR BS 0093- 2024 partner TECH.pdf' se menciona pero no está en la carpeta. Precio unitario del TV, marca y modelo no determinables. El '65' se interpreta como pulgadas por el contexto (televisor UHD 65). Sin imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["CO1_PCCNTR_6013458_Firmado.pdf"]
+}

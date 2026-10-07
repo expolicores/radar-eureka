@@ -1,0 +1,1730 @@
+[
+ {
+  "id_contrato": "CO1.PCCNTR.4946355",
+  "perfil": [
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_4946355_Firmado.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 8111,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5017737",
+  "perfil": [
+   {
+    "tipo": "xlsx",
+    "filas": 31,
+    "doc": "ANEXO  OFERTA ECONOMICA.xlsx"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5017737_Firmado.pdf"
+   },
+   {
+    "paginas": 14,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 14,
+    "doc": "INFORME FINAL CONTRATO 10034-2023- CEVOC.pdf"
+   },
+   {
+    "paginas": 14,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 14,
+    "doc": "13) INFORME FINAL CONTRATO 11-9-10032-2023 - CEVOC.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p1.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p2.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p3.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p4.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p5.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534603_p6.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p1.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p2.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p3.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p4.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p5.png",
+   "documentos\\CO1_PCCNTR_5017737\\384534949_p6.png"
+  ],
+  "chars_texto": 18807,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5375159",
+  "perfil": [
+   {
+    "paginas": 17,
+    "paginas_texto": 17,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION DE COMPUTADORES OK.PDF"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5375159_Firmado.pdf"
+   },
+   {
+    "paginas": 72,
+    "paginas_texto": 72,
+    "paginas_escaneadas": 0,
+    "doc": "ESTUDIO PREVIO  DE MANTENIMIENTO DE PC.PDF"
+   },
+   {
+    "paginas": 42,
+    "paginas_texto": 42,
+    "paginas_escaneadas": 0,
+    "doc": "INVITACION COMPUTADORES_1.PDF"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 249615,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5390141",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "REEVALUACION TECNICA LOTE 1OK.pdf"
+   },
+   {
+    "paginas": 15,
+    "paginas_texto": 15,
+    "paginas_escaneadas": 0,
+    "doc": "REEVALUACION ECONOMICA 188-COREC-2023 LOTE 1.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION DE OFERTA LOTE 1.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION DE OFERTA LOTE 1.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 105656,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5258565",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "EVALUACION TECNICA PROCESO PN MENEV MIC 022 2023.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "EVALUACION JURIDICA PROCESO PN MENEV MIC 022 2023.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 4,
+    "doc": "EVALUACION ECONOMICA PROCESO PN MENEV MIC 022 2023.pdf"
+   },
+   {
+    "paginas": 28,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 28,
+    "doc": "ACEPTACION DE OFERTA MINIMA CUANTIA.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5258565\\327380644_p1.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380644_p2.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380641_p1.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380641_p2.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380638_p1.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380638_p2.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380638_p3.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380638_p4.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p1.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p2.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p3.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p4.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p5.png",
+   "documentos\\CO1_PCCNTR_5258565\\327380646_p6.png"
+  ],
+  "chars_texto": 2062,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5036742",
+  "perfil": [
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "INFORME DE EVALUACION  TV.pdf"
+   },
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "INFORME DE EVALUACION  TV.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5036742_Firmado.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 3,
+    "doc": "CONTRATO TV.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5036742\\305981706_p1.png",
+   "documentos\\CO1_PCCNTR_5036742\\305981706_p2.png",
+   "documentos\\CO1_PCCNTR_5036742\\305981706_p3.png"
+  ],
+  "chars_texto": 30848,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.4838434",
+  "perfil": [
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "1 PARTE COMITE Y EVALUACION IEAMM-06-2023.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_4838434_Firmado.pdf"
+   },
+   {
+    "paginas": 7,
+    "paginas_texto": 7,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf"
+   },
+   {
+    "paginas": 7,
+    "paginas_texto": 7,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 60224,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5508018",
+  "perfil": [
+   {
+    "paginas": 16,
+    "paginas_texto": 16,
+    "paginas_escaneadas": 0,
+    "doc": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf"
+   },
+   {
+    "paginas": 17,
+    "paginas_texto": 17,
+    "paginas_escaneadas": 0,
+    "doc": "CONSOLIDADO DE EVALUACIONES COMPUTADORES.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "GS-2023-064100-MEPAS EVALUACION CONCEPTO TECNICO.pdf"
+   },
+   {
+    "paginas": 17,
+    "paginas_texto": 17,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION OFERTA COMPUTADORES.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 238283,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5687290",
+  "perfil": [
+   {
+    "paginas": 1,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 1,
+    "doc": "SOLICITUD DE OFERTA.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "CONTRATO.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5687290_Firmado.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "CONTRATO.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5687290\\391719364_p1.png",
+   "documentos\\CO1_PCCNTR_5687290\\391867202_p1.png",
+   "documentos\\CO1_PCCNTR_5687290\\391867202_p2.png",
+   "documentos\\CO1_PCCNTR_5687290\\391852748_p1.png",
+   "documentos\\CO1_PCCNTR_5687290\\391852748_p2.png"
+  ],
+  "chars_texto": 8873,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.4545743",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "evaluación final 3.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "evaluación preliminar.pdf"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 16,
+    "doc": "Formato de oferta económica.xlsx"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 8,
+    "paginas_escaneadas": 0,
+    "doc": "Llamado Ofertas.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_4545743\\271798911_p1.png",
+   "documentos\\CO1_PCCNTR_4545743\\271798911_p2.png",
+   "documentos\\CO1_PCCNTR_4545743\\270960064_p1.png",
+   "documentos\\CO1_PCCNTR_4545743\\270960064_p2.png"
+  ],
+  "chars_texto": 30078,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5372563",
+  "perfil": [
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "INFORME DE EVALUACION DEFINITIVO.pdf"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 10,
+    "doc": "ANEXO No. 11 Propuesta Económica.docx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 44,
+    "doc": "ANEXO No 1 CARTA DE PRESENTACION DE LA PROPUESTA.docx"
+   },
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION DE OFERTA.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 52387,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5030063",
+  "perfil": [
+   {
+    "paginas": 23,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 23,
+    "doc": "ACEPTACIÓN DE OFERTA.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5030063_Firmado.pdf"
+   },
+   {
+    "paginas": 19,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 19,
+    "doc": "ESTUDIO PREVIO ADQUISICIÓN DE TELEVISORES (TURISMO).pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "ESPECIFICACIONES TECNICAS TELEVISOR.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p1.png",
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p2.png",
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p3.png",
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p4.png",
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p5.png",
+   "documentos\\CO1_PCCNTR_5030063\\306329951_p6.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p1.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p2.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p3.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p4.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p5.png",
+   "documentos\\CO1_PCCNTR_5030063\\300550446_p6.png"
+  ],
+  "chars_texto": 11816,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5172832",
+  "perfil": [
+   {
+    "paginas": 7,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 7,
+    "doc": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 5,
+    "doc": "PROPUESTA LABORAL Y ECONÓMICA 1.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "CONTRATO.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_5172832_Firmado.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p1.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p2.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p3.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p4.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p5.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550686_p6.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550685_p1.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550685_p2.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550685_p3.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550685_p4.png",
+   "documentos\\CO1_PCCNTR_5172832\\314550685_p5.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p1.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p2.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p3.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p4.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p5.png",
+   "documentos\\CO1_PCCNTR_5172832\\315496693_p6.png"
+  ],
+  "chars_texto": 10540,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7062062",
+  "perfil": [
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "IEAMM-17-2024 Informe de evaluacion.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "2 COMUNICADO DE ACEPTACION DE OFERTA IEAMM-17-2024.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "IEAMM-17-2024 Oferta seleccionada.pdf"
+   },
+   {
+    "paginas": 7,
+    "paginas_texto": 7,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO CLAUSULAS CONTRATO IEAMM-17-2024.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 42484,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7106865",
+  "perfil": [
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "EVALUACION JURIDICA.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "EVALUACION JURIDICA ADQUISICION DE EQUIPOS DE CAFETERIA, ELECTRODOMESTICOS.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "EVALUACION ECONOMICA FINAL.pdf"
+   },
+   {
+    "paginas": 6,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 6,
+    "doc": "EVALUACION TECNICA.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p1.png",
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p2.png",
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p3.png",
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p4.png",
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p5.png",
+   "documentos\\CO1_PCCNTR_7106865\\547579893_p6.png"
+  ],
+  "chars_texto": 49923,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6013458",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_6013458_Firmado.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 7486,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7139511",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "2 CLARYICON COTIZACION .pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "2 CLARYICON COTIZACION .pdf"
+   },
+   {
+    "paginas": 52,
+    "paginas_texto": 52,
+    "paginas_escaneadas": 0,
+    "doc": "SIP043 Proyecto de Pliego Carteleras digitales.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 8,
+    "paginas_escaneadas": 0,
+    "doc": "Clausulado anexo sip043 (1) (1).pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 82761,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7126805",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "Evaluación Jurídica Definitiva FUGA-PCM-239-2024.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "Evaluación Económica Definitiva FUGA-PCM-239-2024.pdf"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 33,
+    "doc": "Evaluación Técnica Definitiva FUGA-PCM-239-2024.xlsx"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "Oficio Remisorio Evaluación Técnica Definitiva FUGA-PMC-239-2024.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 29702,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6432982",
+  "perfil": [
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "026 Evaluacion equipos audiovisuales.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "Comunicacion aceptacion de oferta_0001.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "Comunicacion aceptacion de oferta_0001.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_6432982_Firmado.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p1.png",
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p2.png",
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p3.png",
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p4.png",
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p5.png",
+   "documentos\\CO1_PCCNTR_6432982\\483215885_p6.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p1.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p2.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p3.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p4.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p5.png",
+   "documentos\\CO1_PCCNTR_6432982\\475888583_p6.png"
+  ],
+  "chars_texto": 19286,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6855883",
+  "perfil": [
+   {
+    "paginas": 11,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 11,
+    "doc": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf"
+   },
+   {
+    "doc": "CO1_OTLCNTNR_690920705_CO1_RPL_4375906.pdf",
+    "error": "Failed to open stream"
+   },
+   {
+    "doc": "CO1_OTLCNTNR_690920705_CO1_RPL_4375017.pdf",
+    "error": "Failed to open stream"
+   },
+   {
+    "doc": "Formulario No. 1 - Carta de presentación de la propuesta.pdf",
+    "error": "Failed to open stream"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p1.png",
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p2.png",
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p3.png",
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p4.png",
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p5.png",
+   "documentos\\CO1_PCCNTR_6855883\\519080302_p6.png"
+  ],
+  "chars_texto": 1186,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7047581",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "Informe de Evaluacion Preliminar.pdf"
+   },
+   {
+    "doc": "FORMATO No 12 OFERTA ECONOMICA  botes.docx",
+    "error": "File is not a zip file"
+   },
+   {
+    "doc": "FORMATO No 12 OFERTA ECONOMICA.pdf",
+    "error": "Failed to open stream"
+   },
+   {
+    "doc": "CO1_OTLCNTNR_708050988_CO1_RPL_4492320.pdf",
+    "error": "Failed to open stream"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 4383,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6431478",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "3. Solicitud COTIZACION -JP.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "1.Cotización INNOVA- TV-2_compressed.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "1. Solicitud COTIZACION -innova.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "2.COTIZACION MAAT.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 11731,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7020713",
+  "perfil": [
+   {
+    "tipo": "xlsx",
+    "filas": 5,
+    "doc": "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024.xlsx"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "evaluacion juridica.pdf"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 8,
+    "doc": "Evaluación Técnica - No MC-ANT-CTPGA-030-2024 LUIS CARLOS HOYOS.xlsx"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 5,
+    "doc": "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024- 1.xlsx"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 5226,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6249401",
+  "perfil": [
+   {
+    "tipo": "docx",
+    "parrafos": 48,
+    "doc": "Anexo 10 -Propuesta Economica.docx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 54,
+    "doc": "Formato 1- Carta de Presentación de la Oferta CCE-EICP-FM-104.docx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 48,
+    "doc": "Anexo 10 -Propuesta Economica.docx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 54,
+    "doc": "Formato 1- Carta de Presentación de la Oferta CCE-EICP-FM-104.docx"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 26698,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6138002",
+  "perfil": [
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "Contrato.pdf"
+   },
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "Contrato.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 5,
+    "doc": "Pago fra # CE 2097 CTO 63 COMERCIALIZADORA EXPOSOLUCIONES SAS.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_6138002_Firmado.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_6138002\\524202526_p1.png",
+   "documentos\\CO1_PCCNTR_6138002\\524202526_p2.png",
+   "documentos\\CO1_PCCNTR_6138002\\524202526_p3.png",
+   "documentos\\CO1_PCCNTR_6138002\\524202526_p4.png",
+   "documentos\\CO1_PCCNTR_6138002\\524202526_p5.png"
+  ],
+  "chars_texto": 57829,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6512901",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "FORMATO EVALUACIÓN.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "FORMATO EVALUACIÓN.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "CONTRAPROPUESTA.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "PROPUESTA MANTENIMIENTOS FULL COLOR ACTUALIZADA (1).pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_6512901\\484566487_p1.png",
+   "documentos\\CO1_PCCNTR_6512901\\484566487_p2.png"
+  ],
+  "chars_texto": 14231,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8636357",
+  "perfil": [
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEGS-021-2025.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "OFERTA SELECCIONADA IEGS-021-2025.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXOS contrato RE IEGS-021-2025.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_8636357_Firmado.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 29755,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8721745",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "cotizacion alcaldia dic 17 2025.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 21684,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8618634",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "Evaluación MAYA ELECTRONICC S.A.S (1).pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 1,
+    "doc": "Evaluacion ANDIVISION S.A.S (1).pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO EVALUACIÓN ECONÓMICA Y JUSTIFICACIÓN DEL MARGEN MÍNIMO.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "Evaluación SECURITY SHOPS LTDA (1).pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8618634\\702479577_p1.png",
+   "documentos\\CO1_PCCNTR_8618634\\702479577_p2.png",
+   "documentos\\CO1_PCCNTR_8618634\\702479580_p1.png",
+   "documentos\\CO1_PCCNTR_8618634\\702479576_p1.png",
+   "documentos\\CO1_PCCNTR_8618634\\702479576_p2.png"
+  ],
+  "chars_texto": 4433,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8731668",
+  "perfil": [
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "OFERTA ENSERES OFFIDISEÑOS.pdf"
+   },
+   {
+    "paginas": 7,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 7,
+    "doc": "04.2COTIZACIONES ENSERES Y MUEBLES PRECIOS REFERENCIA WEB.pdf"
+   },
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "GCCON-F-021 ANEXO AL CONTRATO - GYM ENSERES.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 1,
+    "doc": "CO1_PCCNTR_8731668_Firmado.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p1.png",
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p2.png",
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p3.png",
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p4.png",
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p5.png",
+   "documentos\\CO1_PCCNTR_8731668\\718138995_p6.png",
+   "documentos\\CO1_PCCNTR_8731668\\724540219_p5.png"
+  ],
+  "chars_texto": 45168,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8637202",
+  "perfil": [
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "OFERTA SELECCIONADA IEER-017-2025.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEER-017-2025.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO contrato regimen especial IEER-017-2025.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "ANEXO contrato regimen especial IEER-017-2025.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 26390,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8729908",
+  "perfil": [
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "EVALUACION DEFINITIVA20251223_15470436.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "EVALUACION DEFINITIVA20251223_15470436.pdf"
+   },
+   {
+    "paginas": 8,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 8,
+    "doc": "EVALUACION DEFINITIVA20251223_15470436.pdf"
+   },
+   {
+    "paginas": 9,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 9,
+    "doc": "CARTA DE ACEPTACION20251223_15461769.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p1.png",
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p2.png",
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p3.png",
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p4.png",
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p5.png",
+   "documentos\\CO1_PCCNTR_8729908\\723541392_p6.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p1.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p2.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p3.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p4.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p5.png",
+   "documentos\\CO1_PCCNTR_8729908\\723543651_p6.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p1.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p2.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p3.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p4.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p5.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519970_p6.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p1.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p2.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p3.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p4.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p5.png",
+   "documentos\\CO1_PCCNTR_8729908\\723519971_p6.png"
+  ],
+  "chars_texto": 3293,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8448027",
+  "perfil": [
+   {
+    "paginas": 20,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 17,
+    "doc": "#5 CONTRATO #20 PROPUESTA CONTRATISTA.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 4,
+    "doc": "#6 CONTRATO #20 ACTA DE EVALUCACION PROPUESTA.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 1,
+    "doc": "#2 CONTRATO #20 C.D.P. MAESTRO #90.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_8448027_Firmado.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p1.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p2.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p3.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p4.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p5.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897444_p6.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897445_p1.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897445_p2.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897445_p3.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897445_p4.png",
+   "documentos\\CO1_PCCNTR_8448027\\678897441_p1.png"
+  ],
+  "chars_texto": 14207,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8093401",
+  "perfil": [
+   {
+    "paginas": 20,
+    "paginas_texto": 20,
+    "paginas_escaneadas": 0,
+    "doc": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "1.1. COTIZACIÓN.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 3,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_8093401_Firmado.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "2. Estudio previo.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 61191,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8583590",
+  "perfil": [
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "ACTA DE EVALUACION GUAI-MC-007-2025 II.pdf"
+   },
+   {
+    "paginas": 12,
+    "paginas_texto": 12,
+    "paginas_escaneadas": 0,
+    "doc": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "COTIZACION 2025.pdf"
+   },
+   {
+    "paginas": 12,
+    "paginas_texto": 12,
+    "paginas_escaneadas": 0,
+    "doc": "Cotizacion CGR Matibel Guainia.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 78901,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7922631",
+  "perfil": [
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "Evaluación Definitiva MC-016-2025.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "6.Evaluación Definitiva MC-016-2025.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "5.Informe de evaluación preliminar MC-016-2025.pdf"
+   },
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "7.Comunicación de aceptación MC-016-2025.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 52477,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8133999",
+  "perfil": [
+   {
+    "paginas": 9,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 9,
+    "doc": "ACTA CONSOLIDACION E INFORMES Y REEVALUACION MMTTO DE COMPUTADORES OK.pdf"
+   },
+   {
+    "paginas": 22,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 22,
+    "doc": "ACEPTACION DE OFERTA MMTTO DE COMPUTADORES OK.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_8133999_Firmado.pdf"
+   },
+   {
+    "paginas": 74,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 74,
+    "doc": "ESTUDIO PREVIO MANTENIMIENTO DE COMPUTADORES OK.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p1.png",
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p2.png",
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p3.png",
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p4.png",
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p5.png",
+   "documentos\\CO1_PCCNTR_8133999\\643262627_p6.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p1.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p2.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p3.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p4.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p5.png",
+   "documentos\\CO1_PCCNTR_8133999\\643270483_p6.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p1.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p2.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p3.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p4.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p5.png",
+   "documentos\\CO1_PCCNTR_8133999\\624045059_p6.png"
+  ],
+  "chars_texto": 11853,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8234869",
+  "perfil": [
+   {
+    "tipo": "xlsx",
+    "filas": 6,
+    "doc": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 12,
+    "doc": "ANEXO 14. DECLARACIÓN JURAMENTADA DE NO IMPEDIMENTO Y-O CONFLICTO DE INTERESES.docx"
+   },
+   {
+    "tipo": "docx",
+    "parrafos": 14,
+    "doc": "RELACION DE CONTRATOS PRESTACION DE SERVICIOS PERSONA NATURAL.docx"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8234869\\669233760_p1.png",
+   "documentos\\CO1_PCCNTR_8234869\\669233760_p2.png"
+  ],
+  "chars_texto": 6257,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8520884",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 1,
+    "doc": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_8520884\\688085231_p1.png"
+  ],
+  "chars_texto": 19758,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9538760",
+  "perfil": [
+   {
+    "paginas": 41,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 41,
+    "doc": "EVALUACIÓN.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 3,
+    "doc": "0. COTIZACIONES.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_9538760_Firmado.pdf"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 0,
+    "doc": "3. CONTRATO DIGITAL.xlsx"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p1.png",
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p2.png",
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p3.png",
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p4.png",
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p5.png",
+   "documentos\\CO1_PCCNTR_9538760\\801389902_p6.png",
+   "documentos\\CO1_PCCNTR_9538760\\794946864_p1.png",
+   "documentos\\CO1_PCCNTR_9538760\\794946864_p2.png",
+   "documentos\\CO1_PCCNTR_9538760\\794946864_p3.png"
+  ],
+  "chars_texto": 11926,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9566302",
+  "perfil": [
+   {
+    "paginas": 3,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 1,
+    "doc": "#6 CONTRATO #11 ACTA DE EVALUACION.pdf"
+   },
+   {
+    "paginas": 23,
+    "paginas_texto": 23,
+    "paginas_escaneadas": 0,
+    "doc": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf"
+   },
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "#8 CONTRATO #11 C.R.P. #48.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "#4 CONTRATO #11 ESTUDIOS PREVIOS.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9566302\\808278822_p3.png"
+  ],
+  "chars_texto": 45436,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9883818",
+  "perfil": [
+   {
+    "tipo": "xlsx",
+    "filas": 40,
+    "doc": "Formato Oferta economica 2026.xlsx"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "GCCON-F-083_Carta_de_Aceptación_de_la_Oferta (4).pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 2,
+    "paginas_escaneadas": 0,
+    "doc": "GCCON-F-083_Carta_de_Aceptación_de_la_Oferta (4).pdf"
+   },
+   {
+    "paginas": 6,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 1,
+    "doc": "3.3. COTIZACION SERVICIO NACIONAL DE APRENDIZAJE-MI.PDF 01-MAIL-Anexos Respuestas Internas - No. 9-2026-08.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9883818\\838947825_p1.png"
+  ],
+  "chars_texto": 21706,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9527378",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_9527378_Firmado.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 11950,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9482543",
+  "perfil": [
+   {
+    "paginas": 7,
+    "paginas_texto": 7,
+    "paginas_escaneadas": 0,
+    "doc": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "22.2 INFORME FINAL EVALUACION JURIDICA ELECTRONICOS 035.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "18.1 EVALUACION ECONOMICA 2 OF MC 035.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 5,
+    "paginas_escaneadas": 0,
+    "doc": "22.1 INFORME FINAL EVALUACION TECNICA ELECTRONICOS 035.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 44361,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9691113",
+  "perfil": [
+   {
+    "paginas": 15,
+    "paginas_texto": 15,
+    "paginas_escaneadas": 0,
+    "doc": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf"
+   },
+   {
+    "paginas": 15,
+    "paginas_texto": 15,
+    "paginas_escaneadas": 0,
+    "doc": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 5,
+    "doc": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf"
+   },
+   {
+    "paginas": 5,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 5,
+    "doc": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9691113\\829159841_p1.png",
+   "documentos\\CO1_PCCNTR_9691113\\829159841_p2.png",
+   "documentos\\CO1_PCCNTR_9691113\\829159841_p3.png",
+   "documentos\\CO1_PCCNTR_9691113\\829159841_p4.png",
+   "documentos\\CO1_PCCNTR_9691113\\829159841_p5.png",
+   "documentos\\CO1_PCCNTR_9691113\\828564902_p1.png",
+   "documentos\\CO1_PCCNTR_9691113\\828564902_p2.png",
+   "documentos\\CO1_PCCNTR_9691113\\828564902_p3.png",
+   "documentos\\CO1_PCCNTR_9691113\\828564902_p4.png",
+   "documentos\\CO1_PCCNTR_9691113\\828564902_p5.png"
+  ],
+  "chars_texto": 52108,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9829420",
+  "perfil": [
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf"
+   },
+   {
+    "paginas": 4,
+    "paginas_texto": 4,
+    "paginas_escaneadas": 0,
+    "doc": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf"
+   },
+   {
+    "paginas": 16,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 16,
+    "doc": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p1.png",
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p2.png",
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p3.png",
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p4.png",
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p5.png",
+   "documentos\\CO1_PCCNTR_9829420\\842954845_p6.png"
+  ],
+  "chars_texto": 20528,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9492542",
+  "perfil": [
+   {
+    "paginas": 9,
+    "paginas_texto": 9,
+    "paginas_escaneadas": 0,
+    "doc": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 3.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 1.pdf"
+   },
+   {
+    "paginas": 10,
+    "paginas_texto": 10,
+    "paginas_escaneadas": 0,
+    "doc": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 2.pdf"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 58595,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9763105",
+  "perfil": [
+   {
+    "paginas": 1,
+    "paginas_texto": 1,
+    "paginas_escaneadas": 0,
+    "doc": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 16,
+    "doc": "12. Formato Oferta Economica.xlsx"
+   },
+   {
+    "paginas": 11,
+    "paginas_texto": 11,
+    "paginas_escaneadas": 0,
+    "doc": "ACEPTACION DE OFERTA FDLUSA-MC-004-2026.pdf"
+   },
+   {
+    "paginas": 2,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 2,
+    "doc": "10. solicitud cotizacion SECOP casaj2026.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9763105\\825096400_p1.png",
+   "documentos\\CO1_PCCNTR_9763105\\825096400_p2.png"
+  ],
+  "chars_texto": 40880,
+  "indicio_multi_oferentes": true
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9640674",
+  "perfil": [
+   {
+    "tipo": "xlsx",
+    "filas": 24,
+    "doc": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx"
+   },
+   {
+    "tipo": "xlsx",
+    "filas": 24,
+    "doc": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx"
+   },
+   {
+    "doc": "CO1_OTLCNTNR_865350542_CO1_RPL_5746675.pdf",
+    "error": "Failed to open stream"
+   },
+   {
+    "doc": "CO1_OTLCNTNR_865350542_CO1_RPL_5742800.pdf",
+    "error": "Failed to open stream"
+   }
+  ],
+  "imagenes": [],
+  "chars_texto": 9781,
+  "indicio_multi_oferentes": false
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9766009",
+  "perfil": [
+   {
+    "paginas": 7,
+    "paginas_texto": 7,
+    "paginas_escaneadas": 0,
+    "doc": "CONTRATO No. 79-2026.pdf"
+   },
+   {
+    "paginas": 6,
+    "paginas_texto": 6,
+    "paginas_escaneadas": 0,
+    "doc": "CO1_PCCNTR_9766009_Firmado.pdf"
+   },
+   {
+    "paginas": 3,
+    "paginas_texto": 0,
+    "paginas_escaneadas": 3,
+    "doc": "INVITACION.pdf"
+   }
+  ],
+  "imagenes": [
+   "documentos\\CO1_PCCNTR_9766009\\837267361_p1.png",
+   "documentos\\CO1_PCCNTR_9766009\\837267361_p2.png",
+   "documentos\\CO1_PCCNTR_9766009\\837267361_p3.png"
+  ],
+  "chars_texto": 37778,
+  "indicio_multi_oferentes": false
+ }
+]

@@ -1,0 +1,139 @@
+﻿ID,Categoria,Tarea,Componente,Rol,Prioridad,Horas_Estimadas,Base_Estimacion
+INF-001,Infraestructura,"Crear el proyecto Railway `scp-prod` en región US East (Virginia), con el plan adecuado y el acceso del equipo configurado",Railway (PaaS),DEV-OPS,Alta,2,"Alta de proyecto, región y accesos 2FA"
+INF-002,Infraestructura,"Aprovisionar PostgreSQL 16 gestionado en Railway con volumen persistente, solo red privada, TLS y backups diarios nativos",PostgreSQL gestionado,DEV-OPS,Alta,4,"PostgreSQL gestionado, red privada, TLS, backups, usuario app y pg_trgm"
+INF-003,Infraestructura,Configurar el servicio `web` en Railway,Servicio Web / API,DEV-OPS,Alta,4,"Servicio web, healthcheck, dominio y TLS"
+INF-004,Infraestructura,Configurar el servicio `worker` en Railway,Worker,DEV-OPS,Alta,4,"Servicio worker sin dominio, límites y graceful shutdown"
+INF-005,Infraestructura,Configurar el servicio `scheduler` con Railway Cron cada 5 minutos ejecutando el comando `dispatch`,Scheduler (dispatcher),DEV-OPS,Alta,3,Railway Cron */5 con comando dispatch
+INF-006,Infraestructura,"Crear la cuenta de Cloudflare R2 y el bucket privado `scp-prod-docs` con *location hint* `enam`, sin reglas de expiración ni sobrescritura, ",Almacén de objetos (R2),DEV-OPS,Alta,3,Cuenta y bucket privado R2 con CORS restringido
+INF-007,Infraestructura,Crear el bucket privado `scp-prod-backups` con regla de retención de 4 a 8 copias semanales,Almacén de objetos (R2),DEV-OPS,Alta,2,Bucket de respaldos con regla de retención
+INF-008,Infraestructura,Emitir credenciales de R2 de mínimo privilegio separadas por servicio,"Almacén de objetos (R2), Railway",DEV-OPS,Alta,4,3 credenciales de mínimo privilegio con pruebas negativas
+INF-009,Infraestructura,Definir la imagen Docker única multi-stage `scp,Imagen de despliegue,DEV-OPS,Alta,12,"Imagen multi-stage Node+Python con LibreOffice, unrar y PyMuPDF; 3 comandos"
+INF-010,Infraestructura,"Registrar y configurar el dominio propio de la aplicación (DNS en Cloudflare, certificado TLS gestionado por Railway) antes de exponer el pi","Servicio Web / API, DNS",DEV-OPS,Media,3,"Dominio, DNS, certificado y HSTS"
+INF-011,Infraestructura,"Configurar los registros DNS de envío de correo (SPF, DKIM, DMARC) para verificar el dominio de envío en Resend","Correo transaccional (Resend), DNS",DEV-OPS,Media,3,SPF/DKIM/DMARC y verificación de envío
+INF-012,Infraestructura,"Configurar límites de uso y alertas de facturación en Railway, Cloudflare y Anthropic, alineados al techo del piloto (COP 300.000/mes de inf","Railway, R2, Anthropic",DEV-OPS,Media,2,Límites y alertas de gasto en 3 proveedores
+INF-013,Infraestructura,"Verificar el costo real de la infraestructura contra las tarifas vigentes (Railway, PostgreSQL, R2, planes gratuitos de Sentry, monitor y Re",Infraestructura completa,ARCH,Baja,4,Verificación de costos reales contra el techo
+POC-001,Pruebas de Concepto,Validar el *walking skeleton* de despliegue en Railway,"Railway, imagen, Worker",ARCH,Alta,16,Walking skeleton de despliegue con migración pre-deploy y rollback
+POC-002,Pruebas de Concepto,Decidir la implementación de la cola de jobs sobre PostgreSQL,"Operación (cola de jobs), Worker",ARCH,Alta,24,"Prototipo de cola sobre PostgreSQL (2 opciones), prueba de 20.000 jobs y ADR"
+POC-003,Pruebas de Concepto,Validar el flujo de extracción multimodal de extremo a extremo con Claude Sonnet sobre la muestra D4-4,"Extracción, adaptador `ExtractorIA`",ARCH,Alta,32,"Extracción multimodal E2E sobre D4-4, precisión por campo, costo y umbral"
+POC-004,Pruebas de Concepto,"Validar la detección determinística de páginas que requieren lectura visual (capa de texto, imágenes incrustadas) con PyMuPDF sobre la muest",Documentos,ARCH,Alta,16,Heurística de páginas visuales medida sobre muestra D4
+POC-005,Pruebas de Concepto,Validar el procesamiento documental dentro de los recursos del worker (1 vCPU / 2 GB),"Documentos, Worker",ARCH,Media,16,Conversión LibreOffice y descompresión segura en 1 vCPU/2 GB con casos malformados
+POC-006,Pruebas de Concepto,"Validar la minimización de datos personales antes de enviar contenido a la IA, incluyendo el caso de páginas enviadas como imagen (donde las",Extracción,ARCH,Media,12,"Minimización de datos personales en texto e imágenes, decisión en ADR"
+POC-007,Pruebas de Concepto,Validar la captura retail de Alkosto y Falabella con datos estructurados,"Mercado, `ConectorRetail`",ARCH,Alta,16,"Captura retail con robots, sitemaps y JSON-LD en 2 tiendas"
+POC-008,Pruebas de Concepto,Validar las reglas de normalización y emparejamiento (mismo modelo / equivalente / insuficiente) con datos reales de SECOP II y TVEC,"Catálogo de productos, Comparación",ARCH,Alta,20,Reglas de normalización/emparejamiento con datos reales SECOP II y TVEC
+POC-009,Pruebas de Concepto,Validar el visor de evidencia en el navegador,"Web App, R2",ARCH,Media,12,Visor PDF.js por página y celda XLSX con URL firmada en 4 navegadores
+POC-010,Pruebas de Concepto,"Definir el mecanismo de verificación del hash SHA-256 al servir evidencia con URL firmada (la descarga va directo del navegador a R2, sin pa","Almacén de objetos, Servicio Web / API",ARCH,Media,8,Mecanismo de verificación de hash con URL firmada
+LBC-BE-001,Líneas Base de Código,Crear el repositorio y la estructura del monolito modular,Monolito (todos los módulos),TECH-LEAD,Alta,12,"Monolito de 10 módulos con capas, tooling e import-linter"
+LBC-BE-002,Líneas Base de Código,Implementar el núcleo transversal compartido,Núcleo compartido,DEV-BACK,Alta,20,"Núcleo transversal: config, logging JSON, RFC 9457, UoW, COP enteros"
+LBC-BE-003,Líneas Base de Código,Configurar la base de persistencia,Base de datos,DEV-BACK,Alta,12,"Alembic por esquema, mixin de versionado y prueba de solo inserción"
+LBC-BE-004,Líneas Base de Código,Crear el esqueleto del Servicio Web / API con FastAPI,Servicio Web / API,DEV-BACK,Alta,12,"FastAPI app factory, routers, healthz, middleware y SPA estática"
+LBC-BE-005,Líneas Base de Código,Crear el esqueleto del Worker según la decisión de POC-002,"Worker, Operación (cola)",DEV-BACK,Alta,16,"Esqueleto worker con colas, latido, apagado ordenado y correlation_id"
+LBC-BE-006,Líneas Base de Código,Crear el comando `dispatch`,Scheduler (dispatcher),DEV-BACK,Alta,12,"Dispatcher con Schedule, idempotencia por ventana y huérfanos"
+LBC-BE-007,Líneas Base de Código,Crear el esqueleto de la CLI de administración con Typer,CLI de administración,DEV-BACK,Media,8,CLI Typer por módulo con auditoría
+LBC-BE-008,Líneas Base de Código,Definir los puertos y la base de adaptadores,Adaptadores (puertos),DEV-BACK,Alta,16,"7 puertos, cliente httpx compartido y fakes"
+LBC-BE-009,Líneas Base de Código,Implementar la base del módulo Operación usada por todos los módulos,Operación,DEV-BACK,Alta,16,"ConfigurationVersion, feature flags y servicio de auditoría"
+LBC-FE-001,Líneas Base de Código,Crear la SPA con React + TypeScript (Vite),Web App,DEV-FRONT,Alta,10,"SPA React+TS Vite con features, tooling y librería accesible"
+LBC-FE-002,Líneas Base de Código,"Implementar el cliente de API tipado generado desde el OpenAPI del backend, manejo de sesión por cookie, token CSRF en escrituras, tratamien",Web App,DEV-FRONT,Alta,14,"Cliente tipado desde OpenAPI, sesión, CSRF, errores y caché"
+LBC-FE-003,Líneas Base de Código,Crear los componentes base de experiencia,Web App,DEV-FRONT,Media,20,"Componentes de estados, layout responsive, advertencia y guardas por rol"
+LBC-FE-004,Líneas Base de Código,Crear los componentes base de datos,Web App,DEV-FRONT,Media,28,"Tabla paginada, gráfico de distribución y visor de evidencia"
+PIP-INF-001,Pipelines,Configurar el repositorio GitHub para la entrega,"GitHub, entrega de software",DEV-OPS,Alta,3,"Protección de main, environment y secretos de Actions"
+PIP-INF-002,Pipelines,Versionar la configuración de los servicios de Railway como código (`railway.toml`/`railway.json`,Railway,DEV-OPS,Media,4,Configuración de Railway como código
+PIP-BE-001,Pipelines,Pipeline de CI del backend en cada PR,"Backend (API, worker, dispatcher, CLI)",DEV-OPS,Alta,8,"CI backend con lint, tipos, import-linter y PostgreSQL de servicio"
+PIP-FE-001,Pipelines,Pipeline de CI del frontend en cada PR,Web App,DEV-OPS,Alta,6,CI frontend con verificación de tipos OpenAPI
+PIP-BE-002,Pipelines,Construir en CI la imagen Docker única (`scp,Imagen de despliegue,DEV-OPS,Alta,6,Build y publicación de imagen única con caché
+PIP-BE-003,Pipelines,Agregar al CI la etapa E2E del flujo crítico,Sistema completo (CI efímero),DEV-OPS,Media,12,"Etapa E2E en CI con imagen, PostgreSQL, MinIO y semilla"
+PIP-INF-003,Pipelines,Pipeline de CD,Railway (3 servicios),DEV-OPS,Alta,10,"CD con aprobación, pre-deploy, healthcheck y notificación"
+PIP-INF-004,Pipelines,Workflow de rollback manual (`workflow_dispatch`) que redespliega una versión anterior de la imagen sin revertir el esquema,"Railway, entrega de software",DEV-OPS,Media,6,Workflow de rollback y ensayo
+PIP-BE-004,Pipelines,Pipeline de evaluación de IA contra el *golden dataset*,"Extracción, `ExtractorIA`",DEV-OPS,Media,12,Pipeline de evaluación de IA contra golden dataset con umbrales
+PIP-BE-005,Pipelines,Pipeline programado (semanal) de *contract tests* ligeros de los datasets de datos.gov.co y de la descarga de SECOP,"Ingesta, Documentos",DEV-OPS,Media,8,Contract tests semanales de datasets y descarga SECOP
+SEG-001,Seguridad,Implementar invitaciones y registro,Identidad y Acceso,SEC-ENG,Alta,16,"Invitaciones, registro con términos y Argon2id"
+SEG-002,Seguridad,Implementar sesión de servidor en PostgreSQL,Identidad y Acceso,SEC-ENG,Alta,16,Sesión de servidor con rotación y expiraciones
+SEG-003,Seguridad,Implementar recuperación de contraseña y límites de intentos en inicio de sesión y recuperación,Identidad y Acceso,SEC-ENG,Media,12,Recuperación de contraseña y límite de intentos
+SEG-004,Seguridad,Implementar la autorización,"Servicio Web / API, Investigación",SEC-ENG,Alta,14,RBAC en endpoints y autorización por propietario con registro
+SEG-005,Seguridad,Configurar la protección web,"Servicio Web / API, Web App",SEC-ENG,Media,10,"CSRF, cabeceras CSP/HSTS compatibles con PDF.js"
+SEG-006,Seguridad,Implementar la entrega segura de evidencia,"Servicio Web / API, R2",SEC-ENG,Media,8,URL firmadas tras validar sesión y permisos
+SEG-007,Seguridad,Implementar los controles de archivos para descargas de SECOP y cargas manuales/CSV,"Documentos, Mercado (cargas)",SEC-ENG,Media,14,"Controles de archivos: tipo real, tamaño, descompresión, macros, timeout"
+SEG-008,Seguridad,Proteger las descargas contra SSRF,Documentos (`RepositorioDocumental`),SEC-ENG,Media,6,Protección SSRF con lista blanca y sin redirecciones externas
+SEG-009,Seguridad,"Implementar la lista blanca de campos por dataset en la ingesta, con advertencia de campos desconocidos y prueba automática de que los campo",Ingesta,SEC-ENG,Alta,10,Lista blanca de campos por dataset y prueba de esquema
+SEG-010,Seguridad,Aplicar la clasificación de datos L1/L2/L3,"Exploración, Extracción, núcleo de logging",SEC-ENG,Alta,14,"Clasificación L1/L2/L3, persona natural no visible, filtro de logs, minimización IA"
+SEG-011,Seguridad,Verificar y documentar las condiciones del proveedor de IA,Proveedor de IA,SEC-ENG,Alta,4,Verificación contractual del proveedor de IA y retención
+SEG-012,Seguridad,"Implementar el catálogo central de plantillas de texto generadas por el sistema y la lista configurable de términos prohibidos (""sobreprecio","Comparación y Señales, Web App",DEV-BACK,Media,8,Catálogo de plantillas y lista de términos prohibidos
+SEG-013,Seguridad,Gestionar los secretos,"Railway, GitHub",SEC-ENG,Alta,8,"Inventario de secretos, gitleaks y rotación ensayada"
+SEG-014,Seguridad,Endurecer el contenedor y los procesos,Imagen de despliegue,SEC-ENG,Media,6,"Contenedor no root, imagen slim y secretos por servicio"
+SEG-015,Seguridad,"Activar 2FA en todas las cuentas de proveedores con acceso a producción (GitHub, Railway, Cloudflare, Anthropic, Resend, Sentry)",Cuentas de proveedores,SEC-ENG,Media,2,2FA en 6 cuentas de proveedores
+SEG-016,Seguridad,Configurar el análisis de dependencias y vulnerabilidades en CI,"CI, imagen",SEC-ENG,Baja,6,"pip-audit, npm audit, Trivy y PR automáticos"
+SEG-017,Seguridad,Preparar el cumplimiento de la Ley 1581/2012,"Identidad y Acceso, producto",ARCH,Alta,12,Política de tratamiento y términos versionados con revisión legal
+SEG-018,Seguridad,Revisar y documentar los términos de uso de Alkosto y Falabella y registrar el resultado en el sistema como condición para habilitar la capt,Mercado,ARCH,Media,6,Revisión de ToS de 2 tiendas y registro en configuración
+SEG-019,Seguridad,"Ejecutar la revisión OWASP Top 10 (2021) y un escaneo dinámico (OWASP ZAP) antes de abrir el piloto, y corregir los hallazgos",Sistema completo,SEC-ENG,Alta,24,"Revisión OWASP Top 10, escaneo ZAP y corrección de hallazgos"
+INT-001,Integraciones,Obtener y configurar por ambiente las credenciales y endpoints de los servicios externos,Adaptadores externos,DEV-BACK,Alta,4,Credenciales y endpoints por ambiente
+INT-002,Integraciones,Implementar el adaptador `FuentePublica` para la API Socrata de datos.gov.co,"Ingesta, adaptador Socrata",DEV-BACK,Alta,14,"Adaptador Socrata con paginación, metadatos y reintentos"
+INT-003,Integraciones,Integrar el dataset SECOP II Contratos (`jbjy-vk9h`),Ingesta,DEV-BACK,Alta,16,"Ingesta SECOP II con prefiltro, marca de agua, lista blanca y upsert"
+INT-004,Integraciones,Integrar los datasets de la TVEC,Ingesta,DEV-BACK,Alta,16,Ingesta TVEC ítems y órdenes con relación y marca de agua
+INT-005,Integraciones,"Integrar los datasets anuales de Archivos Descarga para listar los documentos de cada proceso (nombre, descripción, URL oficial, `id_documen","Documentos, adaptador Socrata",DEV-BACK,Media,10,Listado de documentos desde datasets anuales de archivos
+INT-006,Integraciones,Implementar el adaptador `RepositorioDocumental` para community.secop.gov.co,Documentos,DEV-BACK,Media,14,Descarga de documentos en streaming con límites y SHA-256
+INT-007,Integraciones,"Implementar el adaptador `AlmacenObjetos` sobre la API S3 (R2 en producción, MinIO en local)",Almacén de objetos,DEV-BACK,Alta,10,Adaptador S3 (R2/MinIO) sin sobrescritura y URL firmadas
+INT-008,Integraciones,Implementar el adaptador `ExtractorIA` para la API de Anthropic,Extracción,DEV-BACK,Alta,20,"Adaptador Anthropic multimodal con salida estructurada, reintentos y costo"
+INT-009,Integraciones,Diseñar y versionar en el repositorio los artefactos de IA,Extracción,DEV-BACK,Media,16,Prompts de extracción y clasificación y esquema de salida versionados
+INT-010,Integraciones,Implementar el control de costo de IA,"Extracción, Operación",DEV-BACK,Media,10,Control de costo de IA con tope y pausa de cola
+INT-011,Integraciones,Implementar el conector retail de Alkosto sobre la clase base `ConectorRetail`,Mercado,DEV-BACK,Media,20,"Conector Alkosto: robots, sitemaps, JSON-LD, presupuesto y suspensión"
+INT-012,Integraciones,Implementar el conector retail de Falabella sobre la misma clase base (fuente secundaria),Mercado,DEV-BACK,Media,12,Conector Falabella sobre la clase base
+INT-013,Integraciones,Implementar el adaptador `Correo` con Resend (API HTTP),"Identidad y Acceso, Operación",DEV-BACK,Media,8,Adaptador Resend con plantillas y reintentos
+INT-014,Integraciones,"Escribir las pruebas de integración de cada adaptador con respuestas simuladas o grabadas, incluidos los caminos de error",Adaptadores externos,DEV-BACK,Media,24,Pruebas de integración con fallos inyectados de 6 adaptadores
+DAT-001,Persistencia y Datos,Detallar el modelo de datos canónico a partir del diagrama 8.1,Base de datos (todos los esquemas),ARCH,Alta,20,Modelo físico canónico de 9 esquemas y ciclos de vida
+DAT-002,Persistencia y Datos,Crear las migraciones del esquema `ingesta`,Ingesta,DEV-BACK,Alta,12,"Esquema ingesta con bitácora, contratos, órdenes e ítems"
+DAT-003,Persistencia y Datos,Crear las migraciones del esquema `documentos`,Documentos,DEV-BACK,Media,8,Esquema documentos y artefactos
+DAT-004,Persistencia y Datos,Crear las migraciones del esquema `extraccion`,Extracción,DEV-BACK,Alta,12,Esquema extracción con localizadores y revisiones versionadas
+DAT-005,Persistencia y Datos,Crear las migraciones del esquema `catalogo`,Catálogo de productos,DEV-BACK,Media,8,Esquema catálogo con emparejamientos y reglas versionadas
+DAT-006,Persistencia y Datos,Crear las migraciones del esquema `mercado`,Mercado,DEV-BACK,Media,10,Esquema mercado solo inserción con capturas y búsquedas manuales
+DAT-007,Persistencia y Datos,Crear las migraciones del esquema `comparacion`,Comparación y Señales,DEV-BACK,Alta,12,Esquema comparación con versiones de señal y calificaciones
+DAT-008,Persistencia y Datos,Crear las migraciones del esquema `investigacion`,Investigación,DEV-BACK,Media,8,Esquema investigación con instantánea inmutable
+DAT-009,Persistencia y Datos,Crear las migraciones del esquema `identidad`,Identidad y Acceso,DEV-BACK,Media,6,Esquema identidad
+DAT-010,Persistencia y Datos,"Completar el esquema `operacion` con `AuditEvent`, métricas de costo por componente y KPIs con fecha de cálculo (configuración, `Schedule` y",Operación,DEV-BACK,Alta,8,"Esquema operación: auditoría, costos y KPIs"
+DAT-011,Persistencia y Datos,Crear las estructuras de lectura para exploración,Exploración,DEV-BACK,Media,16,"Vistas materializadas, índices, pg_trgm y tsvector verificados con EXPLAIN"
+DAT-012,Persistencia y Datos,Implementar el respaldo externo,"PostgreSQL, R2",DEV-OPS,Alta,8,Respaldo semanal cifrado con pg_dump
+DAT-013,Persistencia y Datos,Ejecutar y documentar la prueba de restauración desde el backup nativo de Railway y desde el `pg_dump` externo antes del piloto,PostgreSQL,DEV-OPS,Alta,8,Prueba de restauración desde 2 fuentes
+DAT-014,Persistencia y Datos,"Planificar y ejecutar la carga histórica de 3 años de SECOP II y TVEC por lotes acotados, controlando el crecimiento de la cola de revisión ","Ingesta, Extracción",DEV-BACK,Baja,16,Carga histórica de 3 años por lotes con monitoreo de cola y costo
+DAT-015,Persistencia y Datos,Implementar los jobs de purga por retención,Operación,DEV-BACK,Media,6,Jobs de purga por retención con tablas protegidas
+DAT-016,Persistencia y Datos,Crear los datos de referencia y semilla,"Operación, todos los módulos",DEV-BACK,Alta,14,"Configuración v1, Schedule, listas y datos semilla de desarrollo y E2E"
+OBS-001,Observabilidad,"Configurar Sentry (plan gratuito) para `web`, `worker` y la Web App","Servicio Web / API, Worker, Web App",DEV-OPS,Media,6,"Sentry en web, worker y SPA con depuración de datos personales"
+OBS-002,Observabilidad,Configurar el monitor externo de disponibilidad (plan gratuito) sobre `/healthz` con medición mensual y alerta por correo,Servicio Web / API,DEV-OPS,Media,2,Monitor externo de disponibilidad
+OBS-003,Observabilidad,Verificar la gestión de logs en Railway,Railway (3 servicios),DEV-OPS,Baja,3,Verificación de logs y retención en Railway
+OBS-004,Observabilidad,Implementar las métricas operativas desde PostgreSQL,Operación,DEV-BACK,Media,10,Métricas operativas desde PostgreSQL
+OBS-005,Observabilidad,Implementar el job verificador de alertas funcionales por correo,Operación,DEV-BACK,Alta,14,Verificador de alertas funcionales con deduplicación
+OBS-006,Observabilidad,Implementar los *health checks* de los procesos sin HTTP,"Worker, Scheduler",DEV-OPS,Alta,8,Health checks de worker y dispatcher con alerta
+OBS-007,Observabilidad,Registrar la duración de las solicitudes de la API por endpoint y calcular p95 para verificar la meta de ≤ 3 s,Servicio Web / API,DEV-OPS,Media,6,Duración por endpoint y reporte p95
+OBS-008,Observabilidad,Implementar el cálculo programado de los KPIs del MVP,Operación,DEV-BACK,Media,20,"Cálculo programado de KPIs del MVP (precisión, 3 coberturas, etc.)"
+OBS-009,Observabilidad,Implementar el reporte de costos por componente,Operación,DEV-BACK,Media,10,Reporte de costos por componente
+OBS-010,Observabilidad,Construir el tablero de operación del Administrador en la Web App,Web App,DEV-FRONT,Media,24,Tablero de operación del Administrador en la SPA
+AMB-001,Ambientes,Configurar el ambiente de desarrollo local con Docker Compose,Ambiente local,DEV-OPS,Media,12,"Docker Compose local con imagen, PostgreSQL, MinIO y semilla"
+AMB-002,Ambientes,Configurar el ambiente efímero de CI,CI efímero,DEV-OPS,Media,4,Servicios efímeros de CI
+AMB-003,Ambientes,Configurar el ambiente de producción,Railway (producción),DEV-OPS,Media,3,Variables no secretas de producción por servicio
+AMB-004,Ambientes,Definir el catálogo de configuración técnica por ambiente,Núcleo compartido,DEV-BACK,Media,6,Catálogo de configuración técnica y validación al arranque
+AMB-005,Ambientes,Asignar los secretos por ambiente y servicio,"Local, CI, Railway",DEV-OPS,Media,4,Asignación de secretos por ambiente y servicio
+AMB-006,Ambientes,Configurar por ambiente qué adaptadores son reales o *fake*,"Adaptadores, núcleo compartido",DEV-BACK,Media,6,Selección real/fake de adaptadores por ambiente
+COM-001,Comunicación entre Servicios,Definir los contratos de comunicación entre módulos,Monolito (10 módulos),TECH-LEAD,Alta,12,Fachadas y DTOs por módulo verificados con import-linter
+COM-002,Comunicación entre Servicios,Definir el catálogo de tipos de job del pipeline con contratos de payload versionados (Pydantic),"Operación (cola de jobs), Worker",DEV-BACK,Media,10,Catálogo de tipos de job con payload versionado
+COM-003,Comunicación entre Servicios,Implementar el encadenamiento por coreografía,"Operación, módulos del pipeline",DEV-BACK,Media,16,Encadenamiento por coreografía transaccional con correlation_id
+COM-004,Comunicación entre Servicios,Implementar los disparadores de recálculo con agrupación,"Comparación y Señales, Operación",DEV-BACK,Media,16,Disparadores de recálculo con deduplicación por alcance
+COM-005,Comunicación entre Servicios,Definir las convenciones de la API REST `/api/v1` entre la SPA y el servicio web,"Servicio Web / API, Web App",TECH-LEAD,Media,6,Guía de convenciones REST y OpenAPI
+COM-006,Comunicación entre Servicios,"Asegurar que los servicios de consulta (contratos, documentos, comparables, señales, casos) queden con contrato tipado reutilizable como her",Servicios de aplicación,ARCH,Baja,8,Contratos tipados exportables para un agente futuro
+DOC-001,Documentación Técnica,Registrar los ADR en `docs/adr/` como archivos individuales (MADR simplificada),Documentación de arquitectura,ARCH,Alta,16,ADR-001 a 015 y nuevos ADR de POC
+DOC-002,Documentación Técnica,Completar la documentación OpenAPI de la API,Servicio Web / API,TECH-LEAD,Media,10,Documentación OpenAPI completa
+DOC-003,Documentación Técnica,Escribir el README raíz y el README de cada módulo,Monolito,TECH-LEAD,Media,10,README raíz y 10 README de módulo
+DOC-004,Documentación Técnica,"Escribir la guía de desarrollo y contribución, incluida la guía para los agentes de desarrollo del Método Ceiba",Repositorio,TECH-LEAD,Media,12,Guía de desarrollo y para agentes del Método Ceiba
+DOC-005,Documentación Técnica,Escribir el runbook operativo mínimo,Operación,DEV-OPS,Alta,16,Runbook operativo con ensayos
+DOC-006,Documentación Técnica,"Mantener los diagramas de arquitectura como código (Mermaid C4) en el repositorio, sincronizados con la implementación",Documentación de arquitectura,ARCH,Media,6,Diagramas C4 como código
+DOC-007,Documentación Técnica,Documentar los artefactos de IA y su ciclo de cambio,Extracción,TECH-LEAD,Media,6,Documentación de artefactos de IA y su ciclo
+DOC-008,Documentación Técnica,Documentar el catálogo de configuración funcional y *feature flags*,Operación,TECH-LEAD,Media,8,Catálogo de configuración funcional y flags
+DOC-009,Documentación Técnica,Documentar las reglas analíticas determinísticas versionadas,"Catálogo, Comparación y Señales",TECH-LEAD,Media,12,Reglas analíticas determinísticas con ejemplos
+TST-001,Testing y Calidad,Configurar los frameworks de pruebas unitarias,"Backend, Web App",QA,Media,8,Frameworks unitarios backend y frontend con Hypothesis
+TST-002,Testing y Calidad,Configurar las pruebas de integración,Backend,QA,Media,10,Pruebas de integración con PostgreSQL real y MinIO
+TST-003,Testing y Calidad,"Preparar el corpus de documentos de prueba a partir de la muestra D4 (PDF nativos y escaneados, XLSX/XLS, DOCX/DOC, ZIP/RAR, vacíos, en blan","Documentos, Extracción",QA,Alta,16,Corpus documental de prueba desde muestra D4
+TST-004,Testing y Calidad,Construir los casos de referencia de las reglas analíticas,"Catálogo, Comparación y Señales, Extracción",QA,Alta,24,Casos de referencia de reglas analíticas aprobados por el PO
+TST-005,Testing y Calidad,Construir el *golden dataset* versionado (derivado de D4-4) y el comando de evaluación que calcula la precisión global y por campo crítico,Extracción,QA,Alta,16,Golden dataset versionado y comando de evaluación
+TST-006,Testing y Calidad,"Automatizar las pruebas E2E del flujo crítico (p. ej., Playwright)",Sistema completo,QA,Media,32,E2E del flujo crítico con Playwright
+TST-007,Testing y Calidad,Automatizar las pruebas de autorización,"Servicio Web / API, Investigación",QA,Media,12,Matriz de autorización y pruebas de propietario
+TST-008,Testing y Calidad,Automatizar la prueba de términos prohibidos,"Comparación y Señales, Web App",QA,Media,6,Prueba automática de términos prohibidos
+TST-009,Testing y Calidad,Automatizar las pruebas de escenarios de calidad y resiliencia,"Pipeline, Comparación, Extracción, Operación",QA,Baja,16,"Escenarios de calidad y resiliencia (QS-02/03/07, idempotencia)"
+TST-010,Testing y Calidad,"Ejecutar las pruebas de rendimiento y capacidad (p. ej., k6 o Locust)","Servicio Web / API, Worker, PostgreSQL",QA,Baja,16,Pruebas de rendimiento y capacidad
+TST-011,Testing y Calidad,"Automatizar las pruebas de accesibilidad (axe) en las vistas principales y la ejecución de E2E en Chrome, Edge, Firefox y Safari (WebKit)",Web App,QA,Media,12,Accesibilidad axe y E2E en 4 motores
+TST-012,Testing y Calidad,"Configurar la medición de cobertura con umbrales en CI, más exigentes para el dominio y las reglas determinísticas",CI,QA,Media,4,Umbrales de cobertura en CI

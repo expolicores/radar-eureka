@@ -1,0 +1,132 @@
+{
+  "id_contrato": "CO1.PCCNTR.9763105",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor. Tamaño: 60 pulgadas o superior, sonido surround simulado DASP, potencia 20W+20W, imagen 1920 x 1080 Full HD, entradas AV, HDMI, USB, Y/Pb/Pr, DVB-T2, WIFI, navegador web, incluye soporte; garantía mínima 3 años",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 60,
+      "resolucion": "Full HD",
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 2,
+      "precio_unitario": 2169353.34,
+      "valor_total_item": 4338706.68,
+      "iva": "con_iva",
+      "tipo_precio": "presupuesto",
+      "confianza": {
+        "marca": null,
+        "modelo": null,
+        "tamano_pulgadas": "media",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "resolucion": "alta"
+      },
+      "evidencia": {
+        "descripcion": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8",
+        "tamano_pulgadas": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8 ('60 pulgadas o superior')",
+        "resolucion": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8",
+        "cantidad": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8",
+        "precio_unitario": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8 (columna 'VALORES TECHO DE REFERENCIA - VALOR UNITARIO CON IVA')",
+        "valor_total_item": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8",
+        "iva": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 7 (encabezado 'VALOR UNITARIO CON IVA')",
+        "tipo_precio": "12. Formato Oferta Economica.xlsx | hoja OFERTA_ECON | fila 8"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "SUCCESS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $30.273.600 (NO HABILITADO)"
+    },
+    {
+      "nombre": "SUMINISTROS JLC SAS",
+      "precio_unitario": null,
+      "adjudicado": true,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $23.139.550 (HABILITADO, orden 1, GANADOR)"
+    },
+    {
+      "nombre": "YEFERSONCOR",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $30.750.000 (NO HABILITADO)"
+    },
+    {
+      "nombre": "SUMINISTRO, ACOMPAÑAMIENTO Y ASESORIAS CONTRACTUALES RYA",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $27.918.918 (NO HABILITADO)"
+    },
+    {
+      "nombre": "SUMINISTROS NACIONALES LA ROCA SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $28.252.293 (NO HABILITADO)"
+    },
+    {
+      "nombre": "SOLUCIONES EMPRESARIALES OASIS SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $28.062.654 (HABILITADO, orden 2)"
+    },
+    {
+      "nombre": "SERVICOL E INGENIERÍA",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $32.804.730 (NO HABILITADO)"
+    },
+    {
+      "nombre": "MectroInnova",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $27.918.920 (NO HABILITADO)"
+    },
+    {
+      "nombre": "SEMCAR SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $34.266.050 (NO HABILITADO)"
+    },
+    {
+      "nombre": "Prosecop.com sas bic",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $31.023.300 (NO HABILITADO)"
+    },
+    {
+      "nombre": "IMPERIUM COMPANY S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $24.709.491 (NO HABILITADO)"
+    },
+    {
+      "nombre": "GREAR SOLUCIONES S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $26.252.664 (NO HABILITADO)"
+    },
+    {
+      "nombre": "DAROX S.A.S.",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf | página 1: valor total oferta $29.709.227 (NO HABILITADO)"
+    }
+  ],
+  "inconsistencias": [
+    "La nota 8 de la evaluación económica dice que el valor del contrato será $34.467.798 IVA incluido (monto agotable, igual al valor total de referencia), mientras la aceptación de oferta fija $23.139.550 IVA incluido (Formato Evaluacion Economica FINAL ... .pdf | página 1; ACEPTACION DE OFERTA FDLUSA-MC-004-2026.pdf | página 2).",
+    "La aceptación cita un informe de evaluación del 8 de mayo de 2026, pero el formato de evaluación económica final tiene fecha 3/08/2026 (ACEPTACION DE OFERTA FDLUSA-MC-004-2026.pdf | página 1).",
+    "El precio techo unitario del TV tiene decimales (2.169.353,34); 2 x 2.169.353,34 = 4.338.706,68 cuadra."
+  ],
+  "observaciones": "Mínima cuantía FDLUSA-MC-004-2026 (dotación Casa de Justicia Usaquén), 13 oferentes con solo valor total; ganador SUMINISTROS JLC SAS por $23.139.550 IVA incluido. No está la oferta económica del ganador por ítem (el xlsx es el formato con columnas de oferta en 0), por lo que el único precio del TV es el valor techo de referencia de la entidad (presupuesto). El soporte de televisor (ítem 2), portátiles, proyector, parlantes y mobiliario se excluyen. Marca y modelo no aparecen. La especificación pide WIFI y navegador web pero no dice 'Smart' explícitamente (smart = null). Se leyó 1 imagen (825096400_p1.png, solicitud de información SECOP FDLUSA-SIP-009-2026): legible, solo datos generales del procedimiento y UNSPSC, sin precios; no se leyó p2.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf",
+    "12. Formato Oferta Economica.xlsx",
+    "ACEPTACION DE OFERTA FDLUSA-MC-004-2026.pdf",
+    "10. solicitud cotizacion SECOP casaj2026.pdf"
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "id_contrato": "CO1.PCCNTR.8093401",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISOR 55 PULGADAS LED UHD4K SMART TV REFERENCIA UN55DU7000KXZL",
+      "marca": null,
+      "modelo": "UN55DU7000KXZL",
+      "tamano_pulgadas": 55,
+      "resolucion": "4K UHD",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 10,
+      "precio_unitario": 2219000,
+      "valor_total_item": 22190000,
+      "iva": "indeterminado",
+      "tipo_precio": "presupuesto",
+      "confianza": {
+        "modelo": "alta",
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "tecnologia": "alta",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta"
+      },
+      "evidencia": {
+        "descripcion": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "modelo": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "tamano_pulgadas": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "resolucion": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "tecnologia": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "smart": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "cantidad": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "precio_unitario": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "valor_total_item": "1.1. COTIZACIÓN.pdf | página 1, ítem 1",
+        "tipo_precio": "1.1. COTIZACIÓN.pdf | página 1 (cotización de mercado; total $36.065.900 = presupuesto oficial en 2. Estudio previo.pdf | página 2)"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "QUANTYC S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $27.255.033; rechazada por superar precio unitario presupuestal en ítems 2,6,7,8,9,10)"
+    },
+    {
+      "nombre": "CRR SOLUCIONES INTEGRALES SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $30.295.356; rechazada por no subsanar requerimiento (precio artificialmente bajo))"
+    },
+    {
+      "nombre": "LUIS ARMANDO TRONCOSO MORALES",
+      "precio_unitario": null,
+      "adjudicado": true,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $31.023.000; adjudicatario)"
+    },
+    {
+      "nombre": "NEGOCIOS E INVERSIONES SINGS S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $31.164.222)"
+    },
+    {
+      "nombre": "CARLOS ARTURO ROZO CORTES",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $31.701.000)"
+    },
+    {
+      "nombre": "COMERCIALIZADORA SEMCAR S A S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $31.803.940)"
+    },
+    {
+      "nombre": "DATASERVICIOS & COMUNICACIONES SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $31.876.054)"
+    },
+    {
+      "nombre": "FUNDACION PARQUE TECNOLOGICO DE SOFTWARE DE TULUA",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $32.750.000; rechazada, no presentó Anexo 5)"
+    },
+    {
+      "nombre": "MULTITINTAS.INK S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $33.241.827)"
+    },
+    {
+      "nombre": "LOPEZ GOMEZ LADY HERMILA",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $33.482.000)"
+    },
+    {
+      "nombre": "HAROLD MAURICIO JARAMILLO CUEVAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $33.933.000)"
+    },
+    {
+      "nombre": "PC LOGIN COM S.A.S",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $33.997.023)"
+    },
+    {
+      "nombre": "INTEGROS COMERCIALIZADORA S.A.S.",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $34.000.680)"
+    },
+    {
+      "nombre": "DERLY VIVIANA ARCE NIÑO",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $34.262.605)"
+    },
+    {
+      "nombre": "FVG DISTRIBUCIONES S.A.S.",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $34.494.530)"
+    },
+    {
+      "nombre": "HIGH LEVEL INFORMATION TECHNOLOGY SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $34.946.730)"
+    },
+    {
+      "nombre": "GRUPO IMCOIN S.A.S.",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $35.303.492)"
+    },
+    {
+      "nombre": "CT & GA ASOCIADOS SAS",
+      "precio_unitario": null,
+      "adjudicado": false,
+      "evidencia": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf | página 5-6 (orden de elegibilidad; solo valor total de oferta: $35.648.600)"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "Contrato multi-ítem de equipos tecnológicos (11 ítems: TV, soportes, instalación, impresoras, cabinas, cables, micrófonos, etc.); solo el ítem 1 es televisor. El único precio unitario del TV está en la cotización de mercado de SINDY LORENA RUBIO MENDOZA (base del presupuesto oficial $36.065.900), por eso tipo_precio=presupuesto. El adjudicatario LUIS ARMANDO TRONCOSO MORALES ofertó $31.023.000 en total (contrato firmado y evaluación), pero su Anexo 5 con precios por ítem no está en los documentos; el precio unitario adjudicado del TV es desconocido. Marca no escrita en el documento (la referencia UN55DU7000KXZL corresponde a un modelo Samsung, pero no se registró por no estar explícita). 18 oferentes, solo con valor total. IVA no indicado para los precios. No hubo imágenes (todo con capa de texto).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "1.1. COTIZACIÓN.pdf",
+    "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf",
+    "CO1_PCCNTR_8093401_Firmado.pdf",
+    "2. Estudio previo.pdf"
+  ]
+}

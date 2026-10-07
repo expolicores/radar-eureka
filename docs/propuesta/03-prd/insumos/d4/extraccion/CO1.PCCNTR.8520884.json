@@ -1,0 +1,41 @@
+{
+  "id_contrato": "CO1.PCCNTR.8520884",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "TELEVISOR SMART TV 55\" UHD",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 55,
+      "resolucion": "UHD",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 2,
+      "precio_unitario": 2350000,
+      "valor_total_item": 4700000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {"tamano_pulgadas": "alta", "resolucion": "alta", "smart": "alta", "cantidad": "alta", "precio_unitario": "alta", "valor_total_item": "alta"},
+      "evidencia": {
+        "descripcion": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "tamano_pulgadas": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "resolucion": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "smart": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "cantidad": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "precio_unitario": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "valor_total_item": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf | página 1 (imagen 688085231_p1.png)",
+        "tipo_precio": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf | página 4 (adjudica a PAOLA ANDREA SOSA MEJIA; valor contrato $5.443.000 = total de la cotización)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "PAOLA ANDREA SOSA MEJIA", "precio_unitario": 2350000, "adjudicado": true, "evidencia": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf | página 1 y 4; precio en 10 cotizacion uno ... .pdf | página 1"},
+    {"nombre": "DISTRIBUIDORA EL TAMBO", "precio_unitario": null, "adjudicado": false, "evidencia": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf | página 1 y 3 (puntaje precio 5/15; sin valores)"},
+    {"nombre": "RELOJERIA Y MISCELANEA EL PORVENIR", "precio_unitario": null, "adjudicado": false, "evidencia": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf | página 1 y 3 (puntaje precio 10/15; sin valores)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Dotación pedagógica de inglés: 3 ítems de material didáctico y 1 ítem de televisores (2 TV Smart 55\" UHD). La cotización del adjudicatario (Mil Variedades La Ceja) solo está como escaneo; se leyó 1 imagen (688085231_p1.png), legible. Su total $5.443.000 coincide con el valor del contrato; la fila TOTAL de la columna 'Valor unidad' (2.498.600) es solo la suma de unitarios. La cotización dice régimen común e 'incluidos los valores de estampillas', pero no menciona IVA. Acta de evaluación triplicada en el texto. Los otros 2 oferentes no tienen precios en el acta.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": ["3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf", "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf"]
+}

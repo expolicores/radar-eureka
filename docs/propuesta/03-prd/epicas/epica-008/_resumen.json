@@ -1,0 +1,48 @@
+{
+  "epica": "ÉPICA-008",
+  "features": [
+    {
+      "nombre": "Operar Fuentes de Datos",
+      "hus": [
+        {"id": "HU-098", "carpeta": "HU-098-consultar-estado-fuentes", "titulo": "Consultar el estado de las fuentes de datos", "prioridad": "Alta", "frs": ["FR-088"], "escenarios": 14, "casos_qa": 15},
+        {"id": "HU-099", "carpeta": "HU-099-relanzar-ingesta-o-captura", "titulo": "Relanzar una ingesta o captura y reactivar una fuente suspendida", "prioridad": "Alta", "frs": ["FR-088"], "escenarios": 17, "casos_qa": 17},
+        {"id": "HU-100", "carpeta": "HU-100-alertar-fallas-ingesta-captura", "titulo": "Alertar al Administrador ante una ingesta o captura fallida o retrasada", "prioridad": "Alta", "frs": ["FR-088"], "escenarios": 13, "casos_qa": 16}
+      ]
+    },
+    {
+      "nombre": "Configurar Parámetros del Análisis",
+      "hus": [
+        {"id": "HU-101", "carpeta": "HU-101-configurar-parametros-comparacion-senal", "titulo": "Configurar y versionar los parámetros de comparación y señal", "prioridad": "Alta", "frs": ["FR-089"], "escenarios": 17, "casos_qa": 19},
+        {"id": "HU-102", "carpeta": "HU-102-configurar-parametros-operativos", "titulo": "Configurar términos de búsqueda, umbral de aceptación de extracción y frecuencias", "prioridad": "Alta", "frs": ["FR-089"], "escenarios": 14, "casos_qa": 16}
+      ]
+    },
+    {
+      "nombre": "Gestionar Revisión y Muestra de Validación",
+      "hus": [
+        {"id": "HU-103", "carpeta": "HU-103-consultar-cola-revision-humana", "titulo": "Consultar la cola de revisión humana", "prioridad": "Alta", "frs": ["FR-090"], "escenarios": 13, "casos_qa": 15},
+        {"id": "HU-104", "carpeta": "HU-104-marcar-muestra-validacion", "titulo": "Marcar contratos y documentos de la muestra de validación manual", "prioridad": "Alta", "frs": ["FR-092"], "escenarios": 14, "casos_qa": 17},
+        {"id": "HU-105", "carpeta": "HU-105-registrar-resultados-validacion", "titulo": "Generar la plantilla de validación y cargar los resultados verificados", "prioridad": "Alta", "frs": ["FR-092", "FR-091"], "escenarios": 15, "casos_qa": 17}
+      ]
+    },
+    {
+      "nombre": "Medir KPIs del MVP",
+      "hus": [
+        {"id": "HU-106", "carpeta": "HU-106-calcular-precision-extraccion", "titulo": "Calcular la precisión de la extracción, global y por campo", "prioridad": "Alta", "frs": ["FR-091"], "escenarios": 11, "casos_qa": 13},
+        {"id": "HU-107", "carpeta": "HU-107-calcular-indicadores-cobertura", "titulo": "Calcular los tres indicadores de cobertura sobre SECOP II, con TVEC aparte", "prioridad": "Alta", "frs": ["FR-091"], "escenarios": 13, "casos_qa": 13},
+        {"id": "HU-108", "carpeta": "HU-108-calcular-kpis-trazabilidad-comparabilidad", "titulo": "Verificar trazabilidad de señales, clasificación de comparaciones y base tributaria", "prioridad": "Alta", "frs": ["FR-091"], "escenarios": 12, "casos_qa": 15},
+        {"id": "HU-109", "carpeta": "HU-109-registrar-tiempo-por-caso", "titulo": "Registrar el tiempo que el Analista dedica a cada señal", "prioridad": "Alta", "frs": ["FR-093"], "escenarios": 12, "casos_qa": 13},
+        {"id": "HU-110", "carpeta": "HU-110-calcular-kpis-validacion-eficiencia", "titulo": "Calcular los KPIs de señales sustentadas y de eficiencia por caso", "prioridad": "Alta", "frs": ["FR-091", "FR-093"], "escenarios": 12, "casos_qa": 14},
+        {"id": "HU-111", "carpeta": "HU-111-consultar-costos-operacion", "titulo": "Consultar el costo por documento procesado con IA y el costo mensual por componente", "prioridad": "Alta", "frs": ["FR-091"], "escenarios": 13, "casos_qa": 13}
+      ]
+    },
+    {
+      "nombre": "Auditar Acciones Administrativas",
+      "hus": [
+        {"id": "HU-112", "carpeta": "HU-112-registrar-log-auditoria", "titulo": "Registrar el log de auditoría y aplicar la retención de logs", "prioridad": "Alta", "frs": ["FR-094"], "escenarios": 12, "casos_qa": 13},
+        {"id": "HU-113", "carpeta": "HU-113-consultar-log-auditoria", "titulo": "Consultar y exportar el log de auditoría", "prioridad": "Alta", "frs": ["FR-094"], "escenarios": 13, "casos_qa": 13}
+      ]
+    }
+  ],
+  "frs_cubiertos": ["FR-088", "FR-089", "FR-090", "FR-091", "FR-092", "FR-093", "FR-094"],
+  "frs_no_cubiertos": []
+}

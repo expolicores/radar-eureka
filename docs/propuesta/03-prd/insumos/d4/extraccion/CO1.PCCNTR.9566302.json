@@ -1,0 +1,45 @@
+{
+  "id_contrato": "CO1.PCCNTR.9566302",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TV DE 55 \" SAMSUNG U8000",
+      "marca": "Samsung",
+      "modelo": "U8000",
+      "tamano_pulgadas": 55,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 1,
+      "precio_unitario": 2553000,
+      "valor_total_item": 2553000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {"marca": "alta", "modelo": "media", "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": "alta"},
+      "evidencia": {
+        "descripcion": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "marca": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "modelo": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "tamano_pulgadas": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "cantidad": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "precio_unitario": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "valor_total_item": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf | página 22",
+        "tipo_precio": "#6 CONTRATO #11 ACTA DE EVALUACION.pdf | página 3 (imagen 808278822_p3.png: recomienda adjudicar al proponente único)"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [
+    "El objeto en el acta de evaluación, la propuesta y el CRP dice 'DOS TELEVISORES', pero la oferta económica y el estudio previo cotizan 1 TV de 55\" (#6 CONTRATO #11 ACTA DE EVALUACION.pdf | página 1; PROPUESTA CONTRATISTA.pdf | página 22; ESTUDIOS PREVIOS.pdf | página 3).",
+    "El CRP #48 registra un total comprometido de $8.224.800 (rubros $3.899.272 + $4.325.528), distinto del valor de la propuesta/contrato de $11.224.800 (#8 CONTRATO #11 C.R.P. #48.pdf | página 1)."
+  ],
+  "observaciones": "Proponente único: ELMER HUMBERTO TRIANA VILLALBA, propuesta $11.224.800 (acta de evaluación p.1). El precio del TV en la oferta coincide exactamente con el estudio previo (presupuesto) $2.553.000. El soporte de pared ($151.800) se excluye por no ser televisor. La oferta no menciona IVA; el RUT del proponente indica 'No responsable de IVA' (PROPUESTA CONTRATISTA.pdf p.5), pero el precio no se declara con/sin IVA, por eso 'indeterminado'. Se leyó 1 imagen (808278822_p3.png, acta de evaluación p.3): legible, solo contiene la recomendación de adjudicar al proponente único y firmas, sin precios.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "#6 CONTRATO #11 ACTA DE EVALUACION.pdf",
+    "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf",
+    "#8 CONTRATO #11 C.R.P. #48.pdf",
+    "#4 CONTRATO #11 ESTUDIOS PREVIOS.pdf"
+  ]
+}

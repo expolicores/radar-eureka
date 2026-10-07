@@ -1,0 +1,15 @@
+{
+  "id_contrato": "CO1.PCCNTR.5017737",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Contrato de SERVICIO de mantenimiento preventivo y correctivo (neveras, televisores, lavadoras, etc.), no compra de televisores; fuera del límite de categoría. La oferta económica (hoja OFERTA ECONOMICA, filas 23-26) lista mantenimiento de TVs existentes (Samsung 55\", Sony 43\", LG 43\") con valores de mantenimiento de $80.000-$120.000 IVA incluido, que no son precios de televisores. Se leyó 1 imagen (384534603_p1.png, informe de supervisión, legible y sin datos de precios de TV); las demás páginas del informe final no se leyeron por no ser relevantes.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "ANEXO  OFERTA ECONOMICA.xlsx",
+    "CO1_PCCNTR_5017737_Firmado.pdf",
+    "INFORME FINAL CONTRATO 10034-2023- CEVOC.pdf"
+  ]
+}

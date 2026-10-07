@@ -1,0 +1,103 @@
+{
+  "id_contrato": "CO1.PCCNTR.5508018",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISOR DE 75\" Smart TV 4K Ultra HD",
+      "marca": "SAMSUNG",
+      "modelo": "UN75CU7000KXZL",
+      "tamano_pulgadas": 75,
+      "resolucion": "4K Ultra HD",
+      "tecnologia": "UHD",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 6000000,
+      "valor_total_item": 6000000,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "marca": "media",
+        "modelo": "media",
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "tecnologia": "media",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta",
+        "iva": "alta"
+      },
+      "evidencia": {
+        "descripcion": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13",
+        "marca": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13; ACEPTACION OFERTA COMPUTADORES.pdf | página 15",
+        "modelo": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13; ACEPTACION OFERTA COMPUTADORES.pdf | página 15",
+        "tamano_pulgadas": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13",
+        "resolucion": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13",
+        "tecnologia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13",
+        "smart": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 13",
+        "cantidad": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 15",
+        "precio_unitario": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 15; ACEPTACION OFERTA COMPUTADORES.pdf | página 4",
+        "valor_total_item": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 15; ACEPTACION OFERTA COMPUTADORES.pdf | página 4",
+        "iva": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 15 (columna 'VALOR UNITARIO OFERTADO, INCLUIDO IVA')"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "CONTACTOS CAUCA SAS",
+      "precio_unitario": 5000000,
+      "valor_propuesta": 55480000,
+      "adjudicado": false,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES.pdf | página 15; CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 1",
+      "nota": "Primer lugar; NO CUMPLE (posible precio artificialmente bajo)"
+    },
+    {
+      "nombre": "HDC SAS SOPORTE A LA INGENIERIA",
+      "precio_unitario": 6000000,
+      "valor_propuesta": 61035000,
+      "adjudicado": true,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 15; ACEPTACION OFERTA COMPUTADORES.pdf | página 4"
+    },
+    {
+      "nombre": "SIMCO GROUP SAS",
+      "precio_unitario": null,
+      "valor_propuesta": 64379000,
+      "adjudicado": false,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 1"
+    },
+    {
+      "nombre": "COLTECNO SAS",
+      "precio_unitario": null,
+      "valor_propuesta": 64660000,
+      "adjudicado": false,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 1"
+    },
+    {
+      "nombre": "CDG TECNOLOGIA SAS",
+      "precio_unitario": null,
+      "valor_propuesta": 65000000,
+      "adjudicado": false,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 1"
+    },
+    {
+      "nombre": "DISURSAS",
+      "precio_unitario": null,
+      "valor_propuesta": 66510000,
+      "adjudicado": false,
+      "evidencia": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [
+    "CONTACTOS CAUCA SAS (consolidado 1, ítem 7 TV): valor unitario ofertado $5.000.000, pero el valor total del ítem reportado es $6.000.000 con cantidad 1. La columna de total parece repetir el valor estimado.",
+    "Ítem no TV (licencias Office) en la oferta adjudicada: 4 x $1.020.000 = $4.080.000, pero aparece $4.800.000. Aun así, la suma total de $61.035.000 usa $4.800.000.",
+    "El valor del contrato en datos abiertos ($89.805.000) no coincide con la aceptación de oferta ($61.035.000). Puede haber adición u otro alcance no documentado."
+  ],
+  "observaciones": "Contrato multiítem (cómputo, impresoras, escáner y 1 TV 75\"). Precio del TV igual al estimado ($6.000.000 IVA incluido). Marca y modelo (SAMSUNG UN75CU7000KXZL) aparecen en la columna 'REQUERIMIENTO MÍNIMO' de la verificación técnica de la oferta de HDC y en el anexo de la aceptación; en el consolidado de la primera oferta esa columna dice 'Especificar', así que se interpreta como lo ofertado (confianza media). Incluye soporte móvil pedestal como accesorio/instalación. Sin imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf",
+    "CONSOLIDADO DE EVALUACIONES COMPUTADORES.pdf",
+    "ACEPTACION OFERTA COMPUTADORES.pdf"
+  ]
+}

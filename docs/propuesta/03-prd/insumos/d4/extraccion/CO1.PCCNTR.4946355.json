@@ -1,0 +1,40 @@
+{
+  "id_contrato": "CO1.PCCNTR.4946355",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "VALOR TOTAL DE LOS ELEMENTOS ENTREGADOS (código UNSPSC 52161505)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 6,
+      "precio_unitario": 3200000,
+      "valor_total_item": 19200000,
+      "iva": "indeterminado",
+      "tipo_precio": "contratado",
+      "confianza": {
+        "descripcion": "baja",
+        "cantidad": "media",
+        "precio_unitario": "media",
+        "valor_total_item": "alta"
+      },
+      "evidencia": {
+        "descripcion": "CO1_PCCNTR_4946355_Firmado.pdf | página 2",
+        "cantidad": "CO1_PCCNTR_4946355_Firmado.pdf | página 2",
+        "precio_unitario": "CO1_PCCNTR_4946355_Firmado.pdf | página 2",
+        "valor_total_item": "CO1_PCCNTR_4946355_Firmado.pdf | página 2"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Contrato de COMODATO (Gobernación de Nariño entrega equipos al Municipio de Imués para IE María Paz), no compraventa. El único soporte es la tabla de ítems del contrato SECOP: 1 línea UNSPSC 52161505 (televisores) con descripción genérica, 6 UN x $3.200.000 = $19.200.000 (cuadra). El documento no dice explícitamente 'televisor': la clasificación como TV se basa solo en el código UNSPSC; sin marca, modelo, tamaño ni IVA. El valor corresponde a la valoración de los bienes en comodato, no a un precio de mercado adjudicado. Los anexos (estudios, anexo contractual) no estaban disponibles. No hubo imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "CO1_PCCNTR_4946355_Firmado.pdf"
+  ]
+}

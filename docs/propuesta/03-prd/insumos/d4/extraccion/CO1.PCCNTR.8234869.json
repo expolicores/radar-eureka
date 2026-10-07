@@ -1,0 +1,38 @@
+{
+  "id_contrato": "CO1.PCCNTR.8234869",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor 32\" Resolución HD (1366 x 768 píxeles), Android TV, Smart TV, Wi-Fi, Bluetooth, 3 HDMI y 2 USB, altavoces; medidas alto 42 cm x ancho 71 cm",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 32,
+      "resolucion": "HD (1366 x 768)",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 150,
+      "precio_unitario": null,
+      "valor_total_item": 111906108,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {"tamano_pulgadas": "alta", "resolucion": "alta", "smart": "alta", "cantidad": "media", "valor_total_item": "media"},
+      "evidencia": {
+        "descripcion": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx | hoja Hoja1 | fila 5",
+        "tamano_pulgadas": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx | hoja Hoja1 | fila 5",
+        "resolucion": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx | hoja Hoja1 | fila 5",
+        "smart": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx | hoja Hoja1 | fila 5",
+        "cantidad": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx | hoja Hoja1 | fila 5 ('CANTIDAD ESTIMADA' 150)",
+        "valor_total_item": "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf | página 1 (imagen 669233760_p1.png; valor del contrato $111.906.108)",
+        "tipo_precio": "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf | página 1 (imagen 669233760_p1.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "PC SYSTEM S.A.S.", "precio_unitario": null, "adjudicado": true, "evidencia": "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf | página 1 (imagen 669233760_p1.png)"}
+  ],
+  "inconsistencias": ["El valor del contrato ($111.906.108) dividido entre la cantidad estimada (150) no da un entero ($746.040,72), y el anexo indica que los valores deben ser enteros; la cantidad 150 es estimada y el contrato es por monto agotable, así que el número real de unidades no es determinable."],
+  "observaciones": "Contrato solo de televisores de 32\" (monto agotable). El ANEXO TECNICO ECONOMICO TELEVISORES.xlsx es la plantilla de la entidad con VALOR UNITARIO = 0 (sin diligenciar), así que no hay precio unitario adjudicado; la oferta de PC SYSTEM S.A.S. no está en los documentos. Las otras dos piezas (.docx) son formatos en blanco. Se leyeron 2 imágenes: acta de inicio página 1 (legible: contratista, valor $111.906.108, plazo) y página 2 (en blanco). Marca/modelo e IVA no indicados.",
+  "imagenes_leidas": 2,
+  "documentos_revisados": ["ANEXO TECNICO ECONOMICO TELEVISORES.xlsx", "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf", "ANEXO 14. DECLARACIÓN JURAMENTADA DE NO IMPEDIMENTO Y-O CONFLICTO DE INTERESES.docx", "RELACION DE CONTRATOS PRESTACION DE SERVICIOS PERSONA NATURAL.docx"]
+}

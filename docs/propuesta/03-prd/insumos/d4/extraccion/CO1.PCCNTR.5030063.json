@@ -1,0 +1,44 @@
+{
+  "id_contrato": "CO1.PCCNTR.5030063",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisores 65\" (Smart TV, 4K Ultra HD, Wi-Fi 6, BT 5.0, DVB-T2, con soporte de pared)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 65,
+      "resolucion": "4K Ultra HD",
+      "tecnologia": "UHD",
+      "smart": true,
+      "cantidad": 3,
+      "precio_unitario": 2974255,
+      "valor_total_item": 8922765,
+      "iva": "sin_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": "alta"},
+      "evidencia": {
+        "descripcion": "ACEPTACIÓN DE OFERTA.pdf | página 4 (imagen 306329951_p4.png, Formulario 4 Propuesta Económica)",
+        "tamano_pulgadas": "ACEPTACIÓN DE OFERTA.pdf | página 4 (imagen 306329951_p4.png)",
+        "resolucion": "ESPECIFICACIONES TECNICAS TELEVISOR.pdf | página 1 (requisito mínimo)",
+        "tecnologia": "ESPECIFICACIONES TECNICAS TELEVISOR.pdf | página 1 (requisito mínimo)",
+        "smart": "ESPECIFICACIONES TECNICAS TELEVISOR.pdf | página 1 (requisito mínimo)",
+        "cantidad": "CO1_PCCNTR_5030063_Firmado.pdf | página 2",
+        "precio_unitario": "ACEPTACIÓN DE OFERTA.pdf | página 4 (imagen 306329951_p4.png, columna VALOR OFERTADO); CO1_PCCNTR_5030063_Firmado.pdf | página 2 (precio unitario estimado 2.974.255,00)",
+        "valor_total_item": "CO1_PCCNTR_5030063_Firmado.pdf | página 2; ACEPTACIÓN DE OFERTA.pdf | página 2 (imagen 306329951_p2.png, cláusula segunda)",
+        "iva": "ESTUDIO PREVIO ADQUISICIÓN DE TELEVISORES (TURISMO).pdf | página 3 de la extracción (imagen 300550446_p3.png, num. 4.2.1: exclusión de IVA en San Andrés, art. 423 E.T.); ACEPTACIÓN DE OFERTA.pdf | página 4 (Nota 3: 'EXENTO DE IVA')",
+        "tipo_precio": "ACEPTACIÓN DE OFERTA.pdf | páginas 1-4"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "ACARIBE LIBROS LTDA", "precio_unitario": 2974255, "adjudicado": true, "evidencia": "ACEPTACIÓN DE OFERTA.pdf | página 4 (imagen 306329951_p4.png)"}
+  ],
+  "inconsistencias": [
+    "La propuesta económica (Formulario 4) referencia el proceso 'PN DESAP MIC 019 2023', mientras la aceptación de oferta se refiere al proceso 'PN DESAP MIC 030 2023'.",
+    "La Nota 3 del formulario indica ofrecer el 100% del presupuesto ($10.000.000) pero el valor contratado es $8.922.765; el menor valor unitario cotizado (techo) es $3.997.107,00."
+  ],
+  "observaciones": "Aritmética cuadra: 3 x 2.974.255 = 8.922.765. Precio techo unitario del estudio de mercado: $3.997.107 (columna 'MENOR VALOR UNITARIO COTIZADO'). Marca y modelo no aparecen (la especificación pide 'Especificar' pero la oferta incluida no los trae). Resolución/tecnología/smart provienen de la especificación mínima, no de la oferta. Imágenes leídas: 306329951_p1-p6 (aceptación de oferta, legibles; p4 contiene la propuesta económica escaneada, legible) y 300550446_p3-p4 (estudio previo, legibles). No hay informe con varios oferentes.",
+  "imagenes_leidas": 8,
+  "documentos_revisados": ["ACEPTACIÓN DE OFERTA.pdf", "CO1_PCCNTR_5030063_Firmado.pdf", "ESTUDIO PREVIO ADQUISICIÓN DE TELEVISORES (TURISMO).pdf", "ESPECIFICACIONES TECNICAS TELEVISOR.pdf"]
+}

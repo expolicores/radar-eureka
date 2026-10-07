@@ -1,0 +1,14 @@
+{
+  "id_contrato": "CO1.PCCNTR.4545743",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Objeto: instalación y protección de 11 televisores existentes (suministro e instalación de gabinetes de aluminio y soportes de pared para TV de 55\"). No incluye compra de televisores; soportes e instalación están fuera de la categoría. Hubo 5 oferentes para ese alcance (Carlos Pinzon, Emporio Inversiones S.A.S, Tecnsoft, Myc Constructora Sas $9.071.370 —igual al valor del contrato—, Inversiones y Construcciones Gerrari Sas); no se registran en 'oferentes' porque no son precios de TV. Imagen leída: 271798911_p1 (acta de evaluación definitiva, legible).",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "Formato de oferta económica.xlsx",
+    "evaluación final 3.pdf"
+  ]
+}

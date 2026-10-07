@@ -1,0 +1,62 @@
+{
+  "id_contrato": "CO1.PCCNTR.5036742",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor Smart TV de 50 pulgadas",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 50,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 5,
+      "precio_unitario": 1880000,
+      "valor_total_item": 9400000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "descripcion": "alta",
+        "tamano_pulgadas": "alta",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta"
+      },
+      "evidencia": {
+        "descripcion": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)",
+        "tamano_pulgadas": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)",
+        "smart": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)",
+        "cantidad": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)",
+        "precio_unitario": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)",
+        "valor_total_item": "CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "TIC AMERICA S.A.S",
+      "precio_unitario": null,
+      "valor_propuesta": 8881463,
+      "adjudicado": false,
+      "evidencia": "INFORME DE EVALUACION  TV.pdf | página 1",
+      "nota": "No habilitado (requisitos jurídicos y técnicos); solo se reporta el valor total de la propuesta"
+    },
+    {
+      "nombre": "IDELFONSO LEAL GASCA (DOTACIONES Y SUMINISTROS I&S)",
+      "precio_unitario": 1880000,
+      "valor_propuesta": 9400000,
+      "adjudicado": true,
+      "evidencia": "INFORME DE EVALUACION  TV.pdf | página 1; CONTRATO TV.pdf | página 2 (imagen 305981706_p2.png)"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "El contrato de compraventa No. 003 (imagen escaneada) trae la tabla de ítems: 5 x $1.880.000 = $9.400.000 (cuadra). No hay marca, modelo, resolución ni tecnología. El IVA no se menciona. La tabla SECOP del contrato firmado usa una sola línea genérica (UNSPSC 52161500, 1 VG). Imágenes leídas: 305981706_p1 y p2 (legibles, buena calidad); p3 no se leyó (firmas).",
+  "imagenes_leidas": 2,
+  "documentos_revisados": [
+    "INFORME DE EVALUACION  TV.pdf",
+    "CO1_PCCNTR_5036742_Firmado.pdf",
+    "CONTRATO TV.pdf"
+  ]
+}

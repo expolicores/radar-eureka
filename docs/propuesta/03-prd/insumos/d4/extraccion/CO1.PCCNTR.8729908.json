@@ -1,0 +1,40 @@
+{
+  "id_contrato": "CO1.PCCNTR.8729908",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "TELEVISOR 60 pulgas, samrt tv, 4k, resolución pantalla 4k-UHD, tipo de pantalla Smart TV, ancho alto x fondo 135.5 x 77.89 x 6.03 centímetros",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 60,
+      "resolucion": "4K UHD",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 3759752,
+      "valor_total_item": 3759752,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {"tamano_pulgadas": "alta", "resolucion": "alta", "smart": "alta", "cantidad": "alta", "precio_unitario": "alta", "valor_total_item": "alta"},
+      "evidencia": {
+        "descripcion": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "tamano_pulgadas": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "resolucion": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "smart": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "cantidad": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "precio_unitario": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "valor_total_item": "CARTA DE ACEPTACION20251223_15461769.pdf | página 5 (imagen 723519971_p5.png), ítem 12",
+        "tipo_precio": "CARTA DE ACEPTACION20251223_15461769.pdf | página 1 (imagen 723519971_p1.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "LA UNIVERSAL DE INVERSIONES BOYACA SAS", "precio_unitario": 3759752, "adjudicado": true, "evidencia": "EVALUACION DEFINITIVA20251223_15470436.pdf | página 1 (imagen 723519970_p1.png; oferta total $22.146.702); precio TV en CARTA DE ACEPTACION | página 5"},
+    {"nombre": "NIDIA YAMILE BELTRAN DIAZ", "precio_unitario": null, "adjudicado": false, "evidencia": "EVALUACION DEFINITIVA20251223_15470436.pdf | página 1 (imagen 723519970_p1.png; oferta total $7.290.000; no cumple jurídicamente, página 2)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Contrato multi-objeto (banderas, soportes, ferretería, sudaderas y 1 televisor); solo el ítem 12 es televisor. Todo escaneado: se leyeron 10 imágenes (carta de aceptación p1-p6; evaluación p1, p2, p5, p6), todas legibles. Los 3 PDF de evaluación son idénticos (mismo hash), se leyó una copia. Marca/modelo no indicados. La suma de los 12 ítems cuadra con $22.146.702. El IVA no se menciona. Oferentes solo con valor total de oferta (no unitario del TV para el segundo).",
+  "imagenes_leidas": 10,
+  "documentos_revisados": ["CARTA DE ACEPTACION20251223_15461769.pdf", "EVALUACION DEFINITIVA20251223_15470436.pdf"]
+}

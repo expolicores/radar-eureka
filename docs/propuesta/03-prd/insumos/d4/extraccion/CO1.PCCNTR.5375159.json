@@ -1,0 +1,14 @@
+{
+  "id_contrato": "CO1.PCCNTR.5375159",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Contrato de SERVICIO de mantenimiento preventivo y correctivo con bolsa de repuestos para equipos de cómputo, impresoras, televisores, etc.; adjudicado por porcentaje único de descuento. Los valores asociados a 'TELEVISOR' (p. ej. $112.420 y $148.555 en ACEPTACION DE COMPUTADORES OK.PDF) son tarifas de mantenimiento, no precios de televisores. Sin televisores en el límite de categoría. Sin imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "ACEPTACION DE COMPUTADORES OK.PDF",
+    "ESTUDIO PREVIO  DE MANTENIMIENTO DE PC.PDF"
+  ]
+}

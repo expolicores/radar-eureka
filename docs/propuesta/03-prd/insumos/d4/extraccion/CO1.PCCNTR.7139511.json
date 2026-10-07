@@ -1,0 +1,14 @@
+{
+  "id_contrato": "CO1.PCCNTR.7139511",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [
+    "La cotización de CLARYICON aparece duplicada en el texto (páginas 1-2 repetidas).",
+    "El presupuesto oficial del pliego es $96.485.200 y el valor del contrato es $96.475.200 (diferencia de $10.000)."
+  ],
+  "observaciones": "Excluido por límite de categoría: el objeto es la compraventa de 'pantallas industriales de 65 pulgadas ... para la cartelería institucional, con sus respectivas bases y LICENCIAS SUPERSIGN' (señalización digital), según el Proyecto de Pliego (página 1) y el Clausulado (páginas 1-2). Caso frontera a revisar: la cotización de estudio de mercado (2 CLARYICON COTIZACION .pdf, página 1, 04-oct-2024) ofrece 'MONITOR TELEVISOR DE 65\" LG 65UR640S' (UHD 3840x2160, TDT Colombia, YouTube, gestión Supersign), 20 unidades a $3.480.000 sin IVA (subtotal $69.600.000 + IVA $13.224.000 = $82.824.000), y como alternativa 'MONITOR PROFESIONAL LG 65UL3J-3' 20 unidades a $3.990.000 sin IVA. Esto es una cotización previa (precio de referencia/presupuesto), no el precio adjudicado; no hay documento de adjudicación, oferta ganadora ni nombre del contratista. Presupuesto oficial $96.485.200 con impuestos; valor del contrato $96.475.200 (Clausulado página 3). Sin imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["2 CLARYICON COTIZACION .pdf", "SIP043 Proyecto de Pliego Carteleras digitales.pdf", "Clausulado anexo sip043 (1) (1).pdf"]
+}

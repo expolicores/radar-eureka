@@ -1,0 +1,46 @@
+{
+  "id_contrato": "CO1.PCCNTR.9492542",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor (ítem 1 del proceso; requisitos mínimos citados: procesador AI Alpha 7 Gen 8, mínimo 3 HDMI y 2 USB). Se adquiere con soporte móvil tipo carro para televisor de gran formato (ítem 2, excluido)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": null, "cantidad": null, "precio_unitario": null, "descripcion": "media"},
+      "evidencia": {
+        "descripcion": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 2"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "PROMOCIONALES Y TECNOLOGICOS MEDELLIN SAS", "precio_unitario": null, "adjudicado": true, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: oferta total $47.300.000 antes de IVA + $8.987.000 IVA = $56.287.000 (igual al valor del contrato)"},
+    {"nombre": "ARHO SOLUCIONES SAS", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $37.500.000 + IVA $7.125.000 = $44.625.000 (rechazada, página 2)"},
+    {"nombre": "C&S TECNOLOGIA SAS BIC", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $39.150.000 + IVA $7.438.500 = $46.588.500 (rechazada, páginas 2-3)"},
+    {"nombre": "BIDFOR SAS", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $44.000.000 + IVA $8.360.000 = $52.360.000 (rechazada, página 2)"},
+    {"nombre": "GUILLERMO ZAMBRANO", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $53.000.000 + IVA $0 = $53.000.000 (rechazada, página 2)"},
+    {"nombre": "CONTROL GRUPO EMPRESARIAL SAS", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $46.202.770 + IVA $8.778.526 = $54.981.296 (rechazada, página 3)"},
+    {"nombre": "CARLOS ALBERTO GUTIERREZ HOYOS", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1: $48.096.640 + IVA $9.138.362 = $57.235.002"},
+    {"nombre": "INVERSIONES COLUSA SAS", "precio_unitario": null, "adjudicado": false, "evidencia": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 2: $51.949.340 + IVA $9.870.375 = $61.819.715"}
+  ],
+  "inconsistencias": [
+    "En la tabla de ofertas la columna de total se rotula 'VALOR TOTAL ANUAL SIN IVA', pero los valores son antes de IVA + IVA (es decir, con IVA) (MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf | página 1)."
+  ],
+  "observaciones": "Mínima cuantía MC 23 de 2026 (ITM), presupuesto oficial $63.017.045, 8 oferentes. Los 4 informes de evaluación solo traen valores totales por oferente, sin desglose por ítem: no hay cantidad, tamaño, marca, modelo ni precio unitario del televisor. Del texto se sabe que el ítem 1 es el televisor (requisito de procesador 'AI Alpha 7 Gen 8', mín. 3 HDMI y 2 USB) y el ítem 2 un soporte móvil tipo carro para TV de gran formato. Tras el rechazo sucesivo de ARHO, C&S y CONTROL, se evalúa a PROMOCIONALES Y TECNOLOGICOS MEDELLIN S.A.S. (informe 4, pendiente de subsanar requisitos jurídicos y técnicos); su oferta coincide con el valor del contrato ($56.287.000), por lo que se marca como adjudicado. No hay imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf",
+    "MC 23 DE 2026 - INFORME DE EVALUACIÓN 3.pdf",
+    "MC 23 DE 2026 - INFORME DE EVALUACIÓN 2.pdf",
+    "MC 23 DE 2026 - INFORME DE EVALUACIÓN 1.pdf"
+  ]
+}

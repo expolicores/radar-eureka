@@ -1,0 +1,36 @@
+{
+  "id_contrato": "CO1.PCCNTR.9527378",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "UN TELEVISOR DE 50 PULGADAS (incluido en el suministro e instalación a todo costo de un sistema CCTV de 8 cámaras)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 50,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 1,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": null},
+      "evidencia": {
+        "descripcion": "CO1_PCCNTR_9527378_Firmado.pdf | página 1 (objeto del contrato) y página 3 (Bienes y servicios)",
+        "tamano_pulgadas": "CO1_PCCNTR_9527378_Firmado.pdf | página 1",
+        "cantidad": "CO1_PCCNTR_9527378_Firmado.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [
+    "La sección 'Bienes y servicios' del contrato SECOP II lista dos veces la misma línea global (1 UN x $11.700.000), aunque el valor del contrato es $11.700.000 (CO1_PCCNTR_9527378_Firmado.pdf | página 3)."
+  ],
+  "observaciones": "Único documento disponible: la ficha del contrato SECOP II firmado (CD-137-2026, contratista GREGORY GABRIEL GOMEZ GOMEZ, $11.700.000). El televisor de 50 pulgadas está incluido en un ítem global a todo costo junto con un CCTV de 8 cámaras e instalación (UNSPSC 43211500, 1 UN x $11.700.000), sin precio discriminado para el televisor; por eso precio_unitario y valor_total_item quedan null. No hay marca, modelo, oferta económica ni información de IVA. No hay imágenes en la carpeta.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "CO1_PCCNTR_9527378_Firmado.pdf"
+  ]
+}

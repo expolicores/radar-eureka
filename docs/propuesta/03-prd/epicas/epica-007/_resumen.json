@@ -1,0 +1,23 @@
+{"epica":"ÉPICA-007","features":[
+{"nombre":"Gestionar Acceso por Invitación","hus":[
+{"id":"HU-084","carpeta":"HU-084-emitir-invitacion-registro-analista","titulo":"Emitir invitación de registro para un Analista","prioridad":"Crítica","frs":["FR-083","FR-086"],"escenarios":11,"casos_qa":15},
+{"id":"HU-085","carpeta":"HU-085-registrar-cuenta-analista-por-invitacion","titulo":"Registrar cuenta de Analista mediante invitación con aceptación de términos y política de datos","prioridad":"Crítica","frs":["FR-083","FR-087"],"escenarios":14,"casos_qa":17}]},
+{"nombre":"Autenticar y Proteger la Sesión","hus":[
+{"id":"HU-086","carpeta":"HU-086-iniciar-sesion-correo-contrasena","titulo":"Iniciar sesión con correo y contraseña","prioridad":"Crítica","frs":["FR-084"],"escenarios":9,"casos_qa":12},
+{"id":"HU-087","carpeta":"HU-087-cerrar-sesion-y-expirar-por-inactividad","titulo":"Cerrar sesión y expirar la sesión por inactividad","prioridad":"Crítica","frs":["FR-084"],"escenarios":9,"casos_qa":12},
+{"id":"HU-088","carpeta":"HU-088-recuperar-contrasena-por-correo","titulo":"Recuperar la contraseña por correo electrónico","prioridad":"Crítica","frs":["FR-085"],"escenarios":9,"casos_qa":12},
+{"id":"HU-089","carpeta":"HU-089-aplicar-roles-analista-administrador","titulo":"Aplicar los roles Analista y Administrador con permisos diferenciados","prioridad":"Crítica","frs":["FR-086"],"escenarios":9,"casos_qa":12}]},
+{"nombre":"Crear y Organizar Casos de Investigación","hus":[
+{"id":"HU-090","carpeta":"HU-090-crear-caso-desde-senal","titulo":"Crear un caso de investigación desde una señal","prioridad":"Crítica","frs":["FR-077","FR-081"],"escenarios":11,"casos_qa":13},
+{"id":"HU-091","carpeta":"HU-091-crear-caso-desde-contrato","titulo":"Crear un caso de investigación desde un contrato","prioridad":"Crítica","frs":["FR-077","FR-081"],"escenarios":9,"casos_qa":12},
+{"id":"HU-092","carpeta":"HU-092-guardar-elementos-en-caso-existente","titulo":"Guardar señales, contratos y evidencias en un caso existente","prioridad":"Crítica","frs":["FR-078","FR-081"],"escenarios":11,"casos_qa":15}]},
+{"nombre":"Documentar Casos con Notas","hus":[
+{"id":"HU-093","carpeta":"HU-093-agregar-nota-a-caso","titulo":"Agregar notas a un caso","prioridad":"Crítica","frs":["FR-079"],"escenarios":9,"casos_qa":11},
+{"id":"HU-094","carpeta":"HU-094-editar-y-eliminar-notas-de-caso","titulo":"Editar y eliminar notas de un caso","prioridad":"Crítica","frs":["FR-079"],"escenarios":10,"casos_qa":12}]},
+{"nombre":"Consultar y Retomar Casos Propios","hus":[
+{"id":"HU-095","carpeta":"HU-095-listar-mis-casos","titulo":"Listar mis casos de investigación","prioridad":"Crítica","frs":["FR-080","FR-082"],"escenarios":8,"casos_qa":13},
+{"id":"HU-096","carpeta":"HU-096-abrir-y-retomar-caso-con-instantanea","titulo":"Abrir y retomar un caso con su evidencia conservada como instantánea","prioridad":"Crítica","frs":["FR-080","FR-081"],"escenarios":11,"casos_qa":15},
+{"id":"HU-097","carpeta":"HU-097-restringir-acceso-casos-a-su-autor","titulo":"Restringir el acceso a casos, elementos y notas únicamente a su autor","prioridad":"Crítica","frs":["FR-082"],"escenarios":8,"casos_qa":12}]}
+],
+"frs_cubiertos":["FR-077","FR-078","FR-079","FR-080","FR-081","FR-082","FR-083","FR-084","FR-085","FR-086","FR-087"],
+"frs_no_cubiertos":[]}

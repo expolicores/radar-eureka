@@ -1,0 +1,49 @@
+{
+  "id_contrato": "CO1.PCCNTR.7047581",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisores (mencionados en el objeto; sin detalle de ítem en los documentos)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "descripcion": "baja"
+      },
+      "evidencia": {
+        "descripcion": "Informe de Evaluacion Preliminar.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "MIGUEL ANTONIO BAMBAGUE MURCIA",
+      "precio_unitario": null,
+      "valor_oferta_total": 115000000,
+      "adjudicado": true,
+      "evidencia": "Informe de Evaluacion Preliminar.pdf | página 1"
+    },
+    {
+      "nombre": "JUAN DE JESUS LAVERDE VELASQUEZ",
+      "precio_unitario": null,
+      "valor_oferta_total": 125000000,
+      "adjudicado": false,
+      "evidencia": "Informe de Evaluacion Preliminar.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "Solo se dispone del Informe de Evaluación Preliminar. Indica 2 propuestas por valor total (115.000.000 'incluido IVA' y 125.000.000) para un objeto mixto (motores fuera de borda, televisores y pantallas industriales); no hay tabla de ítems, cantidades, marcas ni precios unitarios de TV. Adjudicado=true para Bambague se infiere de 'primera mejor oferta' y de que el valor coincide con el valor del contrato en datos abiertos (el informe es preliminar y pide subsanar). Ítem registrado solo como marcador sin datos.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "Informe de Evaluacion Preliminar.pdf"
+  ]
+}

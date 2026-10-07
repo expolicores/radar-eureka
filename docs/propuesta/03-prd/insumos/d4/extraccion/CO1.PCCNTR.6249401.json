@@ -1,0 +1,43 @@
+{
+  "id_contrato": "CO1.PCCNTR.6249401",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor 60 pulgadas LED ULTRA SMART TV BLUETHOOTH Entrada HDMI",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 60,
+      "resolucion": null,
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 8,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "descripcion": "alta",
+        "tamano_pulgadas": "alta",
+        "tecnologia": "alta",
+        "smart": "alta",
+        "cantidad": "alta"
+      },
+      "evidencia": {
+        "descripcion": "Anexo 10 -Propuesta Economica.docx | tabla 1 fila 2",
+        "tamano_pulgadas": "Anexo 10 -Propuesta Economica.docx | tabla 1 fila 2",
+        "tecnologia": "Anexo 10 -Propuesta Economica.docx | tabla 1 fila 2",
+        "smart": "Anexo 10 -Propuesta Economica.docx | tabla 1 fila 2",
+        "cantidad": "Anexo 10 -Propuesta Economica.docx | tabla 1 fila 2"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "El Anexo 10 (formato de propuesta económica) está en blanco: lista ítems y cantidades pero sin valores; la Carta de Presentación también es plantilla sin diligenciar. 'ULTRA' podría referirse a Ultra HD, no se asume resolución. Ítem 2 (soporte de pared para TV 60\", 8 und) excluido por no ser televisor. Sin marca, modelo ni precio; el valor del contrato (46.495.308) cubre 10 ítems heterogéneos.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "Anexo 10 -Propuesta Economica.docx",
+    "Formato 1- Carta de Presentación de la Oferta CCE-EICP-FM-104.docx"
+  ]
+}

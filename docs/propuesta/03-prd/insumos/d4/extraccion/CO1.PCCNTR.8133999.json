@@ -1,0 +1,11 @@
+{
+  "id_contrato": "CO1.PCCNTR.8133999",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Fuera de categoría: servicio de mantenimiento preventivo y correctivo a todo costo con bolsa de repuestos para equipos de cómputo, impresoras, video beams, televisores, puntos de red, etc. (Policía Nacional - UPRES Santander; contratista MULTITINTAS INK S.A.S, $18.000.000 incluido IVA). Es mantenimiento de televisores existentes, no compra de televisores, por lo que no hay ítems válidos. Se leyó 1 imagen (ACEPTACION DE OFERTA MMTTO DE COMPUTADORES OK.pdf | página 1, imagen 643270483_p1.png), legible, que confirma el objeto; no se leyeron las demás (acta de reevaluación y estudio previo) por no ser relevantes para precios de TV.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": ["ACEPTACION DE OFERTA MMTTO DE COMPUTADORES OK.pdf", "CO1_PCCNTR_8133999_Firmado.pdf"]
+}

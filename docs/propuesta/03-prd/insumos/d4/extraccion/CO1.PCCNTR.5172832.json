@@ -1,0 +1,76 @@
+{
+  "id_contrato": "CO1.PCCNTR.5172832",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor Samsung QLED Smart TV 43 pulgadas UHD 4K (3840x2160, DVB-T2, Bluetooth, AirPlay 2, HDMI x3, USB x2, LAN, Bixby)",
+      "marca": "Samsung",
+      "modelo": null,
+      "tamano_pulgadas": 43,
+      "resolucion": "UHD 4K (3840x2160)",
+      "tecnologia": "QLED",
+      "smart": true,
+      "cantidad": 5,
+      "precio_unitario": 2224500,
+      "valor_total_item": 13235775,
+      "iva": "sin_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {"marca": "alta", "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": "alta"},
+      "evidencia": {
+        "descripcion": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "marca": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "tamano_pulgadas": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "resolucion": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "tecnologia": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "smart": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "cantidad": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "precio_unitario": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png, columna VALOR UNITARIO)",
+        "valor_total_item": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png, columna VALOR TOTAL)",
+        "iva": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png, columna IVA 19%; total = cant x unitario x 1,19)",
+        "tipo_precio": "CONTRATO.pdf | página 3 (imagen 315496693_p3.png, valor $175.286.538 = gran total de la cotización SIRES)"
+      }
+    },
+    {
+      "descripcion": "Televisor Samsung Smart TV 65 pulgadas Crystal UHD 4K (3840x2160, DVB-T2, LAN, Bluetooth, AirPlay 2, HDMI x3, USB x2, control de voz)",
+      "marca": "Samsung",
+      "modelo": null,
+      "tamano_pulgadas": 65,
+      "resolucion": "Crystal UHD 4K (3840x2160)",
+      "tecnologia": "Crystal UHD",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 3490500,
+      "valor_total_item": 4153695,
+      "iva": "sin_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {"marca": "alta", "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": "alta"},
+      "evidencia": {
+        "descripcion": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "marca": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "tamano_pulgadas": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "resolucion": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "tecnologia": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "smart": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "cantidad": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "precio_unitario": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "valor_total_item": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)",
+        "iva": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png, columna IVA 19%)",
+        "tipo_precio": "CONTRATO.pdf | página 3 (imagen 315496693_p3.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "SISTEMAS REDES Y SERVICIOS SAS (SIRES)", "item": "TV 43\" Samsung QLED", "precio_unitario": 2224500, "adjudicado": true, "evidencia": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)"},
+    {"nombre": "SISTEMAS REDES Y SERVICIOS SAS (SIRES)", "item": "TV 65\" Samsung Crystal UHD", "precio_unitario": 3490500, "adjudicado": true, "evidencia": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf | página 3 (imagen 314550686_p3.png)"},
+    {"nombre": "INNOVOTIC SAS", "item": "TV 43\" LG Led Full HD Smart (ítem 7)", "precio_unitario": 2590500, "adjudicado": false, "evidencia": "PROPUESTA LABORAL Y ECONÓMICA 1.pdf | página 3 (imagen 314550685_p3.png); precios antes de IVA según subtotal/IVA de página 5"},
+    {"nombre": "INNOVOTIC SAS", "item": "TV 65\" LG Led Full HD Smart (ítem 8)", "precio_unitario": 3849000, "adjudicado": false, "evidencia": "PROPUESTA LABORAL Y ECONÓMICA 1.pdf | página 3 (imagen 314550685_p3.png)"}
+  ],
+  "inconsistencias": [
+    "El valor del contrato en datos abiertos (186.974.718) no coincide con el valor del contrato en CONTRATO.pdf página 3 y en el contrato SECOP firmado (175.286.538).",
+    "El contrato es contratación directa (régimen especial), por lo que las cotizaciones de SIRES e INNOVOTIC son cotizaciones comparativas, no un informe de evaluación formal."
+  ],
+  "observaciones": "Contrato multi-ítem (tecnología y mobiliario). 2 ítems TV en la cotización del contratista SIRES (S038-2023), que coincide con el valor contratado ($175.286.538). Aritmética cuadra: 5 x 2.224.500 x 1,19 = 13.235.775; 1 x 3.490.500 x 1,19 = 4.153.695 (el valor total incluye IVA 19%, el unitario no). Modelos no especificados. INNOVOTIC SAS cotizó TVs LG Full HD (subtotal $156.174.400 + IVA $29.673.136 = $185.847.536). Imágenes leídas (todas legibles): 314550686_p1,p2,p3,p6; 314550685_p1,p2,p3,p5; 315496693_p1,p2,p3.",
+  "imagenes_leidas": 11,
+  "documentos_revisados": ["PROPUESTA LABORAL Y ECONÓMICA 2.pdf", "PROPUESTA LABORAL Y ECONÓMICA 1.pdf", "CONTRATO.pdf", "CO1_PCCNTR_5172832_Firmado.pdf"]
+}

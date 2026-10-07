@@ -1,0 +1,36 @@
+{
+  "id_contrato": "CO1.PCCNTR.5687290",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor (sin especificaciones en los documentos disponibles)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "descripcion": "media"
+      },
+      "evidencia": {
+        "descripcion": "CONTRATO.pdf | página 1 (imagen 391867202_p1.png)"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Compra de aires acondicionados, lavadora y televisor por un valor global de $14.035.000, 'incluido el valor de todos los impuestos' (aplica al total, no al TV). El detalle de valor unitario está en un 'Anexo Técnico 2' que no está entre los documentos. No hay cantidad, precio, marca ni tamaño del TV; la tabla SECOP tiene 1 línea global (UNSPSC 40101701). Hay un solo oferente: Variedades LOU (Lourdes Martínez). Imágenes leídas (4, todas legibles): 391719364_p1 (solicitud de oferta), 391867202_p1 y p2 (contrato), 391852748_p1 (duplicado del contrato; por eso no se leyó 391852748_p2).",
+  "imagenes_leidas": 4,
+  "documentos_revisados": [
+    "SOLICITUD DE OFERTA.pdf",
+    "CONTRATO.pdf",
+    "CO1_PCCNTR_5687290_Firmado.pdf"
+  ]
+}

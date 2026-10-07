@@ -1,0 +1,15 @@
+{
+  "id_contrato": "CO1.PCCNTR.9883818",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "El objeto es 'compra de televisores' (aceptación de oferta a S.O.S. SOLUCIONES DE OFICINA & SUMINISTROS S.A.S., MC-DC-CEET-052-2026), pero en los documentos disponibles no aparece la oferta económica del contratista ni una tabla de ítems adjudicados: la carta de aceptación (GCCON-F-083 p.1-2) no tiene precios ni ítems, y el 'Formato Oferta economica 2026.xlsx' (hoja LOTE 1) es la plantilla vacía (valores en 0). El único documento con precios es una cotización de estudio de mercado de Tienda Tek (3.3. COTIZACION ... .pdf | página 2) por 'Monitor industrial LG signage 55\" UL3Q' (SKU 55UL3Q-E.AWCQ, 7 un. x $2.512.521 antes de IVA 19%) y 'Monitor industrial LG signage 65in UL3Q' (SKU 65UL3Q-E.AWCQ, 8 un. x $3.344.454 antes de IVA 19%), total $52.768.500 con IVA. Estos productos son monitores de señalización digital (signage), que están fuera del límite de categoría, por lo que no se registran como ítems de televisor; además serían presupuesto/cotización, no precio adjudicado. Se leyó 1 imagen (838947825_p1.png, portada de la cotización): legible, solo publicidad de Tienda Tek sin datos útiles.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "Formato Oferta economica 2026.xlsx",
+    "GCCON-F-083_Carta_de_Aceptación_de_la_Oferta (4).pdf",
+    "3.3. COTIZACION SERVICIO NACIONAL DE APRENDIZAJE-MI.PDF 01-MAIL-Anexos Respuestas Internas - No. 9-2026-08.pdf"
+  ]
+}

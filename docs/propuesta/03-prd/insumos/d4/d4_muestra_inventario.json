@@ -1,0 +1,2602 @@
+[
+ {
+  "id_contrato": "CO1.PCCNTR.4946355",
+  "proceso": "CO1.BDOS.4399152",
+  "anio": "2023",
+  "entidad": "GOBERNACION DE NARIÑO",
+  "objeto": "El Departamento de Nariño hace entrega al Municipio de Imues a título de comodato; equipos tecnológicos; para el beneficio y uso exclusivo de la Institución Educativa MARIA PAZ; en virtud del proyecto FORTALECIMIENTO DE LA INFRAESTRUCTURA ESCOLAR Y DOTACIÓN DE EQUIPOS TECNOLÓGICOS Y DE CÓMPUTO EN LA",
+  "modalidad": "Contratación directa",
+  "valor": "19200000",
+  "unspsc": "V1.52161505",
+  "docs_total": 12,
+  "docs_priorizables": 1,
+  "seleccionados": [
+   {
+    "id_documento": "298740619",
+    "nombre": "CO1_PCCNTR_4946355_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 82032,
+    "sha256": "b11f1fd23d77942f77ffbf3388de470bf4d37fd7f466011851402113047b5d3c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=298740619&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4946355\\298740619.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5017737",
+  "proceso": "CO1.BDOS.4417259",
+  "anio": "2023",
+  "entidad": "POLICIA METROPOLITANA SANTIAGO DE CALI",
+  "objeto": "MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE ELEMENTOS MOBILIARIOS Y AUDIOVISUALES (NEVERAS; TELEVISORES; LAVADORAS; ESTUFAS A GAS; VENTILADORES DE TECHO Y SISTEMA DE SONIDO PREAMPLIFICADOR) A TODO COSTO CON MANO DE OBRA INCLUIDA; PARA LA POLICÍA METROPOLITANA SANTIAGO DE CALI Y CENTRO VACACIONAL OCCIDE",
+  "modalidad": "Mínima cuantía",
+  "valor": "26120000",
+  "unspsc": "V1.73152108",
+  "docs_total": 26,
+  "docs_priorizables": 10,
+  "seleccionados": [
+   {
+    "id_documento": "301240169",
+    "nombre": "ANEXO  OFERTA ECONOMICA.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 18119,
+    "sha256": "83766d3f08be878b83031e2ce15804e64b39afca7e13c4fd9dd34aafbff6c9c5",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=301240169&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5017737\\301240169.xlsx"
+   },
+   {
+    "id_documento": "307720094",
+    "nombre": "CO1_PCCNTR_5017737_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 85646,
+    "sha256": "6e410eed7b605aa8eea351afce2a4db51c87582727b5d9d9464f28d1329947f9",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=307720094&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5017737\\307720094.pdf"
+   },
+   {
+    "id_documento": "384534603",
+    "nombre": "INFORME FINAL CONTRATO 10034-2023- CEVOC.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 4322971,
+    "sha256": "f9372276772773fabe022aeefd0e2cb8901458d0f423e1df2c4329e4a0fa5286",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=384534603&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5017737\\384534603.pdf"
+   },
+   {
+    "id_documento": "384534949",
+    "nombre": "13) INFORME FINAL CONTRATO 11-9-10032-2023 - CEVOC.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 3777709,
+    "sha256": "9c5e2bbf99fc4a5427ab691a4d01ce4a6771d9cbaf2efc5e802e50e87dd21585",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=384534949&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5017737\\384534949.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5375159",
+  "proceso": "CO1.BDOS.4856114",
+  "anio": "2023",
+  "entidad": "UNIDAD PRESTADORA DE SALUD SANTANDER",
+  "objeto": "PRESTACION DEL SERVICIO DE MANTENIMIENTO PREVENTIVO Y CORRECTIVO A TODO COSTO CON SOPORTE A USUARIO FINAL INCLUYENDO BOLSA DE REPUESTOS A TODO COSTO PARA EQUIPOS DE COMPUTO; PORTATILES; IMPRESORAS; ESCANNER; TELEFONOS IP; FOTOCOPIADORA; VIDEO BEAMS; SWITCHS; IMPRESORAS ZEBRAS; TELEVISORES; PUNTOS DE",
+  "modalidad": "Mínima cuantía",
+  "valor": "15000000",
+  "unspsc": "V1.81112300",
+  "docs_total": 15,
+  "docs_priorizables": 5,
+  "seleccionados": [
+   {
+    "id_documento": "346241952",
+    "nombre": "ACEPTACION DE COMPUTADORES OK.PDF",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 439754,
+    "sha256": "a30803a6f0843cd2b4ede9e6ed40f2bf57c0de2a6f3f911f4e427d83ea0c3d12",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=346241952&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5375159\\346241952.pdf"
+   },
+   {
+    "id_documento": "349118478",
+    "nombre": "CO1_PCCNTR_5375159_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 83287,
+    "sha256": "f45dd91bc89d73b180271960ea016fd6dfb8e2d5e58b15b382cd6d4aad66007e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=349118478&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5375159\\349118478.pdf"
+   },
+   {
+    "id_documento": "336069531",
+    "nombre": "ESTUDIO PREVIO  DE MANTENIMIENTO DE PC.PDF",
+    "ext": "pdf",
+    "prioridad": 3,
+    "bytes": 1511502,
+    "sha256": "4591653cc9647b78ffb652dc02a9b1e08ecc3e5384c4d61a5fc0feda8ee9804a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=336069531&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5375159\\336069531.pdf"
+   },
+   {
+    "id_documento": "336069530",
+    "nombre": "INVITACION COMPUTADORES_1.PDF",
+    "ext": "pdf",
+    "prioridad": 2,
+    "bytes": 867655,
+    "sha256": "3a53b810862ffdab26c8d8bc0b1803ea6c599efd2cf86b84b12c023c49edaf9a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=336069530&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5375159\\336069530.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5390141",
+  "proceso": "CO1.BDOS.4821610",
+  "anio": "2023",
+  "entidad": "COMANDO DE RECLUTAMIENTO Y CONTROL RESERVAS DEL EJERCITO NACIONAL",
+  "objeto": "ADQUISICIÓN DE SISTEMA DE SONIDO PARLANTES- ALTAVOCES; MICROFONOS CON SUS ACCESORIOS; TELEVISORES Y CÁMARA DIGITAL PARA EL COMANDO DE RECLUTAMIENTO; APOYO A ZONAS DE RECLUTAMIENTO Y DISTRITOS MILITARES; A EJECUTAR EN LA VIGENCIA 2023. LOTE 3: CÁMARA DIGITAL.",
+  "modalidad": "Mínima cuantía",
+  "valor": "10500000",
+  "unspsc": "V1.52161500",
+  "docs_total": 34,
+  "docs_priorizables": 10,
+  "seleccionados": [
+   {
+    "id_documento": "346070060",
+    "nombre": "REEVALUACION TECNICA LOTE 1OK.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 377867,
+    "sha256": "59a299977c744cba85ebb851b68ac46ca8c2768d70244e018ccd862b2b790140",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=346070060&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5390141\\346070060.pdf"
+   },
+   {
+    "id_documento": "346070059",
+    "nombre": "REEVALUACION ECONOMICA 188-COREC-2023 LOTE 1.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 445459,
+    "sha256": "807a9020726dc4a26719eea61a0b0597ce5b3a598fb46e2712e27c4bc6f0abb8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=346070059&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5390141\\346070059.pdf"
+   },
+   {
+    "id_documento": "347215783",
+    "nombre": "ACEPTACION DE OFERTA LOTE 1.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 622450,
+    "sha256": "cb3513e5e2459a241a11578eff09553e831700425d9297dd58a81c90325859a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=347215783&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5390141\\347215783.pdf"
+   },
+   {
+    "id_documento": "348668344",
+    "nombre": "ACEPTACION DE OFERTA LOTE 1.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 623292,
+    "sha256": "0d903586176878364573278f6f1d2bcd2d1f4f033bac69369505b8713f26115c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=348668344&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5390141\\348668344.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5258565",
+  "proceso": "CO1.BDOS.4700773",
+  "anio": "2023",
+  "entidad": "POLICIA METROPOLITANA DE NEIVA",
+  "objeto": "ADQUISICIÓN; INSTALACIÓN Y PUESTA EN FUNCIONAMIENTO DE UN CIRCUITO CERRADO DE TELEVISIÓN CCTV PARA LA BASE DEL COMANDO DE LA POLICÍA METROPOLITANA DE NEIVA",
+  "modalidad": "Mínima cuantía",
+  "valor": "33518350",
+  "unspsc": "V1.52161505",
+  "docs_total": 20,
+  "docs_priorizables": 11,
+  "seleccionados": [
+   {
+    "id_documento": "327380644",
+    "nombre": "EVALUACION TECNICA PROCESO PN MENEV MIC 022 2023.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 98077,
+    "sha256": "47c35465d1617e655bebe692ac4748237d2d4a30bc51060e040549bffa4988f5",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=327380644&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5258565\\327380644.pdf"
+   },
+   {
+    "id_documento": "327380641",
+    "nombre": "EVALUACION JURIDICA PROCESO PN MENEV MIC 022 2023.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 299982,
+    "sha256": "43d14ba3fa051522bf7db88243c4eb28229fd5d81764df02251d76cd3b4e8668",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=327380641&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5258565\\327380641.pdf"
+   },
+   {
+    "id_documento": "327380638",
+    "nombre": "EVALUACION ECONOMICA PROCESO PN MENEV MIC 022 2023.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 137006,
+    "sha256": "08054a9260278adc8bc605982934003cd8d5ba70953ac65761ba7563209708b5",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=327380638&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5258565\\327380638.pdf"
+   },
+   {
+    "id_documento": "327380646",
+    "nombre": "ACEPTACION DE OFERTA MINIMA CUANTIA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 15964331,
+    "sha256": "a09e3b6e4610a7f8395518ca770051cdebf459bc12914a16dd530f6f30bd393a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=327380646&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5258565\\327380646.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5036742",
+  "proceso": "CO1.BDOS.4486843",
+  "anio": "2023",
+  "entidad": "INSTITUCION EDUCATIVA EL CHAIRA JOSE MARIA CORDOBA",
+  "objeto": "ADQUISICIÓN DE TELEVISORES SMART TV DE 50 PULGADAS PARA LA INSTITUCION EDUCATIVA EL CHAIRÁ JOSÉ MARÍA CÓRDOBA DEL MUNICIPIO DE CARTAGENA DEL CHAIRA",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "9400000",
+  "unspsc": "V1.52161500",
+  "docs_total": 7,
+  "docs_priorizables": 5,
+  "seleccionados": [
+   {
+    "id_documento": "305977685",
+    "nombre": "INFORME DE EVALUACION  TV.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 680065,
+    "sha256": "36c229a02d38bae11a2deaca49ff176621746375d4f925b76982c182dcc655e4",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=305977685&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5036742\\305977685.pdf"
+   },
+   {
+    "id_documento": "305977686",
+    "nombre": "INFORME DE EVALUACION  TV.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 680065,
+    "sha256": "36c229a02d38bae11a2deaca49ff176621746375d4f925b76982c182dcc655e4",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=305977686&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5036742\\305977686.pdf"
+   },
+   {
+    "id_documento": "306278136",
+    "nombre": "CO1_PCCNTR_5036742_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 72784,
+    "sha256": "dd0e88c371f22a69b340dad83dae6d7e7c1a36699be13b73055bb0f69a3fe6db",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=306278136&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5036742\\306278136.pdf"
+   },
+   {
+    "id_documento": "305981706",
+    "nombre": "CONTRATO TV.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 1366270,
+    "sha256": "93f53cb1e4e30f4feadd08671b3caa33275575b852ccee56c19bf7a16c7067bc",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=305981706&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5036742\\305981706.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.4838434",
+  "proceso": "CO1.BDOS.4230190",
+  "anio": "2023",
+  "entidad": "INSTITUCION EDUCATIVA ALBERTO MENDOZA MAYOR",
+  "objeto": "COMPRA DE TELEVISORES; SOPORTES DE PARED E INSTALACION PARA LA INSTITUCIÓN EDUCATIVA ALBERTO MENDOZA MAYOR SEDE LICEO",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "18175465",
+  "unspsc": "V1.52161505",
+  "docs_total": 8,
+  "docs_priorizables": 5,
+  "seleccionados": [
+   {
+    "id_documento": "289513746",
+    "nombre": "1 PARTE COMITE Y EVALUACION IEAMM-06-2023.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 195718,
+    "sha256": "1b6bb4b7c00c63bea28bc2109fb4de3be27a197175847a8510a35d2e0195bc88",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=289513746&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4838434\\289513746.pdf"
+   },
+   {
+    "id_documento": "289891052",
+    "nombre": "CO1_PCCNTR_4838434_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 76213,
+    "sha256": "1e996d24820dd39ecd92b261b029e617563025340d3fa58eedf1782f0d41f3c3",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=289891052&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4838434\\289891052.pdf"
+   },
+   {
+    "id_documento": "289865885",
+    "nombre": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 471130,
+    "sha256": "0d02d4027630bbdbfb7c2000896f156a6c077d45cd08c725374b15f15baded73",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=289865885&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4838434\\289865885.pdf"
+   },
+   {
+    "id_documento": "289891048",
+    "nombre": "ANEXO CLAUSULAS CONTRATO IEAMM-06-2023.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 471130,
+    "sha256": "0d02d4027630bbdbfb7c2000896f156a6c077d45cd08c725374b15f15baded73",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=289891048&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4838434\\289891048.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5508018",
+  "proceso": "CO1.BDOS.5063482",
+  "anio": "2023",
+  "entidad": "MEPAS",
+  "objeto": "ADQUISICIÓN DE ELEMENTOS TECNOLÓGICOS; COMPUTADORES DE ESCRITORIO; PORTÁTILES; LICENCIAS OFFICE; IMPRESORAS; ESCANER Y TELEVISOR 75 PULGADAS PARA LA POLICIA METROPOLITANA DE SAN JUAN DE PASTO Y DEPARTAMENTO DE POLICIA NARIÑO",
+  "modalidad": "Mínima cuantía",
+  "valor": "89805000",
+  "unspsc": "V1.52161505",
+  "docs_total": 15,
+  "docs_priorizables": 9,
+  "seleccionados": [
+   {
+    "id_documento": "365187728",
+    "nombre": "CONSOLIDADO DE EVALUACIONES COMPUTADORES 2da OFERTA.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 720456,
+    "sha256": "1d1353fc626364345e05596e6b279c1579ff493f2518846ac35445f9fef9a9df",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=365187728&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5508018\\365187728.pdf"
+   },
+   {
+    "id_documento": "365187726",
+    "nombre": "CONSOLIDADO DE EVALUACIONES COMPUTADORES.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 742284,
+    "sha256": "b35270cdceef7eb6f31e3291db84494e6984831dd58f00d490f7528055228740",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=365187726&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5508018\\365187726.pdf"
+   },
+   {
+    "id_documento": "365187727",
+    "nombre": "GS-2023-064100-MEPAS EVALUACION CONCEPTO TECNICO.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 352338,
+    "sha256": "62f44c0fe8589c7ad8d917735447f348e5c903b9c60ea0800649ea5d999c8632",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=365187727&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5508018\\365187727.pdf"
+   },
+   {
+    "id_documento": "365211945",
+    "nombre": "ACEPTACION OFERTA COMPUTADORES.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 537385,
+    "sha256": "56731d92836175a6a71f1253d91984e4dbc5e5e898d1e8e519a6f60c1868ba0f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=365211945&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5508018\\365211945.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5687290",
+  "proceso": "CO1.BDOS.5332291",
+  "anio": "2023",
+  "entidad": "SUCRE - E.S.E CENTRO DE SALUD SAMPUES",
+  "objeto": "COMPRA DE EQUIPOS TIPO ELECTRODOMESTICOS; ESPECÍFICAMENTE AIRES ACONDICIONADO;\nLAVADORA Y TELEVISOR; QUE POR NECESIDAD SE REQUIEREN EN DIFERENTES ÁREAS DEL CENTRO DE SALUD SAMPUÉS E.s.E SEDE PRINCIPAL.",
+  "modalidad": "Contratación régimen especial",
+  "valor": "14035000",
+  "unspsc": "UNSPECIFIED",
+  "docs_total": 19,
+  "docs_priorizables": 4,
+  "seleccionados": [
+   {
+    "id_documento": "391719364",
+    "nombre": "SOLICITUD DE OFERTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 349386,
+    "sha256": "bceb0a74349d1236c1385d84cd69ecb563b7b2215d176ee57fa7d6e22af41ee7",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=391719364&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5687290\\391719364.pdf"
+   },
+   {
+    "id_documento": "391867202",
+    "nombre": "CONTRATO.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 934219,
+    "sha256": "fe1878cda5cfc75f87e1cc2cb3bd1a8c9515310e001c5bc5e6b0969605ca5ab0",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=391867202&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5687290\\391867202.pdf"
+   },
+   {
+    "id_documento": "391867404",
+    "nombre": "CO1_PCCNTR_5687290_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 83412,
+    "sha256": "b97aa729de20fb04ee7e92361fd94c376017fa015e5775821984503c61704814",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=391867404&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5687290\\391867404.pdf"
+   },
+   {
+    "id_documento": "391852748",
+    "nombre": "CONTRATO.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 934219,
+    "sha256": "fe1878cda5cfc75f87e1cc2cb3bd1a8c9515310e001c5bc5e6b0969605ca5ab0",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=391852748&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5687290\\391852748.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.4545743",
+  "proceso": "CO1.BDOS.3844923",
+  "anio": "2023",
+  "entidad": "COLEGIO ALMIRANTE PADILLA IED",
+  "objeto": "INSTALACIÓN Y PROTECCIÓN DE 11 TELEVISORES EN LAS AULAS DE CLASE DEL COLEGIO ALMIRANTE PADILLA IED",
+  "modalidad": "Contratación régimen especial",
+  "valor": "9071370",
+  "unspsc": "UNSPECIFIED",
+  "docs_total": 10,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "271798911",
+    "nombre": "evaluación final 3.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 152274,
+    "sha256": "8e92a739eed909cbc5b02dd68041257154fe0f1a4d56bc01b511f2a022dac4a9",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=271798911&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4545743\\271798911.pdf"
+   },
+   {
+    "id_documento": "270960064",
+    "nombre": "evaluación preliminar.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 165152,
+    "sha256": "23d634864bee6d562cdb37a7c2e8fa70e65f8eb567c5d2863e2184982a3e9377",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=270960064&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4545743\\270960064.pdf"
+   },
+   {
+    "id_documento": "268946731",
+    "nombre": "Formato de oferta económica.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 34497,
+    "sha256": "2e285126a4887a29dfe61dc3ec93d34654a4f8405471ea88a9a8478cf77ab796",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=268946731&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4545743\\268946731.xlsx"
+   },
+   {
+    "id_documento": "268784865",
+    "nombre": "Llamado Ofertas.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 373396,
+    "sha256": "0a0fd2dead102f8c54f0ab614340bb842ab786bbd7867c2410d0a5b240f89f01",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=268784865&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_4545743\\268784865.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5372563",
+  "proceso": "CO1.BDOS.4886481",
+  "anio": "2023",
+  "entidad": "SECRETARIA DE EDUCACION DE CALI",
+  "objeto": "COMPRA DE ARTÍCULOS ELÉCTRICOS; ELECTRÓNICOS; ELECTRODOMÉSTICOS Y HERRAMIENTAS PARA LAS INSTITUCIONES EDUCATIVAS OFICIALES DEL DISTRITO ESPECIAL DE SANTIAGO DE CALI; FINANCIADOS CON PRESUPUESTO PARTICIPATIVO 2023- BP- 26003872 y BP-26004280",
+  "modalidad": "Mínima cuantía",
+  "valor": "38479840",
+  "unspsc": "V1.52161505",
+  "docs_total": 36,
+  "docs_priorizables": 9,
+  "seleccionados": [
+   {
+    "id_documento": "343979491",
+    "nombre": "INFORME DE EVALUACION DEFINITIVO.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 262083,
+    "sha256": "357083c3b9dc3677026b7791d027b7f386053668ce15410e72411824488762af",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=343979491&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5372563\\343979491.pdf"
+   },
+   {
+    "id_documento": "339611221",
+    "nombre": "ANEXO No. 11 Propuesta Económica.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 24214,
+    "sha256": "27b2af085ed84a3a4ba86b8e4be9a62e407f9f77cb5ab12fb75e9c452461a28b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=339611221&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5372563\\339611221.docx"
+   },
+   {
+    "id_documento": "339611223",
+    "nombre": "ANEXO No 1 CARTA DE PRESENTACION DE LA PROPUESTA.docx",
+    "ext": "docx",
+    "prioridad": 7,
+    "bytes": 17620,
+    "sha256": "6797f066e8f146f57c5fcb2b4c3a54120eac01c089bd2868ec52a9af44dd0552",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=339611223&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5372563\\339611223.docx"
+   },
+   {
+    "id_documento": "343979492",
+    "nombre": "ACEPTACION DE OFERTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 352900,
+    "sha256": "57d3d1f2f02589058b1a91730c7463421e9d91ce94dc6943fec9cdabfa577ad6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=343979492&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5372563\\343979492.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5030063",
+  "proceso": "CO1.BDOS.4431705",
+  "anio": "2023",
+  "entidad": "DEPARTAMENTO DE POLICIA SAN ANDRES, PROVIDENCIA Y SANTA CATALINA",
+  "objeto": "ADQUISICIÓN DE EQUIPOS TECNOLÓGICOS TELEVISORES PARA PROGRAMAS DE PREVENCIÓN Y EDUCACIÓN; EN EL COMANDO DE DEPARTAMENTO DE POLICÍA SAN ANDRÉS; PROVIDENCIA Y SANTA CATALINA.",
+  "modalidad": "Mínima cuantía",
+  "valor": "8922765",
+  "unspsc": "V1.52161505",
+  "docs_total": 11,
+  "docs_priorizables": 5,
+  "seleccionados": [
+   {
+    "id_documento": "306329951",
+    "nombre": "ACEPTACIÓN DE OFERTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 10424785,
+    "sha256": "11d9cdfbd6f75b6c67f4b09f18de1bb903b0a4413b013a5774be4f55baf6494a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=306329951&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5030063\\306329951.pdf"
+   },
+   {
+    "id_documento": "309789828",
+    "nombre": "CO1_PCCNTR_5030063_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 80782,
+    "sha256": "971b36f3d1a9cd56959c40e753e8f80fe6c95812abfbdea83565faf73987db3a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=309789828&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5030063\\309789828.pdf"
+   },
+   {
+    "id_documento": "300550446",
+    "nombre": "ESTUDIO PREVIO ADQUISICIÓN DE TELEVISORES (TURISMO).pdf",
+    "ext": "pdf",
+    "prioridad": 3,
+    "bytes": 4427162,
+    "sha256": "91b0b356ae8b303f9ca8078bd1f289176dd2db17a771976492bd889afee77de4",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=300550446&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5030063\\300550446.pdf"
+   },
+   {
+    "id_documento": "300550445",
+    "nombre": "ESPECIFICACIONES TECNICAS TELEVISOR.pdf",
+    "ext": "pdf",
+    "prioridad": 2,
+    "bytes": 195178,
+    "sha256": "3c6763599b8af663af52777271a832642c2e70290be89f25ad06be2337cfe6dc",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=300550445&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5030063\\300550445.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.5172832",
+  "proceso": "CO1.BDOS.4641178",
+  "anio": "2023",
+  "entidad": "EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN VICENTE DE PAUL REMEDIOS",
+  "objeto": "SUMINISTRO DE EQUIPOS TÉCNOLÓGICOS; DE OFICINA; COMPUTO Y MUEBLES PARA FORTALECER LA OPERATIVIDAD ADMINISTRATIVA DE LA E.S.E. HOSPITAL SAN VICENTE DE PAÚL DE REMEDIOS; ANTIOQUIA.",
+  "modalidad": "Contratación régimen especial",
+  "valor": "186974718",
+  "unspsc": "V1.52161505",
+  "docs_total": 32,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "314550686",
+    "nombre": "PROPUESTA LABORAL Y ECONÓMICA 2.pdf",
+    "ext": "pdf",
+    "prioridad": 8,
+    "bytes": 2637299,
+    "sha256": "d0d2dc631f268ff1fff20687635e31fc91b55664847d9909d4a9275fa26dc66e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=314550686&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5172832\\314550686.pdf"
+   },
+   {
+    "id_documento": "314550685",
+    "nombre": "PROPUESTA LABORAL Y ECONÓMICA 1.pdf",
+    "ext": "pdf",
+    "prioridad": 8,
+    "bytes": 1561481,
+    "sha256": "f7f25a84012f148e8f6f057d8146033f70d5ce71bab061c4420e8f37f82db913",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=314550685&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5172832\\314550685.pdf"
+   },
+   {
+    "id_documento": "315496693",
+    "nombre": "CONTRATO.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 5192316,
+    "sha256": "a85912a0987bae7c7caadb8d63b010becd488788603a1a4b5cef69cca604ad34",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=315496693&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5172832\\315496693.pdf"
+   },
+   {
+    "id_documento": "315608620",
+    "nombre": "CO1_PCCNTR_5172832_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 83209,
+    "sha256": "189a338673e048b8193a9ac34b6228f3589cba2fb6e937253dad2d673fdc1906",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=315608620&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_5172832\\315608620.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7062062",
+  "proceso": "CO1.BDOS.7030214",
+  "anio": "2024",
+  "entidad": "INSTITUCION EDUCATIVA ALBERTO MENDOZA MAYOR",
+  "objeto": "COMPRA DE 7 TELEVISORES Y SIETE SOPORTES DE PARED PARA LA INSTITUCIÓN EDUCATIVA ALBERTO MENDOZA MAYOR Y SUS SEDES",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "19495000",
+  "unspsc": "V1.52161505",
+  "docs_total": 10,
+  "docs_priorizables": 7,
+  "seleccionados": [
+   {
+    "id_documento": "540766247",
+    "nombre": "IEAMM-17-2024 Informe de evaluacion.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 5664330,
+    "sha256": "372c64b5a1b8370bb68b48a8d37dc6436f422a23e4cf5805202f5c8044512d1a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=540766247&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7062062\\540766247.pdf"
+   },
+   {
+    "id_documento": "540766250",
+    "nombre": "2 COMUNICADO DE ACEPTACION DE OFERTA IEAMM-17-2024.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 141106,
+    "sha256": "9117e92cacdbd75484e568d5bc8329ad716b247072ad44d8a2256ed829d0f5f1",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=540766250&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7062062\\540766250.pdf"
+   },
+   {
+    "id_documento": "540766248",
+    "nombre": "IEAMM-17-2024 Oferta seleccionada.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 476901,
+    "sha256": "62ce382c4f69671f2cc20a4e24fe2ecbfa54a81519b1498c15105fabb9eb2104",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=540766248&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7062062\\540766248.pdf"
+   },
+   {
+    "id_documento": "541727824",
+    "nombre": "ANEXO CLAUSULAS CONTRATO IEAMM-17-2024.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 238019,
+    "sha256": "35e18fa6ec545a961fe6c47e432c5daabfdf56697cf6e4a508ba6187e84ee45e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=541727824&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7062062\\541727824.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7106865",
+  "proceso": "CO1.BDOS.6875298",
+  "anio": "2024",
+  "entidad": "ARMADA NACIONAL - BASE NAVAL No.1 ARC BOLÍVAR",
+  "objeto": "ADQUISICIÓN DE AIRES ACONDICIONADOS",
+  "modalidad": "Selección abreviada subasta inversa",
+  "valor": "481560000",
+  "unspsc": "V1.52161505",
+  "docs_total": 419,
+  "docs_priorizables": 60,
+  "seleccionados": [
+   {
+    "id_documento": "547579997",
+    "nombre": "EVALUACION JURIDICA.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 745073,
+    "sha256": "4976050fe919974da477ae42e39499a785a8064315fbeb84d6288b691449ad4a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=547579997&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7106865\\547579997.pdf"
+   },
+   {
+    "id_documento": "547579901",
+    "nombre": "EVALUACION JURIDICA ADQUISICION DE EQUIPOS DE CAFETERIA, ELECTRODOMESTICOS.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 417954,
+    "sha256": "b8f9729e54f3ff319ad38b0583c9e015b0dadc0e6a532db4936e58606c4fbfcc",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=547579901&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7106865\\547579901.pdf"
+   },
+   {
+    "id_documento": "547580023",
+    "nombre": "EVALUACION ECONOMICA FINAL.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 140448,
+    "sha256": "a84adc58577a016bde0af5146e443cc2f5b75c2fa36ba2ddb7bc819f293aead4",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=547580023&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7106865\\547580023.pdf"
+   },
+   {
+    "id_documento": "547579893",
+    "nombre": "EVALUACION TECNICA.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 465695,
+    "sha256": "66b714835b02cbf0e168662efecc72b8d1706d658db9953f4775d654be072759",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=547579893&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7106865\\547579893.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6013458",
+  "proceso": "CO1.BDOS.5733226",
+  "anio": "2024",
+  "entidad": "EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN RAFAEL DE FACATATIVA",
+  "objeto": "ADQUISICIÓN DE DOCE (12) EQUIPOS DE ESCRITORIO; 1 TELEVISORES UHD 65 Y TRES (3) TABLET ANDROID 10 PARA LA RENOVACIÓN Y EL FORTALECIMIENTO TECNOLÓGICO DE LA ESE HOSPITAL SAN RAFAEL DE FACATATIVÁ Y LOS CENTROS Y PUESTOS DE SALUD.",
+  "modalidad": "Contratación régimen especial",
+  "valor": "65000000",
+  "unspsc": "UNSPECIFIED",
+  "docs_total": 5,
+  "docs_priorizables": 1,
+  "seleccionados": [
+   {
+    "id_documento": "440032736",
+    "nombre": "CO1_PCCNTR_6013458_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 77473,
+    "sha256": "2261669582c60c56c6e1c601023c29a15a36b493e60de5bbc637f8e59182c9e6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=440032736&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6013458\\440032736.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7139511",
+  "proceso": "CO1.BDOS.7079906",
+  "anio": "2024",
+  "entidad": "INSTITUCIÓN UNIVERSITARIA COLEGIO MAYOR DE ANTIOQUIA",
+  "objeto": "El CONTRATISTA se compromete con la INSTITUCIÓN UNIVERSITARIA COLEGIO MAYOR DE ANTIOQUIA para la compraventa de pantallas industriales de 65 pulgadas de alta resolución para la cartelería institucional; con sus respectivas bases y LICENCIAS SUPERSINGN por pantalla para la difusión de información rel",
+  "modalidad": "Selección abreviada subasta inversa",
+  "valor": "96475200",
+  "unspsc": "V1.52161505",
+  "docs_total": 43,
+  "docs_priorizables": 13,
+  "seleccionados": [
+   {
+    "id_documento": "545127509",
+    "nombre": "2 CLARYICON COTIZACION .pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 135512,
+    "sha256": "a428bafccf7f024a12bf50957496e3a18b70d5c0c4d4f628cad3433271ba856f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=545127509&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7139511\\545127509.pdf"
+   },
+   {
+    "id_documento": "540743517",
+    "nombre": "2 CLARYICON COTIZACION .pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 135512,
+    "sha256": "a428bafccf7f024a12bf50957496e3a18b70d5c0c4d4f628cad3433271ba856f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=540743517&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7139511\\540743517.pdf"
+   },
+   {
+    "id_documento": "540743523",
+    "nombre": "SIP043 Proyecto de Pliego Carteleras digitales.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 725793,
+    "sha256": "3ac64e1e2a0edeca6334c76d16bfce13482f7bce4cbbe8527824e1dd7abf177d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=540743523&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7139511\\540743523.pdf"
+   },
+   {
+    "id_documento": "557159086",
+    "nombre": "Clausulado anexo sip043 (1) (1).pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 313288,
+    "sha256": "70b9594d063ccfec75c74ae9f6c562f68cf6762f4eaec2b8dc7eaeb7c62e65df",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=557159086&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7139511\\557159086.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7126805",
+  "proceso": "CO1.BDOS.7081438",
+  "anio": "2024",
+  "entidad": "FUNDACION GILBERTO ALZATE AVENDAÑO",
+  "objeto": "Adquisición de dos Pantallas inflables con motor para la proyección de material audiovisual \nque sea programado en la agenda cultural de la Fundación Gilberto Álzate Avendaño.",
+  "modalidad": "Mínima cuantía",
+  "valor": "10710000",
+  "unspsc": "V1.52161505",
+  "docs_total": 49,
+  "docs_priorizables": 22,
+  "seleccionados": [
+   {
+    "id_documento": "549863229",
+    "nombre": "Evaluación Jurídica Definitiva FUGA-PCM-239-2024.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 177367,
+    "sha256": "c5c24d7be4ab080ceac197d527fbadd13078f403a2a53a7becd458bc2d4d1f26",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=549863229&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7126805\\549863229.pdf"
+   },
+   {
+    "id_documento": "549970263",
+    "nombre": "Evaluación Económica Definitiva FUGA-PCM-239-2024.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 932540,
+    "sha256": "ef621b92a61fa2ebba04dfd4c04a1646c7f7cbd2fd0c3a795ecefe1f4203f33e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=549970263&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7126805\\549970263.pdf"
+   },
+   {
+    "id_documento": "549970265",
+    "nombre": "Evaluación Técnica Definitiva FUGA-PCM-239-2024.xlsx",
+    "ext": "xlsx",
+    "prioridad": 9,
+    "bytes": 257523,
+    "sha256": "0f2ed9795f1a6c861ec54d4c3d99d53bd00c36e5f7bc272a62b909b87af8fbe8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=549970265&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7126805\\549970265.xlsx"
+   },
+   {
+    "id_documento": "549970266",
+    "nombre": "Oficio Remisorio Evaluación Técnica Definitiva FUGA-PMC-239-2024.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 95317,
+    "sha256": "40d132548cbfe97a5f0ac83e42c5d455f4ad904eee0e506151cb877eeeee76b8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=549970266&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7126805\\549970266.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6432982",
+  "proceso": "CO1.BDOS.6230489",
+  "anio": "2024",
+  "entidad": "COMPLEJO CARCELARIO Y PENITENCIARIO EL PEDREGAL DE MEDELLIN",
+  "objeto": "No definido",
+  "modalidad": "Mínima cuantía",
+  "valor": "12720000",
+  "unspsc": "V1.52161505",
+  "docs_total": 9,
+  "docs_priorizables": 6,
+  "seleccionados": [
+   {
+    "id_documento": "475888581",
+    "nombre": "026 Evaluacion equipos audiovisuales.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 485610,
+    "sha256": "27f6b196e3b88a9a004b87eb65f7bebf6643b3039936005e88091afb6d00087d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=475888581&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6432982\\475888581.pdf"
+   },
+   {
+    "id_documento": "483215885",
+    "nombre": "Comunicacion aceptacion de oferta_0001.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 2955242,
+    "sha256": "7f12c68a2d3835a994b486e170df56a927c3601b60611d17c6187526d22930b5",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=483215885&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6432982\\483215885.pdf"
+   },
+   {
+    "id_documento": "475888583",
+    "nombre": "Comunicacion aceptacion de oferta_0001.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 2955242,
+    "sha256": "7f12c68a2d3835a994b486e170df56a927c3601b60611d17c6187526d22930b5",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=475888583&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6432982\\475888583.pdf"
+   },
+   {
+    "id_documento": "499929425",
+    "nombre": "CO1_PCCNTR_6432982_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 82562,
+    "sha256": "c37a9fc4e847db2cb93da35301081e6df62a4ee512d7524893eabb3917fbfc70",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=499929425&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6432982\\499929425.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6855883",
+  "proceso": "CO1.BDOS.6692519",
+  "anio": "2024",
+  "entidad": "POLICIA METROPOLITANA DE POPAYAN",
+  "objeto": "ADQUISICION DE TELEVISORES DE 60 PARA LAS DIFERENTES ESTACIONES DE POLICIA Y GRUPOS QUE CONFORMAN DEL DEPARTAMENTO DE POLICIA CAUCA",
+  "modalidad": "Mínima cuantía",
+  "valor": "50884850",
+  "unspsc": "V1.83101804",
+  "docs_total": 309,
+  "docs_priorizables": 48,
+  "seleccionados": [
+   {
+    "id_documento": "519080302",
+    "nombre": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 2625620,
+    "sha256": "149e719dafdc2b8c71ff4f18ad491d28aaf63c4d581d2e25e184c55838d91859",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=519080302&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6855883\\519080302.pdf"
+   },
+   {
+    "id_documento": "514439042",
+    "nombre": "CO1_OTLCNTNR_690920705_CO1_RPL_4375906.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=514439042&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6855883\\514439042.pdf"
+   },
+   {
+    "id_documento": "514439113",
+    "nombre": "CO1_OTLCNTNR_690920705_CO1_RPL_4375017.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=514439113&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6855883\\514439113.pdf"
+   },
+   {
+    "id_documento": "514438805",
+    "nombre": "Formulario No. 1 - Carta de presentación de la propuesta.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=514438805&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6855883\\514438805.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7047581",
+  "proceso": "CO1.BDOS.7021172",
+  "anio": "2024",
+  "entidad": "SERVICIO NACIONAL DE APRENDIZAJE SENA - REGIONAL VAUPES",
+  "objeto": "Adquisición de motores fuera de borda; televisores y pantallas industriales para mejorar las capacidades formativas; la calidad de la enseñanza; y el equipamiento de los ambientes de aprendizaje; así como optimizar el proceso de enseñanza-aprendizaje en diversas áreas técnicas del Centro Agropecuari",
+  "modalidad": "Mínima cuantía",
+  "valor": "115000000",
+  "unspsc": "V1.26101515",
+  "docs_total": 118,
+  "docs_priorizables": 22,
+  "seleccionados": [
+   {
+    "id_documento": "538958878",
+    "nombre": "Informe de Evaluacion Preliminar.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 698015,
+    "sha256": "82f8a8952f8e1458f4602597a53b9f7c1e43ea99d6f530e89d124670c5e96986",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=538958878&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7047581\\538958878.pdf"
+   },
+   {
+    "id_documento": "536122428",
+    "nombre": "FORMATO No 12 OFERTA ECONOMICA  botes.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=536122428&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7047581\\536122428.docx"
+   },
+   {
+    "id_documento": "536122539",
+    "nombre": "FORMATO No 12 OFERTA ECONOMICA.pdf",
+    "ext": "pdf",
+    "prioridad": 8,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=536122539&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7047581\\536122539.pdf"
+   },
+   {
+    "id_documento": "536122530",
+    "nombre": "CO1_OTLCNTNR_708050988_CO1_RPL_4492320.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=536122530&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7047581\\536122530.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6431478",
+  "proceso": "CO1.BDOS.6203867",
+  "anio": "2024",
+  "entidad": "CORPOAMAZONIA - CORPORACIÓN PARA EL DESARROLLO SOSTENIBLE DEL SUR DE LA AMAZONIA1",
+  "objeto": "SUMINISTRAR EQUIPO TELEVISOR; EN EL MARCO DEL PROYECTO CON CÓDIGO BPIN 20233223000005 DENOMINADO ACCIONES DE RESTAURACIÓN EN ÁREAS DE BAJA COBERTURA VEGETAL; EN LOS MUNICIPIOS DE SOLANO; LA MONTAÑITA; en cumplimiento al Plan de Acción.",
+  "modalidad": "Mínima cuantía",
+  "valor": "5000000",
+  "unspsc": "V1.52161505",
+  "docs_total": 23,
+  "docs_priorizables": 9,
+  "seleccionados": [
+   {
+    "id_documento": "471537035",
+    "nombre": "3. Solicitud COTIZACION -JP.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 161663,
+    "sha256": "b1cab3ac2a7519dcf397fd9743d45ffa2ed5d79b3d71a585454130e9691df777",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=471537035&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6431478\\471537035.pdf"
+   },
+   {
+    "id_documento": "471537036",
+    "nombre": "1.Cotización INNOVA- TV-2_compressed.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 54426,
+    "sha256": "7435fc9f13d0cfabd3236e75bb2b7c9277be1ecabe1ab79af1bd240445692630",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=471537036&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6431478\\471537036.pdf"
+   },
+   {
+    "id_documento": "471537033",
+    "nombre": "1. Solicitud COTIZACION -innova.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 159460,
+    "sha256": "abb530cb740d35678ba494500505bc3298b7e1537703e246a885462601920a4c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=471537033&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6431478\\471537033.pdf"
+   },
+   {
+    "id_documento": "471537031",
+    "nombre": "2.COTIZACION MAAT.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 125054,
+    "sha256": "cf9b46e8a8d7be06166955ab86b1977d860dfc59886d007f4d16d0effdc21d77",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=471537031&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6431478\\471537031.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7020713",
+  "proceso": "CO1.BDOS.6996820",
+  "anio": "2024",
+  "entidad": "SENA REGIONAL ANTIOQUIA Grupo Administrativo CTPGA",
+  "objeto": "5_9501_577 Compra de equipos de audio; video y comunicación para la modernización de ambientes de formación y áreas administrativas del complejo tecnológico para la gestión agroempresarial y su subsede la Uribe",
+  "modalidad": "Mínima cuantía",
+  "valor": "129969030",
+  "unspsc": "V1.52161505",
+  "docs_total": 145,
+  "docs_priorizables": 32,
+  "seleccionados": [
+   {
+    "id_documento": "535832120",
+    "nombre": "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024.xlsx",
+    "ext": "xlsx",
+    "prioridad": 9,
+    "bytes": 21939,
+    "sha256": "9519073d4144ac70e04caec230eab7aeacd3ac588a0678f3e248d2d359f3ca34",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=535832120&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7020713\\535832120.xlsx"
+   },
+   {
+    "id_documento": "535832144",
+    "nombre": "evaluacion juridica.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 108101,
+    "sha256": "6160341ff69b63862feabf240a9adb537671b1cab42dea418991091a27f06eff",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=535832144&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7020713\\535832144.pdf"
+   },
+   {
+    "id_documento": "535832128",
+    "nombre": "Evaluación Técnica - No MC-ANT-CTPGA-030-2024 LUIS CARLOS HOYOS.xlsx",
+    "ext": "xlsx",
+    "prioridad": 9,
+    "bytes": 54324,
+    "sha256": "e1500e86ff24f7ed469b9d820435c673c4b7b6a27e5a25794d02f5395f84948b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=535832128&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7020713\\535832128.xlsx"
+   },
+   {
+    "id_documento": "535832118",
+    "nombre": "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024- 1.xlsx",
+    "ext": "xlsx",
+    "prioridad": 9,
+    "bytes": 21935,
+    "sha256": "33bc578712ef8e5677844cf98ced240d1832204204cee1dcd3c9d746edd93384",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=535832118&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7020713\\535832118.xlsx"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6249401",
+  "proceso": "CO1.BDOS.5861903",
+  "anio": "2024",
+  "entidad": "INSTITUCION EDUCATIVA ANDRES PAEZ DE SOTOMAYOR",
+  "objeto": "ADQUISICION DE HERRAMIENTAS TECNOLOGICAS: VENTILADORES; VIDEO BEAMS; TELEVISORES Y EQUIPOS PARA SONIDO DE LA INSTITUCION EDUCATIVA ANDRES PAEZ DE SOTOMAYOR SEDE A..",
+  "modalidad": "Selección abreviada subasta inversa",
+  "valor": "46495308",
+  "unspsc": "V1.52161500",
+  "docs_total": 47,
+  "docs_priorizables": 15,
+  "seleccionados": [
+   {
+    "id_documento": "453744738",
+    "nombre": "Anexo 10 -Propuesta Economica.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 102552,
+    "sha256": "f5806ef21aa5fa4d8e655904891e763be58b0728fc73c03c61cd14c4d0e6105c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=453744738&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6249401\\453744738.docx"
+   },
+   {
+    "id_documento": "453744740",
+    "nombre": "Formato 1- Carta de Presentación de la Oferta CCE-EICP-FM-104.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 51857,
+    "sha256": "d2af7fe65f55ca793a350335d2085f141850ff9f3106ba6ece91ca634ee6e38c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=453744740&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6249401\\453744740.docx"
+   },
+   {
+    "id_documento": "448001942",
+    "nombre": "Anexo 10 -Propuesta Economica.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 102552,
+    "sha256": "f5806ef21aa5fa4d8e655904891e763be58b0728fc73c03c61cd14c4d0e6105c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=448001942&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6249401\\448001942.docx"
+   },
+   {
+    "id_documento": "448001944",
+    "nombre": "Formato 1- Carta de Presentación de la Oferta CCE-EICP-FM-104.docx",
+    "ext": "docx",
+    "prioridad": 8,
+    "bytes": 51857,
+    "sha256": "d2af7fe65f55ca793a350335d2085f141850ff9f3106ba6ece91ca634ee6e38c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=448001944&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6249401\\448001944.docx"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6138002",
+  "proceso": "CO1.BDOS.5878875",
+  "anio": "2024",
+  "entidad": "INDUSTRIA LICORERA DEL CAUCA",
+  "objeto": "CONTRATAR EL SUMINISTRO E INSTALACIÓN A TODO COSTO DE UN (1) AIRE ACONDICIONADO Y UN (1) TELEVISOR PARA LA GERENCIA DE LA INDUSTRIA LICORERA DEL CAUCA",
+  "modalidad": "Contratación régimen especial",
+  "valor": "13750000",
+  "unspsc": "V1.40101701",
+  "docs_total": 16,
+  "docs_priorizables": 6,
+  "seleccionados": [
+   {
+    "id_documento": "448402923",
+    "nombre": "Contrato.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 740798,
+    "sha256": "b66d1ab9a64c2fe60fb98342b2add95683e03baacb3b0e0ff7c042770928f44c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=448402923&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6138002\\448402923.pdf"
+   },
+   {
+    "id_documento": "448332887",
+    "nombre": "Contrato.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 740798,
+    "sha256": "b66d1ab9a64c2fe60fb98342b2add95683e03baacb3b0e0ff7c042770928f44c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=448332887&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6138002\\448332887.pdf"
+   },
+   {
+    "id_documento": "524202526",
+    "nombre": "Pago fra # CE 2097 CTO 63 COMERCIALIZADORA EXPOSOLUCIONES SAS.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 198273,
+    "sha256": "10fe871e1c0d15e50ec5c9e78ca480c05f6bc1ee6a8da736fc136b3a654fba8e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=524202526&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6138002\\524202526.pdf"
+   },
+   {
+    "id_documento": "448402938",
+    "nombre": "CO1_PCCNTR_6138002_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 80816,
+    "sha256": "5db7780ddbc0ef9f420acf3f9bb1c697314c443a457b9bbabe2ce1349df00930",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=448402938&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6138002\\448402938.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.6512901",
+  "proceso": "CO1.BDOS.6364821",
+  "anio": "2024",
+  "entidad": "INSTITUCION EDUCATIVA JUAN HURTADO",
+  "objeto": "PRESTACIÓN DE SERVICIOS DE MANTENIMIENTO PREVENTIVO Y/O CORRECTIVO DE EQUIPOS DE CÓMPUTO; REDES; VIDEO BEAM; TELEVISORES; CABINAS Y SOPORTE TÉCNICO GENERAL DE LOS EQUIPOS QUE SON PROPIEDAD DE LA INSTITUCIÓN EDUCATIVA JUAN HURTADO",
+  "modalidad": "Contratación Directa (con ofertas)",
+  "valor": "10000000",
+  "unspsc": "V1.81111812",
+  "docs_total": 17,
+  "docs_priorizables": 10,
+  "seleccionados": [
+   {
+    "id_documento": "484569038",
+    "nombre": "FORMATO EVALUACIÓN.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 25730,
+    "sha256": "99c1f4337512e723f4ea2a995b3739b6aa37dc6d9b0410dcf2b8232ad4db8549",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=484569038&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6512901\\484569038.pdf"
+   },
+   {
+    "id_documento": "484569039",
+    "nombre": "FORMATO EVALUACIÓN.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 25730,
+    "sha256": "99c1f4337512e723f4ea2a995b3739b6aa37dc6d9b0410dcf2b8232ad4db8549",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=484569039&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6512901\\484569039.pdf"
+   },
+   {
+    "id_documento": "484566487",
+    "nombre": "CONTRAPROPUESTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 289700,
+    "sha256": "d747c7ba3de76ba2b538831afc8eea208d8df7cf28582102727571bf4927470e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=484566487&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6512901\\484566487.pdf"
+   },
+   {
+    "id_documento": "484570282",
+    "nombre": "PROPUESTA MANTENIMIENTOS FULL COLOR ACTUALIZADA (1).pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 702257,
+    "sha256": "f747bdb5b7a255c570f97886ff9d008440bc01f94a71f4c5992bebae5f0c1e57",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=484570282&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_6512901\\484570282.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8636357",
+  "proceso": "CO1.BDOS.9140185",
+  "anio": "2025",
+  "entidad": "INSTITUCION EDUCATIVA GENERAL SANTANDER",
+  "objeto": "COMPRA DE TELEVISORES COMPUTADORES VENTILADORES VIDEOPROYECTOR CON PRESUPUESTO DE FORMACION INTEGRAL; PRIMERA INFANCIA Y GRATUIDAD PARA LA IE GENERAL SANTANDER",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "16000000",
+  "unspsc": "V1.52161505",
+  "docs_total": 16,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "705394565",
+    "nombre": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEGS-021-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 410890,
+    "sha256": "93d40516db8dc2db2a37dc19f582c1837da82453674135739aba32b7841a3701",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705394565&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8636357\\705394565.pdf"
+   },
+   {
+    "id_documento": "705394568",
+    "nombre": "OFERTA SELECCIONADA IEGS-021-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 330336,
+    "sha256": "3e6883145bb7c64efba76bba9581bbfeb57d81056b0ef819fe634db8b49a946e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705394568&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8636357\\705394568.pdf"
+   },
+   {
+    "id_documento": "705629830",
+    "nombre": "ANEXOS contrato RE IEGS-021-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 606376,
+    "sha256": "f43e57c27125d32067b71aa750f5b31ed2885e5f26200e5502c0eea5e6e20c72",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705629830&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8636357\\705629830.pdf"
+   },
+   {
+    "id_documento": "705629468",
+    "nombre": "CO1_PCCNTR_8636357_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 87909,
+    "sha256": "da7105a8828674e4f012f68396566052bb549f9723af8dc0d48b7cc67d5b960e",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705629468&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8636357\\705629468.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8721745",
+  "proceso": "CO1.BDOS.9281573",
+  "anio": "2025",
+  "entidad": "ALCALDIA MUNICIPIO DE MANZANARES",
+  "objeto": "CONTRATAR EL SUMINISTRO DE ELEMENTOS TECNOLÓGICOS Y UTILITARIOS PARA EL \nFORTALECIMIENTO DEL FUNCIONAMIENTO; LA PRESTACIÓN DE SERVICIOS DE LA \nBIBLIOTECA MUNICIPAL BERNARDO ARIAS TRUJILLO DEL MUNICIPIO DE MANZANARES; \nORIENTADO A MEJORAR EL ACCESO A RECURSOS TECNOLÓGICOS Y LA ATENCIÓN A LA \nCOMUNIDA",
+  "modalidad": "Mínima cuantía",
+  "valor": "13470000",
+  "unspsc": "V1.52161505",
+  "docs_total": 15,
+  "docs_priorizables": 7,
+  "seleccionados": [
+   {
+    "id_documento": "721603234",
+    "nombre": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 319998,
+    "sha256": "6943fc80bbaef337b5f316785f5849a643e4c6a594fedf80591855b8f75150d2",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=721603234&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8721745\\721603234.pdf"
+   },
+   {
+    "id_documento": "721602633",
+    "nombre": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 319998,
+    "sha256": "6943fc80bbaef337b5f316785f5849a643e4c6a594fedf80591855b8f75150d2",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=721602633&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8721745\\721602633.pdf"
+   },
+   {
+    "id_documento": "721621284",
+    "nombre": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 319998,
+    "sha256": "6943fc80bbaef337b5f316785f5849a643e4c6a594fedf80591855b8f75150d2",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=721621284&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8721745\\721621284.pdf"
+   },
+   {
+    "id_documento": "719491558",
+    "nombre": "cotizacion alcaldia dic 17 2025.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 694777,
+    "sha256": "01d12cb4e0b9800857870394aba72afa0cfc23bdca9386e1430514defbb8a3cc",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=719491558&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8721745\\719491558.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8618634",
+  "proceso": "CO1.BDOS.8631909",
+  "anio": "2025",
+  "entidad": "DEPARTAMENTO DE POLICÍA CUNDINAMARCA",
+  "objeto": "ADQUISICIÓN E INSTALACIÓN DE UN CIRCUITO CERRADO DE TELEVISIÓN CCTV PARA LA BASE DEL DEPARTAMENTO DE POLICÍA CUNDINAMARCA",
+  "modalidad": "Selección abreviada subasta inversa",
+  "valor": "249148654.32",
+  "unspsc": "V1.52161505",
+  "docs_total": 70,
+  "docs_priorizables": 20,
+  "seleccionados": [
+   {
+    "id_documento": "702479577",
+    "nombre": "Evaluación MAYA ELECTRONICC S.A.S (1).pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 111861,
+    "sha256": "c4a1917352189886c20f8e5fb4fb6fb230055cca6325d881d1f357183a841a32",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=702479577&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8618634\\702479577.pdf"
+   },
+   {
+    "id_documento": "702479580",
+    "nombre": "Evaluacion ANDIVISION S.A.S (1).pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 52642,
+    "sha256": "9fb6df2c0308c6c285790e329cb6bafb47f351ebf84132b3403b85ef37940d44",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=702479580&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8618634\\702479580.pdf"
+   },
+   {
+    "id_documento": "659929541",
+    "nombre": "ANEXO EVALUACIÓN ECONÓMICA Y JUSTIFICACIÓN DEL MARGEN MÍNIMO.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 298811,
+    "sha256": "532e1c111f8b564f87327cdd422d294c506e665c52bd571ec2b3c42723c99f5d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=659929541&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8618634\\659929541.pdf"
+   },
+   {
+    "id_documento": "702479576",
+    "nombre": "Evaluación SECURITY SHOPS LTDA (1).pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 89640,
+    "sha256": "b0ebf42ae4864676fd2dd16b9e2b2b2cf16b16b7b8db144c8de76858c8016d6a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=702479576&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8618634\\702479576.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8731668",
+  "proceso": "CO1.BDOS.9266009",
+  "anio": "2025",
+  "entidad": "SENA REGIONAL NORTE DE SANTANDER Grupo de Apoyo Administrativo Mixto",
+  "objeto": "54_511 CONTRATAR EL SUMINISTRO E INSTALACIÓN DE MUEBLES Y ENSERES PARA LOS GIMNASIOS DEL SENA REGIONAL NORTE DE SANTANDER.",
+  "modalidad": "Mínima cuantía",
+  "valor": "40000000",
+  "unspsc": "V1.52161505",
+  "docs_total": 28,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "724219156",
+    "nombre": "OFERTA ENSERES OFFIDISEÑOS.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 72849,
+    "sha256": "6c84fedd06d5528d01b0a1ef16891dea5af13ae3fbafd36c80cbf52a3d9065e8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=724219156&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8731668\\724219156.pdf"
+   },
+   {
+    "id_documento": "718138995",
+    "nombre": "04.2COTIZACIONES ENSERES Y MUEBLES PRECIOS REFERENCIA WEB.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 1712604,
+    "sha256": "aa289118f1c6da88d6d17727521fa5653dc0e0190f7850854f5beb706e895dc3",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=718138995&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8731668\\718138995.pdf"
+   },
+   {
+    "id_documento": "724219157",
+    "nombre": "GCCON-F-021 ANEXO AL CONTRATO - GYM ENSERES.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 458479,
+    "sha256": "b4370be0ce24f8dcd90d79e5676f673d1862e6470052ea1740057fa536108a63",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=724219157&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8731668\\724219157.pdf"
+   },
+   {
+    "id_documento": "724540219",
+    "nombre": "CO1_PCCNTR_8731668_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 102947,
+    "sha256": "219414797a81eca60635660c8e057b6539271baf413bc2d84da547c8d151337c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=724540219&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8731668\\724540219.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8637202",
+  "proceso": "CO1.BDOS.9147862",
+  "anio": "2025",
+  "entidad": "INSTITUCION EDUCATIVA EL RODEO",
+  "objeto": "COMPRA DE TELEVISORES CON PRESUPUESTO DEL COMPONENTE DE PRIMERA INFANCIA PARA LA I.E. EL RODEO",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "3800000",
+  "unspsc": "V1.52161505",
+  "docs_total": 16,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "705419551",
+    "nombre": "OFERTA SELECCIONADA IEER-017-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 196868,
+    "sha256": "f55ffbe8ef9779dc036fca5ce7a90733d8368cf3e926c196f97f1c8f58462cec",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705419551&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8637202\\705419551.pdf"
+   },
+   {
+    "id_documento": "705419550",
+    "nombre": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEER-017-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 278871,
+    "sha256": "12921230c0d4f5262da83d84b88f3564ce00754a3892a9176386873f703bd075",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705419550&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8637202\\705419550.pdf"
+   },
+   {
+    "id_documento": "705632005",
+    "nombre": "ANEXO contrato regimen especial IEER-017-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 425339,
+    "sha256": "0cda17140d8ccd6459b09545ae55f7af3e92f8c07a32ea307f5d7112b2fc581d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705632005&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8637202\\705632005.pdf"
+   },
+   {
+    "id_documento": "705632318",
+    "nombre": "ANEXO contrato regimen especial IEER-017-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 425339,
+    "sha256": "0cda17140d8ccd6459b09545ae55f7af3e92f8c07a32ea307f5d7112b2fc581d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=705632318&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8637202\\705632318.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8729908",
+  "proceso": "CO1.BDOS.9281515",
+  "anio": "2025",
+  "entidad": "MUNICIPIO DE SANTANA",
+  "objeto": "ADQUISICIÓN DE SUDADERAS; BANDERAS INSTITUCIONALES; ELEMENTOS DE FERRETERÍA Y UN TELEVISOR; DESTINADOS A FORTALECER LA DOTACIÓN; MANTENIMIENTO Y ADECUACIÓN DE LOS ESPACIOS DE LA CARCEL Y PENITENCIARIA DE MEDIA SEGURIDAD DE MONIQUIRÁ (CPMS); EN CUMPLIMIENTO DEL CONVENIO INTERADMINISTRATIVO SUSCRITO E",
+  "modalidad": "Mínima cuantía",
+  "valor": "22146702",
+  "unspsc": "V1.55121715",
+  "docs_total": 20,
+  "docs_priorizables": 10,
+  "seleccionados": [
+   {
+    "id_documento": "723541392",
+    "nombre": "EVALUACION DEFINITIVA20251223_15470436.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 4480962,
+    "sha256": "76e74fe747dbe29155a43aa7f7f60993a66ff2dba1220145bd96378bbac358a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=723541392&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8729908\\723541392.pdf"
+   },
+   {
+    "id_documento": "723543651",
+    "nombre": "EVALUACION DEFINITIVA20251223_15470436.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 4480962,
+    "sha256": "76e74fe747dbe29155a43aa7f7f60993a66ff2dba1220145bd96378bbac358a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=723543651&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8729908\\723543651.pdf"
+   },
+   {
+    "id_documento": "723519970",
+    "nombre": "EVALUACION DEFINITIVA20251223_15470436.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 4480962,
+    "sha256": "76e74fe747dbe29155a43aa7f7f60993a66ff2dba1220145bd96378bbac358a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=723519970&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8729908\\723519970.pdf"
+   },
+   {
+    "id_documento": "723519971",
+    "nombre": "CARTA DE ACEPTACION20251223_15461769.pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 5323182,
+    "sha256": "8fcb2d289d7384227cafe5e084e76f7c886b634f84f948a12b4b27d710a3ed15",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=723519971&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8729908\\723519971.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8448027",
+  "proceso": "CO1.BDOS.8913314",
+  "anio": "2025",
+  "entidad": "INSTITUCION EDUCATIVA ESCUELA NORMAL SUPERIOR SOR JOSEFA DEL CASTILLO Y GUEVARA",
+  "objeto": ": CONTRATAR EL MANTENIMIENTO DE LA PLANTA FÍSICA SEDE PRINCIPAL Y SEDES RURALES A TODO COSTO RELACIONADO CON MANO DE OBRA EN:  SUMINISTRO E INSTALACIÓN DE TEJAS FIBROCEMENTO No.8 EN ALGUNOS SALONES DE BACHILLERATO; SUMINISTRO E INSTALACIÓN DE CIELO RASO EN PVC 7mm SALONES DE PREESCOLAR SEDE CENTRAL;",
+  "modalidad": "Contratación régimen especial",
+  "valor": "22000000",
+  "unspsc": "V1.72102905",
+  "docs_total": 12,
+  "docs_priorizables": 9,
+  "seleccionados": [
+   {
+    "id_documento": "678897444",
+    "nombre": "#5 CONTRATO #20 PROPUESTA CONTRATISTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 4975362,
+    "sha256": "fd7c6332c03f5f56ea24a019c2330377b0142a0e3a7ae31bce913a02525091e8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=678897444&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8448027\\678897444.pdf"
+   },
+   {
+    "id_documento": "678897445",
+    "nombre": "#6 CONTRATO #20 ACTA DE EVALUCACION PROPUESTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 856327,
+    "sha256": "578d9fe60866a1a964799f8d2a357298193754e209222389fa6864dc4e9b7add",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=678897445&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8448027\\678897445.pdf"
+   },
+   {
+    "id_documento": "678897441",
+    "nombre": "#2 CONTRATO #20 C.D.P. MAESTRO #90.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 235001,
+    "sha256": "ce9c40e64773407c7bcb287fecb6edb01a6a8661ab16d303b79091841289ba9f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=678897441&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8448027\\678897441.pdf"
+   },
+   {
+    "id_documento": "678955713",
+    "nombre": "CO1_PCCNTR_8448027_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 77230,
+    "sha256": "7d42ba9fd3cf817d414bd08ef9b9c5978fc8a1d802735c6a5fb11cc300890fab",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=678955713&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8448027\\678955713.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8093401",
+  "proceso": "CO1.BDOS.8383878",
+  "anio": "2025",
+  "entidad": "INSTITUCION EDUCATIVA POLICARPA SALAVARRIETA",
+  "objeto": "ADQUISICIÓN POR COMPRA DE BIENES DE CONSUMO DE USO DURADERO (EQUIPOS TECNOLÓGICOS); PARA LA BUENA MARCHA DE LAS ACTIVIDADES ADMINISTRATIVAS Y ACADEMICAS DE LA INSTITUCIÓN EDUCATIVA POLICARPA SALAVARRIETA DE GIRARDOT - CUNDINAMARCA",
+  "modalidad": "Mínima cuantía",
+  "valor": "31023000",
+  "unspsc": "V1.52161505",
+  "docs_total": 15,
+  "docs_priorizables": 5,
+  "seleccionados": [
+   {
+    "id_documento": "639827554",
+    "nombre": "8. INFORME DE EVALUACIÓN Y VERIFICACIÓN RH.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 2914949,
+    "sha256": "f1c01152b3be6fb6de97dd9027a3f2f1a0fc6f56677e9b7c711e7f6d287de894",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=639827554&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8093401\\639827554.pdf"
+   },
+   {
+    "id_documento": "635029919",
+    "nombre": "1.1. COTIZACIÓN.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 281760,
+    "sha256": "17d59b0b1a661be4d85efdceed21e4ada8d643a4f46163fd3a0c96fa7711759a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=635029919&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8093401\\635029919.pdf"
+   },
+   {
+    "id_documento": "640212579",
+    "nombre": "CO1_PCCNTR_8093401_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 87418,
+    "sha256": "bf4aeb39a534fcd390a2ac9d360e2372f9d5fc38504ef73be779945341391930",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=640212579&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8093401\\640212579.pdf"
+   },
+   {
+    "id_documento": "635029921",
+    "nombre": "2. Estudio previo.pdf",
+    "ext": "pdf",
+    "prioridad": 3,
+    "bytes": 584222,
+    "sha256": "f5d3284f5889e75aaddaa35aeca9b8b7db1b6258973d98ddd3f6baa8266a2a4b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=635029921&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8093401\\635029921.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8583590",
+  "proceso": "CO1.BDOS.9020176",
+  "anio": "2025",
+  "entidad": "CONTRALORIA GENERAL DE LA REPÚBLICA-CGR- GERENCIA DEPARTAMENTAL GUANIA",
+  "objeto": "COMPRA DE ELEMENTOS PARA LA GERENCIA DEPARTAMENTAL DEL GUAINIA DE LA CONTRALORIA GENERAL DE LA REPUBLICA COMO SILLAS; ESCRITORIOS; MESAS; SOFA; ARCHIVADOR; ESTANTERIA; MPRESORA; SCANNER; VIDEOBEAM; VENTILADOR; AIRE ACONDICIONADO; NEVERA; ESTUFA; TELEVISOR; SONIDO; SOPORTE TV; UNIDADES ESTADO SOLIDO ",
+  "modalidad": "Mínima cuantía",
+  "valor": "88770000",
+  "unspsc": "V1.44103103",
+  "docs_total": 25,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "696678881",
+    "nombre": "ACTA DE EVALUACION GUAI-MC-007-2025 II.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 143002,
+    "sha256": "69074a1dd00070b4bf2856cebf7dd250ecb98bf2482cdabf8be4c5c8f8445f6b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=696678881&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8583590\\696678881.pdf"
+   },
+   {
+    "id_documento": "700345369",
+    "nombre": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 458928,
+    "sha256": "ba4eb38f696d36501a8d782181dd9adf0fc681c2aa86833ff478a3ba3dd1ac02",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=700345369&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8583590\\700345369.pdf"
+   },
+   {
+    "id_documento": "691870682",
+    "nombre": "COTIZACION 2025.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 569710,
+    "sha256": "066600d2602bf36b57e4f614901d9b2bf357fe1df4bb5cf37c418d8b475f7dc2",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=691870682&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8583590\\691870682.pdf"
+   },
+   {
+    "id_documento": "691870683",
+    "nombre": "Cotizacion CGR Matibel Guainia.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 382639,
+    "sha256": "dbe9fbf260e985bdd7b3d2a3207bbf3c1a622b476fd2851c8b6da54caae501df",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=691870683&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8583590\\691870683.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.7922631",
+  "proceso": "CO1.BDOS.8149041",
+  "anio": "2025",
+  "entidad": "MUNICIPIO DE VEGACHI",
+  "objeto": "ADQUISICIÓN E INSTALACIÓN DE AIRE ACONDICIONADO Y TELEVISORES CON DESTINO AL BATALLÓN ESPECIAL ENÉRGÉTICO No. 8  (BAEEV8) PARA EL BIENESTAR DE LA FUERZA PÚBLICA EN EL MUNICIPIO DE VEGACHÍ - ANTIOQUIA.",
+  "modalidad": "Mínima cuantía",
+  "valor": "36746178",
+  "unspsc": "V1.52161505",
+  "docs_total": 27,
+  "docs_priorizables": 12,
+  "seleccionados": [
+   {
+    "id_documento": "617883453",
+    "nombre": "Evaluación Definitiva MC-016-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 121924,
+    "sha256": "6226bcb87a09006a407af7ca8fa486df51d8e0d50be4e52a4c6271aacec30a3b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=617883453&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7922631\\617883453.pdf"
+   },
+   {
+    "id_documento": "623315330",
+    "nombre": "6.Evaluación Definitiva MC-016-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 121924,
+    "sha256": "6226bcb87a09006a407af7ca8fa486df51d8e0d50be4e52a4c6271aacec30a3b",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=623315330&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7922631\\623315330.pdf"
+   },
+   {
+    "id_documento": "623315075",
+    "nombre": "5.Informe de evaluación preliminar MC-016-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 120988,
+    "sha256": "a394a4dd9dc849ecfba1c41054f70c98a87e0c84c8c16d8d92dabb3905d82bf4",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=623315075&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7922631\\623315075.pdf"
+   },
+   {
+    "id_documento": "623315691",
+    "nombre": "7.Comunicación de aceptación MC-016-2025.pdf",
+    "ext": "pdf",
+    "prioridad": 6,
+    "bytes": 286183,
+    "sha256": "1b163c21e9a90965b3fcc0ddab6116ebe7e43ed0a2c52af27290f8c1dbcfbb3a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=623315691&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_7922631\\623315691.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8133999",
+  "proceso": "CO1.BDOS.8248432",
+  "anio": "2025",
+  "entidad": "UNIDAD PRESTADORA DE SALUD SANTANDER",
+  "objeto": "PRESTACION DEL SERVICIO DE MANTENIMIENTO PREVENTIVO Y CORRECTIVO A TODO COSTO CON SOPORTE A USUARIO FINAL INCLUYENDO BOLSA DE REPUESTOS A TODO COSTO PARA EQUIPOS DE COMPUTO PORTATILES IMPRESORAS ESCANNER TELEFONOS IP VIDEO BEAMS SWITCHS IMPRESORAS ZEBRAS TELEVISORES PUNTOS DE RED ENERGIA REGULADA  N",
+  "modalidad": "Mínima cuantía",
+  "valor": "18000000",
+  "unspsc": "V1.81112300",
+  "docs_total": 16,
+  "docs_priorizables": 6,
+  "seleccionados": [
+   {
+    "id_documento": "643262627",
+    "nombre": "ACTA CONSOLIDACION E INFORMES Y REEVALUACION MMTTO DE COMPUTADORES OK.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 538229,
+    "sha256": "868476ffbf05d57d9ebc799086ce0b31fec45af384c19420456cce976d6553c8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=643262627&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8133999\\643262627.pdf"
+   },
+   {
+    "id_documento": "643270483",
+    "nombre": "ACEPTACION DE OFERTA MMTTO DE COMPUTADORES OK.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 1751747,
+    "sha256": "aa48e8cd506100e846f6afa5e7d312e29372b7ce6f18fe757508da684becc0bf",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=643270483&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8133999\\643270483.pdf"
+   },
+   {
+    "id_documento": "643708530",
+    "nombre": "CO1_PCCNTR_8133999_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 88139,
+    "sha256": "9615f823a8f130c6fb2b73d5eee013802eb9ef8314a5023fbdcf99cee861cec1",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=643708530&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8133999\\643708530.pdf"
+   },
+   {
+    "id_documento": "624045059",
+    "nombre": "ESTUDIO PREVIO MANTENIMIENTO DE COMPUTADORES OK.pdf",
+    "ext": "pdf",
+    "prioridad": 3,
+    "bytes": 4858588,
+    "sha256": "733fa4f51b45e57e9187156111abebffaefc2230038a03b6d8e36e96eeba2c9f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=624045059&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8133999\\624045059.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8234869",
+  "proceso": "CO1.BDOS.8516133",
+  "anio": "2025",
+  "entidad": "SUBRED INTEGRADA DE SERVICIOS DE SALUD SUR E.S.E.**",
+  "objeto": "COMPRAVENTA DE TELEVISORES DE 32 PULGADAS PARA LA SUBRED INTEGRADA DE SERVICIOS DE SALUD SUR E.S.E.",
+  "modalidad": "Contratación régimen especial (con ofertas)",
+  "valor": "111906108",
+  "unspsc": "V1.52161505",
+  "docs_total": 25,
+  "docs_priorizables": 11,
+  "seleccionados": [
+   {
+    "id_documento": "646009799",
+    "nombre": "ANEXO TECNICO ECONOMICO TELEVISORES.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 48599,
+    "sha256": "8d8048a63fc692420bef85276cdfa85c6e053217559bd6e9c1c220b0380e89de",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=646009799&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8234869\\646009799.xlsx"
+   },
+   {
+    "id_documento": "646009798",
+    "nombre": "ANEXO 14. DECLARACIÓN JURAMENTADA DE NO IMPEDIMENTO Y-O CONFLICTO DE INTERESES.docx",
+    "ext": "docx",
+    "prioridad": 4,
+    "bytes": 40462,
+    "sha256": "a839e12fbb449873f4bc0ae60d8317abf7ef9960cc276b465b02fb33c9674761",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=646009798&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8234869\\646009798.docx"
+   },
+   {
+    "id_documento": "646009793",
+    "nombre": "RELACION DE CONTRATOS PRESTACION DE SERVICIOS PERSONA NATURAL.docx",
+    "ext": "docx",
+    "prioridad": 4,
+    "bytes": 45136,
+    "sha256": "96e480fd22d97df2f4df60d16eb4e1f620441a5683b6181bb60a4fb7d4ca1554",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=646009793&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8234869\\646009793.docx"
+   },
+   {
+    "id_documento": "669233760",
+    "nombre": "ACTA INICIO DE EJECUCION CONTRATO 6186-2025 PC SYSTEM S.A.S..pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 2535744,
+    "sha256": "cbeb5bff926b3229024e653eb6b255b6217209d837a8b1bde92f5f65bb1cd17f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=669233760&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8234869\\669233760.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.8520884",
+  "proceso": "CO1.BDOS.9013332",
+  "anio": "2025",
+  "entidad": "INSTITUCION EDUCATIVA PIO XI",
+  "objeto": "DOTACIÓN PEDAGÓGICA PARA EL DESARROLLO DEL PROGRAMA DE INGLÉS DEL ASOCIADO I.E.R SAN JUAN DE LA JORNADA EXTENDIDA",
+  "modalidad": "Contratación régimen especial",
+  "valor": "5443000",
+  "unspsc": "V1.52161505",
+  "docs_total": 33,
+  "docs_priorizables": 18,
+  "seleccionados": [
+   {
+    "id_documento": "687978700",
+    "nombre": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 246141,
+    "sha256": "fbbad07854aadaa7f8e3ddef3bb5c3b70a1768351d2ade1f60be7d2a5da3f7a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=687978700&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8520884\\687978700.pdf"
+   },
+   {
+    "id_documento": "687962306",
+    "nombre": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 246141,
+    "sha256": "fbbad07854aadaa7f8e3ddef3bb5c3b70a1768351d2ade1f60be7d2a5da3f7a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=687962306&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8520884\\687962306.pdf"
+   },
+   {
+    "id_documento": "688085222",
+    "nombre": "3 ACTA DE EVALUACION DOTACIÓN PEDAGÓGICA INGLÉS.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 246141,
+    "sha256": "fbbad07854aadaa7f8e3ddef3bb5c3b70a1768351d2ade1f60be7d2a5da3f7a6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=688085222&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8520884\\688085222.pdf"
+   },
+   {
+    "id_documento": "688085231",
+    "nombre": "10 cotizacion uno para ingles jornada extendida i.e.r san juan.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 262063,
+    "sha256": "9d004f0b908f2fd0214eab5cf8d13ee15c3ac082d39462599bae8de31b27225f",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=688085231&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_8520884\\688085231.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9538760",
+  "proceso": "CO1.BDOS.10267138",
+  "anio": "2026",
+  "entidad": "RNEC",
+  "objeto": "Adquisición de Televisor Smart y Cámara Web para dotar la Sala de Juntas de la Delegación Departamental de Arauca conforme a las especificaciones técnicas definidas por la Entidad",
+  "modalidad": "Mínima cuantía",
+  "valor": "2800546",
+  "unspsc": "V1.56101700",
+  "docs_total": 32,
+  "docs_priorizables": 7,
+  "seleccionados": [
+   {
+    "id_documento": "801389902",
+    "nombre": "EVALUACIÓN.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 8452260,
+    "sha256": "5ca217853f04ae376e6da19fd16de5b2d9b5444dfe065129d76e360e9ce5d2b1",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=801389902&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9538760\\801389902.pdf"
+   },
+   {
+    "id_documento": "794946864",
+    "nombre": "0. COTIZACIONES.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 52990,
+    "sha256": "1a030fc112c97fde6156058f34e29fab124dc9a2c8b3853ec1d2696e4203c243",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=794946864&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9538760\\794946864.pdf"
+   },
+   {
+    "id_documento": "802589228",
+    "nombre": "CO1_PCCNTR_9538760_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 95025,
+    "sha256": "5cfaf0fddf962729ac165f2cecdc176b44d9d595b2dade55aa8a7340cd0b8d62",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=802589228&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9538760\\802589228.pdf"
+   },
+   {
+    "id_documento": "834477383",
+    "nombre": "3. CONTRATO DIGITAL.xlsx",
+    "ext": "xlsx",
+    "prioridad": 4,
+    "bytes": 84664,
+    "sha256": "2e2a576080c41152e66948cf1ed44d6fca4d4b5768d8d9269b6957130e545086",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=834477383&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9538760\\834477383.xlsx"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9566302",
+  "proceso": "CO1.BDOS.10338701",
+  "anio": "2026",
+  "entidad": "INSTITUCION EDUCATIVA ESCUELA NORMAL SUPERIOR SOR JOSEFA DEL CASTILLO Y GUEVARA",
+  "objeto": "CONTRATAR LA COMPRA DE ARTICULOS DE DEPORTE; UN TELEVISOR; DOS COMPUTADORES Y UNA UPS PARA LA INSTITUCIÓN EDUCATIVA ESCUELA NORMAL SUPERIOR SOR JOSEFA DEL CASTILLO Y GUEVARA DEL MUNICIPIO DE CHIQUINQUIRÁ.",
+  "modalidad": "Contratación régimen especial",
+  "valor": "11224800",
+  "unspsc": "V1.43211507",
+  "docs_total": 13,
+  "docs_priorizables": 10,
+  "seleccionados": [
+   {
+    "id_documento": "808278822",
+    "nombre": "#6 CONTRATO #11 ACTA DE EVALUACION.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1778497,
+    "sha256": "a25c1d3a68f993c406c0cc2ac9efb415683ddc632622d9c1c2d37930199c7347",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=808278822&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9566302\\808278822.pdf"
+   },
+   {
+    "id_documento": "808278821",
+    "nombre": "#6 CONTRATO #11  PROPUESTA CONTRATISTA.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 1308202,
+    "sha256": "350d41f152ef8260ee8a2720dbebb6fb55fb36c9eef8cde647b02ac9d4ab07d1",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=808278821&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9566302\\808278821.pdf"
+   },
+   {
+    "id_documento": "808421092",
+    "nombre": "#8 CONTRATO #11 C.R.P. #48.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 575295,
+    "sha256": "1794f58c47a74da7fc6cbef3cc179d67969c0e8aba83792f886a7c6578fb7564",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=808421092&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9566302\\808421092.pdf"
+   },
+   {
+    "id_documento": "808278819",
+    "nombre": "#4 CONTRATO #11 ESTUDIOS PREVIOS.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 2801675,
+    "sha256": "3018ca209ceeadeabaf69397e09885907bba4988faa1243e0a2e00ad0a07d313",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=808278819&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9566302\\808278819.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9883818",
+  "proceso": "CO1.BDOS.10597951",
+  "anio": "2026",
+  "entidad": "SENA REGIONAL DISTRITO CAPITAL Grupo Administrativo Intercentros CEET",
+  "objeto": "Contratar la compra de televisores para los ambientes de formación del Centro de Electricidad; Electrónica y Telecomunicaciones de la Regional Distrito Capital",
+  "modalidad": "Mínima cuantía",
+  "valor": "49920000",
+  "unspsc": "V1.52161505",
+  "docs_total": 23,
+  "docs_priorizables": 9,
+  "seleccionados": [
+   {
+    "id_documento": "838947832",
+    "nombre": "Formato Oferta economica 2026.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 25835,
+    "sha256": "4e8807bfe02e8a499121aa156b9c0e26024cbf2dab5bc3ca7e44437cef7f7cc8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=838947832&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9883818\\838947832.xlsx"
+   },
+   {
+    "id_documento": "850666439",
+    "nombre": "GCCON-F-083_Carta_de_Aceptación_de_la_Oferta (4).pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 295527,
+    "sha256": "03fb2fc4fefab1b7474f4fb3bf96dd7315996044b1e294653b5f8d0bf80b0499",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=850666439&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9883818\\850666439.pdf"
+   },
+   {
+    "id_documento": "850629176",
+    "nombre": "GCCON-F-083_Carta_de_Aceptación_de_la_Oferta (4).pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 295527,
+    "sha256": "03fb2fc4fefab1b7474f4fb3bf96dd7315996044b1e294653b5f8d0bf80b0499",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=850629176&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9883818\\850629176.pdf"
+   },
+   {
+    "id_documento": "838947825",
+    "nombre": "3.3. COTIZACION SERVICIO NACIONAL DE APRENDIZAJE-MI.PDF 01-MAIL-Anexos Respuestas Internas - No. 9-2026-08.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 391507,
+    "sha256": "5c6f5674495515332c48987610193516d33c7e75178802eb52815aa61a3a5d07",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=838947825&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9883818\\838947825.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9527378",
+  "proceso": "CO1.BDOS.10284137",
+  "anio": "2026",
+  "entidad": "E.S.E. HOSPITAL FRAY LUIS DE LEON",
+  "objeto": "SUMINISTRO E INSTALACIÓN; A TODO COSTO; DE UN SISTEMA DE CIRCUITO CERRADO DE TELEVISIÓN (CCTV) DE OCHO (8) CÁMARAS Y UN TELEVISOR DE 50 PULGADAS PARA LA E.S.E HOSPITAL FRAY LUIS DE LEÓN DE PLATO MAGDALENA",
+  "modalidad": "Contratación régimen especial",
+  "valor": "11700000",
+  "unspsc": "V1.43211500",
+  "docs_total": 7,
+  "docs_priorizables": 1,
+  "seleccionados": [
+   {
+    "id_documento": "798033645",
+    "nombre": "CO1_PCCNTR_9527378_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 93225,
+    "sha256": "48ab90159dbd4f5eefd2c6e49b1c47656936c78696755bafa1cf446e7874d4f0",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=798033645&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9527378\\798033645.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9482543",
+  "proceso": "CO1.BDOS.10176383",
+  "anio": "2026",
+  "entidad": "BATALLON DE APOYO Y SERVICIOS PARA EL COMBATE NO 27",
+  "objeto": "ADQUISICION DE DISPOSITIVOS ELECTRONICOS PARA LAS UNIDADES CENTRALIZADAS ADMINISTRATIVAMENTE POR EL BATALLON DE ASPC N° 27",
+  "modalidad": "Mínima cuantía",
+  "valor": "19990000",
+  "unspsc": "V1.52161505",
+  "docs_total": 126,
+  "docs_priorizables": 23,
+  "seleccionados": [
+   {
+    "id_documento": "785890218",
+    "nombre": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1296788,
+    "sha256": "69d042eb7d8f31e9bce16d0283afaa1c8b14c6d0545aabb17341ba34b554e9ac",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=785890218&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9482543\\785890218.pdf"
+   },
+   {
+    "id_documento": "785890215",
+    "nombre": "22.2 INFORME FINAL EVALUACION JURIDICA ELECTRONICOS 035.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 399197,
+    "sha256": "45cfd5de39caed39b5fa48ecfc6a62b8dd354187add3e94a380e5448782ea037",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=785890215&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9482543\\785890215.pdf"
+   },
+   {
+    "id_documento": "785890206",
+    "nombre": "18.1 EVALUACION ECONOMICA 2 OF MC 035.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 528258,
+    "sha256": "1bb9eb8929b16469a9bce8550c85d46df45a395593e8df17382ce7e997595951",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=785890206&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9482543\\785890206.pdf"
+   },
+   {
+    "id_documento": "785890217",
+    "nombre": "22.1 INFORME FINAL EVALUACION TECNICA ELECTRONICOS 035.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 475662,
+    "sha256": "4be22ade4b44887cd091d063350af9ef5a7f3bb4991cffcbea34c09ea8bd4356",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=785890217&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9482543\\785890217.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9691113",
+  "proceso": "CO1.BDOS.10468194",
+  "anio": "2026",
+  "entidad": "ALCALDIA MUNICIPAL DE SANTA BARBARA",
+  "objeto": "ADQUISICIÓN DE EQUIPOS TECNOLÓGICOS (TELEVISORES Y COMPUTADORES) PARA LA REPOSICIÓN DE LOS ELEMENTOS HURTADOS EN LA INSTITUCIÓN EDUCATIVA EL GUAYABO; CON EL FIN MEJOAR LOS PROCESOS INHERENTES A LA PRESTACIÓN DEL SERVICIO EDUCATIVO EN EL MUNICIPIO DE SANTA BÁRBARA; ANTIOQUIA.",
+  "modalidad": "Mínima cuantía",
+  "valor": "15146000",
+  "unspsc": "V1.52161505",
+  "docs_total": 12,
+  "docs_priorizables": 6,
+  "seleccionados": [
+   {
+    "id_documento": "827154833",
+    "nombre": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1166311,
+    "sha256": "5b6a9064f6f142394ade94e306959c4a9e75a76c2fa8b9c21556c6186728230c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=827154833&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9691113\\827154833.pdf"
+   },
+   {
+    "id_documento": "827154832",
+    "nombre": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1166311,
+    "sha256": "5b6a9064f6f142394ade94e306959c4a9e75a76c2fa8b9c21556c6186728230c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=827154832&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9691113\\827154832.pdf"
+   },
+   {
+    "id_documento": "829159841",
+    "nombre": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 2356682,
+    "sha256": "4f60362146a8138d9732f30c3654f15c84a4494112f810a65e271c33fd555b69",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=829159841&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9691113\\829159841.pdf"
+   },
+   {
+    "id_documento": "828564902",
+    "nombre": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 2356682,
+    "sha256": "4f60362146a8138d9732f30c3654f15c84a4494112f810a65e271c33fd555b69",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=828564902&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9691113\\828564902.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9829420",
+  "proceso": "CO1.BDOS.10695771",
+  "anio": "2026",
+  "entidad": "INSTITUCION EDUCATIVA PIO XI",
+  "objeto": "ADQUISICIÓN DE EQUIPOS COMO TELEVISORES; IMPRESORA Y TABLET Y EQUIPO DE COMPUTO PARA LA I.E PIO XI; SEDES; ASOCIADO I.E.R SAN JUAN Y SEDES",
+  "modalidad": "Contratación régimen especial",
+  "valor": "16258392",
+  "unspsc": "V1.43211508",
+  "docs_total": 31,
+  "docs_priorizables": 18,
+  "seleccionados": [
+   {
+    "id_documento": "842948971",
+    "nombre": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 244601,
+    "sha256": "5d7ee56825754f3f44e7d60177fc0834e7530c1e5775e78662c698104bc59277",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=842948971&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9829420\\842948971.pdf"
+   },
+   {
+    "id_documento": "843027034",
+    "nombre": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 244601,
+    "sha256": "5d7ee56825754f3f44e7d60177fc0834e7530c1e5775e78662c698104bc59277",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=843027034&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9829420\\843027034.pdf"
+   },
+   {
+    "id_documento": "842954828",
+    "nombre": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 244601,
+    "sha256": "5d7ee56825754f3f44e7d60177fc0834e7530c1e5775e78662c698104bc59277",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=842954828&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9829420\\842954828.pdf"
+   },
+   {
+    "id_documento": "842954845",
+    "nombre": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 5366032,
+    "sha256": "7abe42fe41108dc7c23b7a2b726465b7d2d296dc791ae2eb0660b2b404cedeec",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=842954845&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9829420\\842954845.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9492542",
+  "proceso": "CO1.BDOS.10176837",
+  "anio": "2026",
+  "entidad": "INSTITUCIÓN UNIVERSITARIA ITM",
+  "objeto": "ADQUISICIÓN DE TELEVISORES CON SUS RESPECTIVOS SOPORTES; PARA EL  FORTALECIMIENTO DE LOS PROCESOS ACADÉMICOS DE LA INSTITUCIÓN UNIVERSITARIA ITM DE ACUERDO CON LAS  ESPECIFICACIONES TÉCNICAS",
+  "modalidad": "Mínima cuantía",
+  "valor": "56287000",
+  "unspsc": "V1.52161505",
+  "docs_total": 226,
+  "docs_priorizables": 37,
+  "seleccionados": [
+   {
+    "id_documento": "787955398",
+    "nombre": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 3.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1808390,
+    "sha256": "6895a01174be9d6cfd28867f731c090b7e3c2868afebd65f543800f3318d2799",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=787955398&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9492542\\787955398.pdf"
+   },
+   {
+    "id_documento": "787955400",
+    "nombre": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 4.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1994439,
+    "sha256": "eaf4c703f9233b20f25aa8a50ffa37d9afc80cc502cfde32831c055546c5be56",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=787955400&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9492542\\787955400.pdf"
+   },
+   {
+    "id_documento": "787955395",
+    "nombre": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 1.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1992643,
+    "sha256": "99e968f500e513ae154d939d4d724f149f904daa08645758ac78f671b8c50289",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=787955395&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9492542\\787955395.pdf"
+   },
+   {
+    "id_documento": "787955396",
+    "nombre": "MC 23 DE 2026 - INFORME DE EVALUACIÓN 2.pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 1992338,
+    "sha256": "d600f98179dd34940dcfd24a3b29c851d7a4796fa9aea4872d2462ff75fea24a",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=787955396&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9492542\\787955396.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9763105",
+  "proceso": "CO1.BDOS.10436960",
+  "anio": "2026",
+  "entidad": "ALCALDIA LOCAL DE USAQUEN",
+  "objeto": "ADQUISICIÓN DE ARTÍCULOS DE DOTACIÓN PARA LA CASA DE JUSTICIA DE LA LOCALIDAD DE USAQUÉN EN EL MARCO DEL PROYECTO 2602\nFORTALECIENDO LAS CAPACIDADES Y LA TECNOLOGÍA PARA LA SEGURIDAD DE USAQUÉN",
+  "modalidad": "Mínima cuantía",
+  "valor": "23139550",
+  "unspsc": "V1.52161505",
+  "docs_total": 23,
+  "docs_priorizables": 8,
+  "seleccionados": [
+   {
+    "id_documento": "836662170",
+    "nombre": "Formato Evaluacion Economica FINAL_MC-004-2026_03082026 (1).pdf",
+    "ext": "pdf",
+    "prioridad": 9,
+    "bytes": 377095,
+    "sha256": "9f2602d7e32473fecbad000e3bbf0e2d203f9c3b12bfe45cd7322207959827c8",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=836662170&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9763105\\836662170.pdf"
+   },
+   {
+    "id_documento": "825096392",
+    "nombre": "12. Formato Oferta Economica.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 31073,
+    "sha256": "9e94b5f5c14c24ca91921f2a74bf2b88dcbdd08cabc99a36d25452df5fc006e0",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=825096392&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9763105\\825096392.xlsx"
+   },
+   {
+    "id_documento": "839536120",
+    "nombre": "ACEPTACION DE OFERTA FDLUSA-MC-004-2026.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 269004,
+    "sha256": "c5b5dbcf89e5b52b5f670d589b4b78af51496ebf67475a2e88e8027eb48fc77d",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=839536120&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9763105\\839536120.pdf"
+   },
+   {
+    "id_documento": "825096400",
+    "nombre": "10. solicitud cotizacion SECOP casaj2026.pdf",
+    "ext": "pdf",
+    "prioridad": 5,
+    "bytes": 769437,
+    "sha256": "f65b1e5deaf1199d5ba8177e985c2f62430252e77715a43bfba17b29a553de47",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=825096400&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9763105\\825096400.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9640674",
+  "proceso": "CO1.BDOS.10328284",
+  "anio": "2026",
+  "entidad": "INSTITUCIÓN UNIVERSITARIA ITM",
+  "objeto": "ADQUISICIÓN DE TELEVISORES CON SUS RESPECTIVOS SOPORTES PARA LA INSTITUCIÓN UNIVERSITARIA ITM DE ACUERDO CON LAS ESPECIFICACIONES TÉCNICAS",
+  "modalidad": "Selección abreviada subasta inversa",
+  "valor": "222316051",
+  "unspsc": "V1.45111802",
+  "docs_total": 59,
+  "docs_priorizables": 21,
+  "seleccionados": [
+   {
+    "id_documento": "806636940",
+    "nombre": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 13192,
+    "sha256": "df3da41924fea9bdd5da4614b7ab6039d737bc12e8995039d68563cebe2fadb7",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=806636940&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9640674\\806636940.xlsx"
+   },
+   {
+    "id_documento": "812570899",
+    "nombre": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx",
+    "ext": "xlsx",
+    "prioridad": 8,
+    "bytes": 13192,
+    "sha256": "df3da41924fea9bdd5da4614b7ab6039d737bc12e8995039d68563cebe2fadb7",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=812570899&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9640674\\812570899.xlsx"
+   },
+   {
+    "id_documento": "824317289",
+    "nombre": "CO1_OTLCNTNR_865350542_CO1_RPL_5746675.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=824317289&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9640674\\824317289.pdf"
+   },
+   {
+    "id_documento": "824317218",
+    "nombre": "CO1_OTLCNTNR_865350542_CO1_RPL_5742800.pdf",
+    "ext": "pdf",
+    "prioridad": 7,
+    "bytes": 130,
+    "sha256": "b823cce8ada81faa10bbd0e6ea618f3c8852cc743ed4a25582af55a9981708d6",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=824317218&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9640674\\824317218.pdf"
+   }
+  ]
+ },
+ {
+  "id_contrato": "CO1.PCCNTR.9766009",
+  "proceso": "CO1.BDOS.10610623",
+  "anio": "2026",
+  "entidad": "LOTERIA DE CUNDINAMARCA",
+  "objeto": "Ejecución del promocional TEMÁTICA COPA DEL MUNDO vigente durante todo el mes de junio desde el sorteo 4805 del 1 de junio al sorteo 4809 del 30 de junio del 2026 de conformidad con el plan de mercadeo para la vigencia 2026.",
+  "modalidad": "Contratación régimen especial",
+  "valor": "3200000",
+  "unspsc": "V1.52161505",
+  "docs_total": 9,
+  "docs_priorizables": 3,
+  "seleccionados": [
+   {
+    "id_documento": "837267378",
+    "nombre": "CONTRATO No. 79-2026.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 391365,
+    "sha256": "239afd5eaa7da3bde6cb43aaa0f4df817a1d85f7f191a7d976711f9bf238d5da",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=837267378&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9766009\\837267378.pdf"
+   },
+   {
+    "id_documento": "839537889",
+    "nombre": "CO1_PCCNTR_9766009_Firmado.pdf",
+    "ext": "pdf",
+    "prioridad": 4,
+    "bytes": 111796,
+    "sha256": "5ad9da5eed30a07e06582114e13236bddcf887edbd72a2061c074cf0b2e7cedc",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=839537889&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9766009\\839537889.pdf"
+   },
+   {
+    "id_documento": "837267361",
+    "nombre": "INVITACION.pdf",
+    "ext": "pdf",
+    "prioridad": 2,
+    "bytes": 2334673,
+    "sha256": "3de1f4a3a4a3d45e8dfdce1ef96deb04ff0021c1aadf26950d27637544ae814c",
+    "url": "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=837267361&InCommunity=False&InPaymentGateway=False&DocUniqueIdentifier=",
+    "archivo": "documentos\\CO1_PCCNTR_9766009\\837267361.pdf"
+   }
+  ]
+ }
+]

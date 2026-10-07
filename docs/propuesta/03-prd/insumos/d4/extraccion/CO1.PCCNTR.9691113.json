@@ -1,0 +1,43 @@
+{
+  "id_contrato": "CO1.PCCNTR.9691113",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor QLED Smart TV de 55 pulgadas, resolución UHD 4K 3840 x 2160, Quantum Dot, 60 Hz, HDR10+, control remoto recargable con comando de voz, sonido 20W 2 canales, VESA 200x200, sintonizador TDT integrado",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 55,
+      "resolucion": "4K UHD",
+      "tecnologia": "QLED",
+      "smart": true,
+      "cantidad": 4,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": null, "resolucion": "alta", "tecnologia": "alta", "smart": "alta"},
+      "evidencia": {
+        "descripcion": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)",
+        "tamano_pulgadas": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)",
+        "resolucion": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)",
+        "tecnologia": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)",
+        "smart": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)",
+        "cantidad": "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 3 (imagen 829159841_p3.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "PROMOCIONALES Y TECNOLOGICOS MEDELLIN S.A.S", "precio_unitario": null, "adjudicado": true, "evidencia": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf | página 12 (valor total oferta $15.146.000; recomendado en página 14) y COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf | página 1"},
+    {"nombre": "READYNET S.A.S.", "precio_unitario": null, "adjudicado": false, "evidencia": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf | página 11 (valor total oferta $17.385.060)"},
+    {"nombre": "GRUPO IMCOIN S.A.S.", "precio_unitario": null, "adjudicado": false, "evidencia": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf | página 13 (valor total oferta $15.734.978)"},
+    {"nombre": "CARVAJ S.A.S.", "precio_unitario": null, "adjudicado": false, "evidencia": "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf | página 14 (valor total oferta $17.200.000)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Contrato adjudicado a PROMOCIONALES Y TECNOLOGICOS MEDELLIN S.A.S por $15.146.000 (aceptación de oferta del 21-jul-2026) para 4 televisores QLED 55\" y 2 portátiles. Ningún documento discrimina el precio unitario del televisor: las tablas económicas de cada oferente en el informe definitivo (páginas 11-14) no tienen texto extraído (parecen imágenes incrustadas, sin PNG disponible), solo el valor total de cada oferta; la aceptación tampoco tiene precios por ítem. No hay marca ni modelo. El CDP 00518 certifica $17.901.000 (presupuesto). Cuatro oferentes con solo valores totales (precio_unitario null). Archivos duplicados: 827154832.pdf = 827154833.pdf (informe) y 828564902 = 829159841 (aceptación, mismas imágenes). Se leyeron 4 imágenes (829159841_p1 a p4): todas legibles; p3 contiene la tabla de equipos y cantidades; p4 forma de pago y CDP; no se leyó p5 ni el duplicado 828564902_*.",
+  "imagenes_leidas": 4,
+  "documentos_revisados": [
+    "6 Informe de Evaluación Definitivo MC-CV-053-2026 firmado.pdf",
+    "COMUNICACIÓN ACEPTACIÓN DE OFERTA MC-CV-053 FIRMADO.pdf"
+  ]
+}

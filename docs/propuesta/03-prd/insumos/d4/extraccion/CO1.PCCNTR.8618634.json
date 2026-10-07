@@ -1,0 +1,37 @@
+{
+  "id_contrato": "CO1.PCCNTR.8618634",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [
+    {
+      "nombre": "MAYA ELECTRONICS SAS",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "Evaluación MAYA ELECTRONICC S.A.S (1).pdf | página 1 (imagen 702479577_p1.png)"
+    },
+    {
+      "nombre": "SECURITY SHOPS LTDA",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "Evaluación SECURITY SHOPS LTDA (1).pdf | página 1 (imagen 702479576_p1.png)"
+    },
+    {
+      "nombre": "ANDIVISION S.A.S",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "Evaluacion ANDIVISION S.A.S (1).pdf | página 1 (imagen 702479580_p1.png)"
+    }
+  ],
+  "inconsistencias": [
+    "Ítem 3 (Cámara fija tipo 1): 2 x 8.936.900 = 17.873.800, pero el valor estimado aparece como '$17.873.80,00' (error de formato) (ANEXO EVALUACIÓN ECONÓMICA Y JUSTIFICACIÓN DEL MARGEN MÍNIMO.pdf | página 1). El total estimado 249.424.000 sí cuadra con 17.873.800."
+  ],
+  "observaciones": "Fuera de categoría: circuito cerrado de televisión (CCTV) — cámaras, torniquete, biométricos, NVR, switch y un 'MONITOR DE VISUALIZACION' (excluido, es monitor). Sin televisores. Se leyeron 3 imágenes (evaluaciones técnicas p1 de MAYA ELECTRONICS: NO CUMPLE; SECURITY SHOPS: NO CUMPLE; ANDIVISION: CUMPLE), legibles; no traen precios. No se leyeron las p2 por no ser relevantes.",
+  "imagenes_leidas": 3,
+  "documentos_revisados": [
+    "ANEXO EVALUACIÓN ECONÓMICA Y JUSTIFICACIÓN DEL MARGEN MÍNIMO.pdf",
+    "Evaluación MAYA ELECTRONICC S.A.S (1).pdf (imagen p1)",
+    "Evaluación SECURITY SHOPS LTDA (1).pdf (imagen p1)",
+    "Evaluacion ANDIVISION S.A.S (1).pdf (imagen p1)"
+  ]
+}

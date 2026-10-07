@@ -1,0 +1,47 @@
+{
+  "epica": "ÉPICA-005",
+  "features": [
+    {
+      "nombre": "Selección de Comparables",
+      "hus": [
+        {"id": "HU-054", "carpeta": "HU-054-seleccionar-comparables-benchmark-1", "titulo": "Seleccionar comparables públicos del Benchmark 1 con ventana temporal configurable", "prioridad": "Crítica", "frs": ["FR-055", "FR-062"], "escenarios": 10, "casos_qa": 14},
+        {"id": "HU-055", "carpeta": "HU-055-seleccionar-observaciones-benchmark-2", "titulo": "Seleccionar observaciones retail del Benchmark 2 cercanas a la fecha de la compra", "prioridad": "Crítica", "frs": ["FR-056", "FR-062"], "escenarios": 9, "casos_qa": 13},
+        {"id": "HU-056", "carpeta": "HU-056-homologar-base-tributaria-iva", "titulo": "Homologar la base tributaria (IVA) y marcar comparaciones incompletas", "prioridad": "Crítica", "frs": ["FR-057"], "escenarios": 9, "casos_qa": 13}
+      ]
+    },
+    {
+      "nombre": "Cálculo de Benchmarks",
+      "hus": [
+        {"id": "HU-057", "carpeta": "HU-057-calcular-benchmark-1-compras-publicas", "titulo": "Calcular el Benchmark 1 – Contratación pública y la desviación del precio contratado", "prioridad": "Crítica", "frs": ["FR-054", "FR-058", "FR-059", "FR-061"], "escenarios": 9, "casos_qa": 12},
+        {"id": "HU-058", "carpeta": "HU-058-calcular-benchmark-2-mercado", "titulo": "Calcular el Benchmark 2 – Mercado con degradación a \"no disponible\"", "prioridad": "Crítica", "frs": ["FR-058", "FR-059", "FR-060", "FR-061"], "escenarios": 8, "casos_qa": 11}
+      ]
+    },
+    {
+      "nombre": "Generación y Confianza de Señales",
+      "hus": [
+        {"id": "HU-059", "carpeta": "HU-059-generar-senal-desviacion-al-alza", "titulo": "Generar la «señal que merece revisión» por desviación al alza con regla híbrida configurable", "prioridad": "Crítica", "frs": ["FR-063"], "escenarios": 12, "casos_qa": 16},
+        {"id": "HU-060", "carpeta": "HU-060-enviar-precios-bajos-revision-calidad", "titulo": "Dirigir los precios anormalmente bajos a la cola de revisión de calidad", "prioridad": "Crítica", "frs": ["FR-063"], "escenarios": 8, "casos_qa": 12},
+        {"id": "HU-061", "carpeta": "HU-061-calcular-confianza-de-la-senal", "titulo": "Calcular el nivel de confianza de la comparación y de la señal", "prioridad": "Crítica", "frs": ["FR-068"], "escenarios": 9, "casos_qa": 13}
+      ]
+    },
+    {
+      "nombre": "Presentación de Evidencia Trazable",
+      "hus": [
+        {"id": "HU-062", "carpeta": "HU-062-registrar-evidencia-de-la-senal", "titulo": "Registrar la evidencia completa y reproducible de cada señal", "prioridad": "Crítica", "frs": ["FR-065"], "escenarios": 8, "casos_qa": 12},
+        {"id": "HU-063", "carpeta": "HU-063-ver-detalle-de-la-senal", "titulo": "Ver el detalle de una señal con su comparación, su evidencia y la advertencia de no conclusión", "prioridad": "Crítica", "frs": ["FR-065", "FR-067", "FR-062", "FR-059", "FR-060"], "escenarios": 10, "casos_qa": 14},
+        {"id": "HU-064", "carpeta": "HU-064-navegar-a-evidencia-de-origen", "titulo": "Navegar desde la señal hasta el contrato, el documento y la página de origen, y cada observación de referencia", "prioridad": "Crítica", "frs": ["FR-066"], "escenarios": 10, "casos_qa": 14},
+        {"id": "HU-065", "carpeta": "HU-065-garantizar-lenguaje-no-acusatorio", "titulo": "Garantizar lenguaje no acusatorio en todos los textos generados por el sistema", "prioridad": "Crítica", "frs": ["FR-064"], "escenarios": 8, "casos_qa": 10}
+      ]
+    },
+    {
+      "nombre": "Validación Humana de Señales",
+      "hus": [
+        {"id": "HU-066", "carpeta": "HU-066-calificar-senal-sustentada", "titulo": "Calificar una señal como suficientemente sustentada para merecer revisión", "prioridad": "Crítica", "frs": ["FR-069"], "escenarios": 10, "casos_qa": 12},
+        {"id": "HU-067", "carpeta": "HU-067-reportar-error-dato-o-senal", "titulo": "Reportar un error en un dato o en una señal", "prioridad": "Crítica", "frs": ["FR-070"], "escenarios": 9, "casos_qa": 13},
+        {"id": "HU-068", "carpeta": "HU-068-gestionar-reportes-de-error", "titulo": "Gestionar los reportes de error y registrar su resolución", "prioridad": "Crítica", "frs": ["FR-070"], "escenarios": 10, "casos_qa": 13}
+      ]
+    }
+  ],
+  "frs_cubiertos": ["FR-054", "FR-055", "FR-056", "FR-057", "FR-058", "FR-059", "FR-060", "FR-061", "FR-062", "FR-063", "FR-064", "FR-065", "FR-066", "FR-067", "FR-068", "FR-069", "FR-070"],
+  "frs_no_cubiertos": []
+}

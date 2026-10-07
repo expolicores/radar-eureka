@@ -1,0 +1,56 @@
+{
+  "id_contrato": "CO1.PCCNTR.9766009",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor Smart TV de 55 pulgadas nuevo, pantalla LED con tecnología de mejora de color (tipo Crystal UHD o equivalente), resolución 4K UHD, compatible con Google Cast / Apple AirPlay o equivalentes; referencia de mercado Samsung UN55U8500HKXZL o su equivalente técnico en otras marcas",
+      "marca": "Samsung",
+      "modelo": "UN55U8500HKXZL",
+      "tamano_pulgadas": 55,
+      "resolucion": "4K UHD",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 3200000,
+      "valor_total_item": 3200000,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "marca": "baja",
+        "modelo": "baja",
+        "tamano_pulgadas": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "media",
+        "resolucion": "alta",
+        "tecnologia": "alta",
+        "smart": "alta"
+      },
+      "evidencia": {
+        "descripcion": "CONTRATO No. 79-2026.pdf | página 3 (cláusula primera, alcance) y página 4 (obligaciones específicas)",
+        "marca": "CONTRATO No. 79-2026.pdf | página 3 ('se toma como referencia el modelo Samsung UN55U8500HKXZL o su equivalente técnico')",
+        "modelo": "CONTRATO No. 79-2026.pdf | página 3",
+        "tamano_pulgadas": "CONTRATO No. 79-2026.pdf | página 3",
+        "resolucion": "CONTRATO No. 79-2026.pdf | página 3",
+        "tecnologia": "CONTRATO No. 79-2026.pdf | página 3",
+        "smart": "CONTRATO No. 79-2026.pdf | página 3",
+        "cantidad": "CONTRATO No. 79-2026.pdf | página 3; CO1_PCCNTR_9766009_Firmado.pdf | página 3 (Bienes y servicios: TELEVISORES 1,00 UN)",
+        "precio_unitario": "CO1_PCCNTR_9766009_Firmado.pdf | página 3 (precio unitario 3.200.000,00); CONTRATO No. 79-2026.pdf | página 1 y 3 (valor $3.200.000)",
+        "valor_total_item": "CO1_PCCNTR_9766009_Firmado.pdf | página 3",
+        "iva": "CONTRATO No. 79-2026.pdf | página 3 (cláusula segunda: 'IVA INCLUIDO Y DEMÁS IMPUESTOS')",
+        "tipo_precio": "CONTRATO No. 79-2026.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [
+    "La invitación a presentar oferta está fechada 5 de agosto de 2026 y menciona 'Participación comercial en el evento de lanzamiento del nuevo plan de premios, venta electrónica y rendición de cuentas 2025', texto ajeno al objeto (promocional Copa del Mundo, junio 2026) (INVITACION.pdf | página 1, imagen 837267361_p1.png)."
+  ],
+  "observaciones": "Contratación directa (régimen especial) de la Lotería de Cundinamarca con TALENTO COMERCIALIZADORA S.A. para entregar 1 televisor como premio del promocional 'La Cundí es Mundial'. El contrato tiene un único ítem (UNSPSC 52161505 TELEVISORES, 1 UN x $3.200.000 IVA incluido), por lo que el precio unitario corresponde al TV más la logística de entrega; confianza media. Marca y modelo son la 'referencia de mercado' del pliego (Samsung UN55U8500HKXZL 'o su equivalente técnico en otras marcas'), no necesariamente el equipo entregado: confianza baja. Según el contrato se cotizó a DESARROLLO IDEAS CONSTRUIMOS SAS, GRAFICANDO SERVICIOS INTEGRADOS y TALENTO COMERCIALIZADORA S.A. (estudio de mercado, sin precios en los documentos), por eso no se registran en oferentes. Se leyó 1 imagen (837267361_p1.png, invitación p.1): legible, confirma especificaciones y presupuesto $3.200.000 IVA incluido; no se leyeron p2-p3.",
+  "imagenes_leidas": 1,
+  "documentos_revisados": [
+    "CONTRATO No. 79-2026.pdf",
+    "CO1_PCCNTR_9766009_Firmado.pdf",
+    "INVITACION.pdf"
+  ]
+}

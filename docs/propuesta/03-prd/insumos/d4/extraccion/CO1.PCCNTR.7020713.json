@@ -1,0 +1,35 @@
+{
+  "id_contrato": "CO1.PCCNTR.7020713",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [],
+  "oferentes": [
+    {
+      "nombre": "MAXIAIRES CAUCASIA/LUIS CARLOS HOYOS DIAZ",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "evaluacion juridica.pdf | página 1"
+    },
+    {
+      "nombre": "CORPORACION PRODESARROLLO INTEGRAL",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "evaluacion juridica.pdf | página 1"
+    },
+    {
+      "nombre": "ARHO SOLUCIONES S.A.S.",
+      "precio_unitario": null,
+      "adjudicado": null,
+      "evidencia": "evaluacion juridica.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "Objeto genérico 'equipos de audio, video y comunicación'. Los documentos son evaluaciones jurídica, técnica (experiencia) y financiera; no contienen lista de ítems ni precios. La palabra 'televisores' solo aparece en el requisito de experiencia, por lo que no se puede confirmar ni describir ningún ítem de televisor. 3 proponentes sin precios; jurídicamente solo PRODEINTEGRAL 'CUMPLE' (adjudicación no explícita).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "evaluacion juridica.pdf",
+    "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024.xlsx",
+    "Evaluación Financiera MÍNIMA CUANTÍA - No MC-ANT-CTPGA-030-2024- 1.xlsx",
+    "Evaluación Técnica - No MC-ANT-CTPGA-030-2024 LUIS CARLOS HOYOS.xlsx"
+  ]
+}

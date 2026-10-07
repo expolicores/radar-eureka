@@ -1,0 +1,54 @@
+{
+  "id_contrato": "CO1.PCCNTR.8731668",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Pantalla 4K UHD",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": "4K",
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 1,
+      "precio_unitario": 3900000,
+      "valor_total_item": 3900000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "descripcion": "baja",
+        "resolucion": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta"
+      },
+      "evidencia": {
+        "descripcion": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1",
+        "resolucion": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1",
+        "cantidad": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1",
+        "precio_unitario": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1",
+        "valor_total_item": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "OFFIDISEÑOS SOLUCIONES INTEGRALES SAS",
+      "precio_unitario": 3900000,
+      "adjudicado": true,
+      "evidencia": "OFERTA ENSERES OFFIDISEÑOS.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [
+    "La lista de precios a costo unitario suma 11.093.000 (estimado 12.502.980,67), mientras el contrato es por 40.000.000; consistente con un contrato a precios unitarios hasta agotar presupuesto, pero la cantidad final de pantallas no se conoce (OFERTA ENSERES OFFIDISEÑOS.pdf | página 1; GCCON-F-021 ANEXO AL CONTRATO - GYM ENSERES.pdf | página 1)."
+  ],
+  "observaciones": "Contrato de muebles y enseres para gimnasios. El único ítem audiovisual es 'Pantalla 4K UHD' (1 UN, estimado 4.349.950, ofertado 3.900.000); es ambiguo si es televisor (no dice TV/Smart ni tamaño), por eso confianza baja en la clasificación. OFFIDISEÑOS es el contratista firmado. Se leyeron 6 imágenes del estudio de precios web (718138995_p1..p6: ventilador x2, locker, colchoneta x2, báscula), legibles, ninguna corresponde a la pantalla; y 1 imagen 724540219_p5.png (página casi en blanco del contrato SECOP). Sin marca, modelo ni IVA explícito.",
+  "imagenes_leidas": 7,
+  "documentos_revisados": [
+    "OFERTA ENSERES OFFIDISEÑOS.pdf",
+    "GCCON-F-021 ANEXO AL CONTRATO - GYM ENSERES.pdf",
+    "CO1_PCCNTR_8731668_Firmado.pdf",
+    "04.2COTIZACIONES ENSERES Y MUEBLES PRECIOS REFERENCIA WEB.pdf (imágenes p1-p6)"
+  ]
+}

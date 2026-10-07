@@ -1,0 +1,39 @@
+{
+  "epica": "ÉPICA-004",
+  "features": [
+    {
+      "nombre": "Gestionar Base de Observaciones de Mercado",
+      "hus": [
+        {"id": "HU-042", "carpeta": "HU-042-almacenar-observaciones-mercado", "titulo": "Almacenar observaciones de precio de mercado con registro mínimo trazable", "prioridad": "Crítica", "frs": ["FR-041", "FR-042", "FR-049"], "escenarios": 11, "casos_qa": 18},
+        {"id": "HU-043", "carpeta": "HU-043-conservar-historico-observaciones", "titulo": "Conservar el histórico inmutable de observaciones de mercado", "prioridad": "Crítica", "frs": ["FR-053"], "escenarios": 12, "casos_qa": 17}
+      ]
+    },
+    {
+      "nombre": "Aplicar Reglas de Precio de Referencia",
+      "hus": [
+        {"id": "HU-044", "carpeta": "HU-044-filtrar-vendedor-tienda", "titulo": "Aceptar solo observaciones cuyo vendedor sea directamente la tienda", "prioridad": "Crítica", "frs": ["FR-044"], "escenarios": 9, "casos_qa": 13},
+        {"id": "HU-045", "carpeta": "HU-045-registrar-precio-efectivo", "titulo": "Usar el precio efectivo de venta y conservar el precio anterior solo como evidencia", "prioridad": "Crítica", "frs": ["FR-045"], "escenarios": 8, "casos_qa": 10},
+        {"id": "HU-046", "carpeta": "HU-046-marcar-precios-condicionados", "titulo": "Identificar y marcar precios sujetos a condiciones especiales", "prioridad": "Crítica", "frs": ["FR-046"], "escenarios": 9, "casos_qa": 11}
+      ]
+    },
+    {
+      "nombre": "Cargar Observaciones Manual y Semiautomáticamente",
+      "hus": [
+        {"id": "HU-047", "carpeta": "HU-047-registrar-observacion-manual", "titulo": "Registrar manualmente una observación de precio con evidencia adjunta", "prioridad": "Crítica", "frs": ["FR-048", "FR-049", "FR-050"], "escenarios": 10, "casos_qa": 14},
+        {"id": "HU-048", "carpeta": "HU-048-registrar-busqueda-manual-completa", "titulo": "Registrar una búsqueda manual con todas las ofertas comparables y sus términos", "prioridad": "Crítica", "frs": ["FR-051", "FR-049", "FR-050"], "escenarios": 10, "casos_qa": 15},
+        {"id": "HU-049", "carpeta": "HU-049-cargar-observaciones-csv", "titulo": "Cargar observaciones de precio de forma semiautomática con un archivo CSV", "prioridad": "Crítica", "frs": ["FR-052", "FR-049", "FR-050"], "escenarios": 12, "casos_qa": 18}
+      ]
+    },
+    {
+      "nombre": "Capturar Precios Automáticamente con Salvaguardas",
+      "hus": [
+        {"id": "HU-050", "carpeta": "HU-050-ejecutar-captura-automatica-controlada", "titulo": "Ejecutar la captura automática controlada de una fuente retail", "prioridad": "Alta", "frs": ["FR-043"], "escenarios": 12, "casos_qa": 20},
+        {"id": "HU-051", "carpeta": "HU-051-capturar-precios-alkosto", "titulo": "Capturar observaciones de Alkosto desde su sitemap y datos estructurados", "prioridad": "Alta", "frs": ["FR-043", "FR-044", "FR-045"], "escenarios": 10, "casos_qa": 12},
+        {"id": "HU-052", "carpeta": "HU-052-capturar-precios-falabella", "titulo": "Capturar observaciones de Falabella con vendedor = Falabella desde sitemaps y datos estructurados", "prioridad": "Alta", "frs": ["FR-043", "FR-044", "FR-045", "FR-046"], "escenarios": 10, "casos_qa": 13},
+        {"id": "HU-053", "carpeta": "HU-053-suspender-captura-ante-bloqueo", "titulo": "Suspender la captura automática y notificar ante CAPTCHA, bloqueo, autenticación o cambio de robots.txt", "prioridad": "Alta", "frs": ["FR-047"], "escenarios": 11, "casos_qa": 16}
+      ]
+    }
+  ],
+  "frs_cubiertos": ["FR-041", "FR-042", "FR-043", "FR-044", "FR-045", "FR-046", "FR-047", "FR-048", "FR-049", "FR-050", "FR-051", "FR-052", "FR-053"],
+  "frs_no_cubiertos": []
+}

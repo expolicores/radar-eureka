@@ -1,0 +1,46 @@
+{
+  "id_contrato": "CO1.PCCNTR.5372563",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor LED Smart TV 55\" UHD 4K, 60Hz, Active HDR, Magic Remote, WiFi, Bluetooth, HDMI, USB, LAN",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 55,
+      "resolucion": "4K UHD",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 10,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": null},
+      "evidencia": {
+        "descripcion": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6",
+        "tamano_pulgadas": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6",
+        "resolucion": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6",
+        "tecnologia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6",
+        "smart": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6",
+        "cantidad": "INFORME DE EVALUACION DEFINITIVO.pdf | página 6"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "SIMCO GROUP SAS", "precio_unitario": null, "valor_oferta_total": 38479840, "adjudicado": true, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 1 y página 3"},
+    {"nombre": "RICARD SAS", "precio_unitario": null, "valor_oferta_total": 38736334, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 3"},
+    {"nombre": "LICCONT SAS", "precio_unitario": null, "valor_oferta_total": 46354070, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 1 y página 3"},
+    {"nombre": "CRR SOLUCIONES INTEGRALES", "precio_unitario": null, "valor_oferta_total": 47250913, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 1 y página 3"},
+    {"nombre": "SOLTEC VM SAS", "precio_unitario": null, "valor_oferta_total": 48808638.20, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 1 y página 3"},
+    {"nombre": "FERRETERIA DIMAFER", "precio_unitario": null, "valor_oferta_total": 48843410, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 1 y página 3"},
+    {"nombre": "DISTRIBUCIONES Y SOLUCIONES INTEGRALES", "precio_unitario": null, "valor_oferta_total": 50172899, "adjudicado": false, "evidencia": "INFORME DE EVALUACION DEFINITIVO.pdf | página 3"}
+  ],
+  "inconsistencias": [
+    "En la página 1 del informe de evaluación el oferente en 2do lugar (38.736.334) aparece sin nombre; en la página 3 se identifica como RICARD SAS.",
+    "El adjudicatario se nombra como SIMCO GROUP SAS en el informe y como SUMINISTRO INGENIERIA MANTENIMIENTO Y CONSTRUCCION S.A.S. (mismo NIT 901094964-6) en la aceptación de oferta."
+  ],
+  "observaciones": "Contrato multi-ítem (artículos eléctricos, electrodomésticos, herramientas). Un ítem TV válido (ítem 1, 10 unidades); el soporte para TV 55\" (ítem 3) se excluye. No hay precio unitario por ítem en los documentos: el Anexo 11 de propuesta económica es la plantilla vacía y la aceptación de oferta solo trae valor global (base $32.336.000 + IVA $6.143.840 = $38.479.840). Marca/modelo no declarados (la mención 'Magic Remote' sugiere LG pero no se afirma). Los oferentes tienen solo valor total de oferta (campo extra valor_oferta_total), no precio unitario del TV. No hubo imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["INFORME DE EVALUACION DEFINITIVO.pdf", "ANEXO No. 11 Propuesta Económica.docx", "ACEPTACION DE OFERTA.pdf"]
+}

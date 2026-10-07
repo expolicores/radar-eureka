@@ -1,0 +1,35 @@
+{
+  "id_contrato": "CO1.PCCNTR.8637202",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisores (compra de televisores para componente de primera infancia; sin detalle de ítems en los documentos)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": 3800000,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {"descripcion": "media", "valor_total_item": "media", "iva": "media"},
+      "evidencia": {
+        "descripcion": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEER-017-2025.pdf | página 1",
+        "valor_total_item": "ANEXO contrato regimen especial IEER-017-2025.pdf | página 2 (valor $3.800.000 INCLUIDO IMPUESTOS); OFERTA SELECCIONADA IEER-017-2025.pdf | página 1",
+        "iva": "ANEXO contrato regimen especial IEER-017-2025.pdf | página 2 ('INCLUIDO IMPUESTOS')",
+        "tipo_precio": "COMUNICADO DE ACEPTACIÓN DE OFERTA IEER-017-2025.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "DIANA CAROLINA RIVERA HERRERA", "precio_unitario": null, "adjudicado": true, "evidencia": "OFERTA SELECCIONADA IEER-017-2025.pdf | página 1 (precio total oferta $3.800.000; presupuesto oficial $5.500.000)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Los documentos (oferta seleccionada, aceptación de oferta y anexo al contrato, este último duplicado) solo dan el valor global del contrato ($3.800.000, incluido impuestos) y el objeto 'compra de televisores'. No hay cantidad, marca, modelo, tamaño ni precio unitario; la cotización referida en el anexo no está entre los documentos. 'INCLUIDO IMPUESTOS' se interpretó como con IVA (confianza media). No se leyeron imágenes (todo con capa de texto).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["OFERTA SELECCIONADA IEER-017-2025.pdf", "COMUNICADO DE ACEPTACIÓN DE OFERTA IEER-017-2025.pdf", "ANEXO contrato regimen especial IEER-017-2025.pdf"]
+}

@@ -1,0 +1,49 @@
+{
+  "id_contrato": "CO1.PCCNTR.6432982",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "TV LED - televisor led de 75 pulgadas, panel LED, resolución 3840x2160, 16 GB ROM x 2 GB RAM, Google TV, control por voz, Dolby Audio, HDR, HDMI 2.1, Bluetooth 5.0, WiFi 2.4/5 GHz, USB 2.0",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 75,
+      "resolucion": "3840x2160 (4K UHD)",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 2,
+      "precio_unitario": 4000000,
+      "valor_total_item": 8000000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "alta", "cantidad": "alta", "precio_unitario": "alta"},
+      "evidencia": {
+        "descripcion": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png, tabla VALOR Y FORMA DE PAGO); CO1_PCCNTR_6432982_Firmado.pdf | página 2",
+        "tamano_pulgadas": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png)",
+        "resolucion": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png)",
+        "tecnologia": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png)",
+        "smart": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png, 'sistema operativo Google tv')",
+        "cantidad": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png); CO1_PCCNTR_6432982_Firmado.pdf | página 2",
+        "precio_unitario": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png, PRECIO UNITARIO $4,000,000); CO1_PCCNTR_6432982_Firmado.pdf | página 2 (precio unitario 4.000.000,00)",
+        "valor_total_item": "Comunicacion aceptacion de oferta_0001.pdf | página 4 (imagen 483215885_p4.png); CO1_PCCNTR_6432982_Firmado.pdf | página 2",
+        "tipo_precio": "Comunicacion aceptacion de oferta_0001.pdf | página 1 (imagen 483215885_p1.png, aceptación de oferta a ARDOBOT ROBOTICA S.A.S.)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "ARDOBOT ROBOTICA SAS", "precio_unitario": 4000000, "valor_oferta_total": 12720000, "adjudicado": true, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1 (valor oferta); Comunicacion aceptacion de oferta_0001.pdf | página 4 (precio unitario TV)"},
+    {"nombre": "CoreIP", "precio_unitario": null, "valor_oferta_total": 13230000, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "EQUIPARO SAS", "precio_unitario": null, "valor_oferta_total": 13378190, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "BIDFOR S.A.S", "precio_unitario": null, "valor_oferta_total": 13400000, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "ARHO SOLUCIONES S.A.S", "precio_unitario": null, "valor_oferta_total": 13680750, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "Econtrol Systems SAS", "precio_unitario": null, "valor_oferta_total": 13900000, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "UT DICOFRU", "precio_unitario": null, "valor_oferta_total": 13946000, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "SUMINISTROS MAYBE SAS", "precio_unitario": null, "valor_oferta_total": 14091472, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "PAPELERIA EL CID S.A.S.", "precio_unitario": null, "valor_oferta_total": 14740000, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"},
+    {"nombre": "APROVISIONAR SOLUCIONES S.A.S", "precio_unitario": null, "valor_oferta_total": 14764840, "adjudicado": false, "evidencia": "026 Evaluacion equipos audiovisuales.pdf | página 1"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Contrato de 3 ítems (2 TV LED 75\", 4 soportes de pared, 1 computador todo en uno); solo el ítem 1 es TV válido. Aritmética cuadra: 2 x 4.000.000 = 8.000.000; total contrato 8.000.000 + 720.000 + 4.000.000 = 12.720.000. Precio unitario estimado (presupuesto) del TV: $4.275.000 (CO1_PCCNTR_6432982_Firmado.pdf página 2). El documento no indica si el precio incluye IVA. Marca/modelo no declarados (la evaluación pide adjuntar ficha técnica porque la aportada no permitía ver un referente de fabricación). La evaluación preliminar deja a ARDOBOT 'cumple parcialmente' con plazo para subsanar; finalmente se le aceptó la oferta. Los demás oferentes solo tienen valor total (campo extra valor_oferta_total). Imágenes leídas: 483215885_p1-p5 (aceptación de oferta, legibles) y 475888583_p1 (copia idéntica del mismo documento, por eso no se leyeron más páginas de ese archivo).",
+  "imagenes_leidas": 6,
+  "documentos_revisados": ["026 Evaluacion equipos audiovisuales.pdf", "Comunicacion aceptacion de oferta_0001.pdf", "CO1_PCCNTR_6432982_Firmado.pdf"]
+}

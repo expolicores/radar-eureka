@@ -1,0 +1,31 @@
+{
+ "contratos": 50,
+ "docs_por_proceso_mediana": 21.5,
+ "docs_por_proceso_rango": [
+  5,
+  419
+ ],
+ "docs_priorizables_mediana": 9.0,
+ "contratos_con_<2_priorizables": 3,
+ "docs_seleccionados": 190,
+ "descargas_fallidas": 0,
+ "extensiones_seleccionadas": {
+  "pdf": 169,
+  "xlsx": 12,
+  "docx": 9
+ },
+ "documentos_paginados_perfilados": 162,
+ "paginas_totales": 1234,
+ "paginas_con_texto": 803,
+ "paginas_escaneadas": 431,
+ "pct_paginas_escaneadas": 34.9,
+ "docs_con_alguna_pagina_escaneada": 49,
+ "docs_100pct_escaneados": 45,
+ "paginas_por_doc_mediana": 4.0,
+ "contratos_que_requieren_imagen": 26,
+ "imagenes_renderizadas": 198,
+ "archivos_no_soportados": 0,
+ "contratos_con_indicio_multi_oferentes(heuristica)": 16,
+ "chars_texto_por_contrato_mediana": 24048.0,
+ "chars_texto_por_contrato_p90": 78901
+}

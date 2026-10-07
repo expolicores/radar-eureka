@@ -1,0 +1,45 @@
+{
+  "epica": "ÉPICA-001",
+  "features": [
+    {
+      "nombre": "Ingestar Contratos SECOP II",
+      "hus": [
+        {"id": "HU-001", "carpeta": "HU-001-carga-inicial-historico-secop-ii", "titulo": "Carga inicial del histórico de contratos SECOP II", "prioridad": "Crítica", "frs": ["FR-001", "FR-002", "FR-006", "FR-008", "FR-009"], "escenarios": 14, "casos_qa": 16},
+        {"id": "HU-002", "carpeta": "HU-002-carga-incremental-secop-ii", "titulo": "Carga incremental periódica de contratos SECOP II", "prioridad": "Crítica", "frs": ["FR-003", "FR-006", "FR-008", "FR-009"], "escenarios": 13, "casos_qa": 16}
+      ]
+    },
+    {
+      "nombre": "Ingestar Órdenes de la TVEC",
+      "hus": [
+        {"id": "HU-003", "carpeta": "HU-003-ingesta-items-tvec", "titulo": "Ingesta inicial e incremental de ítems de la TVEC", "prioridad": "Crítica", "frs": ["FR-004", "FR-002", "FR-003", "FR-008", "FR-009"], "escenarios": 11, "casos_qa": 15},
+        {"id": "HU-004", "carpeta": "HU-004-relacion-item-orden-entidad-tvec", "titulo": "Relacionar cada ítem TVEC con su orden de compra, entidad y fecha", "prioridad": "Crítica", "frs": ["FR-004", "FR-005", "FR-003", "FR-008", "FR-009"], "escenarios": 9, "casos_qa": 13}
+      ]
+    },
+    {
+      "nombre": "Controlar Calidad y Trazabilidad de la Ingesta",
+      "hus": [
+        {"id": "HU-005", "carpeta": "HU-005-validaciones-calidad-ingesta", "titulo": "Validaciones de calidad en la ingesta y registro de rechazos", "prioridad": "Crítica", "frs": ["FR-010"], "escenarios": 10, "casos_qa": 16},
+        {"id": "HU-006", "carpeta": "HU-006-bitacora-ejecuciones-ingesta", "titulo": "Bitácora de ejecuciones de ingesta", "prioridad": "Crítica", "frs": ["FR-007"], "escenarios": 10, "casos_qa": 13},
+        {"id": "HU-007", "carpeta": "HU-007-verificacion-ausencia-datos-sensibles", "titulo": "Verificación automática de ausencia de datos personales sensibles", "prioridad": "Crítica", "frs": ["FR-006"], "escenarios": 8, "casos_qa": 10}
+      ]
+    },
+    {
+      "nombre": "Identificar Candidatos a Televisor",
+      "hus": [
+        {"id": "HU-008", "carpeta": "HU-008-marcar-candidatos-secop-ii", "titulo": "Marcar candidatos a televisor en contratos SECOP II", "prioridad": "Crítica", "frs": ["FR-011"], "escenarios": 10, "casos_qa": 14},
+        {"id": "HU-009", "carpeta": "HU-009-marcar-candidatos-tvec", "titulo": "Marcar candidatos a televisor en ítems de la TVEC", "prioridad": "Crítica", "frs": ["FR-012"], "escenarios": 6, "casos_qa": 9}
+      ]
+    },
+    {
+      "nombre": "Clasificar Ítems de Televisor",
+      "hus": [
+        {"id": "HU-010", "carpeta": "HU-010-clasificar-items-por-reglas", "titulo": "Clasificar ítems candidatos contra el límite de categoría por reglas", "prioridad": "Crítica", "frs": ["FR-013", "FR-014", "FR-015"], "escenarios": 14, "casos_qa": 16},
+        {"id": "HU-011", "carpeta": "HU-011-clasificar-contratos-secop-mixtos", "titulo": "Clasificar contratos SECOP II y soportar contratos mixtos a nivel de ítem", "prioridad": "Crítica", "frs": ["FR-013", "FR-015", "FR-017"], "escenarios": 14, "casos_qa": 15},
+        {"id": "HU-012", "carpeta": "HU-012-clasificacion-asistida-ia", "titulo": "Clasificación asistida por IA de candidatos que requieren revisión", "prioridad": "Alta", "frs": ["FR-013", "FR-015"], "escenarios": 9, "casos_qa": 14},
+        {"id": "HU-013", "carpeta": "HU-013-revision-correccion-manual-clasificacion", "titulo": "Revisión y corrección manual de la clasificación de candidatos", "prioridad": "Crítica", "frs": ["FR-016", "FR-015"], "escenarios": 13, "casos_qa": 14}
+      ]
+    }
+  ],
+  "frs_cubiertos": ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005", "FR-006", "FR-007", "FR-008", "FR-009", "FR-010", "FR-011", "FR-012", "FR-013", "FR-014", "FR-015", "FR-016", "FR-017"],
+  "frs_no_cubiertos": []
+}

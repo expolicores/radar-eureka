@@ -1,0 +1,11 @@
+{
+  "id_contrato": "CO1.PCCNTR.8448027",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Fuera de categoría: contrato de mantenimiento de planta física a todo costo (tejas, cielo raso, puertas, poda, unidades sanitarias, pintura, etc.). La única mención es 'INSTALACIÓN DE TELEVISORES' (servicio de instalación, no suministro de televisores), por lo que no hay ítems de televisor válidos. El contrato SECOP tiene un único ítem 'VALOR DEL CONTRATO' por $22.000.000 (CO1_PCCNTR_8448027_Firmado.pdf | página 3). Se leyeron 4 imágenes, legibles: propuesta p1 (carta de presentación), p2 (datos del proponente), p3 (cédula, irrelevante) y acta de evaluación p1; ninguna trae tabla de ítems con televisores.",
+  "imagenes_leidas": 4,
+  "documentos_revisados": ["#5 CONTRATO #20 PROPUESTA CONTRATISTA.pdf", "#6 CONTRATO #20 ACTA DE EVALUCACION PROPUESTA.pdf", "CO1_PCCNTR_8448027_Firmado.pdf"]
+}

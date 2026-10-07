@@ -1,0 +1,71 @@
+{
+  "id_contrato": "CO1.PCCNTR.9482543",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISOR DE 55” Tipo: Televisores UHD, Tipo de pantalla: OLED, Smart TV: Si, Sintonizador TDT, WiFi, Bluetooth, ThinQ, 2 USB, 3 HDMI, Sistema operativo WebOS, parlante 20 W 2.0 (UNSPSC 52161505)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 55,
+      "resolucion": "UHD",
+      "tecnologia": "OLED",
+      "smart": true,
+      "cantidad": 2,
+      "precio_unitario": 3000000,
+      "valor_total_item": 6000000,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "marca": null,
+        "modelo": null,
+        "tamano_pulgadas": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "media",
+        "resolucion": "alta",
+        "tecnologia": "alta",
+        "smart": "alta",
+        "tipo_precio": "media"
+      },
+      "evidencia": {
+        "descripcion": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "tamano_pulgadas": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "resolucion": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "tecnologia": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "smart": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "cantidad": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "precio_unitario": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2 (columna 'VALOR UNITARIO OFERTADO INCLUIDO IVA')",
+        "valor_total_item": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2",
+        "iva": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2 (encabezado 'INCLIDO IVA')",
+        "tipo_precio": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 7; 22.1 INFORME FINAL EVALUACION TECNICA ELECTRONICOS 035.pdf | página 5; 22.2 INFORME FINAL EVALUACION JURIDICA ELECTRONICOS 035.pdf | página 4"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "HANNIER FRANCISCO CELY ORTEGA",
+      "precio_unitario": 3000000,
+      "adjudicado": true,
+      "evidencia": "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2 (oferta total $11.990.000, página 1)"
+    },
+    {
+      "nombre": "FANNY DEL CARMEN BASTIDAS CRUZ Y/O POLIPLAP",
+      "precio_unitario": 3500000,
+      "adjudicado": false,
+      "evidencia": "18.1 EVALUACION ECONOMICA 2 OF MC 035.pdf | página 2 (oferta total $12.970.000, página 1)"
+    }
+  ],
+  "inconsistencias": [
+    "El valor del contrato en datos abiertos ($19.990.000) no coincide con la oferta del proponente habilitado HANNIER FRANCISCO CELY ORTEGA ($11.990.000) ni con la de POLIPLAP ($12.970.000) (22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 1).",
+    "La distribución de presupuesto asigna $13.199.600 al rubro 'BRCNA3 - TELEVISOR', pero el precio de referencia es 2 x $5.591.248 = $11.182.496 (22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2).",
+    "La fila TOTAL de la columna 'PRECIO UNITARIO REFERENCIA' ($10.290.070) suma precios unitarios sin multiplicar por cantidad; el costo estimado total usado en la comparación absoluta es $17.938.316 (18.1 EVALUACION ECONOMICA 2 OF MC 035.pdf | páginas 3-4). Aritmética del ítem TV correcta: 2 x 3.000.000 = 6.000.000."
+  ],
+  "observaciones": "Mínima cuantía MC-035-BASPC27-2026 con 2 oferentes. Secuencia: en la evaluación 18.1 (23-abr) se descartó técnicamente a HANNIER y se evaluó a POLIPLAP (no admitida por precio artificialmente bajo); en los informes finales 22.1/22.2/22.3 HANNIER queda habilitado técnica, jurídica y económicamente (tras justificar precio artificialmente bajo). No hay acta de aceptación de oferta en los documentos, por eso tipo_precio 'adjudicado' tiene confianza media. Las fichas no indican marca ni modelo; las características 'ThinQ' y 'WebOS' sugieren LG, pero no se registra por no estar explícito. Excluidos: sistema de sonido, picadoras y video beam. No hay imágenes. Precio unitario de referencia de la entidad (presupuesto) para el TV: $5.591.248 (22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf | página 2).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "22.3 EVALUACION ECONOMICA FINAL 1 OF MC 035.pdf",
+    "18.1 EVALUACION ECONOMICA 2 OF MC 035.pdf",
+    "22.1 INFORME FINAL EVALUACION TECNICA ELECTRONICOS 035.pdf",
+    "22.2 INFORME FINAL EVALUACION JURIDICA ELECTRONICOS 035.pdf"
+  ]
+}

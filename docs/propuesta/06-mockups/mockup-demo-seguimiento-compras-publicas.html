@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento Compras Públicas — Mockup de demostración</title>
+<style>
+  :root{
+    --surface-0:#f4f3f0; --surface-1:#fcfcfb; --surface-2:#ffffff;
+    --border:#e2e1dc; --border-strong:#cfcdc6;
+    --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7974;
+    --accent:#2a78d6; --accent-ink:#184f95; --accent-soft:#e6f0fc;
+    --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+    --ref-line:#8a8984; --grid:#ecebe7;
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+    --good-soft:#e7f6e7; --warning-soft:#fff5dc; --serious-soft:#fdeee7; --critical-soft:#fbe9e9;
+    --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    color:var(--text-primary); background:var(--surface-0);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-size:14px; line-height:1.45}
+  a{color:var(--accent-ink); text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font:inherit; cursor:pointer}
+  .demo-ribbon{background:#1f1f1e;color:#fff;font-size:12px;padding:6px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .demo-ribbon b{color:#fab219}
+  /* ---------- app shell ---------- */
+  header.top{display:flex;align-items:center;gap:24px;padding:0 20px;height:56px;background:var(--surface-2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.2px}
+  .brand .logo{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#2a78d6,#184f95);display:grid;place-items:center;color:#fff;font-size:15px}
+  nav.main{display:flex;gap:4px;flex:1}
+  nav.main a{padding:8px 12px;border-radius:8px;color:var(--text-secondary);font-weight:500}
+  nav.main a.active{background:var(--accent-soft);color:var(--accent-ink)}
+  nav.main a:hover{text-decoration:none;background:var(--surface-0)}
+  .user{display:flex;align-items:center;gap:10px;color:var(--text-secondary);font-size:13px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:#e6e4de;display:grid;place-items:center;font-weight:600;color:#3d3c39}
+  select.role{border:1px solid var(--border);border-radius:6px;padding:4px 6px;background:var(--surface-1)}
+  main{max-width:1360px;margin:0 auto;padding:22px 20px 60px}
+  .view{display:none} .view.active{display:block}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-.3px}
+  h2{font-size:16px;margin:0 0 12px}
+  h3{font-size:14px;margin:0 0 8px}
+  .sub{color:var(--text-secondary);margin:0 0 18px}
+  .muted{color:var(--text-muted)} .small{font-size:12px}
+  .card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr}
+  .g-main{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--border-strong);background:var(--surface-2);border-radius:8px;padding:7px 12px;color:var(--text-primary)}
+  .btn:hover{background:var(--surface-0)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:#256abf}
+  .btn.ghost{border-color:transparent;background:transparent;color:var(--accent-ink)}
+  .btn.sm{padding:4px 9px;font-size:12px}
+  /* ---------- notice ---------- */
+  .notice{display:flex;gap:10px;align-items:flex-start;border:1px solid #e9dcc0;background:#fffaf0;border-radius:var(--radius);padding:10px 14px;color:#4a3b14;font-size:13px}
+  .notice .ico{font-size:16px;line-height:1.2}
+  .notice.info{border-color:#cfe0f6;background:#f3f8fe;color:#163c6d}
+  /* ---------- KPI tiles ---------- */
+  .kpi .label{color:var(--text-secondary);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  .kpi .value{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:4px}
+  .kpi .hint{color:var(--text-muted);font-size:12px;margin-top:2px}
+  /* ---------- filters ---------- */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}
+  .filters input,.filters select{border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px;background:var(--surface-2);font:inherit;min-width:150px}
+  .filters input.search{min-width:340px}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface-1);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--text-secondary)}
+  /* ---------- table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-weight:600;color:var(--text-secondary);font-size:12px;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface-1);white-space:nowrap}
+  td{padding:10px;border-bottom:1px solid var(--grid);vertical-align:top}
+  tr.click{cursor:pointer} tr.click:hover td{background:#f7f9fd}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-2)}
+  /* ---------- badges ---------- */
+  .badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .b-review{background:var(--warning-soft);border-color:#f2d58f;color:#5a4300}
+  .b-good{background:var(--good-soft);border-color:#bfe3bf;color:#0f5a0f}
+  .b-serious{background:var(--serious-soft);border-color:#f3c7b3;color:#6b2c12}
+  .b-critical{background:var(--critical-soft);border-color:#efc1c1;color:#7a1f1f}
+  .b-neutral{background:#f1f0ed;border-color:#e2e1dc;color:#3d3c39}
+  .b-info{background:var(--accent-soft);border-color:#cfe0f6;color:var(--accent-ink)}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .conf{display:inline-flex;gap:2px;vertical-align:middle;margin-right:4px}
+  .conf i{width:6px;height:12px;border-radius:2px;background:#dddcd7;display:block}
+  .conf.c3 i{background:#3d3c39} .conf.c2 i:nth-child(-n+2){background:#3d3c39} .conf.c1 i:first-child{background:#3d3c39}
+  /* ---------- detail ---------- */
+  .breadcrumb{font-size:13px;color:var(--text-secondary);margin-bottom:10px}
+  .kv{display:grid;grid-template-columns:170px 1fr;gap:7px 12px;font-size:13px}
+  .kv dt{color:var(--text-secondary)} .kv dd{margin:0}
+  .big-delta{font-size:30px;font-weight:700;letter-spacing:-.5px}
+  .stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+  .stat{background:var(--surface-1);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+  .stat .l{font-size:11px;color:var(--text-secondary);font-weight:600}
+  .stat .v{font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .chart-box{position:relative;margin-top:10px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary);margin-top:6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .tooltip{position:absolute;pointer-events:none;background:#1f1f1e;color:#fff;font-size:12px;padding:7px 9px;border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;transition:opacity .08s;white-space:nowrap;z-index:5}
+  .tooltip b{color:#fff}
+  .penalty{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--grid)}
+  .penalty:last-child{border:none}
+  .ev-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--grid)}
+  .ev-item:last-child{border:none}
+  .ev-ico{width:30px;height:36px;border-radius:4px;background:#f1f0ed;border:1px solid var(--border);display:grid;place-items:center;font-size:10px;font-weight:700;color:#7a1f1f;flex:none}
+  .method{font-size:11px;color:var(--text-muted)}
+  /* ---------- evidence viewer ---------- */
+  .viewer{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+  .viewer>*{min-width:0}
+  .viewer .kv{grid-template-columns:120px minmax(0,1fr)}
+  .viewer .badge{white-space:normal}
+  .viewer .card{overflow:hidden}
+  .pdf{background:#5c5b57;border-radius:var(--radius);padding:22px;display:flex;justify-content:center}
+  .page{background:#fff;width:640px;min-height:820px;padding:46px 52px;box-shadow:0 4px 16px rgba(0,0,0,.35);font-family:"Times New Roman",serif;font-size:13px;color:#111;position:relative}
+  .page h4{text-align:center;font-size:14px;margin:0 0 4px}
+  .page .center{text-align:center}
+  .page table{font-family:inherit;font-size:12px;margin-top:12px}
+  .page th{background:#eee;color:#111;border:1px solid #999;font-size:11px}
+  .page td{border:1px solid #999;padding:6px}
+  .hl{outline:3px solid #eb6834;outline-offset:-2px;background:#fff1ea}
+  .hl-tag{position:absolute;right:-8px;background:#eb6834;color:#fff;font:600 11px "Segoe UI",sans-serif;padding:3px 8px;border-radius:4px;transform:translateX(100%)}
+  .pg-bar{display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12px;margin-bottom:10px}
+  /* ---------- timeline ---------- */
+  .steps{display:flex;gap:0;margin:6px 0 4px}
+  .step{flex:1;text-align:center;font-size:12px;color:var(--text-secondary);position:relative;padding-top:26px}
+  .step::before{content:"";position:absolute;top:9px;left:0;right:0;height:3px;background:var(--border)}
+  .step:first-child::before{left:50%} .step:last-child::before{right:50%}
+  .step .c{position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--border-strong);display:grid;place-items:center;font-size:11px;z-index:1}
+  .step.done .c{background:var(--good);border-color:var(--good);color:#fff}
+  .step.done::before{background:#9fd69f}
+  .step.warn .c{background:var(--warning);border-color:var(--warning);color:#3d2d00}
+  /* ---------- cases ---------- */
+  .note{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface-1);margin-bottom:8px}
+  .note .meta{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+  textarea{width:100%;min-height:70px;border:1px solid var(--border-strong);border-radius:8px;padding:8px;font:inherit}
+  .snap{border:1px dashed var(--border-strong);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fdfdfc}
+  /* ---------- admin ---------- */
+  .src{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--grid)}
+  .src:last-child{border:none}
+  .bar-track{height:8px;background:#efeee9;border-radius:4px;overflow:hidden;width:140px;display:inline-block;vertical-align:middle;margin-right:8px}
+  .bar-fill{display:block;height:100%;background:var(--accent);border-radius:4px}
+  .prec td{white-space:nowrap}
+  /* ---------- modal / toast ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,15,14,.45);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:12px;width:560px;max-width:92vw;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+  .modal label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin:10px 0 4px}
+  .modal input,.modal select{width:100%;border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px;font:inherit}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f1f1e;color:#fff;padding:10px 16px;border-radius:9px;opacity:0;transition:all .2s;z-index:60;font-size:13px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* ---------- login ---------- */
+  .login-wrap{min-height:calc(100vh - 32px);display:grid;place-items:center;background:linear-gradient(160deg,#eef4fc,#f4f3f0)}
+  .login{width:400px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  .login input{width:100%;border:1px solid var(--border-strong);border-radius:8px;padding:9px 11px;font:inherit;margin:4px 0 12px}
+  .tour{position:fixed;right:18px;bottom:18px;width:300px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.14);padding:14px;z-index:40;font-size:13px}
+  .tour h4{margin:0 0 6px;font-size:13px}
+  .tour ol{margin:6px 0 8px 18px;padding:0}
+  .tour li{margin:3px 0}
+  .tour li.cur{font-weight:700;color:var(--accent-ink)}
+  @media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g-main,.viewer,.g2,.g3{grid-template-columns:1fr}.stat-row{grid-template-columns:repeat(3,1fr)}.page{width:100%}}
+  @media (max-width:640px){nav.main{display:none}.g4{grid-template-columns:1fr}.tour{display:none}}
+</style>
+</head>
+<body>
+
+<div class="demo-ribbon">
+  <span><b>MOCKUP DE DEMOSTRACIÓN</b> · Todos los datos, entidades y proveedores son <b>ficticios</b>. Categoría del MVP: televisores.</span>
+  <span>Seguimiento Compras Públicas · MVP v0.1</span>
+</div>
+
+<!-- =================== LOGIN =================== -->
+<section id="v-login" class="view active">
+  <div class="login-wrap">
+    <div class="login">
+      <div class="brand" style="margin-bottom:14px"><div class="logo">◎</div>Seguimiento Compras Públicas</div>
+      <h2 style="margin-bottom:4px">Iniciar sesión</h2>
+      <p class="sub small">Acceso por invitación durante el piloto.</p>
+      <label class="small muted">Correo</label>
+      <input value="analista.demo@correo.co">
+      <label class="small muted">Contraseña</label>
+      <input type="password" value="demodemo1234">
+      <button class="btn primary" style="width:100%" onclick="login()">Ingresar</button>
+      <p class="small muted" style="margin-top:12px">¿Olvidaste tu contraseña? <a href="#">Recuperarla</a></p>
+      <p class="small muted" style="border-top:1px solid var(--grid);padding-top:10px;margin-top:14px">Al ingresar aceptaste los <a href="#">Términos de uso</a> y la <a href="#">Política de tratamiento de datos (Ley 1581 de 2012)</a>, versión 1.0.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =================== APP SHELL =================== -->
+<div id="app" style="display:none">
+<header class="top">
+  <div class="brand"><div class="logo">◎</div>Seguimiento Compras Públicas</div>
+  <nav class="main">
+    <a href="#senales" data-nav="senales">Señales</a>
+    <a href="#explorar" data-nav="explorar">Explorar compras</a>
+    <a href="#casos" data-nav="casos">Mis casos</a>
+    <a href="#admin" data-nav="admin" id="nav-admin">Administración</a>
+  </nav>
+  <div class="user">
+    <span class="small">Rol:</span>
+    <select class="role" id="role" onchange="setRole(this.value)">
+      <option value="analista">Analista</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <div class="avatar">AD</div>
+    <a href="#" onclick="logout();return false" class="small">Salir</a>
+  </div>
+</header>
+
+<main>
+
+<!-- =================== SEÑALES =================== -->
+<section id="v-senales" class="view">
+  <h1>Señales que merecen revisión</h1>
+  <p class="sub">Compras de televisores cuyo precio unitario se desvía de compras públicas comparables o de referencias de mercado. Datos actualizados al <b>06-oct-2026 03:10</b> · SECOP II y Tienda Virtual del Estado (TVEC).</p>
+
+  <div class="notice" style="margin-bottom:16px"><span class="ico">ⓘ</span>
+    <div><b>Una señal no es una conclusión.</b> Indica que una compra merece revisión humana. No implica irregularidad, sobrecosto ni responsabilidad de ninguna persona o entidad. Revisa siempre la evidencia de origen antes de sacar conclusiones.</div>
+  </div>
+
+  <div class="grid g4">
+    <div class="card kpi"><div class="label">Compras de TV analizadas</div><div class="value">1.284</div><div class="hint">351 contratos SECOP II · 933 órdenes TVEC · 2023–2026</div></div>
+    <div class="card kpi"><div class="label">Señales vigentes</div><div class="value">37</div><div class="hint">12 con confianza alta · 19 media · 6 baja</div></div>
+    <div class="card kpi"><div class="label">Comparaciones incompletas</div><div class="value">58</div><div class="hint">Base tributaria (IVA) indeterminada o evidencia limitada</div></div>
+    <div class="card kpi"><div class="label">Sin información en la fuente</div><div class="value">96</div><div class="hint">El documento publicado no trae precio unitario</div></div>
+  </div>
+
+  <div class="filters">
+    <input class="search" placeholder="Buscar por entidad, proveedor (nombre o NIT) u objeto…">
+    <select><option>Departamento: Todos</option><option>Antioquia</option><option>Valle del Cauca</option><option>Santander</option></select>
+    <select><option>Fecha: últimos 12 meses</option><option>2026</option><option>2025</option><option>2024</option></select>
+    <select><option>Fuente: Todas</option><option>SECOP II</option><option>TVEC</option></select>
+    <select><option>Confianza: Todas</option><option>Alta</option><option>Media</option><option>Baja</option></select>
+    <select><option>Ordenar: prioridad (confianza → desviación)</option><option>Desviación</option><option>Valor</option><option>Fecha</option></select>
+    <span class="spacer"></span><span class="chip">37 resultados</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Señal</th><th>Ítem</th><th>Entidad compradora</th><th>Proveedor</th>
+        <th class="num">Precio unitario</th><th class="num">Referencia</th><th class="num">Desviación</th>
+        <th>Comparación</th><th>Confianza</th><th>Fecha</th>
+      </tr></thead>
+      <tbody id="signals-body"></tbody>
+    </table>
+  </div>
+  <p class="small muted" style="margin-top:8px">Mostrando 6 de 37 · Página 1 de 7. Solo las desviaciones por encima de la referencia generan señal; los precios anormalmente bajos van a revisión de calidad.</p>
+</section>
+
+<!-- =================== DETALLE DE SEÑAL =================== -->
+<section id="v-senal" class="view">
+  <div class="breadcrumb"><a href="#senales">Señales</a> › SG-2026-0142</div>
+  <div class="row" style="align-items:flex-start">
+    <div>
+      <h1>Televisor Smart TV 65" 4K UHD — 8 unidades</h1>
+      <p class="sub" style="margin-bottom:8px">Contrato <a href="#ficha">CO1.PCCNTR.0000142</a> · Alcaldía Municipal de San Rafael del Valle (ficticia) · Mínima cuantía · Firmado el 14-ago-2026</p>
+      <div class="row">
+        <span class="badge b-review">⚑ Merece revisión</span>
+        <span class="badge b-neutral"><span class="conf c2"><i></i><i></i><i></i></span>Confianza media</span>
+        <span class="badge b-info">Producto equivalente</span>
+        <span class="badge b-good">✓ IVA: misma base (con IVA)</span>
+        <span class="badge b-neutral">Versión de señal 2 · vigente</span>
+      </div>
+    </div>
+    <span class="spacer"></span>
+    <div class="row">
+      <button class="btn" onclick="openModal('m-error')">Reportar un error</button>
+      <button class="btn" onclick="openModal('m-rate')">Calificar señal</button>
+      <button class="btn primary" onclick="saveToCase()">★ Guardar en caso</button>
+    </div>
+  </div>
+
+  <div class="notice" style="margin:14px 0"><span class="ico">ⓘ</span>
+    <div>Esta señal <b>no constituye una conclusión ni una acusación</b>. El precio puede explicarse por condiciones no publicadas (instalación incluida, garantía extendida, transporte a zona rural, especificaciones superiores). Revisa la evidencia de origen.</div>
+  </div>
+
+  <div class="grid g-main">
+    <div class="grid">
+      <!-- Benchmark 1 -->
+      <div class="card">
+        <div class="row"><h2 style="margin:0">Benchmark 1 · Compras públicas comparables</h2><span class="spacer"></span>
+          <button class="btn sm" id="toggle-table" onclick="toggleCompTable()">Ver como tabla</button></div>
+        <p class="small muted" style="margin:4px 0 0">Televisores equivalentes (65", 4K, LED, Smart) comprados por entidades públicas en ±6 meses de la fecha de la compra · 14 observaciones · SECOP II y TVEC · precios con IVA</p>
+        <div class="stat-row" id="b1-stats"></div>
+        <div class="chart-box" id="chart-box">
+          <svg id="strip" width="100%" height="190" role="img" aria-label="Distribución de precios unitarios de compras comparables y precio del contrato analizado"></svg>
+          <div class="tooltip" id="tt"></div>
+        </div>
+        <div class="legend">
+          <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--series-1)"/></svg>Compra SECOP II</span>
+          <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" transform="rotate(45 6 6)" fill="var(--series-3)"/></svg>Orden TVEC</span>
+          <span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--series-2)" stroke="#fff" stroke-width="2"/></svg>Contrato analizado</span>
+          <span><svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="var(--ref-line)" stroke-width="2"/></svg>Q1 · mediana · Q3</span>
+          <span><svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#3d3c39" stroke-width="2" stroke-dasharray="4 3"/></svg>Umbral de revisión (Q3 + 1,5 × RIC)</span>
+        </div>
+        <div id="comp-table" style="display:none;margin-top:12px" class="table-wrap"></div>
+      </div>
+
+      <!-- Benchmark 2 -->
+      <div class="card">
+        <div class="row"><h2 style="margin:0">Benchmark 2 · Mercado</h2><span class="spacer"></span><span class="badge b-neutral">Referencia de mercado disponible · evidencia limitada</span></div>
+        <p class="small muted" style="margin:4px 0 10px">2 observaciones de 2 fuentes en ±30 días de la compra. Se requieren ≥ 3 observaciones de ≥ 2 fuentes para calcular una referencia estadística. Solo vendedor = la tienda · precio efectivo de venta.</p>
+        <table>
+          <thead><tr><th>Fuente</th><th>Producto observado</th><th class="num">Precio efectivo</th><th>Fecha</th><th>Método</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Alkosto</td><td>TV 65" 4K UHD Smart · marca A · mod. 65UA7300</td><td class="num">$3.199.900</td><td>02-ago-2026</td><td><span class="badge b-neutral">Sitemap / datos estructurados</span></td><td><a href="#" onclick="toast('Abriendo captura del 02-ago-2026 (evidencia guardada)');return false">Evidencia</a></td></tr>
+            <tr><td>Falabella</td><td>TV 65" 4K QLED Smart · marca B · mod. QN65Q6F</td><td class="num">$3.499.000</td><td>21-ago-2026</td><td><span class="badge b-review">✎ Observación manual</span></td><td><a href="#" onclick="toast('Captura de pantalla adjunta por el Administrador (21-ago-2026)');return false">Evidencia</a></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin:10px 0 0">Desviación del precio contratado frente a la observación más alta: <b>+41,5 %</b>. No se presenta como "precio de mercado" por evidencia limitada.</p>
+      </div>
+    </div>
+
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h3 class="muted" style="font-weight:600">Desviación frente a la mediana pública</h3>
+        <div class="big-delta">+73,1 %</div>
+        <div class="small muted">Precio contratado $4.950.000 vs. mediana $2.860.000 · supera el umbral de revisión ($3.867.500)</div>
+        <hr style="border:none;border-top:1px solid var(--grid);margin:12px 0">
+        <h3>Nivel de confianza: Media (60 / 100)</h3>
+        <div class="penalty"><span>Punto de partida</span><b>100</b></div>
+        <div class="penalty"><span>Emparejamiento por equivalencia (no mismo modelo)</span><span>−20</span></div>
+        <div class="penalty"><span>Precio extraído automáticamente y validado</span><span>−10</span></div>
+        <div class="penalty"><span>Benchmark 2 con evidencia limitada</span><span>−10</span></div>
+        <div class="penalty"><span>Precio unitario explícito (no derivado)</span><span>0</span></div>
+        <p class="small muted" style="margin:8px 0 0">Configuración analítica v1.3 · ventanas, mínimos y umbrales configurables.</p>
+      </div>
+
+      <div class="card">
+        <h3>Evidencia de origen</h3>
+        <div class="ev-item"><div class="ev-ico">PDF</div><div style="flex:1">
+          <a href="#evidencia"><b>Aceptación de oferta MC-031-2026.pdf</b></a>
+          <div class="small">Página 3 · tabla de ítems, fila 1 · precio unitario y cantidad</div>
+          <div class="method">Copia conservada · SHA-256 9f3c…a71e · descargada 15-ago-2026</div></div></div>
+        <div class="ev-item"><div class="ev-ico">PDF</div><div style="flex:1">
+          <a href="#evidencia"><b>Invitación pública MC-031-2026.pdf</b></a>
+          <div class="small">Página 7 · especificación técnica del ítem 1</div>
+          <div class="method">Copia conservada · SHA-256 41bd…0c92</div></div></div>
+        <div class="ev-item"><div class="ev-ico" style="color:#0f5a0f">XLS</div><div style="flex:1">
+          <a href="#evidencia"><b>Anexo 2 — Oferta económica.xlsx</b></a>
+          <div class="small">Hoja "Oferta" · celdas F12:H12</div>
+          <div class="method">Copia conservada · SHA-256 c07e…5d18</div></div></div>
+        <p class="small muted" style="margin:8px 0 0">Fecha de corte de los datos: 06-oct-2026 · <a href="https://www.colombiacompra.gov.co" target="_blank" rel="noopener">Ver en SECOP II ↗</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== VISOR DE EVIDENCIA =================== -->
+<section id="v-evidencia" class="view">
+  <div class="breadcrumb"><a href="#senales">Señales</a> › <a href="#senal">SG-2026-0142</a> › Evidencia</div>
+  <h1>Aceptación de oferta MC-031-2026.pdf</h1>
+  <p class="sub">El dato resaltado es el que se usó en la señal. La copia conservada garantiza que la evidencia siga disponible aunque el documento cambie en SECOP.</p>
+  <div class="viewer">
+    <div class="pdf">
+      <div>
+        <div class="pg-bar"><span>◀ Página 3 de 5 ▶</span><span>100 %</span></div>
+        <div class="page">
+          <h4>ALCALDÍA MUNICIPAL DE SAN RAFAEL DEL VALLE</h4>
+          <p class="center">(Entidad ficticia — documento de demostración)</p>
+          <p class="center"><b>COMUNICACIÓN DE ACEPTACIÓN DE OFERTA</b><br>Proceso de mínima cuantía No. MC-031-2026</p>
+          <p>Objeto: Adquisición de televisores para las aulas de las sedes educativas del municipio, de acuerdo con las especificaciones técnicas de la invitación pública.</p>
+          <p>Proponente seleccionado: <b>TECNOLOGÍA ANDINA DEMO S.A.S.</b> — NIT 900.000.142-1</p>
+          <p>Valor total de la oferta aceptada, IVA incluido: <b>$39.600.000</b></p>
+          <table>
+            <thead><tr><th>Ítem</th><th>Descripción</th><th>Und.</th><th>Cant.</th><th>Valor unitario (IVA incl.)</th><th>Valor total</th></tr></thead>
+            <tbody>
+              <tr class="hl" style="position:relative"><td>1</td><td>Televisor Smart TV 65", resolución 4K UHD, panel LED, Wi-Fi y Bluetooth</td><td>Und</td><td>8</td><td>$ 4.950.000</td><td>$ 39.600.000</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:16px">El contratista deberá entregar los bienes en la sede administrativa dentro de los diez (10) días hábiles siguientes a la suscripción del contrato. La garantía mínima de los bienes será de un (1) año.</p>
+          <p>Los precios ofertados incluyen todos los impuestos a que haya lugar.</p>
+          <p style="margin-top:40px">______________________________<br>Ordenador del gasto</p>
+          <div class="hl-tag" style="top:300px">Precio unitario · cantidad</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h3>Datos extraídos de esta página</h3>
+        <dl class="kv">
+          <dt>Precio unitario</dt><dd><b>$4.950.000</b> · explícito</dd>
+          <dt>Cantidad</dt><dd>8</dd>
+          <dt>Valor total del ítem</dt><dd>$39.600.000 ✓ cuadra</dd>
+          <dt>IVA</dt><dd>Con IVA ("IVA incluido")</dd>
+          <dt>Tamaño / resolución</dt><dd>65" · 4K UHD</dd>
+          <dt>Marca / modelo</dt><dd class="muted">No publicado en el documento</dd>
+          <dt>Estado</dt><dd><span class="badge b-good">✓ Corregido por revisión humana</span></dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Trazabilidad del documento</h3>
+        <dl class="kv small">
+          <dt>Fuente</dt><dd>SECOP II · Archivos Descarga</dd>
+          <dt>id_documento</dt><dd>858840112</dd>
+          <dt>Descargado</dt><dd>15-ago-2026 02:41</dd>
+          <dt>SHA-256</dt><dd style="word-break:break-all">9f3c2b…e4a71e</dd>
+          <dt>Ubicación</dt><dd>Página 3 · tabla 1 · fila 1</dd>
+        </dl>
+        <div class="row" style="margin-top:10px"><button class="btn sm" onclick="toast('Descargando copia conservada (URL firmada, expira en 10 min)')">Descargar copia</button><a class="btn sm ghost" href="https://www.colombiacompra.gov.co" target="_blank" rel="noopener">Original en SECOP II ↗</a></div>
+      </div>
+      <a href="#senal" class="btn">← Volver a la señal</a>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FICHA DEL CONTRATO =================== -->
+<section id="v-ficha" class="view">
+  <div class="breadcrumb"><a href="#explorar">Explorar compras</a> › CO1.PCCNTR.0000142</div>
+  <div class="row"><h1>Ficha del contrato CO1.PCCNTR.0000142</h1><span class="spacer"></span><button class="btn" onclick="saveToCase()">★ Guardar en caso</button><a class="btn" href="https://www.colombiacompra.gov.co" target="_blank" rel="noopener">Ver en SECOP II ↗</a></div>
+  <p class="sub">Datos actualizados al 06-oct-2026 03:10 · Fuente: SECOP II Contratos Electrónicos</p>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3>Estado de procesamiento</h3>
+    <div class="steps">
+      <div class="step done"><span class="c">✓</span>Identificado</div>
+      <div class="step done"><span class="c">✓</span>Documentos obtenidos (6 de 23 priorizados)</div>
+      <div class="step done"><span class="c">✓</span>Extraído</div>
+      <div class="step done"><span class="c">✓</span>Revisado</div>
+      <div class="step done"><span class="c">✓</span>Comparado</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Datos clave</h3>
+      <dl class="kv">
+        <dt>Entidad</dt><dd>Alcaldía Municipal de San Rafael del Valle (ficticia)</dd>
+        <dt>Proveedor</dt><dd>Tecnología Andina Demo S.A.S. · NIT 900.000.142-1</dd>
+        <dt>Objeto</dt><dd>Adquisición de televisores para las aulas de las sedes educativas del municipio</dd>
+        <dt>Modalidad</dt><dd>Mínima cuantía</dd>
+        <dt>Valor del contrato</dt><dd>$39.600.000 <span class="muted small">(dato de referencia publicado en datos abiertos; no se usa como precio unitario)</span></dd>
+        <dt>Fechas</dt><dd>Firma 14-ago-2026 · Inicio 15-ago-2026</dd>
+        <dt>Ubicación</dt><dd>Valle del Cauca</dd>
+        <dt>UNSPSC</dt><dd>52161505 — Televisores</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h3>Ítems del contrato</h3>
+      <table>
+        <thead><tr><th>Ítem</th><th>Clasificación</th><th class="num">Cant.</th><th class="num">Precio unitario</th><th>Benchmarks</th></tr></thead>
+        <tbody>
+          <tr><td>TV Smart 65" 4K UHD LED</td><td><span class="badge b-good">Incluido</span></td><td class="num">8</td><td class="num">$4.950.000</td><td><a href="#senal"><span class="badge b-review">⚑ Señal SG-2026-0142</span></a></td></tr>
+          <tr><td>Soporte de pared para TV 55"–75"</td><td><span class="badge b-neutral">Excluido · accesorio</span></td><td class="num">8</td><td class="num muted">—</td><td class="muted small">Fuera de categoría</td></tr>
+        </tbody>
+      </table>
+      <h3 style="margin-top:16px">Documentos del proceso</h3>
+      <table>
+        <thead><tr><th>Documento</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td><a href="#evidencia">Aceptación de oferta MC-031-2026.pdf</a></td><td><span class="badge b-info">Evidencia de señal</span></td></tr>
+          <tr><td>Invitación pública MC-031-2026.pdf</td><td><span class="badge b-info">Especificación</span></td></tr>
+          <tr><td>Anexo 2 — Oferta económica.xlsx</td><td><span class="badge b-info">Evidencia</span></td></tr>
+          <tr><td>Formato propuesta económica (entidad).xlsx</td><td><span class="badge b-neutral">Formulario en blanco · excluido</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =================== EXPLORAR =================== -->
+<section id="v-explorar" class="view">
+  <h1>Explorar compras de televisores</h1>
+  <p class="sub">Contratos SECOP II y órdenes de la Tienda Virtual del Estado identificados como compra de televisores (2023–2026).</p>
+  <div class="filters">
+    <input class="search" placeholder="Entidad, proveedor (nombre o NIT) u objeto…">
+    <select><option>Fuente: Todas</option><option>SECOP II</option><option>TVEC</option></select>
+    <select><option>Modalidad: Todas</option><option>Mínima cuantía</option><option>Contratación directa</option><option>Subasta inversa</option><option>Régimen especial</option></select>
+    <select><option>Valor: cualquiera</option><option>&lt; $20 M</option><option>$20 M – $100 M</option><option>&gt; $100 M</option></select>
+    <select><option>Con señal: todas</option><option>Solo con señal</option><option>Sin señal</option></select>
+    <span class="spacer"></span><span class="chip">1.284 compras</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Compra</th><th>Fuente</th><th>Entidad</th><th>Proveedor</th><th>Objeto</th><th class="num">Valor</th><th>Estado del análisis</th><th>Fecha</th></tr></thead>
+      <tbody>
+        <tr class="click" onclick="go('ficha')"><td><b>CO1.PCCNTR.0000142</b></td><td>SECOP II</td><td>Alcaldía Mpal. de San Rafael del Valle</td><td>Tecnología Andina Demo S.A.S.</td><td>Televisores para aulas</td><td class="num">$39.600.000</td><td><span class="badge b-review">⚑ Con señal</span></td><td>14-ago-2026</td></tr>
+        <tr class="click" onclick="toast('Ficha de demostración no disponible para este registro')"><td><b>Orden 166021</b></td><td>TVEC</td><td>Instituto Departamental de Ejemplo</td><td>Gran Superficie Demo S.A.</td><td>TV 55" 4K Smart ×3</td><td class="num">$7.854.000</td><td><span class="badge b-good">✓ Comparado · sin señal</span></td><td>02-sep-2026</td></tr>
+        <tr class="click" onclick="toast('Ficha de demostración no disponible para este registro')"><td><b>CO1.PCCNTR.0000215</b></td><td>SECOP II</td><td>Institución Educativa La Esperanza (ficticia)</td><td>Persona natural — documento no visible</td><td>Dotación: TV 50" y portátiles</td><td class="num">$15.146.000</td><td><span class="badge b-neutral">ⓘ Sin precio unitario · limitación de la fuente</span></td><td>21-jul-2026</td></tr>
+        <tr class="click" onclick="toast('Ficha de demostración no disponible para este registro')"><td><b>CO1.PCCNTR.0000233</b></td><td>SECOP II</td><td>Hospital Regional del Norte (ficticio)</td><td>Soluciones Visuales Demo S.A.S.</td><td>TV 43" para salas de espera</td><td class="num">$12.420.000</td><td><span class="badge b-serious">◐ En revisión de calidad</span></td><td>03-sep-2026</td></tr>
+        <tr class="click" onclick="toast('Ficha de demostración no disponible para este registro')"><td><b>CO1.PCCNTR.0000251</b></td><td>SECOP II</td><td>Secretaría de Cultura de Ejemplo</td><td>Electro Comercial Demo Ltda.</td><td>TV 75" para auditorio</td><td class="num">$9.980.000</td><td><span class="badge b-neutral">IVA indeterminado · comparación incompleta</span></td><td>11-sep-2026</td></tr>
+        <tr class="click" onclick="toast('Ficha de demostración no disponible para este registro')"><td><b>CO1.PCCNTR.0000260</b></td><td>SECOP II</td><td>Concejo Municipal de Ejemplo</td><td>Multimedia del Sur Demo S.A.S.</td><td>Mantenimiento de televisores</td><td class="num">$4.200.000</td><td><span class="badge b-neutral">Excluido · servicio, no compra</span></td><td>18-sep-2026</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted" style="margin-top:8px">Los estados distinguen "la fuente no publica el dato" de "el producto no logró extraerlo".</p>
+</section>
+
+<!-- =================== MIS CASOS =================== -->
+<section id="v-casos" class="view">
+  <h1>Mis casos de investigación</h1>
+  <p class="sub">Tus casos son privados: solo tú puedes verlos. La evidencia guardada se conserva como instantánea aunque los benchmarks se recalculen.</p>
+  <div class="grid g-main">
+    <div class="card">
+      <div class="row"><h2 style="margin:0">Televisores en sedes educativas — Valle</h2><span class="spacer"></span><span class="badge b-neutral">3 elementos · 2 notas</span></div>
+      <p class="small muted">Creado el 18-sep-2026 · última actividad hoy</p>
+      <h3>Elementos guardados (instantáneas)</h3>
+      <div class="snap"><div class="row"><b>Señal SG-2026-0142</b><span class="badge b-review">⚑ Merece revisión</span><span class="spacer"></span><span class="small muted">Instantánea del 06-oct-2026 · versión 2</span></div>
+        <div class="small">TV 65" 4K ×8 · $4.950.000 c/u · +73,1 % vs. mediana pública · confianza media · <a href="#senal">ver detalle</a> · <a href="#senal" onclick="toast('Mostrando versión actual: sin cambios desde la instantánea')">ver versión actual</a></div></div>
+      <div class="snap"><div class="row"><b>Contrato CO1.PCCNTR.0000142</b><span class="spacer"></span><span class="small muted">Instantánea del 06-oct-2026</span></div>
+        <div class="small">Alcaldía Mpal. de San Rafael del Valle · Tecnología Andina Demo S.A.S. · $39.600.000</div></div>
+      <div class="snap"><div class="row"><b>Evidencia: Aceptación de oferta MC-031-2026.pdf, pág. 3</b><span class="spacer"></span><span class="small muted">SHA-256 9f3c…a71e</span></div></div>
+      <h3 style="margin-top:14px">Notas</h3>
+      <div id="notes">
+        <div class="note"><div class="meta">06-oct-2026 09:12</div>La invitación pide solo especificaciones básicas (LED, 4K, Smart). No menciona instalación ni garantía extendida que expliquen la diferencia.</div>
+        <div class="note"><div class="meta">06-oct-2026 09:30</div>Pendiente: revisar si otras sedes del mismo municipio compraron el mismo modelo en 2025.</div>
+      </div>
+      <textarea id="note-text" placeholder="Escribe una nota (máx. 5.000 caracteres)…"></textarea>
+      <div class="row" style="margin-top:8px"><span class="spacer"></span><button class="btn primary" onclick="addNote()">Agregar nota</button></div>
+    </div>
+    <div class="card" style="align-self:start">
+      <h3>Todos mis casos</h3>
+      <table>
+        <tbody>
+          <tr><td><b>Televisores en sedes educativas — Valle</b><div class="small muted">3 elementos · hoy</div></td></tr>
+          <tr><td><b>Compras TVEC 2025 — salud</b><div class="small muted">5 elementos · 29-sep-2026</div></td></tr>
+          <tr><td><b>Auditorios municipales 75"</b><div class="small muted">2 elementos · 12-sep-2026</div></td></tr>
+        </tbody>
+      </table>
+      <button class="btn" style="margin-top:10px;width:100%" onclick="toast('Nuevo caso creado')">+ Nuevo caso</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== ADMINISTRACIÓN =================== -->
+<section id="v-admin" class="view">
+  <h1>Administración y operación</h1>
+  <p class="sub">Vista del Administrador (PO): fuentes, cola de revisión, observaciones de mercado e indicadores del MVP. <span class="muted">Valores ilustrativos para la demo.</span></p>
+
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="label">Precisión de extracción</div><div class="value">92,4 %</div><div class="hint">Muestra validada de 52 documentos · meta ≥ 90 %</div></div>
+    <div class="card kpi"><div class="label">Cobertura de extracción</div><div class="value">83 %</div><div class="hint">Sobre contratos con dato publicado · meta ≥ 80 % (provisional)</div></div>
+    <div class="card kpi"><div class="label">Disponibilidad en la fuente</div><div class="value">47 %</div><div class="hint">Contratos SECOP II con precio unitario publicado · se reporta</div></div>
+    <div class="card kpi"><div class="label">Costo IA del mes</div><div class="value">USD 6,10</div><div class="hint">Tope USD 50 · 124 documentos · USD 0,049/doc</div></div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card">
+      <h3>Estado de las fuentes</h3>
+      <div class="src"><span class="badge b-good">✓ OK</span><div style="flex:1"><b>SECOP II — Contratos</b><div class="small muted">Última ingesta hoy 03:10 · 4 nuevos · 0 errores</div></div></div>
+      <div class="src"><span class="badge b-good">✓ OK</span><div style="flex:1"><b>TVEC — Ítems y órdenes</b><div class="small muted">Última ingesta hoy 03:25 · 11 nuevas</div></div></div>
+      <div class="src"><span class="badge b-good">✓ OK</span><div style="flex:1"><b>Alkosto (captura automática)</b><div class="small muted">Semanal · 412/2.000 solicitudes · 38 observaciones</div></div></div>
+      <div class="src"><span class="badge b-critical">⏸ Suspendida</span><div style="flex:1"><b>Falabella</b><div class="small muted">HTTP 403 el 04-oct-2026 · sin reintentos · usar carga manual</div></div><button class="btn sm" onclick="toast('Reactivación requiere motivo y queda auditada')">Reactivar</button></div>
+      <div class="src"><span class="badge b-neutral">— Excluida</span><div style="flex:1"><b>Mercado Libre · Éxito</b><div class="small muted">Sin mecanismo autorizado · solo carga manual</div></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Cola de revisión humana <span class="badge b-review" style="margin-left:6px">14</span></h3>
+      <table>
+        <tbody>
+          <tr><td><b>Extracción de baja confianza</b><div class="small muted">CO1.PCCNTR.0000233 · precio unitario ilegible (escaneado)</div></td><td><button class="btn sm" onclick="toast('Abriendo revisión del ítem')">Revisar</button></td></tr>
+          <tr><td><b>Precio anormalmente bajo</b><div class="small muted">CO1.PCCNTR.0000248 · posible error de cantidad</div></td><td><button class="btn sm" onclick="toast('Abriendo revisión del ítem')">Revisar</button></td></tr>
+          <tr><td><b>Clasificación dudosa</b><div class="small muted">"Pantalla 4K" en contrato de gimnasio</div></td><td><button class="btn sm" onclick="toast('Abriendo revisión de clasificación')">Revisar</button></td></tr>
+          <tr><td><b>Inconsistencia aritmética</b><div class="small muted">4 × $1.020.000 ≠ $4.800.000</div></td><td><button class="btn sm" onclick="toast('Abriendo revisión del ítem')">Revisar</button></td></tr>
+        </tbody>
+      </table>
+      <p class="small muted" style="margin:8px 0 0">Umbral de aceptación automática: <b>sin calibrar</b> · todo dato crítico pasa por revisión.</p>
+    </div>
+
+    <div class="card">
+      <h3>Precisión por campo crítico</h3>
+      <table class="prec">
+        <tbody>
+          <tr><td>Precio unitario</td><td><span class="bar-track"><span class="bar-fill" style="width:94.7%"></span></span>94,7 %</td></tr>
+          <tr><td>Cantidad</td><td><span class="bar-track"><span class="bar-fill" style="width:96.8%"></span></span>96,8 %</td></tr>
+          <tr><td>Tamaño</td><td><span class="bar-track"><span class="bar-fill" style="width:93.1%"></span></span>93,1 %</td></tr>
+          <tr><td>Modelo / referencia</td><td><span class="bar-track"><span class="bar-fill" style="width:85.7%"></span></span>85,7 % <span class="badge b-serious" style="margin-left:4px">▲ bajo meta</span></td></tr>
+          <tr><td>Marca</td><td><span class="bar-track"><span class="bar-fill" style="width:88.9%"></span></span>88,9 % <span class="badge b-serious" style="margin-left:4px">▲ bajo meta</span></td></tr>
+        </tbody>
+      </table>
+      <p class="small muted" style="margin:8px 0 0">Meta ≥ 90 % por campo. La precisión global no oculta campos débiles.</p>
+      <button class="btn" style="margin-top:10px;width:100%" onclick="openModal('m-manual')">+ Registrar observación de mercado manual</button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- =================== MODALES =================== -->
+<div class="modal-bg" id="m-rate"><div class="modal">
+  <h2>Calificar la señal SG-2026-0142</h2>
+  <p class="small muted">Tu calificación ayuda a medir si las señales están bien sustentadas. No implica que exista una irregularidad.</p>
+  <label>¿La señal está suficientemente sustentada para merecer revisión?</label>
+  <select><option>Sí, merece revisión</option><option>No, la evidencia no es suficiente</option></select>
+  <label>Comentario (opcional)</label>
+  <input placeholder="Ej.: la especificación no justifica la diferencia de precio">
+  <div class="row" style="margin-top:16px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="closeModal();toast('Calificación guardada · gracias')">Guardar calificación</button></div>
+</div></div>
+
+<div class="modal-bg" id="m-error"><div class="modal">
+  <h2>Reportar un error</h2>
+  <p class="small muted">El Administrador revisará el reporte. Los datos no se modifican hasta su validación.</p>
+  <label>¿Qué dato tiene el error?</label>
+  <select><option>Precio unitario</option><option>Cantidad</option><option>Clasificación del ítem</option><option>Referencia de comparación</option><option>Otro</option></select>
+  <label>Descripción</label>
+  <input placeholder="Ej.: el precio de la página 3 incluye instalación">
+  <div class="row" style="margin-top:16px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="closeModal();toast('Reporte enviado · ER-2026-0031')">Enviar reporte</button></div>
+</div></div>
+
+<div class="modal-bg" id="m-manual"><div class="modal">
+  <h2>Registrar observación de mercado manual</h2>
+  <p class="small muted">Registra <b>todas</b> las ofertas comparables encontradas en la búsqueda, no solo una. La observación quedará marcada como manual.</p>
+  <div class="grid g2" style="gap:8px">
+    <div><label>Tienda</label><select><option>Falabella</option><option>Alkosto</option><option>Éxito (solo manual)</option><option>Mercado Libre (solo manual)</option></select></div>
+    <div><label>Vendedor</label><select><option>La tienda (requerido)</option></select></div>
+    <div><label>Marca / modelo</label><input placeholder="Ej.: QN65Q6F"></div>
+    <div><label>EAN (si existe)</label><input placeholder="13 dígitos"></div>
+    <div><label>Precio efectivo (COP)</label><input placeholder="3.499.000"></div>
+    <div><label>IVA</label><select><option>Incluido</option><option>No incluido</option><option>Indeterminado</option></select></div>
+    <div><label>Fecha de observación</label><input value="06-oct-2026"></div>
+    <div><label>Términos de búsqueda usados</label><input placeholder="televisor 65 4k smart"></div>
+  </div>
+  <label>URL y evidencia (captura de pantalla)</label>
+  <input placeholder="https://… · adjuntar archivo">
+  <div class="row" style="margin-top:16px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="closeModal();toast('Observación manual registrada · auditada')">Guardar observación</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<div class="tour" id="tour" style="display:none">
+  <h4>Recorrido sugerido de la demo</h4>
+  <ol id="tour-list">
+    <li data-s="senales">Lista priorizada de señales</li>
+    <li data-s="senal">Detalle: benchmarks y confianza</li>
+    <li data-s="evidencia">Evidencia en la página exacta</li>
+    <li data-s="ficha">Ficha del contrato</li>
+    <li data-s="casos">Guardar en un caso y anotar</li>
+    <li data-s="admin">Operación y KPIs (rol Administrador)</li>
+  </ol>
+  <div class="row"><button class="btn sm" onclick="document.getElementById('tour').style.display='none'">Ocultar</button><span class="spacer"></span><button class="btn sm primary" onclick="nextTour()">Siguiente →</button></div>
+</div>
+
+<script>
+/* ---------------- datos de demostración (ficticios) ---------------- */
+const SIGNALS = [
+  {id:"SG-2026-0142", item:'TV Smart 65" 4K ×8', ent:"Alcaldía Mpal. de San Rafael del Valle", prov:"Tecnología Andina Demo S.A.S.", pu:4950000, ref:2860000, dev:73.1, cmp:"Equivalente", conf:2, date:"14-ago-2026", go:"senal"},
+  {id:"SG-2026-0137", item:'TV 55" 4K Smart ×10 · mod. 55UA7300', ent:"Gobernación de Ejemplo — Sec. Educación", prov:"Distribuciones Norte Demo S.A.S.", pu:3780000, ref:2205000, dev:71.4, cmp:"Mismo modelo", conf:3, date:"02-sep-2026"},
+  {id:"SG-2026-0129", item:'TV 75" 4K ×2', ent:"Instituto Municipal de Deportes (ficticio)", prov:"Persona natural — documento no visible", pu:6900000, ref:4410000, dev:56.5, cmp:"Equivalente", conf:2, date:"21-jul-2026"},
+  {id:"SG-2026-0118", item:'TV 43" Full HD ×6', ent:"E.S.E. Hospital del Río (ficticia)", prov:"Soluciones Visuales Demo S.A.S.", pu:2150000, ref:1420000, dev:51.4, cmp:"Equivalente", conf:1, date:"03-jun-2026", note:"IVA convertido con tarifa explícita del documento"},
+  {id:"SG-2026-0104", item:'TV 65" QLED ×1 · mod. QN65Q6F', ent:"Concejo Municipal de Ejemplo", prov:"Electro Comercial Demo Ltda.", pu:5200000, ref:3550000, dev:46.5, cmp:"Mismo modelo", conf:3, date:"19-may-2026"},
+  {id:"SG-2026-0097", item:'TV 50" 4K ×4', ent:"Universidad Pública Demo", prov:"Multimedia del Sur Demo S.A.S.", pu:2990000, ref:2050000, dev:45.9, cmp:"Equivalente", conf:2, date:"30-abr-2026"},
+];
+const COMP = [ // Benchmark 1: compras públicas comparables (precio unitario con IVA)
+  {p:2350000,s:"TVEC",e:"Instituto Departamental de Ejemplo",d:"12-mar-2026",m:"Equivalente"},
+  {p:2480000,s:"SECOP II",e:"Alcaldía de Villa Nueva (ficticia)",d:"28-mar-2026",m:"Equivalente"},
+  {p:2550000,s:"TVEC",e:"Policía Seccional Demo",d:"09-abr-2026",m:"Equivalente"},
+  {p:2610000,s:"TVEC",e:"Registraduría Delegada Demo",d:"22-abr-2026",m:"Equivalente"},
+  {p:2690000,s:"SECOP II",e:"I.E. Simón Bolívar (ficticia)",d:"05-may-2026",m:"Equivalente"},
+  {p:2750000,s:"TVEC",e:"Gobernación de Ejemplo",d:"18-may-2026",m:"Equivalente"},
+  {p:2820000,s:"SECOP II",e:"Hospital Regional del Norte (ficticio)",d:"02-jun-2026",m:"Equivalente"},
+  {p:2900000,s:"TVEC",e:"Secretaría de Salud Demo",d:"16-jun-2026",m:"Equivalente"},
+  {p:2980000,s:"SECOP II",e:"Alcaldía de Puerto Claro (ficticia)",d:"30-jun-2026",m:"Equivalente"},
+  {p:3050000,s:"TVEC",e:"Ministerio Demo — Regional",d:"11-jul-2026",m:"Equivalente"},
+  {p:3150000,s:"SECOP II",e:"Universidad Pública Demo",d:"24-jul-2026",m:"Equivalente"},
+  {p:3290000,s:"TVEC",e:"Fiscalía Seccional Demo",d:"05-ago-2026",m:"Equivalente"},
+  {p:3400000,s:"SECOP II",e:"Alcaldía de Cerro Alto (ficticia)",d:"19-ago-2026",m:"Equivalente"},
+  {p:3600000,s:"SECOP II",e:"Concejo Distrital Demo",d:"01-sep-2026",m:"Equivalente"},
+];
+const TARGET = {p:4950000, e:"Alcaldía Mpal. de San Rafael del Valle", d:"14-ago-2026"};
+
+/* ---------------- utilidades ---------------- */
+const cop = n => "$" + Math.round(n).toLocaleString("es-CO");
+const pct = n => (n>0?"+":"") + n.toFixed(1).replace(".", ",") + " %";
+function quantile(a,q){const s=[...a].sort((x,y)=>x-y);const pos=(s.length-1)*q;const b=Math.floor(pos);const r=pos-b;return s[b+1]!==undefined?s[b]+r*(s[b+1]-s[b]):s[b];}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove("show"),2600);}
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(){document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open"));}
+document.querySelectorAll(".modal-bg").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)closeModal();}));
+
+/* ---------------- lista de señales ---------------- */
+function confBadge(c){const t=["","Baja","Media","Alta"][c];return `<span class="badge b-neutral"><span class="conf c${c}"><i></i><i></i><i></i></span>${t}</span>`;}
+SIGNALS.sort((a,b)=>b.conf-a.conf||b.dev-a.dev);
+document.getElementById("signals-body").innerHTML = SIGNALS.map(s=>`
+  <tr class="click" onclick="${s.go?`go('${s.go}')`:`toast('Detalle de demostración disponible en SG-2026-0142')`}">
+    <td><span class="badge b-review">⚑ ${s.id}</span></td>
+    <td><b>${s.item}</b>${s.note?`<div class="small muted">${s.note}</div>`:""}</td>
+    <td>${s.ent}</td><td>${s.prov}</td>
+    <td class="num">${cop(s.pu)}</td><td class="num">${cop(s.ref)}<div class="small muted">mediana pública</div></td>
+    <td class="num"><b>${pct(s.dev)}</b></td>
+    <td><span class="badge b-info">${s.cmp}</span></td>
+    <td>${confBadge(s.conf)}</td><td>${s.date}</td></tr>`).join("");
+
+/* ---------------- Benchmark 1: estadísticos + strip plot ---------------- */
+const prices = COMP.map(c=>c.p);
+const q1=quantile(prices,.25), med=quantile(prices,.5), q3=quantile(prices,.75), iqr=q3-q1, thr=q3+1.5*iqr;
+document.getElementById("b1-stats").innerHTML = [
+  ["Observaciones","14 · 7 TVEC / 7 SECOP"],["Q1",cop(q1)],["Mediana",cop(med)],["Q3",cop(q3)],["Umbral de revisión",cop(thr)]
+].map(([l,v])=>`<div class="stat"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
+
+function drawStrip(){
+  const svg=document.getElementById("strip"); const W=svg.clientWidth||760, H=190;
+  const m={l:16,r:24,t:30,b:40}; const xmin=2000000, xmax=5300000;
+  const x=v=>m.l+(v-xmin)/(xmax-xmin)*(W-m.l-m.r);
+  const cy=H/2+4; let g="";
+  // grid + eje
+  for(let v=2000000; v<=5000000; v+=500000){
+    g+=`<line x1="${x(v)}" y1="${m.t}" x2="${x(v)}" y2="${H-m.b}" stroke="var(--grid)"/>`;
+    g+=`<text x="${x(v)}" y="${H-m.b+18}" font-size="11" fill="var(--text-secondary)" text-anchor="middle">${(v/1e6).toLocaleString("es-CO",{minimumFractionDigits:1})} M</text>`;
+  }
+  g+=`<text x="${W-m.r}" y="${H-6}" font-size="11" fill="var(--text-muted)" text-anchor="end">Precio unitario con IVA (COP)</text>`;
+  // caja Q1–Q3
+  g+=`<rect x="${x(q1)}" y="${cy-26}" width="${x(q3)-x(q1)}" height="52" rx="4" fill="#eef3fb" />`;
+  [[q1,"Q1"],[med,"Mediana"],[q3,"Q3"]].forEach(([v,l],i)=>{
+    g+=`<line x1="${x(v)}" y1="${cy-30}" x2="${x(v)}" y2="${cy+30}" stroke="var(--ref-line)" stroke-width="${l==="Mediana"?2.5:1.5}"/>`;
+    g+=`<text x="${x(v)}" y="${m.t-8+(i===1?0:0)}" font-size="11" fill="var(--text-secondary)" text-anchor="middle">${l}</text>`;
+  });
+  g+=`<line x1="${x(thr)}" y1="${m.t}" x2="${x(thr)}" y2="${H-m.b}" stroke="#3d3c39" stroke-width="2" stroke-dasharray="4 3"/>`;
+  g+=`<text x="${x(thr)+6}" y="${m.t+4}" font-size="11" fill="var(--text-primary)">Umbral ${cop(thr)}</text>`;
+  // puntos (jitter determinístico)
+  COMP.forEach((c,i)=>{
+    const jy = cy + ((i%5)-2)*8;
+    const tip=`${c.s} · ${c.e}<br><b>${cop(c.p)}</b> · ${c.d} · ${c.m}`;
+    if(c.s==="TVEC"){
+      g+=`<g class="pt" data-tip="${tip}"><rect x="${x(c.p)-14}" y="${jy-14}" width="28" height="28" fill="transparent"/><rect x="${x(c.p)-4.5}" y="${jy-4.5}" width="9" height="9" transform="rotate(45 ${x(c.p)} ${jy})" fill="var(--series-3)" stroke="#fff" stroke-width="1.5"/></g>`;
+    } else {
+      g+=`<g class="pt" data-tip="${tip}"><circle cx="${x(c.p)}" cy="${jy}" r="14" fill="transparent"/><circle cx="${x(c.p)}" cy="${jy}" r="5" fill="var(--series-1)" stroke="#fff" stroke-width="1.5"/></g>`;
+    }
+  });
+  // contrato analizado
+  const tx=x(TARGET.p);
+  g+=`<g class="pt" data-tip="Contrato analizado · ${TARGET.e}<br><b>${cop(TARGET.p)}</b> · ${TARGET.d} · +73,1 % vs. mediana"><circle cx="${tx}" cy="${cy}" r="16" fill="transparent"/><circle cx="${tx}" cy="${cy}" r="8" fill="var(--series-2)" stroke="#fff" stroke-width="2"/></g>`;
+  g+=`<text x="${tx}" y="${cy-16}" font-size="12" font-weight="600" fill="var(--text-primary)" text-anchor="middle">Contrato analizado ${cop(TARGET.p)}</text>`;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.innerHTML=g;
+  const tt=document.getElementById("tt"), box=document.getElementById("chart-box");
+  svg.querySelectorAll(".pt").forEach(p=>{
+    p.addEventListener("mousemove",e=>{const r=box.getBoundingClientRect();tt.innerHTML=p.dataset.tip;tt.style.opacity=1;
+      let lx=e.clientX-r.left+12; if(lx>r.width-230) lx=e.clientX-r.left-230; tt.style.left=lx+"px";tt.style.top=(e.clientY-r.top-10)+"px";});
+    p.addEventListener("mouseleave",()=>tt.style.opacity=0);
+  });
+}
+function toggleCompTable(){
+  const t=document.getElementById("comp-table"), b=document.getElementById("toggle-table");
+  if(t.style.display==="none"){
+    t.innerHTML=`<table><thead><tr><th>Fuente</th><th>Entidad</th><th>Fecha</th><th>Emparejamiento</th><th class="num">Precio unitario</th></tr></thead><tbody>${
+      COMP.map(c=>`<tr><td>${c.s}</td><td>${c.e}</td><td>${c.d}</td><td>${c.m}</td><td class="num">${cop(c.p)}</td></tr>`).join("")}</tbody></table>`;
+    t.style.display="block"; b.textContent="Ocultar tabla";
+  } else { t.style.display="none"; b.textContent="Ver como tabla"; }
+}
+
+/* ---------------- navegación ---------------- */
+const VIEWS=["senales","senal","evidencia","ficha","explorar","casos","admin"];
+const NAVMAP={senal:"senales",evidencia:"senales",ficha:"explorar"};
+function go(v){location.hash=v;}
+function render(){
+  let v=(location.hash||"#senales").slice(1); if(!VIEWS.includes(v)) v="senales";
+  if(v==="admin" && document.getElementById("role").value!=="admin"){ toast("Vista solo para el rol Administrador — cambia el rol arriba a la derecha"); v="senales"; history.replaceState(null,"","#senales"); }
+  VIEWS.forEach(x=>document.getElementById("v-"+x).classList.toggle("active",x===v));
+  document.querySelectorAll("nav.main a").forEach(a=>a.classList.toggle("active",a.dataset.nav===(NAVMAP[v]||v)));
+  document.querySelectorAll("#tour-list li").forEach(li=>li.classList.toggle("cur",li.dataset.s===v));
+  if(v==="senal") requestAnimationFrame(drawStrip);
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",render);
+window.addEventListener("resize",()=>{if(location.hash==="#senal")drawStrip();});
+function login(){document.getElementById("v-login").classList.remove("active");document.getElementById("app").style.display="block";document.getElementById("tour").style.display="block";if(!location.hash)location.hash="senales";render();}
+function logout(){document.getElementById("app").style.display="none";document.getElementById("tour").style.display="none";document.getElementById("v-login").classList.add("active");}
+function setRole(r){document.querySelector(".avatar").textContent=r==="admin"?"PO":"AD";toast(r==="admin"?"Rol Administrador: acceso a operación y KPIs":"Rol Analista");render();}
+function saveToCase(){toast("Guardado en el caso “Televisores en sedes educativas — Valle” como instantánea");}
+function addNote(){const t=document.getElementById("note-text");if(!t.value.trim()){toast("La nota está vacía");return;}
+  const d=document.createElement("div");d.className="note";d.innerHTML=`<div class="meta">Ahora</div>`;d.appendChild(document.createTextNode(t.value.trim()));
+  document.getElementById("notes").appendChild(d);t.value="";toast("Nota agregada");}
+const TOUR=["senales","senal","evidencia","ficha","casos","admin"];
+function nextTour(){const cur=(location.hash||"#senales").slice(1);let i=TOUR.indexOf(cur);i=(i+1)%TOUR.length;
+  if(TOUR[i]==="admin"){document.getElementById("role").value="admin";setRole("admin");}
+  go(TOUR[i]);}
+</script>
+</body>
+</html>

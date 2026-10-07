@@ -1,0 +1,47 @@
+{
+  "id_contrato": "CO1.PCCNTR.8636357",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISORES (línea SECOP agregada; sin especificaciones ni cantidad real)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "descripcion": "baja"
+      },
+      "evidencia": {
+        "descripcion": "CO1_PCCNTR_8636357_Firmado.pdf | página 3"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "DIANA CAROLINA RIVERA HERRERA",
+      "precio_unitario": null,
+      "valor_oferta_total": 16000000,
+      "adjudicado": true,
+      "evidencia": "OFERTA SELECCIONADA IEGS-021-2025.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [
+    "La única línea de bienes en SECOP es 'TELEVISORES' 1 UN por 16.000.000 (estimado 28.000.000), pero el objeto incluye televisores, computadores, ventiladores y videoproyector; la línea no representa un precio unitario de TV (CO1_PCCNTR_8636357_Firmado.pdf | página 3)."
+  ],
+  "observaciones": "Comunicado de aceptación, oferta seleccionada y anexos del contrato sin desglose por ítem. Valor total 16.000.000 'INCLUIDO IMPUESTOS' (ANEXOS contrato RE IEGS-021-2025.pdf | página 3); presupuesto oficial 28.000.000. Un solo proponente en el cuadro de oferta seleccionada. No hay marca, modelo, tamaño, cantidad ni precio de TV.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "COMUNICADO DE ACEPTACIÓN DE OFERTA IEGS-021-2025.pdf",
+    "OFERTA SELECCIONADA IEGS-021-2025.pdf",
+    "ANEXOS contrato RE IEGS-021-2025.pdf",
+    "CO1_PCCNTR_8636357_Firmado.pdf"
+  ]
+}

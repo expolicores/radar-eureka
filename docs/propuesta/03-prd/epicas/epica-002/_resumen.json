@@ -1,0 +1,242 @@
+{
+  "epica": "ÉPICA-002",
+  "features": [
+    {
+      "nombre": "Obtener y Priorizar Documentos del Proceso",
+      "hus": [
+        {
+          "id": "HU-014",
+          "carpeta": "HU-014-listar-documentos-proceso-candidato",
+          "titulo": "Listar y registrar los documentos publicados de cada proceso candidato",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-018",
+            "FR-024"
+          ],
+          "escenarios": 11,
+          "casos_qa": 18
+        },
+        {
+          "id": "HU-015",
+          "carpeta": "HU-015-priorizar-documentos-relevantes-proceso",
+          "titulo": "Priorizar los documentos relevantes de cada proceso para la extracción",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-019"
+          ],
+          "escenarios": 11,
+          "casos_qa": 15
+        },
+        {
+          "id": "HU-016",
+          "carpeta": "HU-016-descargar-documentos-url-oficial",
+          "titulo": "Descargar los documentos priorizados desde la URL oficial sin evadir restricciones",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-020"
+          ],
+          "escenarios": 11,
+          "casos_qa": 16
+        },
+        {
+          "id": "HU-017",
+          "carpeta": "HU-017-excluir-vacios-en-blanco-duplicados",
+          "titulo": "Excluir documentos vacíos, formularios en blanco y duplicados",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-019"
+          ],
+          "escenarios": 10,
+          "casos_qa": 14
+        },
+        {
+          "id": "HU-018",
+          "carpeta": "HU-018-descomprimir-archivos-zip-rar",
+          "titulo": "Descomprimir archivos ZIP y RAR y tratar su contenido como documentos del proceso",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-021"
+          ],
+          "escenarios": 11,
+          "casos_qa": 14
+        }
+      ]
+    },
+    {
+      "nombre": "Preparar Documentos para la Lectura",
+      "hus": [
+        {
+          "id": "HU-019",
+          "carpeta": "HU-019-leer-formatos-documentales-soportados",
+          "titulo": "Leer los formatos documentales soportados y generar su representación con ubicaciones",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-022"
+          ],
+          "escenarios": 11,
+          "casos_qa": 16
+        },
+        {
+          "id": "HU-020",
+          "carpeta": "HU-020-detectar-paginas-lectura-visual",
+          "titulo": "Detectar las páginas que requieren OCR o lectura multimodal",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-023"
+          ],
+          "escenarios": 9,
+          "casos_qa": 12
+        },
+        {
+          "id": "HU-021",
+          "carpeta": "HU-021-conservar-copia-evidencia-documental",
+          "titulo": "Conservar la copia y la evidencia de los documentos de los que se extraen datos",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-024"
+          ],
+          "escenarios": 10,
+          "casos_qa": 13
+        }
+      ]
+    },
+    {
+      "nombre": "Extraer Datos de Ítems de Televisor",
+      "hus": [
+        {
+          "id": "HU-022",
+          "carpeta": "HU-022-extraer-items-televisor-con-evidencia",
+          "titulo": "Extraer con IA los datos de cada ítem de televisor con su evidencia de origen",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-025",
+            "FR-027",
+            "FR-100"
+          ],
+          "escenarios": 14,
+          "casos_qa": 24
+        },
+        {
+          "id": "HU-023",
+          "carpeta": "HU-023-determinar-base-tributaria-precio",
+          "titulo": "Determinar si cada precio extraído es con IVA, sin IVA o de base indeterminada",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-029"
+          ],
+          "escenarios": 10,
+          "casos_qa": 17
+        },
+        {
+          "id": "HU-024",
+          "carpeta": "HU-024-calcular-precio-unitario-derivado",
+          "titulo": "Calcular el precio unitario derivado solo cuando se cumplen las seis condiciones",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-099",
+            "FR-100"
+          ],
+          "escenarios": 11,
+          "casos_qa": 15
+        },
+        {
+          "id": "HU-025",
+          "carpeta": "HU-025-marcar-items-informacion-insuficiente",
+          "titulo": "Marcar los ítems con información insuficiente indicando el motivo",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-030"
+          ],
+          "escenarios": 10,
+          "casos_qa": 15
+        }
+      ]
+    },
+    {
+      "nombre": "Controlar la Calidad de la Extracción",
+      "hus": [
+        {
+          "id": "HU-026",
+          "carpeta": "HU-026-aplicar-umbral-aceptacion-automatica",
+          "titulo": "Aplicar el umbral configurable de aceptación automática y dirigir a revisión los datos dudosos",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-028"
+          ],
+          "escenarios": 11,
+          "casos_qa": 15
+        },
+        {
+          "id": "HU-027",
+          "carpeta": "HU-027-detectar-inconsistencias-aritmeticas",
+          "titulo": "Detectar inconsistencias aritméticas en los datos extraídos y dirigirlas a revisión de calidad",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-031"
+          ],
+          "escenarios": 10,
+          "casos_qa": 14
+        },
+        {
+          "id": "HU-028",
+          "carpeta": "HU-028-revisar-datos-extraidos-item",
+          "titulo": "Validar, corregir o rechazar los datos extraídos de un ítem conservando el historial",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-032"
+          ],
+          "escenarios": 12,
+          "casos_qa": 19
+        }
+      ]
+    },
+    {
+      "nombre": "Operar y Medir la Extracción con IA",
+      "hus": [
+        {
+          "id": "HU-029",
+          "carpeta": "HU-029-desactivar-extraccion-ia-configuracion",
+          "titulo": "Activar o desactivar la extracción con IA por configuración sin afectar las funciones determinísticas",
+          "prioridad": "Crítica",
+          "frs": [
+            "FR-033"
+          ],
+          "escenarios": 9,
+          "casos_qa": 11
+        },
+        {
+          "id": "HU-030",
+          "carpeta": "HU-030-registrar-costo-tiempo-extraccion",
+          "titulo": "Registrar el costo estimado y el tiempo de procesamiento de la extracción por documento",
+          "prioridad": "Alta",
+          "frs": [
+            "FR-034"
+          ],
+          "escenarios": 10,
+          "casos_qa": 13
+        }
+      ]
+    }
+  ],
+  "frs_cubiertos": [
+    "FR-018",
+    "FR-019",
+    "FR-020",
+    "FR-021",
+    "FR-022",
+    "FR-023",
+    "FR-024",
+    "FR-025",
+    "FR-027",
+    "FR-028",
+    "FR-029",
+    "FR-030",
+    "FR-031",
+    "FR-032",
+    "FR-033",
+    "FR-034",
+    "FR-099",
+    "FR-100"
+  ],
+  "frs_no_cubiertos": []
+}

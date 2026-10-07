@@ -1,0 +1,46 @@
+{
+  "id_contrato": "CO1.PCCNTR.9640674",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISOR 75” - Televisor Smart TV de 75 pulgadas UHD 4K (3840 x 2160), HDR, procesador IA con escalamiento 4K (Crystal Processor 4K, α5 AI Processor 4K, α7 AI Processor 4K), 60Hz, sonido mín. 20W 2CH, Smart TV (Tizen OS, webOS), WiFi 5, Ethernet, Bluetooth 5.3, mín. 3 HDMI y 1 USB-A, garantía 1 año",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 75,
+      "resolucion": "4K UHD",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {
+        "marca": null,
+        "modelo": null,
+        "tamano_pulgadas": "alta",
+        "cantidad": "baja",
+        "precio_unitario": null,
+        "resolucion": "alta",
+        "smart": "alta"
+      },
+      "evidencia": {
+        "descripcion": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | fila 8",
+        "tamano_pulgadas": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | fila 8",
+        "resolucion": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | fila 8",
+        "smart": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | fila 8",
+        "cantidad": "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | fila 8 (columna CANT. del formato en blanco)"
+      }
+    }
+  ],
+  "oferentes": [],
+  "inconsistencias": [
+    "El formato de propuesta económica indica CANT. 1 para el televisor de 75\" y 1 soporte, cifra difícil de conciliar con el valor del contrato en datos abiertos ($222.316.051); la cantidad real contratada no está en los documentos disponibles (12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx | hoja Hoja1 | filas 8-9)."
+  ],
+  "observaciones": "Selección abreviada por subasta inversa SA 21 de 2026 (ITM). El texto disponible solo contiene el Formato No. 2 de propuesta económica en blanco (xlsx duplicado: 806636940.xlsx y 812570899.xlsx, mismo contenido), sin valores, proponente ni adjudicatario. Los dos PDF de la carpeta (824317218.pdf, 824317289.pdf) pesan 130 bytes y no tienen contenido. Por eso no hay precio unitario, marca, modelo, IVA ni oferentes. La especificación enumera procesadores y sistemas operativos de varias marcas (Tizen OS / webOS), por lo que no permite inferir la marca. El soporte de piso móvil (ítem 2) se excluye. No hay imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "12. SA 21  DE 2026- FORMATO 2 -  PROPUESTA ECONOMICA.xlsx"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id_contrato": "CO1.PCCNTR.9829420",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor Smart TV 60\" 4K (requerimiento inferido de la cotización de un oferente no adjudicado: 'Televisor Smart TV60\" 4K Full HD ... Contol de voz')",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 60,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 2,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "baja", "cantidad": "baja", "precio_unitario": null, "smart": "baja"},
+      "evidencia": {
+        "descripcion": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 1 (imagen 842954845_p1.png, Cotización Nº 541)",
+        "tamano_pulgadas": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 1 (imagen 842954845_p1.png)",
+        "cantidad": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 1 (imagen 842954845_p1.png)",
+        "smart": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 1 (imagen 842954845_p1.png)"
+      }
+    },
+    {
+      "descripcion": "Televisor Smart TV 43\" Resolución 4K UHD (requerimiento inferido de la cotización de un oferente no adjudicado, sede San Juan)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 43,
+      "resolucion": "4K UHD",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": null, "modelo": null, "tamano_pulgadas": "baja", "cantidad": "baja", "precio_unitario": null, "resolucion": "baja", "smart": "baja"},
+      "evidencia": {
+        "descripcion": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png, Cotización Nº 537)",
+        "tamano_pulgadas": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png)",
+        "resolucion": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png)",
+        "cantidad": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png)",
+        "smart": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "LIDA RODRIGUEZ BERNAL", "precio_unitario": null, "adjudicado": true, "evidencia": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf | página 4 (adjudicación; valor del contrato $16.258.392 en página 1; puntaje 40)"},
+    {"nombre": "NATALIA ANDREA BOTERO ESTRADA (TECHNIWORK SYSTEM) - Televisor Smart TV 60\" Samsung, 2 un.", "precio_unitario": 2856800, "adjudicado": false, "evidencia": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 1 (imagen 842954845_p1.png): 2 x 2.856.800 = 5.713.600"},
+    {"nombre": "NATALIA ANDREA BOTERO ESTRADA (TECHNIWORK SYSTEM) - Televisor Smart TV Samsung 43\", 1 un.", "precio_unitario": 2169300, "adjudicado": false, "evidencia": "11 cotizacion y documnetos proveedor natalia botero estrada.pdf | página 2 (imagen 842954845_p2.png): 1 x 2.169.300 = 2.169.300"},
+    {"nombre": "JHON SCHNEIDER ALVAREZ RODRIGUEZ", "precio_unitario": null, "adjudicado": false, "evidencia": "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf | página 1 y 3 (puntaje 5)"}
+  ],
+  "inconsistencias": [
+    "La cotización del oferente no adjudicado describe el TV de 60\" como '4K Full HD', términos contradictorios (11 cotizacion ... .pdf | página 1, imagen 842954845_p1.png). Aritmética de sus cotizaciones correcta (5.713.600 + 2.798.600 + 1.652.000 = 10.164.200; 2.169.300 + 2.495.000 + 2.249.000 = 6.913.300)."
+  ],
+  "observaciones": "Régimen especial (I.E. PIO XI), 3 oferentes; se adjudicó a LIDA RODRIGUEZ BERNAL por $16.258.392 (acta de evaluación y adjudicación, 19-ago-2026). La propuesta/cotización de la adjudicataria NO está entre los documentos, por lo que no hay precio adjudicado, marca ni modelo de los televisores contratados. Los ítems de TV (2 de 60\" y 1 de 43\") se infieren de las cotizaciones de NATALIA ANDREA BOTERO ESTRADA (Techniwork System), oferente no adjudicado, que ofreció marca Samsung y es 'No responsable de IVA' (encabezado de la cotización y RUT p.3); sus precios se registran solo en oferentes. El acta aparece triplicada en el texto (mismo contenido). Se leyeron 3 imágenes (842954845_p1, p2, p3): legibles; p1 y p2 son cotizaciones con precios, p3 es el RUT; no se leyeron p4-p6 (documentos administrativos del proveedor).",
+  "imagenes_leidas": 3,
+  "documentos_revisados": [
+    "3 ACTA DE EVALUACION INSUMOS DE TV, PC.pdf",
+    "11 cotizacion y documnetos proveedor natalia botero estrada.pdf"
+  ]
+}

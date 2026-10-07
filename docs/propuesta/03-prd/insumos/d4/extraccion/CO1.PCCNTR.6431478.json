@@ -1,0 +1,63 @@
+{
+  "id_contrato": "CO1.PCCNTR.6431478",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisor 60 pulgadas, Smart TV, 4K, pantalla plana (1 año de garantía)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 60,
+      "resolucion": "4K",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 5000000,
+      "valor_total_item": 5000000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "tecnologia": "media",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "media",
+        "valor_total_item": "media"
+      },
+      "evidencia": {
+        "descripcion": "3. Solicitud COTIZACION -JP.pdf | página 1",
+        "tamano_pulgadas": "3. Solicitud COTIZACION -JP.pdf | página 1",
+        "resolucion": "3. Solicitud COTIZACION -JP.pdf | página 1",
+        "tecnologia": "1.Cotización INNOVA- TV-2_compressed.pdf | página 1",
+        "smart": "3. Solicitud COTIZACION -JP.pdf | página 1",
+        "cantidad": "3. Solicitud COTIZACION -JP.pdf | página 1",
+        "precio_unitario": "_texto_para_extraccion.md | encabezado (datos abiertos)",
+        "valor_total_item": "_texto_para_extraccion.md | encabezado (datos abiertos)"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "INNOVA CONSTRUCCIÓN JP S.A.S",
+      "precio_unitario": 4950000,
+      "adjudicado": null,
+      "evidencia": "1.Cotización INNOVA- TV-2_compressed.pdf | página 1"
+    },
+    {
+      "nombre": "MAAT ABOGADOS SAS",
+      "precio_unitario": 5210080,
+      "adjudicado": null,
+      "evidencia": "2.COTIZACION MAAT.pdf | página 1"
+    }
+  ],
+  "inconsistencias": [],
+  "observaciones": "Documentos disponibles son del estudio de mercado (solicitudes de cotización y 2 cotizaciones), no la oferta ganadora. Precio unitario = valor del contrato en datos abiertos (5.000.000) porque el objeto es un único televisor (cantidad 1); IVA de ese valor no indicado. Cotizaciones: INNOVA 4.950.000 'incluyen IVA'; MAAT 5.210.080 (IVA no indicado, descripción 'TV ULTRA HD - SMARTV'). Se registran como cotizantes, adjudicado desconocido. Se solicitó cotización también a GRAPHIC DESIGN JUAN PABLO PEDROZA, sin respuesta en los documentos. Sin marca ni modelo.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "3. Solicitud COTIZACION -JP.pdf",
+    "1. Solicitud COTIZACION -innova.pdf",
+    "1.Cotización INNOVA- TV-2_compressed.pdf",
+    "2.COTIZACION MAAT.pdf"
+  ]
+}

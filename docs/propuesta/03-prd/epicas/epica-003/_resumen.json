@@ -1,0 +1,20 @@
+{"epica":"ÉPICA-003","features":[
+{"nombre":"Normalizar Atributos al Esquema Común","hus":[
+{"id":"HU-031","carpeta":"HU-031-normalizar-marca-tamano-resolucion","titulo":"Normalizar marca, tamaño y resolución al esquema común","prioridad":"Crítica","frs":["FR-035"],"escenarios":15,"casos_qa":19},
+{"id":"HU-032","carpeta":"HU-032-normalizar-tecnologia-smart-generacion","titulo":"Normalizar tecnología de pantalla, Smart y generación del televisor","prioridad":"Crítica","frs":["FR-035"],"escenarios":13,"casos_qa":18}]},
+{"nombre":"Normalizar Códigos de Modelo","hus":[
+{"id":"HU-033","carpeta":"HU-033-identificar-codigo-modelo-origen","titulo":"Identificar el código de modelo en el registro de origen","prioridad":"Crítica","frs":["FR-035","FR-036"],"escenarios":10,"casos_qa":14},
+{"id":"HU-034","carpeta":"HU-034-normalizar-sintaxis-codigo-modelo","titulo":"Normalizar sintácticamente el código de modelo","prioridad":"Crítica","frs":["FR-036","FR-035"],"escenarios":9,"casos_qa":12}]},
+{"nombre":"Emparejar por Mismo Modelo","hus":[
+{"id":"HU-035","carpeta":"HU-035-emparejar-mismo-modelo-marca-modelo","titulo":"Emparejar como mismo modelo por marca y modelo normalizado","prioridad":"Crítica","frs":["FR-037"],"escenarios":10,"casos_qa":15},
+{"id":"HU-036","carpeta":"HU-036-emparejar-mismo-modelo-ean-gtin","titulo":"Emparejar como mismo modelo por EAN/GTIN","prioridad":"Crítica","frs":["FR-037"],"escenarios":9,"casos_qa":13}]},
+{"nombre":"Emparejar por Equivalencia Técnica","hus":[
+{"id":"HU-037","carpeta":"HU-037-configurar-reglas-equivalencia","titulo":"Configurar las reglas de equivalencia por categoría","prioridad":"Crítica","frs":["FR-038","FR-040"],"escenarios":9,"casos_qa":12},
+{"id":"HU-038","carpeta":"HU-038-emparejar-productos-equivalentes","titulo":"Emparejar productos equivalentes por características técnicas","prioridad":"Crítica","frs":["FR-038","FR-040"],"escenarios":11,"casos_qa":15}]},
+{"nombre":"Clasificar y Explicar el Emparejamiento","hus":[
+{"id":"HU-039","carpeta":"HU-039-clasificar-resultado-emparejamiento","titulo":"Clasificar el resultado de emparejamiento de cada ítem","prioridad":"Crítica","frs":["FR-039"],"escenarios":8,"casos_qa":12},
+{"id":"HU-040","carpeta":"HU-040-consultar-criterios-emparejamiento","titulo":"Consultar los criterios de emparejamiento de un ítem","prioridad":"Crítica","frs":["FR-039"],"escenarios":9,"casos_qa":14},
+{"id":"HU-041","carpeta":"HU-041-verificar-criterios-no-relajados","titulo":"Verificar que ningún emparejamiento use criterios relajados","prioridad":"Crítica","frs":["FR-040","FR-039"],"escenarios":9,"casos_qa":14}]}
+],
+"frs_cubiertos":["FR-035","FR-036","FR-037","FR-038","FR-039","FR-040"],
+"frs_no_cubiertos":[]}

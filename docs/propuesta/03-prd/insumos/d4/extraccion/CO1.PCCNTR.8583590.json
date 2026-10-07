@@ -1,0 +1,41 @@
+{
+  "id_contrato": "CO1.PCCNTR.8583590",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "TELEVISOR LED DE 65 PULGADAS (165 CM) CON RESOLUCIÓN 4K UHD Y DISEÑO PLANO; funciones inteligentes con sistema operativo WebOS, Wi-Fi, Bluetooth, sintonizador DVB-T2",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": 65,
+      "resolucion": "4K UHD",
+      "tecnologia": "LED",
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 4200000,
+      "valor_total_item": 4200000,
+      "iva": "con_iva",
+      "tipo_precio": "adjudicado",
+      "confianza": {"tamano_pulgadas": "alta", "resolucion": "alta", "tecnologia": "alta", "smart": "media", "cantidad": "alta", "precio_unitario": "alta", "valor_total_item": "alta", "iva": "media"},
+      "evidencia": {
+        "descripcion": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "tamano_pulgadas": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "resolucion": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "tecnologia": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "smart": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18 ('funciones inteligentes con sistema operativo WebOS')",
+        "cantidad": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "precio_unitario": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "valor_total_item": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 7, ítem 18",
+        "iva": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 3 ('VALOR DEL CONTRATO ... ($88.770.000) IVA INCLUIDO')",
+        "tipo_precio": "CARTA DE ACEPTACION 2025 VM-4 (1).pdf | página 3"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "RAFAEL SANDOVAL PASSOS", "precio_unitario": 4200000, "adjudicado": true, "evidencia": "ACTA DE EVALUACION GUAI-MC-007-2025 II.pdf | página 1-2 (oferta total $88.770.000, recomienda aceptar); precio TV en CARTA DE ACEPTACION | página 7"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Contrato multi-ítem de la CGR Guainía (32 ítems: mobiliario, equipos, electrodomésticos); solo el ítem 18 es televisor (el ítem 20 'soporte TV' se excluye). Precio adjudicado $4.200.000 (contrato $88.770.000 IVA incluido; presupuesto oficial $108.154.366). Hay cotización de mercado de MARIBEL HERNANDEZ CASTAÑEDA (no responsable de IVA) con el TV a $4.700.000 (Cotizacion CGR Matibel Guainia.pdf | página 8), que es estudio de mercado, no oferente. Marca/modelo no indicados (WebOS sugiere LG, no se registró por no ser explícito). El acta de evaluación solo menciona un oferente en orden de elegibilidad. Sin imágenes (todo con capa de texto).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["CARTA DE ACEPTACION 2025 VM-4 (1).pdf", "ACTA DE EVALUACION GUAI-MC-007-2025 II.pdf", "COTIZACION 2025.pdf", "Cotizacion CGR Matibel Guainia.pdf"]
+}

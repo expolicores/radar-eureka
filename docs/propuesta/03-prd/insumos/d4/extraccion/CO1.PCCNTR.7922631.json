@@ -1,0 +1,30 @@
+{
+  "id_contrato": "CO1.PCCNTR.7922631",
+  "documentos_utiles": false,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisores (adquisición e instalación de aire acondicionado y televisores; sin detalle de ítems en los documentos)",
+      "marca": null,
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": null,
+      "tipo_precio": null,
+      "confianza": {"descripcion": "media"},
+      "evidencia": {"descripcion": "7.Comunicación de aceptación MC-016-2025.pdf | página 1 (cláusula SEGUNDA. OBJETO)"}
+    }
+  ],
+  "oferentes": [
+    {"nombre": "GUSTAVO ALBERTO RENTERÍA BERRIO (establecimiento CLUB SOCIAL LA PLAYITA)", "precio_unitario": null, "adjudicado": true, "evidencia": "Evaluación Definitiva MC-016-2025.pdf | página 4 (oferta total $36.746.178, único proponente)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "Los documentos (evaluación definitiva duplicada, informe preliminar, comunicación de aceptación) solo dan el valor global $36.746.178, que mezcla aire acondicionado, televisores e instalación; no se puede aislar el valor de los TV. La evaluación definitiva (página 4) dice 'presenta la siguiente propuesta económica:' pero la tabla no aparece en el texto extraído (probablemente es una imagen embebida en un PDF que sí tiene capa de texto, por lo que no se generó PNG). La ficha técnica y la oferta económica no están entre los documentos. La aceptación indica que los valores unitarios incluyen impuestos de ley (página 4), pero no hay precios de TV. No se leyeron imágenes.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["Evaluación Definitiva MC-016-2025.pdf", "6.Evaluación Definitiva MC-016-2025.pdf", "5.Informe de evaluación preliminar MC-016-2025.pdf", "7.Comunicación de aceptación MC-016-2025.pdf"]
+}

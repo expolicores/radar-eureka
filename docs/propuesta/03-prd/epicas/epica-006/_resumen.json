@@ -1,0 +1,21 @@
+{"epica":"ÉPICA-006","features":[
+{"nombre":"Búsqueda y Filtrado de Compras","hus":[
+{"id":"HU-069","carpeta":"HU-069-explorar-compras-de-televisores","titulo":"Explorar el listado de compras públicas de televisores","prioridad":"Crítica","frs":["FR-071","FR-072"],"escenarios":16,"casos_qa":24},
+{"id":"HU-070","carpeta":"HU-070-filtrar-por-entidad-proveedor-modalidad","titulo":"Filtrar la exploración por entidad, proveedor y modalidad","prioridad":"Crítica","frs":["FR-071"],"escenarios":12,"casos_qa":17},
+{"id":"HU-071","carpeta":"HU-071-filtrar-por-fechas-valor-y-unspsc","titulo":"Filtrar la exploración por fechas, rango de valor y UNSPSC","prioridad":"Crítica","frs":["FR-071"],"escenarios":12,"casos_qa":16},
+{"id":"HU-072","carpeta":"HU-072-filtrar-por-territorio-fuente-y-senal","titulo":"Filtrar la exploración por territorio, fuente y existencia de señal","prioridad":"Crítica","frs":["FR-071"],"escenarios":11,"casos_qa":16},
+{"id":"HU-073","carpeta":"HU-073-ordenar-resultados-de-exploracion","titulo":"Ordenar los resultados de la exploración por desviación, valor, fecha o confianza","prioridad":"Crítica","frs":["FR-072"],"escenarios":9,"casos_qa":13}]},
+{"nombre":"Priorización de Señales","hus":[
+{"id":"HU-074","carpeta":"HU-074-ver-lista-priorizada-de-senales","titulo":"Ver la lista priorizada de señales que merecen revisión","prioridad":"Crítica","frs":["FR-073"],"escenarios":13,"casos_qa":15},
+{"id":"HU-075","carpeta":"HU-075-filtrar-y-ordenar-lista-de-senales","titulo":"Filtrar y ordenar la lista de señales que merecen revisión","prioridad":"Crítica","frs":["FR-071","FR-072","FR-073"],"escenarios":10,"casos_qa":16}]},
+{"nombre":"Consulta de la Ficha del Contrato","hus":[
+{"id":"HU-076","carpeta":"HU-076-ver-datos-clave-de-la-ficha","titulo":"Ver los datos clave del contrato y el enlace a la fuente oficial en la ficha","prioridad":"Crítica","frs":["FR-074"],"escenarios":13,"casos_qa":15},
+{"id":"HU-077","carpeta":"HU-077-ver-items-de-televisor-en-la-ficha","titulo":"Ver los ítems de televisor extraídos en la ficha del contrato","prioridad":"Crítica","frs":["FR-074"],"escenarios":12,"casos_qa":16},
+{"id":"HU-078","carpeta":"HU-078-ver-benchmarks-del-item-en-la-ficha","titulo":"Ver los benchmarks de cada ítem con la distribución de precios comparables en la ficha","prioridad":"Crítica","frs":["FR-074"],"escenarios":13,"casos_qa":16},
+{"id":"HU-079","carpeta":"HU-079-ver-senales-del-contrato-en-la-ficha","titulo":"Ver las señales que merecen revisión del contrato en la ficha","prioridad":"Crítica","frs":["FR-074"],"escenarios":8,"casos_qa":11},
+{"id":"HU-080","carpeta":"HU-080-ver-documentos-del-proceso-en-la-ficha","titulo":"Ver los documentos del proceso en la ficha del contrato","prioridad":"Crítica","frs":["FR-074"],"escenarios":10,"casos_qa":14}]},
+{"nombre":"Seguimiento del Procesamiento y Frescura de Datos","hus":[
+{"id":"HU-081","carpeta":"HU-081-ver-estado-de-procesamiento","titulo":"Ver el estado de procesamiento del contrato en la ficha","prioridad":"Crítica","frs":["FR-075"],"escenarios":10,"casos_qa":14},
+{"id":"HU-082","carpeta":"HU-082-ver-motivos-informacion-insuficiente","titulo":"Ver los motivos de información insuficiente del contrato en la ficha","prioridad":"Crítica","frs":["FR-075"],"escenarios":9,"casos_qa":11},
+{"id":"HU-083","carpeta":"HU-083-mostrar-fecha-de-actualizacion-datos","titulo":"Mostrar la fecha de actualización de los datos en la exploración y en la ficha","prioridad":"Crítica","frs":["FR-076"],"escenarios":8,"casos_qa":10}]}],
+"frs_cubiertos":["FR-071","FR-072","FR-073","FR-074","FR-075","FR-076"],"frs_no_cubiertos":[]}

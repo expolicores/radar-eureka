@@ -1,0 +1,62 @@
+{
+  "id_contrato": "CO1.PCCNTR.8721745",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "tv 65\" Samsung U8000F (modelo 2025) Smart TV Crystal UHD 4K, procesador Crystal 4K, Samsung TV Plus, sistema operativo Tizen",
+      "marca": "Samsung",
+      "modelo": "U8000F",
+      "tamano_pulgadas": 65,
+      "resolucion": "4K",
+      "tecnologia": null,
+      "smart": true,
+      "cantidad": 1,
+      "precio_unitario": 3050000,
+      "valor_total_item": 3050000,
+      "iva": "indeterminado",
+      "tipo_precio": "adjudicado",
+      "confianza": {
+        "marca": "alta",
+        "modelo": "alta",
+        "tamano_pulgadas": "alta",
+        "resolucion": "alta",
+        "smart": "alta",
+        "cantidad": "alta",
+        "precio_unitario": "alta",
+        "valor_total_item": "alta",
+        "tipo_precio": "media"
+      },
+      "evidencia": {
+        "descripcion": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "marca": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "modelo": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "tamano_pulgadas": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "resolucion": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "smart": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "cantidad": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "precio_unitario": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "valor_total_item": "cotizacion alcaldia dic 17 2025.pdf | página 1",
+        "tipo_precio": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf | página 2"
+      }
+    }
+  ],
+  "oferentes": [
+    {
+      "nombre": "EZEQUIEL JIMENEZ HERRERA",
+      "precio_unitario": null,
+      "valor_oferta_total": 13470000,
+      "adjudicado": true,
+      "evidencia": "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf | página 2"
+    }
+  ],
+  "inconsistencias": [
+    "La comunicación de aceptación se titula IPMC-164-2025 pero en el texto menciona 'documentos habilitantes requeridos en la IPMC-165-2025' (COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf | página 2)."
+  ],
+  "observaciones": "La cotización (sin nombre del oferente en el texto) suma 13.470.000, igual al valor de la oferta aceptada de EZEQUIEL JIMENEZ HERRERA, por lo que se trata como precio adjudicado (confianza media en esa vinculación). Aritmética del TV cuadra (1 x 3.050.000). 'Crystal UHD' no se mapea a LED/QLED/OLED por no estar explícito. IVA no mencionado. Soporte de suelo 32-70\" y proyector excluidos.",
+  "imagenes_leidas": 0,
+  "documentos_revisados": [
+    "COMUNICACION DE ACEPTACION IPMC 164-2025 DOTACION BIBLIOTECA.pdf",
+    "cotizacion alcaldia dic 17 2025.pdf"
+  ]
+}

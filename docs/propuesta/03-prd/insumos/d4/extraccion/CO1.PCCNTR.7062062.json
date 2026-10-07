@@ -1,0 +1,40 @@
+{
+  "id_contrato": "CO1.PCCNTR.7062062",
+  "documentos_utiles": true,
+  "requirio_imagen": false,
+  "items": [
+    {
+      "descripcion": "Televisores (7 unidades) para la I.E. Alberto Mendoza Mayor y sus sedes; contratados junto con 7 soportes de pared",
+      "marca": "Samsung",
+      "modelo": null,
+      "tamano_pulgadas": null,
+      "resolucion": null,
+      "tecnologia": null,
+      "smart": null,
+      "cantidad": 7,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": "baja", "modelo": null, "tamano_pulgadas": null, "cantidad": "alta", "precio_unitario": null},
+      "evidencia": {
+        "descripcion": "ANEXO CLAUSULAS CONTRATO IEAMM-17-2024.pdf | página 1 (objeto)",
+        "marca": "IEAMM-17-2024 Informe de evaluacion.pdf | página 9 (OCR ruidoso: 'satisfac!Samsun' en observaciones de la oferta de MAFER)",
+        "cantidad": "ANEXO CLAUSULAS CONTRATO IEAMM-17-2024.pdf | página 1; 2 COMUNICADO DE ACEPTACION DE OFERTA IEAMM-17-2024.pdf | página 1"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "IMPORTADORA FERRETERA MAFER SAS (MAFER)", "precio_unitario": null, "valor_oferta_total": 19495000, "adjudicado": true, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1 y página 10; IEAMM-17-2024 Oferta seleccionada.pdf | página 1"},
+    {"nombre": "COMERCIAL EDIVALLE", "precio_unitario": null, "valor_oferta_total": 19313000, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1 (valor) y página 5 (NO CUMPLE)"},
+    {"nombre": "PRODUSERV COLOMBIA SAS", "precio_unitario": null, "valor_oferta_total": 19964000, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1"},
+    {"nombre": "DATASERVICIOS Y COMUNICACIONES SAS", "precio_unitario": null, "valor_oferta_total": 21070735, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 2"},
+    {"nombre": "REVS SAS", "precio_unitario": null, "valor_oferta_total": 21199850, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1"},
+    {"nombre": "LADY HERMINIA LOPEZ GOMEZ", "precio_unitario": null, "valor_oferta_total": 21280000, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1"},
+    {"nombre": "SILICON", "precio_unitario": null, "valor_oferta_total": null, "adjudicado": false, "evidencia": "IEAMM-17-2024 Informe de evaluacion.pdf | página 1 (no adjuntó propuesta económica anexo 1)"}
+  ],
+  "inconsistencias": [],
+  "observaciones": "El objeto es 7 televisores + 7 soportes de pared, pero ningún documento disponible desglosa el precio por ítem (no está el Anexo 1 'Relación de cantidades y precios' de la oferta). Valor contratado $19.495.000 'incluido impuestos' es global (TV + soportes), por eso no se asigna a valor_total_item; precio unitario del TV no determinable. Presupuesto oficial $21.477.281 (global). Tamaño, resolución y modelo no aparecen. La marca Samsung es inferencia débil de un OCR ruidoso. El informe de evaluación es un escaneo con OCR muy ruidoso; el texto extraído fue suficiente y no había imágenes en la carpeta. Los oferentes solo tienen valor total de oferta (campo extra valor_oferta_total).",
+  "imagenes_leidas": 0,
+  "documentos_revisados": ["IEAMM-17-2024 Informe de evaluacion.pdf", "2 COMUNICADO DE ACEPTACION DE OFERTA IEAMM-17-2024.pdf", "IEAMM-17-2024 Oferta seleccionada.pdf", "ANEXO CLAUSULAS CONTRATO IEAMM-17-2024.pdf"]
+}

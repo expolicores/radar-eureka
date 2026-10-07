@@ -1,0 +1,42 @@
+{
+  "id_contrato": "CO1.PCCNTR.6855883",
+  "documentos_utiles": true,
+  "requirio_imagen": true,
+  "items": [
+    {
+      "descripcion": "Televisor Samsung UN60DU7000 de 60\", 4K Ultra HD, UHD, Smart TV, Wi-Fi 6, BT 5.0, DVB-T2, 20 W RMS, con soporte de pared brazo ajustable (oferta de IMPORTADORA Y COMERCIALIZADORA CAUCA LTDA)",
+      "marca": "Samsung",
+      "modelo": "UN60DU7000",
+      "tamano_pulgadas": 60,
+      "resolucion": "4K Ultra HD",
+      "tecnologia": "UHD",
+      "smart": true,
+      "cantidad": null,
+      "precio_unitario": null,
+      "valor_total_item": null,
+      "iva": "indeterminado",
+      "tipo_precio": null,
+      "confianza": {"marca": "alta", "modelo": "alta", "tamano_pulgadas": "media", "cantidad": null, "precio_unitario": null},
+      "evidencia": {
+        "descripcion": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png, Condiciones técnicas mínimas) y página 6 (imagen 519080302_p6.png)",
+        "marca": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png, ítem 1 Marca: SAMSUNG)",
+        "modelo": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png, ítem 2 Modelo: UN60DU7000)",
+        "tamano_pulgadas": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png, '60\" o superior'); página 1 (imagen 519080302_p1.png, objeto 'TELEVISORES DE 60\"')",
+        "resolucion": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png)",
+        "tecnologia": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png)",
+        "smart": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | página 5 (imagen 519080302_p5.png)"
+      }
+    }
+  ],
+  "oferentes": [
+    {"nombre": "IMPORTADORA Y COMERCIALIZADORA CAUCA LTDA", "precio_unitario": null, "adjudicado": null, "evidencia": "Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf | páginas 1 y 4 (imágenes 519080302_p1.png, 519080302_p4.png): oferta que ocupó el segundo puesto en orden de elegibilidad; CUMPLE jurídicamente"}
+  ],
+  "inconsistencias": [
+    "El documento se titula 'segunda oferta', pero el texto de la evaluación técnica (página 4) dice 'se realizó la evaluación de la primera oferta'.",
+    "El nombre de la representante legal aparece como 'NAZLY JULIETH' (evaluación jurídica) y 'NAZLY YULIETH' (evaluación técnica).",
+    "En la página 2 (imagen 519080302_p2.png) el RUT se identifica con NIT 900741497, mientras la página 1 indica NIT 900248705-4 para la misma sociedad."
+  ],
+  "observaciones": "Único documento con texto: informe de evaluación (jurídica + técnica) de la segunda oferta del proceso PN MEPOY MIC 054 de 2024, escaneado. Presupuesto oficial del proceso: $61.802.000 incluido IVA (página 1). No hay cantidad de televisores, precio unitario ni valor de la oferta en el documento; tampoco aceptación de oferta que confirme que este oferente fue el adjudicatario (el valor de datos abiertos 50.884.850 no aparece en los documentos). La evaluación técnica en página 5 cubre requisitos mínimos (marca, modelo, tamaño) con 'CUMPLE'; año de fabricación 2024. Tamaño 60 con confianza media porque el requisito es '60\" o superior' (el modelo UN60DU7000 corresponde a 60\"). Imágenes leídas: 519080302_p1-p6, todas legibles (p1-p3 evaluación jurídica, p4-p6 evaluación técnica, páginas 1-3 de 5).",
+  "imagenes_leidas": 6,
+  "documentos_revisados": ["Infpormr de evaluacion segunda oferta al proceso PN MEPOY MIC 054.pdf"]
+}

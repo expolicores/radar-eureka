@@ -1,0 +1,15 @@
+{
+  "id_contrato": "CO1.PCCNTR.5258565",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Adquisición e instalación de circuito cerrado de televisión (CCTV). El único elemento de visualización es 'Pantalla de visualización' (NEW SYSTEM $7.178.000, estimado $7.400.000, IVA incluido; EVALUACION ECONOMICA PROCESO PN MENEV MIC 022 2023.pdf | página 2), que es un monitor de CCTV y no un televisor de consumo; queda excluido. Hay un solo oferente (NEW SYSTEM), con oferta total de $27.708.050 frente a un valor del contrato de $33.518.350 en datos abiertos. Imágenes leídas (5, todas legibles): 327380638_p1 y p2 (evaluación económica), 327380644_p1 (evaluación técnica: NEW SYSTEM 'NO CUMPLE' especificaciones porque no indicó modelos), 327380646_p2 y p4 (aceptación de oferta: forma de pago y garantías, sin tabla de ítems).",
+  "imagenes_leidas": 5,
+  "documentos_revisados": [
+    "EVALUACION ECONOMICA PROCESO PN MENEV MIC 022 2023.pdf",
+    "EVALUACION TECNICA PROCESO PN MENEV MIC 022 2023.pdf",
+    "ACEPTACION DE OFERTA MINIMA CUANTIA.pdf"
+  ]
+}

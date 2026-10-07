@@ -1,0 +1,13 @@
+{
+  "metodoCeiba.aiProvider": "miia",
+  "chat.planAgent.defaultModel": "miia (ceiba)",
+  "inlineChat.defaultModel": "miia (ceiba)",
+  "chatCustomizationsEvaluations.model": "miia",
+  "github.copilot.chat.askAgent.model": "miia",
+  "github.copilot.chat.exploreAgent.model": "miia",
+  "github.copilot.chat.implementAgent.model": "miia",
+  "chat.exploreAgent.defaultModel": "miia (ceiba)",
+  "chat.utilityModel": "ceiba/miiavscode",
+  "chat.utilitySmallModel": "ceiba/miiavscode",
+  "metodoCeiba.enabled": true
+}

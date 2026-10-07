@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Story Map - Seguimiento Compras Públicas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #004a51 0%, #008f9f 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #004a51 0%, #008f9f 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-meta {
+            text-align: right;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            border-color: #008f9f;
+            color: #008f9f;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #008f9f;
+            color: white;
+            border-color: #008f9f;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 20px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #008f9f;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .story-map {
+            padding: 40px;
+            overflow-x: auto;
+        }
+
+        .backbone {
+            display: flex;
+            gap: 30px;
+            min-width: max-content;
+        }
+
+        .activity-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .activity {
+            background: linear-gradient(135deg, #008f9f 0%, #009b82 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .activity-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .activity-count-badge {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        .activity-subtitle {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .task-columns {
+            display: flex;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .task-column {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-header {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #004a51;
+            border-left: 4px solid #03bd85;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-count {
+            background: #03bd85;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .task-stories {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .story-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .story-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            border-color: #008f9f;
+        }
+
+        .story-card.mvp {
+            border-left: 4px solid #004a51;
+        }
+
+        .story-card.r2 {
+            border-left: 4px solid #03bd85;
+        }
+
+        .story-card.future {
+            border-left: 4px solid #8e8e8e;
+        }
+
+        .story-id {
+            font-size: 12px;
+            font-weight: 700;
+            color: #008f9f;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .release-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-mvp {
+            background: #004a51;
+            color: white;
+        }
+
+        .badge-r2 {
+            background: #03bd85;
+            color: white;
+        }
+
+        .badge-future {
+            background: #8e8e8e;
+            color: white;
+        }
+
+        .story-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .story-meta {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .story-epic {
+            background: #c5f6cf;
+            color: #004a51;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .legend {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            border-top: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .color-mvp {
+            background: #004a51;
+        }
+
+        .color-r2 {
+            background: #03bd85;
+        }
+
+        .color-future {
+            background: #8e8e8e;
+        }
+
+        @media (max-width: 1200px) {
+            .backbone {
+                flex-direction: column;
+            }
+
+            .activity-section,
+            .task-column {
+                min-width: 100%;
+            }
+
+            .task-columns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- HEADER: Información del proyecto -->
+        <div class="header">
+            <div>
+                <h1>🗺️ User Story Map - Seguimiento Compras Públicas</h1>
+                <p style="margin-top: 8px; font-size: 16px;">MVP para analistas que investigan contratación pública: de SECOP II y TVEC a señales de precio que merecen revisión, con evidencia trazable (recorte: televisores).</p>
+            </div>
+            <div class="header-meta">
+                <div><strong>Fecha:</strong> 2026-10-02</div>
+                <div><strong>Cliente:</strong> Proyecto propio — PO: Juan Camilo</div>
+                <div><strong>Estado:</strong> Borrador — para validación de producto (D5)</div>
+            </div>
+        </div>
+
+        <!-- TOOLBAR: Filtros y métricas -->
+        <div class="toolbar">
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterRelease('all')">📋 Todos los RF</button>
+                <button class="filter-btn" onclick="filterRelease('mvp')">🟦 MVP (95 RF)</button>
+                <button class="filter-btn" onclick="filterRelease('r2')">🟩 Release 2 (4 RF)</button>
+                <button class="filter-btn" onclick="filterRelease('future')">⬛ Futuro (1 RF)</button>
+            </div>
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">7</div>
+                    <div class="metric-label">Actividades</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">100</div>
+                    <div class="metric-label">Requerimientos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-map">
+            <div class="backbone">
+                                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">📥</div>
+                        <div class="activity-title">OBTENER DATOS PÚBLICOS <span class="activity-count-badge">17</span></div>
+                        <div class="activity-subtitle">Ingesta SECOP II y TVEC, e identificación de televisores</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">🏛️ Ingerir SECOP II <span class="task-count">6</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-001</div>
+                                    <div class="story-title">Ingerir contratos SECOP II por API</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-002</div>
+                                    <div class="story-title">Cargar histórico de 3 años</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-003</div>
+                                    <div class="story-title">Carga incremental (separada de extracción)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-006</div>
+                                    <div class="story-title">Excluir datos personales sensibles</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-008</div>
+                                    <div class="story-title">Conservar identificador y URL de origen</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-009</div>
+                                    <div class="story-title">Marcar fecha de corte</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🛒 Ingerir TVEC <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-004</div>
+                                    <div class="story-title">Ingerir ítems y órdenes TVEC</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-005</div>
+                                    <div class="story-title">Relacionar ítem TVEC con orden y entidad</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🧪 Controlar calidad de ingesta <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-007</div>
+                                    <div class="story-title">Registrar cada ejecución de ingesta</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-010</div>
+                                    <div class="story-title">Validar calidad en la ingesta</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🎯 Detectar candidatos <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-011</div>
+                                    <div class="story-title">Candidatos SECOP II por UNSPSC y/o texto</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-012</div>
+                                    <div class="story-title">Candidatos TVEC por texto</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🧭 Clasificar ítems <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-013</div>
+                                    <div class="story-title">Clasificación estricta por ítem</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-014</div>
+                                    <div class="story-title">Excluir TV con servicios no discriminables</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-015</div>
+                                    <div class="story-title">Registrar resultado y criterio de clasificación</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-017</div>
+                                    <div class="story-title">Soportar contratos mixtos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">✍️ Corregir clasificación <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-016</div>
+                                    <div class="story-title">Corregir clasificación (Administrador)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-001</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">🤖</div>
+                        <div class="activity-title">CONVERTIR DOCUMENTOS EN DATOS <span class="activity-count-badge">19</span></div>
+                        <div class="activity-subtitle">Documentos oficiales y extracción multimodal con evidencia</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">⬇️ Obtener documentos <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-018</div>
+                                    <div class="story-title">Listar documentos del proceso</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-020</div>
+                                    <div class="story-title">Descargar por URL oficial sin evasión</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-021</div>
+                                    <div class="story-title">Descomprimir ZIP/RAR</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🗂️ Priorizar documentos <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-019</div>
+                                    <div class="story-title">Priorizar ~8 documentos, sin blancos ni duplicados</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🖼️ Preparar contenido y evidencia <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-022</div>
+                                    <div class="story-title">Soportar PDF, XLSX, DOCX e imágenes</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-023</div>
+                                    <div class="story-title">Detectar OCR e imágenes incrustadas</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-024</div>
+                                    <div class="story-title">Conservar documento, hash y ubicación de evidencia</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🔍 Extraer datos del ítem <span class="task-count">6</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-025</div>
+                                    <div class="story-title">Extraer datos del ítem de televisor</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-027</div>
+                                    <div class="story-title">Evidencia: documento y página por dato</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-029</div>
+                                    <div class="story-title">Distinguir IVA: con / sin / indeterminado</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-030</div>
+                                    <div class="story-title">Marcar información insuficiente</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-099</div>
+                                    <div class="story-title">Precio unitario derivado (reglas estrictas)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-100</div>
+                                    <div class="story-title">No usar valor de datos abiertos como precio</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📏 Asegurar calidad <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-028</div>
+                                    <div class="story-title">Confianza y umbral configurable</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-031</div>
+                                    <div class="story-title">Detectar inconsistencias aritméticas (calidad)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-033</div>
+                                    <div class="story-title">Desactivar IA sin afectar la base</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-034</div>
+                                    <div class="story-title">Registrar costo y tiempo por documento</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">✅ Validar extracción <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-032</div>
+                                    <div class="story-title">Validar o corregir extracción (Revisor)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-002</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">👥 Comparar oferentes <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card future" data-release="future">
+                                    <div class="story-id"><span class="release-badge badge-future">FUTURO</span>FR-026</div>
+                                    <div class="story-title">Precios de múltiples oferentes (pospuesto D4)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-009</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">🏷️</div>
+                        <div class="activity-title">CONSTRUIR REFERENCIAS <span class="activity-count-badge">19</span></div>
+                        <div class="activity-subtitle">Normalización de productos y base propia de mercado</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">🧩 Normalizar <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-035</div>
+                                    <div class="story-title">Esquema común de televisor</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-036</div>
+                                    <div class="story-title">Normalización sintáctica de modelos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🤝 Emparejar <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-037</div>
+                                    <div class="story-title">Emparejar mismo modelo / EAN</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-038</div>
+                                    <div class="story-title">Emparejar producto equivalente</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-039</div>
+                                    <div class="story-title">Clasificar emparejamiento con criterios</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-040</div>
+                                    <div class="story-title">No relajar criterios de equivalencia</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-003</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🛰️ Capturar automáticamente <span class="task-count">5</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-043</div>
+                                    <div class="story-title">Observaciones Alkosto y Falabella (adquisición progresiva)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-044</div>
+                                    <div class="story-title">Solo vendedor = la tienda</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-045</div>
+                                    <div class="story-title">Precio efectivo de venta</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-046</div>
+                                    <div class="story-title">Marcar precios condicionados</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-047</div>
+                                    <div class="story-title">Suspender captura ante bloqueos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📝 Cargar manualmente <span class="task-count">5</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-048</div>
+                                    <div class="story-title">Carga manual con evidencia</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-049</div>
+                                    <div class="story-title">Identificar observación manual</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-050</div>
+                                    <div class="story-title">Registrar usuario de la carga manual</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-051</div>
+                                    <div class="story-title">Protocolo contra el sesgo de selección</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-052</div>
+                                    <div class="story-title">Carga semiautomática por CSV</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🗄️ Conservar observaciones <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-041</div>
+                                    <div class="story-title">Base propia de observaciones</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-042</div>
+                                    <div class="story-title">Registro mínimo de cada observación</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-053</div>
+                                    <div class="story-title">Histórico inmutable de observaciones</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-004</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">🚩</div>
+                        <div class="activity-title">DETECTAR SEÑALES <span class="activity-count-badge">17</span></div>
+                        <div class="activity-subtitle">Benchmarks y señales que merecen revisión</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">🏛️ Comparar con compras públicas <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-054</div>
+                                    <div class="story-title">Benchmark 1: compras públicas</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-055</div>
+                                    <div class="story-title">Comparables B1 en ventana configurable</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🏪 Comparar con mercado <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-056</div>
+                                    <div class="story-title">Benchmark 2: mercado en ventana cercana</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-059</div>
+                                    <div class="story-title">Mostrar &quot;referencia disponible&quot;</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-060</div>
+                                    <div class="story-title">B2 no disponible sin bloquear B1</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🧮 Calcular referencia y desviación <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-057</div>
+                                    <div class="story-title">Comparar solo en la misma base tributaria</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-058</div>
+                                    <div class="story-title">Referencia agregada con mínimo configurable</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-061</div>
+                                    <div class="story-title">Calcular desviación porcentual</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-062</div>
+                                    <div class="story-title">Identificar origen: SECOP II / TVEC / retail</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🔔 Generar señal <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-063</div>
+                                    <div class="story-title">Señal híbrida solo para priorizar</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-064</div>
+                                    <div class="story-title">Sin lenguaje acusatorio</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-067</div>
+                                    <div class="story-title">Advertencia: no es conclusión</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-068</div>
+                                    <div class="story-title">Nivel de confianza de la señal</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🧾 Revisar evidencia <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-065</div>
+                                    <div class="story-title">Asociar evidencia completa a la señal</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-066</div>
+                                    <div class="story-title">Navegar a documento, página y referencias</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">⭐ Calificar y reportar <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-069</div>
+                                    <div class="story-title">Calificar señal (Analista)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-070</div>
+                                    <div class="story-title">Reportar error (mecanismo de corrección)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">🔎</div>
+                        <div class="activity-title">EXPLORAR CONTRATACIÓN <span class="activity-count-badge">9</span></div>
+                        <div class="activity-subtitle">Búsqueda, señales priorizadas y ficha del contrato</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">🔍 Buscar y filtrar <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-071</div>
+                                    <div class="story-title">Buscar y filtrar contratos e ítems</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-072</div>
+                                    <div class="story-title">Ordenar resultados</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-076</div>
+                                    <div class="story-title">Mostrar fecha de actualización</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📋 Priorizar señales <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-073</div>
+                                    <div class="story-title">Lista priorizada de señales</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📑 Ver ficha del contrato <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-074</div>
+                                    <div class="story-title">Ficha del contrato</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-075</div>
+                                    <div class="story-title">Estado de procesamiento del contrato</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-006</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🏢 Ver contexto ampliado <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card r2" data-release="r2">
+                                    <div class="story-id"><span class="release-badge badge-r2">R2</span>FR-095</div>
+                                    <div class="story-title">Ficha de entidad</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-009</span>
+                                    </div>
+                                </div>
+                                <div class="story-card r2" data-release="r2">
+                                    <div class="story-id"><span class="release-badge badge-r2">R2</span>FR-096</div>
+                                    <div class="story-title">Ficha de proveedor</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-009</span>
+                                    </div>
+                                </div>
+                                <div class="story-card r2" data-release="r2">
+                                    <div class="story-id"><span class="release-badge badge-r2">R2</span>FR-097</div>
+                                    <div class="story-title">Señales que no son de precio</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-009</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">🗂️</div>
+                        <div class="activity-title">INVESTIGAR CASOS <span class="activity-count-badge">12</span></div>
+                        <div class="activity-subtitle">Acceso por invitación y espacio de investigación</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">✉️ Registrarse por invitación <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-083</div>
+                                    <div class="story-title">Registro por invitación</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-087</div>
+                                    <div class="story-title">Aceptar términos y política de datos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🔑 Autenticarse <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-084</div>
+                                    <div class="story-title">Iniciar y cerrar sesión</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-085</div>
+                                    <div class="story-title">Recuperar contraseña</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">👤 Asignar roles <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-086</div>
+                                    <div class="story-title">Roles Analista y Administrador</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📁 Crear y organizar casos <span class="task-count">4</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-077</div>
+                                    <div class="story-title">Crear caso desde señal o contrato</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-078</div>
+                                    <div class="story-title">Guardar señales, contratos y evidencias</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-081</div>
+                                    <div class="story-title">Instantánea de la evidencia en el caso</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-082</div>
+                                    <div class="story-title">Caso privado del autor</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🗒️ Anotar y retomar <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-079</div>
+                                    <div class="story-title">Notas del caso</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-080</div>
+                                    <div class="story-title">Listar y retomar casos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📤 Exportar expediente <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card r2" data-release="r2">
+                                    <div class="story-id"><span class="release-badge badge-r2">R2</span>FR-098</div>
+                                    <div class="story-title">Exportar expediente de caso</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-009</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <div class="activity">
+                        <div class="activity-icon">⚙️</div>
+                        <div class="activity-title">OPERAR Y MEDIR EL MVP <span class="activity-count-badge">7</span></div>
+                        <div class="activity-subtitle">Administración, calidad y KPIs (PO)</div>
+                    </div>
+                    <div class="task-columns">
+                        <div class="task-column">
+                            <div class="task-header">🛠️ Operar fuentes <span class="task-count">2</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-088</div>
+                                    <div class="story-title">Estado de fuentes y relanzar procesos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-089</div>
+                                    <div class="story-title">Configurar parámetros analíticos</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">🧹 Revisar cola de calidad <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-090</div>
+                                    <div class="story-title">Cola de revisión humana</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📊 Medir KPIs <span class="task-count">3</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-091</div>
+                                    <div class="story-title">KPIs del MVP (incl. 3 coberturas)</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-092</div>
+                                    <div class="story-title">Marcar muestra de validación</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-093</div>
+                                    <div class="story-title">Medir tiempo por caso</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-column">
+                            <div class="task-header">📜 Auditar <span class="task-count">1</span></div>
+                            <div class="task-stories">
+                                <div class="story-card mvp" data-release="mvp">
+                                    <div class="story-id"><span class="release-badge badge-mvp">MVP</span>FR-094</div>
+                                    <div class="story-title">Log de auditoría</div>
+                                    <div class="story-meta">
+                                        <span class="story-epic">ÉPICA-008</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FIN ACTIVIDADES DINÁMICAS -->
+
+            </div>
+        </div>
+
+        <!-- LEGEND: Explicación de releases -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color color-mvp"></div>
+                <span><strong>🟦 MVP - Release 1:</strong> 95 RF - Crítico para lanzamiento</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-r2"></div>
+                <span><strong>🟩 Release 2:</strong> 4 RF - Funcionalidades avanzadas (ÉPICA-009, reevaluar con D5)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-future"></div>
+                <span><strong>⬛ Futuro:</strong> 1 RF - A evaluar post-R2 (FR-026, pospuesta por D4)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterRelease(release) {
+            const cards = document.querySelectorAll('.story-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            cards.forEach(card => {
+                if (release === 'all' || card.dataset.release === release) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

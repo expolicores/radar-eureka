@@ -1,0 +1,11 @@
+{
+  "id_contrato": "CO1.PCCNTR.7106865",
+  "documentos_utiles": false,
+  "requirio_imagen": true,
+  "items": [],
+  "oferentes": [],
+  "inconsistencias": [],
+  "observaciones": "Sin ítems de televisor identificables. El objeto del contrato (datos abiertos) es 'ADQUISICIÓN DE AIRES ACONDICIONADOS' (valor 481.560.000), derivado del proceso de subasta inversa 0107-ARC-CBNL01-2024 de equipos de cafetería, electrodomésticos y otros (Lote 1 presupuesto $1.875.740.000,03; Lote 2 $907.439.999,92 con IVA). Los documentos disponibles (evaluaciones jurídicas por oferente, evaluación económica final del Lote 2: SIS MG SAS 381.413.700 rechazado, AINECOL SAS 393.210.000 habilitado; evaluación técnica de cumplimiento) no contienen listado de ítems, ni mención de televisores, ni precios unitarios. Imágenes leídas: 547579893_p1 y p2 (EVALUACION TECNICA.pdf, rotadas pero legibles; solo cuadro CUMPLE/SUBSANAR de 19 oferentes, sin ítems). No se leyeron p3-p6 por ser continuación del mismo cuadro de cumplimiento. No se registran oferentes porque no hay precios de TV.",
+  "imagenes_leidas": 2,
+  "documentos_revisados": ["EVALUACION JURIDICA.pdf", "EVALUACION JURIDICA ADQUISICION DE EQUIPOS DE CAFETERIA, ELECTRODOMESTICOS.pdf", "EVALUACION ECONOMICA FINAL.pdf", "EVALUACION TECNICA.pdf"]
+}

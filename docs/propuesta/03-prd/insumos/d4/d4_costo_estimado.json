@@ -1,0 +1,30 @@
+{
+ "supuestos": {
+  "tokens_por_caracter": "1/3,5 (texto en español)",
+  "tokens_por_imagen": 1500,
+  "tokens_salida_por_contrato": 2000,
+  "nota": "No incluye tokens de razonamiento (thinking), reintentos ni caché; multiplicar ×1,5–3 como margen."
+ },
+ "tokens_entrada_por_contrato": {
+  "mediana": 14773,
+  "p90": 30187,
+  "max": 71319
+ },
+ "costo_estimado": {
+  "Haiku 4.5": {
+   "usd_por_contrato_mediana": 0.0248,
+   "usd_por_contrato_p90": 0.0402,
+   "usd_universo_355_contratos": 9.53
+  },
+  "Sonnet 5.5": {
+   "usd_por_contrato_mediana": 0.0495,
+   "usd_por_contrato_p90": 0.0804,
+   "usd_universo_355_contratos": 19.07
+  },
+  "Opus 5.5": {
+   "usd_por_contrato_mediana": 0.0991,
+   "usd_por_contrato_p90": 0.1607,
+   "usd_universo_355_contratos": 38.14
+  }
+ }
+}
