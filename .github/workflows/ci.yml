@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint, tipado y pruebas)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: procurement
+          POSTGRES_PASSWORD: procurement_ci
+          POSTGRES_DB: public_procurement
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U procurement -d public_procurement"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://procurement:procurement_ci@localhost:5432/public_procurement
+      APP_ENV: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Instalar Python 3.12 y dependencias
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check .
+      - name: Formato
+        run: uv run ruff format --check .
+      - name: Tipado
+        run: uv run mypy src
+      - name: Fronteras de importación
+        run: uv run lint-imports
+      - name: Migraciones
+        run: uv run alembic upgrade head
+      - name: Pruebas
+        run: uv run pytest
+
+  frontend:
+    name: Frontend (lint, tipado, pruebas y build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Formato
+        run: npm run format:check
+      - name: Tipado
+        run: npm run typecheck
+      - name: Pruebas
+        run: npm test
+      - name: Build
+        run: npm run build

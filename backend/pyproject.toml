@@ -1,0 +1,141 @@
+[project]
+name = "public-procurement"
+version = "0.1.0"
+description = "Seguimiento Compras Públicas: señales explicables sobre compras públicas de SECOP II y TVEC"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.13",
+    "fastapi>=0.115",
+    "psycopg[binary]>=3.2",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "typer>=0.12",
+    "uvicorn[standard]>=0.32",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.27",
+    "import-linter>=2.1",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+# PostgreSQL embebido solo para desarrollo local sin Docker (scripts/local_postgres.py).
+local-db = [
+    "pgserver>=0.1.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/public_procurement"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "SIM", "RUF", "DTZ", "PT"]
+# Los textos en español usan «×» (cantidades) y «–» (rangos) a propósito.
+allowed-confusables = ["×", "–", "−"]
+
+[tool.ruff.lint.per-file-ignores]
+# Las pruebas usan assert y credenciales falsas a propósito.
+"tests/**" = ["S101", "S105"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["public_procurement"]
+# La carpeta backend/alembic/ (migraciones) no es el paquete alembic.
+known-third-party = ["alembic"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+check_untyped_defs = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]   # strict inicial: dominio y servicios de aplicación
+module = ["public_procurement.*.domain.*", "public_procurement.*.services"]
+strict = true
+# adapters, migraciones de alembic y tests: chequeo estándar, sin strict
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: requiere PostgreSQL real en DATABASE_URL",
+]
+
+[tool.importlinter]
+root_package = "public_procurement"
+include_external_packages = true
+# Un contrato por módulo: desde otro módulo solo se permite importar <module>.services.
+
+
+[[tool.importlinter.contracts]]
+name = "Entrypoints sobre módulos, módulos sobre el núcleo compartido, nunca al revés"
+type = "layers"
+layers = [
+    "public_procurement.entrypoints",
+    "public_procurement.investigation",
+    "public_procurement.exploration",
+    "public_procurement.comparison",
+    "public_procurement.ingestion | public_procurement.market",
+    "public_procurement.shared",
+]
+
+[[tool.importlinter.contracts]]
+name = "Entre módulos solo se usa <module>.services"
+type = "forbidden"
+source_modules = [
+    "public_procurement.investigation",
+    "public_procurement.exploration",
+    "public_procurement.comparison",
+]
+forbidden_modules = [
+    "public_procurement.ingestion.domain",
+    "public_procurement.ingestion.repositories",
+    "public_procurement.ingestion.adapters",
+    "public_procurement.ingestion.ports",
+    "public_procurement.ingestion.unit_of_work",
+    "public_procurement.market.domain",
+    "public_procurement.market.repositories",
+    "public_procurement.market.adapters",
+    "public_procurement.market.ports",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Exploración e investigación solo usan comparison.services"
+type = "forbidden"
+source_modules = ["public_procurement.exploration", "public_procurement.investigation"]
+forbidden_modules = [
+    "public_procurement.comparison.domain",
+    "public_procurement.comparison.repositories",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "La investigación solo usa exploration.services"
+type = "forbidden"
+source_modules = ["public_procurement.investigation"]
+forbidden_modules = ["public_procurement.exploration.domain", "public_procurement.exploration.api"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "El dominio no tiene ORM, framework web ni I/O"
+type = "forbidden"
+source_modules = ["public_procurement.*.domain"]
+forbidden_modules = ["sqlalchemy", "fastapi", "starlette", "psycopg", "httpx", "typer"]
+
+[[tool.importlinter.contracts]]
+name = "El núcleo compartido no depende del framework web"
+type = "forbidden"
+source_modules = ["public_procurement.shared"]
+forbidden_modules = ["fastapi", "starlette"]

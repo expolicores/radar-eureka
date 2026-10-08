@@ -23,3 +23,24 @@ ceiba-worktree.js
 .github/hooks/agent-activity.json
 .github/log-agent-activity.ps1
 .github/log-agent-activity.sh
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.import_linter_cache/
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# PostgreSQL embebido de desarrollo local
+backend/.local/

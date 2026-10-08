@@ -1,0 +1,2078 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Seguimiento Compras Públicas",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Healthz",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Base de datos no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchases": {
+      "get": {
+        "tags": [
+          "Exploración de compras"
+        ],
+        "summary": "Listar compras con búsqueda y filtros",
+        "operationId": "list_purchases_api_v1_purchases_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Entidad, proveedor, NIT u objeto",
+              "title": "Q"
+            },
+            "description": "Entidad, proveedor, NIT u objeto"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Source"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          },
+          {
+            "name": "modality",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 96
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Modality"
+            }
+          },
+          {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department"
+            }
+          },
+          {
+            "name": "value_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ValueRange"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value Range"
+            }
+          },
+          {
+            "name": "signed_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Signed From"
+            }
+          },
+          {
+            "name": "signed_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Signed To"
+            }
+          },
+          {
+            "name": "has_signal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Con señal vigente (true) o sin ella",
+              "title": "Has Signal"
+            },
+            "description": "Con señal vigente (true) o sin ella"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PurchaseSort",
+              "default": "signed_desc"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchases/filters": {
+      "get": {
+        "tags": [
+          "Exploración de compras"
+        ],
+        "summary": "Opciones de filtro y fecha de corte",
+        "operationId": "filter_options_api_v1_purchases_filters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchases/{purchase_id}": {
+      "get": {
+        "tags": [
+          "Exploración de compras"
+        ],
+        "summary": "Ficha de una compra",
+        "operationId": "get_purchase_api_v1_purchases__purchase_id__get",
+        "parameters": [
+          {
+            "name": "purchase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Purchase Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Compra no encontrada"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signals": {
+      "get": {
+        "tags": [
+          "Señales que merecen revisión"
+        ],
+        "summary": "Lista priorizada de señales vigentes",
+        "operationId": "list_signals_api_v1_signals_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Entidad, proveedor, NIT, ítem o código",
+              "title": "Q"
+            },
+            "description": "Entidad, proveedor, NIT, ítem o código"
+          },
+          {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PurchaseSource"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          },
+          {
+            "name": "confidence",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ConfidenceLevel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confidence"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 2000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SignalSort",
+              "default": "priority"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signals/summary": {
+      "get": {
+        "tags": [
+          "Señales que merecen revisión"
+        ],
+        "summary": "Indicadores de las señales",
+        "operationId": "signal_summary_api_v1_signals_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signals/{code}": {
+      "get": {
+        "tags": [
+          "Señales que merecen revisión"
+        ],
+        "summary": "Detalle reproducible de una señal",
+        "operationId": "get_signal_api_v1_signals__code__get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^SG-\\d{4}-[0-9A-Z-]+$",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Señal no encontrada"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cases": {
+      "get": {
+        "tags": [
+          "Casos de investigación"
+        ],
+        "summary": "Mis casos",
+        "operationId": "list_cases_api_v1_cases_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CaseSummaryResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Cases Api V1 Cases Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Casos de investigación"
+        ],
+        "summary": "Crear un caso",
+        "operationId": "create_case_api_v1_cases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cases/{case_id}": {
+      "get": {
+        "tags": [
+          "Casos de investigación"
+        ],
+        "summary": "Abrir un caso",
+        "operationId": "get_case_api_v1_cases__case_id__get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cases/{case_id}/items": {
+      "post": {
+        "tags": [
+          "Casos de investigación"
+        ],
+        "summary": "Guardar una señal o una compra como instantánea",
+        "operationId": "save_item_api_v1_cases__case_id__items_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cases/{case_id}/notes": {
+      "post": {
+        "tags": [
+          "Casos de investigación"
+        ],
+        "summary": "Agregar una nota",
+        "operationId": "add_note_api_v1_cases__case_id__notes_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AcquisitionMethod": {
+        "type": "string",
+        "enum": [
+          "sitemap",
+          "structured_data",
+          "manual",
+          "simulated"
+        ],
+        "title": "AcquisitionMethod"
+      },
+      "AnalysisStatus": {
+        "type": "string",
+        "enum": [
+          "with_signal",
+          "compared_no_signal",
+          "insufficient_comparables",
+          "excluded",
+          "quality_review",
+          "no_unit_price",
+          "vat_incomplete",
+          "pending_comparison"
+        ],
+        "title": "AnalysisStatus"
+      },
+      "CaseCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CaseCreate"
+      },
+      "CaseDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          },
+          "note_count": {
+            "type": "integer",
+            "title": "Note Count"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CaseItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/NoteResponse"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "item_count",
+          "note_count",
+          "created_at",
+          "last_activity_at",
+          "items",
+          "notes"
+        ],
+        "title": "CaseDetailResponse"
+      },
+      "CaseItemCreate": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CaseItemKind"
+          },
+          "reference": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Reference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "reference"
+        ],
+        "title": "CaseItemCreate"
+      },
+      "CaseItemKind": {
+        "type": "string",
+        "enum": [
+          "signal",
+          "purchase"
+        ],
+        "title": "CaseItemKind"
+      },
+      "CaseItemResponse": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CaseItemKind"
+          },
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          },
+          "snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Snapshot"
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Saved At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "reference",
+          "snapshot",
+          "saved_at"
+        ],
+        "title": "CaseItemResponse"
+      },
+      "CaseSummaryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          },
+          "note_count": {
+            "type": "integer",
+            "title": "Note Count"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "item_count",
+          "note_count",
+          "created_at",
+          "last_activity_at"
+        ],
+        "title": "CaseSummaryResponse"
+      },
+      "Comparable": {
+        "properties": {
+          "purchase_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Id"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PurchaseSource"
+          },
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          },
+          "entity_name": {
+            "type": "string",
+            "title": "Entity Name"
+          },
+          "signed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Signed On"
+          },
+          "unit_price_cop": {
+            "type": "integer",
+            "title": "Unit Price Cop"
+          },
+          "same_model": {
+            "type": "boolean",
+            "title": "Same Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purchase_id",
+          "source",
+          "reference",
+          "entity_name",
+          "signed_on",
+          "unit_price_cop",
+          "same_model"
+        ],
+        "title": "Comparable"
+      },
+      "ConfidenceLevel": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "ConfidenceLevel"
+      },
+      "ConfidencePenalty": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/PenaltyCode"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "label",
+          "points"
+        ],
+        "title": "ConfidencePenalty"
+      },
+      "DatabaseStatus": {
+        "type": "string",
+        "enum": [
+          "ok",
+          "unavailable"
+        ],
+        "title": "DatabaseStatus"
+      },
+      "FilterOptions": {
+        "properties": {
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "modalities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Modalities"
+          },
+          "departments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Departments"
+          },
+          "data_cutoff_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sources",
+          "modalities",
+          "departments",
+          "data_cutoff_at"
+        ],
+        "title": "FilterOptions"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthStatus": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "database": {
+            "$ref": "#/components/schemas/DatabaseStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database"
+        ],
+        "title": "HealthStatus"
+      },
+      "ItemClassification": {
+        "type": "string",
+        "enum": [
+          "included",
+          "excluded_accessory",
+          "excluded_service",
+          "undetermined"
+        ],
+        "title": "ItemClassification"
+      },
+      "MarketObservation": {
+        "properties": {
+          "store": {
+            "$ref": "#/components/schemas/Store"
+          },
+          "product_description": {
+            "type": "string",
+            "title": "Product Description"
+          },
+          "effective_price_cop": {
+            "type": "integer",
+            "title": "Effective Price Cop"
+          },
+          "list_price_cop": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "List Price Cop"
+          },
+          "observed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Observed On"
+          },
+          "method": {
+            "$ref": "#/components/schemas/AcquisitionMethod"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store",
+          "product_description",
+          "effective_price_cop",
+          "list_price_cop",
+          "observed_on",
+          "method"
+        ],
+        "title": "MarketObservation"
+      },
+      "MarketStatus": {
+        "type": "string",
+        "enum": [
+          "reference",
+          "limited",
+          "unavailable"
+        ],
+        "title": "MarketStatus"
+      },
+      "NoteCreate": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "NoteCreate"
+      },
+      "NoteResponse": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body",
+          "created_at"
+        ],
+        "title": "NoteResponse"
+      },
+      "Outcome": {
+        "type": "string",
+        "enum": [
+          "signal",
+          "no_signal",
+          "low_price_review",
+          "insufficient_comparables",
+          "vat_incomplete",
+          "no_unit_price",
+          "quality_review"
+        ],
+        "title": "Outcome"
+      },
+      "PenaltyCode": {
+        "type": "string",
+        "enum": [
+          "equivalent_match",
+          "derived_price",
+          "market_limited",
+          "market_unavailable",
+          "few_comparables",
+          "extended_window",
+          "percentage_rule"
+        ],
+        "title": "PenaltyCode"
+      },
+      "ProblemDetails": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "about:blank"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "status",
+          "detail"
+        ],
+        "title": "ProblemDetails"
+      },
+      "PurchaseDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "entity_name": {
+            "type": "string",
+            "title": "Entity Name"
+          },
+          "entity_department": {
+            "type": "string",
+            "title": "Entity Department"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "object_description": {
+            "type": "string",
+            "title": "Object Description"
+          },
+          "modality": {
+            "type": "string",
+            "title": "Modality"
+          },
+          "total_value_cop": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Value Cop"
+          },
+          "signed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Signed On"
+          },
+          "analysis_status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          },
+          "proceso_de_compra": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proceso De Compra"
+          },
+          "entity_municipality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Municipality"
+          },
+          "supplier_nit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Nit"
+          },
+          "supplier_is_natural_person": {
+            "type": "boolean",
+            "title": "Supplier Is Natural Person"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "data_cutoff_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "reference",
+          "source",
+          "entity_name",
+          "entity_department",
+          "supplier_name",
+          "object_description",
+          "modality",
+          "total_value_cop",
+          "signed_on",
+          "analysis_status",
+          "proceso_de_compra",
+          "entity_municipality",
+          "supplier_nit",
+          "supplier_is_natural_person",
+          "source_url",
+          "items",
+          "data_cutoff_at"
+        ],
+        "title": "PurchaseDetail"
+      },
+      "PurchaseItem": {
+        "properties": {
+          "line_number": {
+            "type": "integer",
+            "title": "Line Number"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/ItemClassification"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "unit_price_cop": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Price Cop"
+          },
+          "unit_price_status": {
+            "$ref": "#/components/schemas/UnitPriceStatus"
+          },
+          "vat_basis": {
+            "$ref": "#/components/schemas/VatBasis"
+          },
+          "screen_size_inches": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen Size Inches"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
+          },
+          "panel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Panel"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "comparison_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signal Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "line_number",
+          "description",
+          "classification",
+          "quantity",
+          "unit_price_cop",
+          "unit_price_status",
+          "vat_basis",
+          "screen_size_inches",
+          "resolution",
+          "panel",
+          "brand",
+          "model",
+          "comparison_outcome",
+          "signal_code"
+        ],
+        "title": "PurchaseItem"
+      },
+      "PurchaseList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "PurchaseList"
+      },
+      "PurchaseSort": {
+        "type": "string",
+        "enum": [
+          "signed_desc",
+          "signed_asc",
+          "value_desc",
+          "value_asc"
+        ],
+        "title": "PurchaseSort"
+      },
+      "PurchaseSource": {
+        "type": "string",
+        "enum": [
+          "secop_ii",
+          "tvec"
+        ],
+        "title": "PurchaseSource"
+      },
+      "PurchaseSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "entity_name": {
+            "type": "string",
+            "title": "Entity Name"
+          },
+          "entity_department": {
+            "type": "string",
+            "title": "Entity Department"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "object_description": {
+            "type": "string",
+            "title": "Object Description"
+          },
+          "modality": {
+            "type": "string",
+            "title": "Modality"
+          },
+          "total_value_cop": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Value Cop"
+          },
+          "signed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Signed On"
+          },
+          "analysis_status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "reference",
+          "source",
+          "entity_name",
+          "entity_department",
+          "supplier_name",
+          "object_description",
+          "modality",
+          "total_value_cop",
+          "signed_on",
+          "analysis_status"
+        ],
+        "title": "PurchaseSummary"
+      },
+      "Signal": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "purchase_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Id"
+          },
+          "line_number": {
+            "type": "integer",
+            "title": "Line Number"
+          },
+          "purchase_reference": {
+            "type": "string",
+            "title": "Purchase Reference"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PurchaseSource"
+          },
+          "entity_name": {
+            "type": "string",
+            "title": "Entity Name"
+          },
+          "entity_department": {
+            "type": "string",
+            "title": "Entity Department"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "supplier_nit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Nit"
+          },
+          "item_description": {
+            "type": "string",
+            "title": "Item Description"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "unit_price_cop": {
+            "type": "integer",
+            "title": "Unit Price Cop"
+          },
+          "median_cop": {
+            "type": "integer",
+            "title": "Median Cop"
+          },
+          "deviation_pct": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Deviation Pct"
+          },
+          "match_type": {
+            "type": "string",
+            "title": "Match Type"
+          },
+          "confidence_level": {
+            "$ref": "#/components/schemas/ConfidenceLevel"
+          },
+          "confidence_score": {
+            "type": "integer",
+            "title": "Confidence Score"
+          },
+          "signed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Signed On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "purchase_id",
+          "line_number",
+          "purchase_reference",
+          "source",
+          "entity_name",
+          "entity_department",
+          "supplier_name",
+          "supplier_nit",
+          "item_description",
+          "quantity",
+          "unit_price_cop",
+          "median_cop",
+          "deviation_pct",
+          "match_type",
+          "confidence_level",
+          "confidence_score",
+          "signed_on"
+        ],
+        "title": "Signal"
+      },
+      "SignalDetailResponse": {
+        "properties": {
+          "signal": {
+            "$ref": "#/components/schemas/Signal"
+          },
+          "modality": {
+            "type": "string",
+            "title": "Modality"
+          },
+          "vat_basis": {
+            "$ref": "#/components/schemas/VatBasis"
+          },
+          "config_version_id": {
+            "type": "string",
+            "title": "Config Version Id"
+          },
+          "threshold_rule": {
+            "$ref": "#/components/schemas/ThresholdRule"
+          },
+          "window_months": {
+            "type": "integer",
+            "title": "Window Months"
+          },
+          "q1_cop": {
+            "type": "integer",
+            "title": "Q1 Cop"
+          },
+          "q3_cop": {
+            "type": "integer",
+            "title": "Q3 Cop"
+          },
+          "threshold_cop": {
+            "type": "integer",
+            "title": "Threshold Cop"
+          },
+          "comparables": {
+            "items": {
+              "$ref": "#/components/schemas/Comparable"
+            },
+            "type": "array",
+            "title": "Comparables"
+          },
+          "market_status": {
+            "$ref": "#/components/schemas/MarketStatus"
+          },
+          "market_reference_cop": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Reference Cop"
+          },
+          "market_deviation_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Deviation Pct"
+          },
+          "market_observations": {
+            "items": {
+              "$ref": "#/components/schemas/MarketObservation"
+            },
+            "type": "array",
+            "title": "Market Observations"
+          },
+          "penalties": {
+            "items": {
+              "$ref": "#/components/schemas/ConfidencePenalty"
+            },
+            "type": "array",
+            "title": "Penalties"
+          },
+          "data_cutoff_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "signal",
+          "modality",
+          "vat_basis",
+          "config_version_id",
+          "threshold_rule",
+          "window_months",
+          "q1_cop",
+          "q3_cop",
+          "threshold_cop",
+          "comparables",
+          "market_status",
+          "market_reference_cop",
+          "market_deviation_pct",
+          "market_observations",
+          "penalties",
+          "data_cutoff_at"
+        ],
+        "title": "SignalDetailResponse"
+      },
+      "SignalList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Signal"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "SignalList"
+      },
+      "SignalSort": {
+        "type": "string",
+        "enum": [
+          "priority",
+          "deviation",
+          "value",
+          "date"
+        ],
+        "title": "SignalSort"
+      },
+      "SignalSummaryResponse": {
+        "properties": {
+          "tv_purchases": {
+            "type": "integer",
+            "title": "Tv Purchases"
+          },
+          "tv_purchases_by_source": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Tv Purchases By Source"
+          },
+          "signals": {
+            "type": "integer",
+            "title": "Signals"
+          },
+          "signals_by_confidence": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConfidenceLevel"
+            },
+            "type": "object",
+            "title": "Signals By Confidence"
+          },
+          "incomplete_comparisons": {
+            "type": "integer",
+            "title": "Incomplete Comparisons"
+          },
+          "without_source_information": {
+            "type": "integer",
+            "title": "Without Source Information"
+          },
+          "config_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Version Id"
+          },
+          "data_cutoff_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tv_purchases",
+          "tv_purchases_by_source",
+          "signals",
+          "signals_by_confidence",
+          "incomplete_comparisons",
+          "without_source_information",
+          "config_version_id",
+          "data_cutoff_at"
+        ],
+        "title": "SignalSummaryResponse"
+      },
+      "Source": {
+        "type": "string",
+        "enum": [
+          "secop_ii",
+          "tvec"
+        ],
+        "title": "Source"
+      },
+      "Store": {
+        "type": "string",
+        "enum": [
+          "alkosto",
+          "falabella"
+        ],
+        "title": "Store"
+      },
+      "ThresholdRule": {
+        "type": "string",
+        "enum": [
+          "iqr",
+          "percentage"
+        ],
+        "title": "ThresholdRule"
+      },
+      "UnitPriceStatus": {
+        "type": "string",
+        "enum": [
+          "explicit",
+          "derived",
+          "not_published",
+          "pending_review"
+        ],
+        "title": "UnitPriceStatus"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ValueRange": {
+        "type": "string",
+        "enum": [
+          "lt_20m",
+          "between_20m_100m",
+          "gt_100m"
+        ],
+        "title": "ValueRange"
+      },
+      "VatBasis": {
+        "type": "string",
+        "enum": [
+          "included",
+          "excluded",
+          "undetermined"
+        ],
+        "title": "VatBasis"
+      }
+    }
+  }
+}

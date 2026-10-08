@@ -1,0 +1,6 @@
+# Andamiaje efímero de cada intento — regenerable, no se versiona.
+# En intentos COMPLETED, work/ se borra automáticamente (queda solo attempt.json).
+# Se conservan y versionan: attempts/*/attempt.json, canonical/, facts/, inputs/, evidencia/,
+# tiempos/, juicios/, solape/ y el bundle oficial de la HU (medicion-*.json/.md y verificacion.json,
+# que siguen en la raiz porque los consume el exportador de metricas y las personas).
+attempts/*/work/

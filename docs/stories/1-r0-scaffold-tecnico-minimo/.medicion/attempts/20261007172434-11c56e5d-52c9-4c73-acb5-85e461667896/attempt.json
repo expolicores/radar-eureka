@@ -1,0 +1,12 @@
+{
+  "attempt_id": "20261007172434-11c56e5d-52c9-4c73-acb5-85e461667896",
+  "story_id": "1",
+  "status": "PENDING_STRATEGY",
+  "started_at": "2026-10-07T17:24:34.519Z",
+  "updated_at": "2026-10-07T17:24:34.671Z",
+  "rieles": 1,
+  "work_dir": "docs\\stories\\1-r0-scaffold-tecnico-minimo\\.medicion\\attempts\\20261007172434-11c56e5d-52c9-4c73-acb5-85e461667896\\work",
+  "official_artifacts_modified": false,
+  "reason_code": "STRATEGY_NOT_APPROVED",
+  "detail": "No existe measurement-strategy.json"
+}
