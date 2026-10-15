@@ -639,3 +639,55 @@ textarea {
     display: none;
   }
 }
+
+.eureka-detail > .card,
+.eureka-detail > .g2 {
+  margin: 16px 0;
+}
+.eureka-field {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.eureka-field dt {
+  font-weight: 600;
+}
+.eureka-field dd {
+  margin: 6px 0;
+  overflow-wrap: anywhere;
+}
+.eureka-evidence-panel {
+  margin: 10px 0;
+}
+.eureka-evidence-panel summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.eureka-evidence {
+  padding: 12px;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+  border-radius: var(--radius);
+}
+.eureka-detail pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 350px;
+  overflow: auto;
+  font: inherit;
+}
+.eureka-item {
+  padding: 10px;
+  border-left: 3px solid var(--border);
+  margin: 10px 0;
+}
+.eureka-filters label {
+  display: grid;
+  gap: 5px;
+}
+@media (max-width: 640px) {
+  nav.main {
+    display: flex;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+}

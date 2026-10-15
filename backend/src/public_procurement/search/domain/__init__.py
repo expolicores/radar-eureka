@@ -1,0 +1,1 @@
+"""Contratos y ranking determinístico."""

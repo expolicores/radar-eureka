@@ -30,9 +30,10 @@ DATABASE = "public_procurement"
 TEST_DATABASE = "public_procurement_test"
 
 
-def _write_database_url(url: str) -> None:
+def _write_database_url(url: str, test_url: str) -> None:
     lines = ENV_FILE.read_text(encoding="utf-8").splitlines() if ENV_FILE.exists() else []
-    lines = [line for line in lines if not re.match(r"\s*DATABASE_URL\s*=", line)]
+    lines = [line for line in lines if not re.match(r"\s*(TEST_)?DATABASE_URL\s*=", line)]
+    lines.insert(0, f"TEST_DATABASE_URL={test_url}")
     lines.insert(0, f"DATABASE_URL={url}")
     ENV_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -50,10 +51,10 @@ def start() -> None:
                 connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
     url = server.get_uri(DATABASE).replace("postgresql://", "postgresql+psycopg://", 1)
     test_url = server.get_uri(TEST_DATABASE).replace("postgresql://", "postgresql+psycopg://", 1)
-    _write_database_url(url)
+    _write_database_url(url, test_url)
     print(f"PostgreSQL embebido listo: {url}")
     print(f"DATABASE_URL escrita en {ENV_FILE}")
-    print(f'Tests de integración: DATABASE_URL="{test_url}" uv run pytest -m integration')
+    print("TEST_DATABASE_URL escrita: uv run pytest -m integration (solo base de pruebas)")
 
 
 def status() -> None:

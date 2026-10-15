@@ -1,0 +1,320 @@
+{
+  "version": "eureka-radar-v1",
+  "families": [
+    {
+      "category": "packaged_food",
+      "label": "Refrigerios y bebidas",
+      "terms": [
+        "chocorramo",
+        "ponqué",
+        "galletas",
+        "chocolatinas",
+        "pasabocas",
+        "refrigerios",
+        "jugos",
+        "bebidas",
+        "agua",
+        "gaseosa",
+        "snacks",
+        "refrigerio",
+        "gansito"
+      ],
+      "phrases": [
+        "agua embotellada",
+        "ponqué gala",
+        "jugo hit"
+      ],
+      "brands": [
+        "Chocorramo",
+        "Gala",
+        "Gansito"
+      ],
+      "aliases": {
+        "Jugo Hit": [
+          "hit",
+          "jugos tetra hit",
+          "jugo hit tetra"
+        ],
+        "Chocorramo": [
+          "ponqué chocorramo",
+          "chocorramo tradicional"
+        ],
+        "Gala": [
+          "ponqué gala"
+        ],
+        "Gansito": [
+          "gansito"
+        ]
+      },
+      "unspsc": [
+        "50192703",
+        "50181903",
+        "50181905",
+        "50182001",
+        "50192109",
+        "50161800",
+        "50161509",
+        "50161511",
+        "50201706",
+        "50201709",
+        "50131704",
+        "50201700",
+        "50181700",
+        "50181900",
+        "50182000",
+        "50192100",
+        "50202300"
+      ],
+      "exclusions": [],
+      "priority": 4
+    },
+    {
+      "category": "office_supplies",
+      "label": "Papelería y suministros de oficina",
+      "terms": [
+        "papelería",
+        "resmas",
+        "tóner",
+        "toner",
+        "tintas"
+      ],
+      "phrases": [],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "14111507",
+        "14111519",
+        "44122000",
+        "44121600",
+        "44122018",
+        "14111500",
+        "44121700",
+        "44122100"
+      ],
+      "exclusions": [],
+      "priority": 1
+    },
+    {
+      "category": "basic_technology",
+      "label": "Tecnología básica",
+      "terms": [
+        "impresoras",
+        "televisores",
+        "pantallas",
+        "monitores",
+        "televisor",
+        "portátil",
+        "computador",
+        "impresora"
+      ],
+      "phrases": [
+        "smart tv",
+        "televisor 43 pulgadas",
+        "televisor 45 pulgadas"
+      ],
+      "brands": [],
+      "aliases": {
+        "Televisor": [
+          "tv",
+          "televisores"
+        ],
+        "Computador portátil": [
+          "laptop",
+          "portátil",
+          "computador portátil"
+        ]
+      },
+      "unspsc": [
+        "52161505",
+        "43211503",
+        "43212105",
+        "43211700",
+        "45111616"
+      ],
+      "exclusions": [],
+      "priority": 3
+    },
+    {
+      "category": "cleaning_cafeteria",
+      "label": "Aseo y cafetería",
+      "terms": [
+        "aseo",
+        "cafetería"
+      ],
+      "phrases": [],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "47131800",
+        "47131600",
+        "47131700",
+        "14111705"
+      ],
+      "exclusions": [],
+      "priority": 1
+    },
+    {
+      "category": "printing_customization",
+      "label": "Impresión y personalización",
+      "terms": [
+        "camisetas",
+        "estampados",
+        "stickers",
+        "señalética"
+      ],
+      "phrases": [],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "82121500",
+        "82121900",
+        "55121700",
+        "53103000"
+      ],
+      "exclusions": [],
+      "priority": 1
+    },
+    {
+      "category": "furniture_supplies",
+      "label": "Mobiliario y suministros variados",
+      "terms": [
+        "sillas",
+        "archivadores"
+      ],
+      "phrases": [],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "56101504"
+      ],
+      "exclusions": [],
+      "priority": 1
+    },
+    {
+      "category": "prepared_snacks",
+      "label": "Refrigerios preparados (condicional)",
+      "terms": [
+        "refrigerios preparados",
+        "alimentos preparados"
+      ],
+      "phrases": [],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "90101600"
+      ],
+      "exclusions": [],
+      "priority": 1
+    },
+    {
+      "category": "hardware_supplies",
+      "label": "Ferretería",
+      "terms": [
+        "ferretería",
+        "tornillo",
+        "herramienta",
+        "pintura",
+        "cemento",
+        "tubería"
+      ],
+      "phrases": [
+        "materiales de ferretería"
+      ],
+      "brands": [],
+      "aliases": {},
+      "unspsc": [
+        "31161500",
+        "27111700",
+        "31211500",
+        "40141700"
+      ],
+      "exclusions": [],
+      "priority": 2
+    }
+  ],
+  "terminal_terms": [
+    "vencido",
+    "cerrado",
+    "cancelado",
+    "adjudicado",
+    "adjudicación",
+    "terminado",
+    "evaluación",
+    "desierto",
+    "finalizado"
+  ],
+  "preferred_phases": [
+    "Presentación de oferta",
+    "Manifestación de interés"
+  ],
+  "strong_exclusions": [
+    "obra civil",
+    "ejecución de obra",
+    "consultoría especializada",
+    "interventoría",
+    "servicios profesionales",
+    "software a medida",
+    "software a la medida",
+    "desarrollo de software"
+  ],
+  "review_terms": [
+    "instalación especializada",
+    "experiencia especializada",
+    "garantías complejas",
+    "logística extraordinaria",
+    "suministro continuo",
+    "cadena de frío"
+  ],
+  "token_aliases": {
+    "jugos": "jugo",
+    "refrigerios": "refrigerio",
+    "galletas": "galleta",
+    "bebidas": "bebida",
+    "televisores": "televisor",
+    "impresoras": "impresora",
+    "computadores": "computador",
+    "portatiles": "portatil",
+    "tornillos": "tornillo",
+    "herramientas": "herramienta",
+    "resmas": "resma",
+    "tintas": "tinta",
+    "mls": "ml",
+    "mililitros": "ml",
+    "gr": "g",
+    "gramos": "g"
+  },
+  "alert_score_threshold": 60,
+  "max_attempts": 3,
+  "page_size": 200,
+  "max_pages": 100,
+  "manageable_execution_days": 30,
+  "manageable_payment_days": 60,
+  "candidate_terms": [
+    "suministro de elementos",
+    "materiales y útiles de oficina",
+    "adquisición de bienes",
+    "dotación institucional",
+    "material didáctico",
+    "elementos de apoyo logístico",
+    "materiales para actividades",
+    "suministro por demanda",
+    "elementos de funcionamiento",
+    "día del colegio",
+    "comunidad educativa",
+    "actividades académicas",
+    "actividades culturales",
+    "celebración",
+    "conmemoración",
+    "actividades deportivas",
+    "torneos",
+    "jornadas deportivas",
+    "encuentros",
+    "capacitación",
+    "reuniones institucionales",
+    "bienestar estudiantil",
+    "integración",
+    "reconocimientos",
+    "funcionamiento de dependencias",
+    "apoyo a la gestión documental"
+  ]
+}

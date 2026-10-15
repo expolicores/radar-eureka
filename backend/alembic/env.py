@@ -6,11 +6,21 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from public_procurement.comparison import repositories as comparison_repositories  # noqa: F401
+from public_procurement.documents import repositories as document_repositories  # noqa: F401
+from public_procurement.eureka import radar_repositories as radar_repositories
+from public_procurement.eureka import repositories as eureka_repositories  # noqa: F401
+from public_procurement.extraction import canonical_repositories as canonical_repositories
+from public_procurement.extraction import repositories as extraction_repositories  # noqa: F401
+from public_procurement.extraction import (
+    structured_repositories as structured_repositories,
+)
+from public_procurement.ingestion import process_repositories as process_repositories
 from public_procurement.ingestion import repositories as ingestion_repositories  # noqa: F401
 from public_procurement.investigation import (
     repositories as investigation_repositories,  # noqa: F401
 )
 from public_procurement.market import repositories as market_repositories  # noqa: F401
+from public_procurement.notifications import repositories as notification_repositories  # noqa: F401
 from public_procurement.shared.config import load_settings
 from public_procurement.shared.persistence import Base
 
@@ -20,7 +30,8 @@ if config.config_file_name is not None:
     # Sin desactivar los loggers de la aplicación que ya existan (p. ej. en los tests).
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-config.set_main_option("sqlalchemy.url", load_settings().database_url.replace("%", "%%"))
+database_url = config.attributes.get("database_url") or load_settings().database_url
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 # Cada módulo registra sus tablas en Base.metadata al importar su repositorio (arriba).
 target_metadata = Base.metadata

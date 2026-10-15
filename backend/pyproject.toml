@@ -4,15 +4,22 @@ version = "0.1.0"
 description = "Seguimiento Compras Públicas: señales explicables sobre compras públicas de SECOP II y TVEC"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "defusedxml>=0.7.1,<1",
     "alembic>=1.13",
     "fastapi>=0.115",
     "psycopg[binary]>=3.2",
+    "pypdf>=5,<7",
+    "python-docx>=1.1,<2",
+    "openpyxl>=3.1,<4",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "sqlalchemy>=2.0.36",
     "typer>=0.12",
     "uvicorn[standard]>=0.32",
 ]
+
+[project.optional-dependencies]
+ocr = ["pypdfium2>=4.30,<6", "Pillow>=11,<13", "pytesseract>=0.3.13,<0.4"]
 
 [dependency-groups]
 dev = [
@@ -70,6 +77,7 @@ strict = true
 testpaths = ["tests"]
 markers = [
     "integration: requiere PostgreSQL real en DATABASE_URL",
+    "ocr_real: aceptaci?n expl?cita con Tesseract local real (RUN_REAL_OCR=1)",
 ]
 
 [tool.importlinter]
@@ -83,9 +91,15 @@ name = "Entrypoints sobre módulos, módulos sobre el núcleo compartido, nunca 
 type = "layers"
 layers = [
     "public_procurement.entrypoints",
+    "public_procurement.operations",
+    "public_procurement.notifications",
+    "public_procurement.search",
+    "public_procurement.eureka",
     "public_procurement.investigation",
     "public_procurement.exploration",
     "public_procurement.comparison",
+    "public_procurement.extraction",
+    "public_procurement.documents",
     "public_procurement.ingestion | public_procurement.market",
     "public_procurement.shared",
 ]
@@ -95,12 +109,15 @@ name = "Entre módulos solo se usa <module>.services"
 type = "forbidden"
 source_modules = [
     "public_procurement.investigation",
+    "public_procurement.eureka",
     "public_procurement.exploration",
     "public_procurement.comparison",
+    "public_procurement.documents",
 ]
 forbidden_modules = [
     "public_procurement.ingestion.domain",
     "public_procurement.ingestion.repositories",
+    "public_procurement.ingestion.process_repositories",
     "public_procurement.ingestion.adapters",
     "public_procurement.ingestion.ports",
     "public_procurement.ingestion.unit_of_work",
@@ -108,6 +125,66 @@ forbidden_modules = [
     "public_procurement.market.repositories",
     "public_procurement.market.adapters",
     "public_procurement.market.ports",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Notifications only reads persisted alerts through eureka.services"
+type = "forbidden"
+source_modules = ["public_procurement.notifications"]
+forbidden_modules = [
+    "public_procurement.eureka.domain", "public_procurement.eureka.radar_repositories",
+    "public_procurement.eureka.repositories", "public_procurement.eureka.radar_services",
+    "public_procurement.eureka.adapters", "public_procurement.eureka.api",
+    "public_procurement.ingestion", "public_procurement.documents", "public_procurement.extraction",
+    "public_procurement.search",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Extracción solo usa documents.services"
+type = "forbidden"
+source_modules = ["public_procurement.extraction"]
+forbidden_modules = [
+    "public_procurement.documents.domain", "public_procurement.documents.repositories",
+    "public_procurement.documents.adapters", "public_procurement.documents.ports",
+    "public_procurement.ingestion", "public_procurement.eureka",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Los consumidores solo usan extraction.services"
+type = "forbidden"
+source_modules = ["public_procurement.eureka", "public_procurement.exploration", "public_procurement.investigation"]
+forbidden_modules = ["public_procurement.extraction.domain", "public_procurement.extraction.repositories",
+                     "public_procurement.extraction.ports", "public_procurement.extraction.adapters"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Los consumidores solo usan eureka.services"
+type = "forbidden"
+source_modules = [
+    "public_procurement.investigation", "public_procurement.exploration",
+    "public_procurement.comparison", "public_procurement.documents", "public_procurement.ingestion",
+]
+forbidden_modules = [
+    "public_procurement.eureka.domain", "public_procurement.eureka.config",
+    "public_procurement.eureka.repositories", "public_procurement.eureka.ports",
+    "public_procurement.eureka.adapters",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Los consumidores solo usan documents.services"
+type = "forbidden"
+source_modules = [
+    "public_procurement.eureka",
+    "public_procurement.investigation", "public_procurement.exploration",
+    "public_procurement.comparison",
+]
+forbidden_modules = [
+    "public_procurement.documents.domain", "public_procurement.documents.repositories",
+    "public_procurement.documents.ports", "public_procurement.documents.adapters",
 ]
 allow_indirect_imports = true
 
@@ -132,10 +209,41 @@ allow_indirect_imports = true
 name = "El dominio no tiene ORM, framework web ni I/O"
 type = "forbidden"
 source_modules = ["public_procurement.*.domain"]
-forbidden_modules = ["sqlalchemy", "fastapi", "starlette", "psycopg", "httpx", "typer"]
+forbidden_modules = ["sqlalchemy", "fastapi", "starlette", "psycopg", "httpx", "typer", "pypdf", "docx", "openpyxl", "pypdfium2", "pytesseract", "PIL"]
 
 [[tool.importlinter.contracts]]
 name = "El núcleo compartido no depende del framework web"
 type = "forbidden"
 source_modules = ["public_procurement.shared"]
 forbidden_modules = ["fastapi", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "Search only uses public module services"
+type = "forbidden"
+source_modules = ["public_procurement.search"]
+forbidden_modules = [
+ "public_procurement.ingestion.repositories", "public_procurement.ingestion.process_repositories",
+ "public_procurement.ingestion.adapters", "public_procurement.ingestion.domain",
+ "public_procurement.documents.repositories", "public_procurement.documents.adapters", "public_procurement.documents.domain",
+ "public_procurement.extraction.repositories", "public_procurement.extraction.canonical_repositories",
+ "public_procurement.extraction.structured_repositories", "public_procurement.extraction.domain", "public_procurement.extraction.adapters",
+ "public_procurement.eureka.repositories", "public_procurement.eureka.radar_repositories", "public_procurement.eureka.domain", "public_procurement.eureka.radar_services",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Operations coordinates only public module services"
+type = "forbidden"
+source_modules = ["public_procurement.operations"]
+forbidden_modules = [
+    "public_procurement.eureka.domain", "public_procurement.eureka.repositories",
+    "public_procurement.eureka.radar_repositories", "public_procurement.eureka.radar_services",
+    "public_procurement.eureka.adapters", "public_procurement.eureka.api",
+    "public_procurement.ingestion.domain", "public_procurement.ingestion.repositories",
+    "public_procurement.ingestion.process_repositories", "public_procurement.ingestion.adapters",
+    "public_procurement.extraction.domain", "public_procurement.extraction.repositories",
+    "public_procurement.extraction.adapters", "public_procurement.extraction.canonical_repositories",
+    "public_procurement.notifications.domain", "public_procurement.notifications.repositories",
+    "public_procurement.notifications.adapters", "public_procurement.notifications.api",
+]
+allow_indirect_imports = true

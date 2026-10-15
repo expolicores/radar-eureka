@@ -1,0 +1,2 @@
+# Los fixtures PDF deben conservar sus bytes y offsets internos en cualquier plataforma.
+*.pdf binary

@@ -1,0 +1,16 @@
+{
+  "version": "ocr-v1",
+  "min_alphanumeric_chars": 40,
+  "min_alphanumeric_ratio": 0.5,
+  "max_damaged_ratio": 0.05,
+  "language": "spa",
+  "fallback_language": "eng",
+  "max_ocr_pages": 20,
+  "dpi": 300,
+  "max_pixels": 12000000,
+  "page_timeout_seconds": 30,
+  "document_timeout_seconds": 180,
+  "memory_bytes": 536870912,
+  "max_retry_attempts": 3,
+  "preprocessing": "grayscale-autocontrast-v1"
+}

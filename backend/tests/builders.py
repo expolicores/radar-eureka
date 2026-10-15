@@ -28,7 +28,7 @@ from public_procurement.ingestion.domain.purchase import (
 from public_procurement.shared.config import AppEnvironment, LogLevel, Settings
 
 LOCAL_DATABASE_URL = (
-    "postgresql+psycopg://procurement:procurement_local@localhost:5432/public_procurement"
+    "postgresql+psycopg://procurement:procurement_local@localhost:55432/public_procurement"
 )
 
 

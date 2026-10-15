@@ -4,7 +4,12 @@ from collections.abc import Iterable
 from datetime import datetime
 from typing import Protocol
 
+from .domain.process import ProcessQuery, SecopProcess
 from .domain.purchase import Source, SourcePurchase
+
+
+class ProcessDataSource(Protocol):
+    def fetch_processes(self, query: ProcessQuery) -> Iterable[SecopProcess]: ...
 
 
 class PublicDataSource(Protocol):

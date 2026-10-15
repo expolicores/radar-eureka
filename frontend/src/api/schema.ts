@@ -4,6 +4,142 @@
  */
 
 export interface paths {
+    "/api/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search */
+        get: operations["search_api_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/search/processes/{process_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence */
+        get: operations["evidence_api_search_processes__process_id__evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listing */
+        get: operations["listing_api_eureka_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/notifications/{notification_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_eureka_notifications__notification_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/cycles/manual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manual */
+        post: operations["manual_api_operations_cycles_manual_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status */
+        get: operations["status_api_operations_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cycles */
+        get: operations["cycles_api_operations_cycles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/cycles/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_operations_cycles__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -192,6 +328,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/eureka/opportunities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Opportunities */
+        get: operations["opportunities_api_eureka_opportunities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/opportunities/{opportunity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_eureka_opportunities__opportunity_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/opportunities/{opportunity_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence */
+        get: operations["evidence_api_eureka_opportunities__opportunity_id__evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Alerts */
+        get: operations["alerts_api_eureka_alerts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/alerts/{alert_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Alert */
+        get: operations["alert_api_eureka_alerts__alert_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/radar-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Radar Runs */
+        get: operations["radar_runs_api_eureka_radar_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/radar-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Radar Run */
+        get: operations["radar_run_api_eureka_radar_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -329,6 +584,222 @@ export interface components {
          * @enum {string}
          */
         DatabaseStatus: "ok" | "unavailable";
+        /** EurekaAlertResponse */
+        EurekaAlertResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Opportunity Id
+             * Format: uuid
+             */
+            opportunity_id: string;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Alert Type */
+            alert_type: string;
+            /** Rule Version */
+            rule_version: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Priority */
+            priority: string;
+            /** Review Required */
+            review_required: boolean;
+            /** Reasons */
+            reasons: {
+                [key: string]: unknown;
+            }[];
+            /** Snapshot */
+            snapshot: {
+                [key: string]: unknown;
+            };
+            process?: components["schemas"]["SecopPresentation"] | null;
+        };
+        /** EurekaAlertsResponse */
+        EurekaAlertsResponse: {
+            /** Items */
+            items: components["schemas"]["EurekaAlertResponse"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** EurekaDetailResponse */
+        EurekaDetailResponse: {
+            opportunity: components["schemas"]["EurekaSummaryResponse"];
+            details: components["schemas"]["EurekaDetailsResponse"];
+        };
+        /** EurekaDetailsResponse */
+        EurekaDetailsResponse: {
+            /**
+             * Process Id
+             * Format: uuid
+             */
+            process_id: string;
+            /** Secop Id */
+            secop_id: string;
+            /** Opportunity Id */
+            opportunity_id: string | null;
+            /** Category */
+            category: string[];
+            /** Score */
+            score: number | null;
+            /** Priority */
+            priority: string | null;
+            /** Scoring Rule Version */
+            scoring_rule_version: string | null;
+            /** Review Required */
+            review_required: boolean;
+            /** Enrichment Status */
+            enrichment_status: string;
+            /** Commercial */
+            commercial: {
+                [key: string]: unknown;
+            };
+            /** Execution */
+            execution: {
+                [key: string]: unknown;
+            };
+            /** Payment */
+            payment: {
+                [key: string]: unknown;
+            };
+            /** Requirements */
+            requirements: {
+                [key: string]: unknown;
+            };
+            /** Quality */
+            quality: {
+                [key: string]: unknown;
+            };
+            /** Commercial Profile */
+            commercial_profile: {
+                [key: string]: unknown;
+            };
+            /** Evidence */
+            evidence: {
+                [key: string]: unknown;
+            };
+        };
+        /** EurekaEvidenceResponse */
+        EurekaEvidenceResponse: {
+            /**
+             * Canonical Fact Id
+             * Format: uuid
+             */
+            canonical_fact_id: string;
+            /**
+             * Structured Fact Id
+             * Format: uuid
+             */
+            structured_fact_id: string;
+            /**
+             * Document Version Id
+             * Format: uuid
+             */
+            document_version_id: string;
+            /** Content Fragment Id */
+            content_fragment_id: string | null;
+            /** Evidence Text */
+            evidence_text: string;
+            /** Source Locator */
+            source_locator: {
+                [key: string]: unknown;
+            };
+            /** Confidence */
+            confidence: string;
+            /** Corroborated */
+            corroborated: boolean;
+            /** Rule Name */
+            rule_name: string;
+            /** Rule Version */
+            rule_version: string;
+        };
+        /** EurekaListResponse */
+        EurekaListResponse: {
+            /** Items */
+            items: components["schemas"]["EurekaSummaryResponse"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** EurekaSummaryResponse */
+        EurekaSummaryResponse: {
+            /** Secop Id */
+            secop_id: string;
+            /** Reference */
+            reference?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Source Url */
+            source_url?: string | null;
+            /**
+             * Opportunity Id
+             * Format: uuid
+             */
+            opportunity_id: string;
+            /**
+             * Process Id
+             * Format: uuid
+             */
+            process_id: string;
+            /** Title */
+            title: string | null;
+            /** Entity */
+            entity: string | null;
+            /** Department */
+            department: string | null;
+            /** Municipality */
+            municipality: string | null;
+            /** Budget */
+            budget: number | string | null;
+            /** Category */
+            category: string[];
+            /** Score */
+            score: number;
+            /** Priority */
+            priority: string;
+            /** Review Required */
+            review_required: boolean;
+            /** Enrichment Status */
+            enrichment_status: string;
+            /** Product Match */
+            product_match: boolean | null;
+            /** Published At */
+            published_at: string | null;
+        };
+        /** ExecutionConfiguration */
+        ExecutionConfiguration: {
+            /** Start Date */
+            start_date: string | null;
+            /**
+             * Before Date
+             * Format: date
+             */
+            before_date: string;
+            /** Before Exclusive */
+            before_exclusive: boolean;
+            /** Timezone */
+            timezone: string;
+            /** Regions */
+            regions: string[];
+            /** Max Processes */
+            max_processes: number;
+        };
         /** FilterOptions */
         FilterOptions: {
             /** Sources */
@@ -356,6 +827,22 @@ export interface components {
          * @enum {string}
          */
         ItemClassification: "included" | "excluded_accessory" | "excluded_service" | "undetermined";
+        /** ManualCycleAccepted */
+        ManualCycleAccepted: {
+            /**
+             * Cycle Id
+             * Format: uuid
+             */
+            cycle_id: string;
+            /** Status */
+            status: string;
+            /** Started At */
+            started_at: string;
+            /** Reason */
+            reason?: string | null;
+        };
+        /** ManualCycleRequest */
+        ManualCycleRequest: Record<string, never>;
         /** MarketObservation */
         MarketObservation: {
             store: components["schemas"]["Store"];
@@ -391,6 +878,207 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** NotificationDetail */
+        NotificationDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Alert Id */
+            alert_id: string | null;
+            /** Alert Ids */
+            alert_ids: string[];
+            /** Channel */
+            channel: string;
+            /** Recipient */
+            recipient: string;
+            /** Notification Type */
+            notification_type: string;
+            /** Delivery Scope */
+            delivery_scope: string;
+            /** Delivery Mode */
+            delivery_mode: string;
+            /** Provider */
+            provider: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "processing" | "captured" | "sent" | "retryable" | "failed" | "skipped";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Sent At */
+            sent_at: string | null;
+            /** Captured At */
+            captured_at: string | null;
+            /** Failed At */
+            failed_at: string | null;
+            /** Processing Started At */
+            processing_started_at: string | null;
+            /** Next Retry At */
+            next_retry_at: string | null;
+            /** Provider Idempotency Until */
+            provider_idempotency_until: string | null;
+            /** Delivery Ambiguous */
+            delivery_ambiguous: boolean;
+            /** Attempt Count */
+            attempt_count: number;
+            /** Retry Count */
+            retry_count: number;
+            /** Provider Message Id */
+            provider_message_id: string | null;
+            /** Error Code */
+            error_code: string | null;
+            /** Error Message */
+            error_message: string | null;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Digest From */
+            digest_from: string | null;
+            /** Digest To */
+            digest_to: string | null;
+            /** Payload Snapshot */
+            payload_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Attempt History */
+            attempt_history: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** NotificationSummary */
+        NotificationSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Alert Id */
+            alert_id: string | null;
+            /** Alert Ids */
+            alert_ids: string[];
+            /** Channel */
+            channel: string;
+            /** Recipient */
+            recipient: string;
+            /** Notification Type */
+            notification_type: string;
+            /** Delivery Scope */
+            delivery_scope: string;
+            /** Delivery Mode */
+            delivery_mode: string;
+            /** Provider */
+            provider: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "processing" | "captured" | "sent" | "retryable" | "failed" | "skipped";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Sent At */
+            sent_at: string | null;
+            /** Captured At */
+            captured_at: string | null;
+            /** Failed At */
+            failed_at: string | null;
+            /** Processing Started At */
+            processing_started_at: string | null;
+            /** Next Retry At */
+            next_retry_at: string | null;
+            /** Provider Idempotency Until */
+            provider_idempotency_until: string | null;
+            /** Delivery Ambiguous */
+            delivery_ambiguous: boolean;
+            /** Attempt Count */
+            attempt_count: number;
+            /** Retry Count */
+            retry_count: number;
+            /** Provider Message Id */
+            provider_message_id: string | null;
+            /** Error Code */
+            error_code: string | null;
+            /** Error Message */
+            error_message: string | null;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Digest From */
+            digest_from: string | null;
+            /** Digest To */
+            digest_to: string | null;
+        };
+        /** NotificationsPage */
+        NotificationsPage: {
+            /** Items */
+            items: components["schemas"]["NotificationSummary"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /** OperationalStatus */
+        OperationalStatus: {
+            execution_config: components["schemas"]["ExecutionConfiguration"];
+            /** Db Connected */
+            db_connected: boolean;
+            /** Schema Ready */
+            schema_ready: boolean;
+            /** Latest */
+            latest: {
+                [key: string]: unknown;
+            } | null;
+            /** Latest Success */
+            latest_success: {
+                [key: string]: unknown;
+            } | null;
+            /** Latest Alert */
+            latest_alert?: unknown;
+            /** Automation Enabled */
+            automation_enabled: boolean;
+            /** Notification Mode */
+            notification_mode: string;
+            /** Notification Enabled */
+            notification_enabled: boolean;
+            /** Scheduler */
+            scheduler: {
+                [key: string]: unknown;
+            };
+            /** Next Theoretical */
+            next_theoretical: string;
+            /** Ocr */
+            ocr: {
+                [key: string]: unknown;
+            };
+            /** Diagnostic */
+            diagnostic?: string | null;
+            /** Active Cycle */
+            active_cycle?: {
+                [key: string]: unknown;
+            } | null;
         };
         /**
          * Outcome
@@ -535,6 +1223,155 @@ export interface components {
              */
             signed_on: string;
             analysis_status: components["schemas"]["AnalysisStatus"];
+        };
+        /** RadarRunDetailResponse */
+        RadarRunDetailResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * Before Date
+             * Format: date
+             */
+            before_date: string;
+            /** Regions */
+            regions: string[];
+            /** Rule Version */
+            rule_version: string;
+            /** Config Hash */
+            config_hash: string;
+            /** Processes Seen */
+            processes_seen: number;
+            /** New Processes */
+            new_processes: number;
+            /** Candidates */
+            candidates: number;
+            /** Enriched */
+            enriched: number;
+            /** Alerts Created */
+            alerts_created: number;
+            /** Skipped */
+            skipped: number;
+            /** Failures */
+            failures: number;
+            /** Errors */
+            errors: {
+                [key: string]: unknown;
+            }[];
+            /** Config Snapshot */
+            config_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Items */
+            items: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** RadarRunResponse */
+        RadarRunResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * Before Date
+             * Format: date
+             */
+            before_date: string;
+            /** Regions */
+            regions: string[];
+            /** Rule Version */
+            rule_version: string;
+            /** Config Hash */
+            config_hash: string;
+            /** Processes Seen */
+            processes_seen: number;
+            /** New Processes */
+            new_processes: number;
+            /** Candidates */
+            candidates: number;
+            /** Enriched */
+            enriched: number;
+            /** Alerts Created */
+            alerts_created: number;
+            /** Skipped */
+            skipped: number;
+            /** Failures */
+            failures: number;
+            /** Errors */
+            errors: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** RadarRunsResponse */
+        RadarRunsResponse: {
+            /** Items */
+            items: components["schemas"]["RadarRunResponse"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** SearchPageResponse */
+        SearchPageResponse: {
+            /** Items */
+            items: {
+                [key: string]: unknown;
+            }[];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Ranking Version */
+            ranking_version: string;
+        };
+        /** SecopPresentation */
+        SecopPresentation: {
+            /** Secop Id */
+            secop_id: string;
+            /** Reference */
+            reference?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Source Url */
+            source_url?: string | null;
         };
         /** Signal */
         Signal: {
@@ -701,6 +1538,276 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    search_api_search_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                product?: string;
+                brand?: string;
+                unspsc?: string;
+                entity?: string;
+                department?: string;
+                municipality?: string;
+                category?: string;
+                priority?: string;
+                budget_min?: number | null;
+                budget_max?: number | null;
+                published_from?: string | null;
+                published_to?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evidence_api_search_processes__process_id__evidence_get: {
+        parameters: {
+            query?: {
+                canonical_fact_id?: string | null;
+                fragment_id?: string | null;
+            };
+            header?: never;
+            path: {
+                process_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listing_api_eureka_notifications_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                status?: ("pending" | "processing" | "captured" | "sent" | "retryable" | "failed" | "skipped") | null;
+                channel?: "email" | null;
+                recipient?: string | null;
+                alert_id?: string | null;
+                delivery_scope?: ("capture" | "real") | null;
+                created_from?: string | null;
+                created_before?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_eureka_notifications__notification_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manual_api_operations_cycles_manual_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualCycleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManualCycleAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status_api_operations_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationalStatus"];
+                };
+            };
+        };
+    };
+    cycles_api_operations_cycles_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_operations_cycles__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     healthz_healthz_get: {
         parameters: {
             query?: never;
@@ -1069,6 +2176,232 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    opportunities_api_eureka_opportunities_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                priority?: ("high" | "medium" | "low") | null;
+                department?: string | null;
+                category?: string | null;
+                review_required?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EurekaListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_eureka_opportunities__opportunity_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                opportunity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EurekaDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evidence_api_eureka_opportunities__opportunity_id__evidence_get: {
+        parameters: {
+            query: {
+                canonical_fact_id: string;
+            };
+            header?: never;
+            path: {
+                opportunity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EurekaEvidenceResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alerts_api_eureka_alerts_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EurekaAlertsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alert_api_eureka_alerts__alert_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EurekaAlertResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    radar_runs_api_eureka_radar_runs_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RadarRunsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    radar_run_api_eureka_radar_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RadarRunDetailResponse"];
                 };
             };
             /** @description Validation Error */

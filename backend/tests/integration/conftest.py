@@ -14,14 +14,21 @@ from public_procurement.market.services import build_market_ingestion_service
 from public_procurement.shared.config import Settings, load_settings
 from public_procurement.shared.database import create_db_engine
 from public_procurement.shared.persistence import create_session_factory
+from public_procurement.shared.testing import settings_for_test_database
 
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 
 
 @pytest.fixture(scope="session")
 def database_settings() -> Settings:
-    """Configuración real: requiere DATABASE_URL apuntando a un PostgreSQL 16 disponible."""
-    return load_settings()
+    """Falla antes de conectar si no hay una base explícita y separada de pruebas."""
+    return settings_for_test_database(load_settings())
+
+
+def migration_config(settings: Settings) -> Config:
+    config = Config(str(ALEMBIC_INI))
+    config.attributes["database_url"] = settings.database_url
+    return config
 
 
 @pytest.fixture
@@ -32,9 +39,9 @@ def database_engine(database_settings: Settings) -> Iterator[Engine]:
 
 
 @pytest.fixture
-def migrated_engine(database_engine: Engine) -> Engine:
+def migrated_engine(database_engine: Engine, database_settings: Settings) -> Engine:
     """Base vacía con todas las migraciones aplicadas."""
-    config = Config(str(ALEMBIC_INI))
+    config = migration_config(database_settings)
     command.downgrade(config, "base")
     command.upgrade(config, "head")
     return database_engine
@@ -54,7 +61,7 @@ def load_seed(engine: Engine) -> None:
 def seeded_engine(database_settings: Settings) -> Iterator[Engine]:
     """Base migrada con la carga seed, compartida por los tests de lectura de un módulo de test."""
     engine = create_db_engine(database_settings)
-    config = Config(str(ALEMBIC_INI))
+    config = migration_config(database_settings)
     command.downgrade(config, "base")
     command.upgrade(config, "head")
     load_seed(engine)

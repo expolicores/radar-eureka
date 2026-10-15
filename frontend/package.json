@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "generate:api": "npx --yes openapi-typescript@7 src/api/openapi.json -o src/api/schema.ts"
+    "generate:api": "npx --yes --package=openapi-typescript@7.13.0 --package=typescript@5.9.3 openapi-typescript src/api/openapi.json -o src/api/schema.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",

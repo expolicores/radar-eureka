@@ -1,0 +1,227 @@
+from contextlib import nullcontext
+from dataclasses import replace
+from datetime import date
+from unittest.mock import Mock
+
+import pytest
+
+from public_procurement.eureka.radar_config import load_radar_config
+from public_procurement.eureka.radar_services import RadarService
+from public_procurement.shared.config import Settings
+
+from .test_affinity import details, process
+
+
+@pytest.fixture
+def config():
+    return load_radar_config(
+        Settings(database_url="postgresql://unused", _env_file=None).eureka_radar_config_path
+    )
+
+
+class MemoryRepository:
+    def __init__(self):
+        self.states, self.alerts, self.outcomes, self.runs = {}, set(), [], []
+
+    def lock(self):
+        return nullcontext()
+
+    def start(self, run, snapshot):
+        self.runs.append(run)
+
+    def state(self, dataset, secop_id):
+        return self.states.get((dataset, secop_id))
+
+    def claim(self, run_id, dataset, secop_id, at):
+        key = dataset, secop_id
+        self.states[key] = {
+            "status": "processing",
+            "attempts": self.states.get(key, {}).get("attempts", 0) + 1,
+        }
+
+    def stage(self, *args):
+        pass
+
+    def outcome(self, run_id, item, at, update_state):
+        self.outcomes.append(item)
+        if update_state:
+            self.states[(item["dataset_id"], item["secop_id"])]["status"] = (
+                "failed"
+                if item["outcome"] == "failed" or item.get("coverage_incomplete")
+                else "completed"
+            )
+
+    def finish(self, run):
+        pass
+
+    def alert(self, run_id, opportunity_id, version, decision, at):
+        key = opportunity_id, version
+        created = key not in self.alerts
+        self.alerts.add(key)
+        return created
+
+
+def setup(config):
+    repository, pipeline = MemoryRepository(), Mock()
+    pipeline.enrich.return_value = pipeline.preview.return_value = details()
+    pipeline.evidence.return_value = [
+        {"document_version_id": "document", "source_locator": {"page_number": 3}}
+    ]
+    return RadarService(repository, pipeline, config, 30_000_000), repository, pipeline
+
+
+def run(service, source, **kwargs):
+    return service.run(
+        source,
+        start=date(2026, 10, 7),
+        before=date(2026, 10, 14),
+        regions=("Boyacá", "Casanare"),
+        **kwargs,
+    )
+
+
+def test_new_seen_idempotence_and_explanations(config):
+    service, repo, pipeline = setup(config)
+    first = run(service, [process(), process()])
+    second = run(service, [process()])
+    assert (
+        first["new_processes"]
+        == first["candidates"]
+        == first["enriched"]
+        == first["alerts_created"]
+        == 1
+    )
+    assert first["items"][0]["decision"]["snapshot"]["score"] == 65
+    assert any(
+        reason["code"] == "document_evidence" for reason in first["items"][0]["decision"]["reasons"]
+    )
+    assert second["alerts_created"] == second["new_processes"] == 0
+    assert second["items"][0]["reason"] == "already_seen"
+    assert pipeline.enrich.call_count == 1
+    assert len(repo.alerts) == 1
+
+
+def test_partial_failure_does_not_abort_and_failed_process_retries(config):
+    service, repo, pipeline = setup(config)
+    pipeline.enrich.side_effect = [ValueError("Download interrupted"), details()]
+    first = run(service, [process(), replace(process(), id_del_proceso="second")])
+    assert first["status"] == "partial"
+    assert first["failures"] == 1
+    assert first["alerts_created"] == 1
+    pipeline.enrich.side_effect = None
+    retry = run(service, [process()])
+    assert retry["new_processes"] == 0
+    assert retry["enriched"] == 1
+    assert repo.states[process().identity]["attempts"] == 2
+
+
+def test_incomplete_ocr_can_alert_but_remains_retryable_without_changing_decision(config):
+    service, repo, pipeline = setup(config)
+    incomplete = replace(
+        details(),
+        quality={
+            **details().quality,
+            "extraction_coverage": {
+                "coverage_complete": False,
+                "documents": [{"diagnostics": {"status": "ocr_truncated", "omitted_pages": [21]}}],
+            },
+        },
+    )
+    pipeline.enrich.return_value = incomplete
+    first = run(service, [process()])
+    assert first["alerts_created"] == 1
+    assert first["status"] == "partial"
+    assert first["items"][0]["decision"]["snapshot"]["score"] == 65
+    assert (
+        first["items"][0]["decision"]["snapshot"]["extraction_coverage"]["coverage_complete"]
+        is False
+    )
+    assert repo.states[process().identity]["status"] == "failed"
+    pipeline.enrich.return_value = replace(
+        incomplete, quality={"extraction_coverage": {"coverage_complete": True}}
+    )
+    second = run(service, [process()])
+    assert second["enriched"] == 1
+    assert second["alerts_created"] == 0
+    assert repo.states[process().identity]["status"] == "completed"
+    assert len(repo.alerts) == 1
+
+
+def test_dry_run_no_writes_or_pipeline_and_unknown_enrichment_is_not_predicted(config):
+    service, repo, pipeline = setup(config)
+    report = run(service, [process()], dry_run=True)
+    assert report["items"][0]["would_create_alert"]
+    assert report["alerts_created"] == 0
+    assert not repo.states
+    assert not repo.runs
+    assert not repo.alerts
+    pipeline.enrich.assert_not_called()
+    pipeline.preview.return_value = None
+    report = run(service, [process()], dry_run=True)
+    assert report["items"][0]["outcome"] == "pending_enrichment"
+
+
+def test_outside_window_is_not_marked_seen_for_golden_window(config):
+    service, repo, _ = setup(config)
+    report = service.run(
+        [process()], start=date(2026, 10, 13), before=date(2026, 10, 14), regions=("Boyacá",)
+    )
+    assert report["items"][0]["reason"] == "outside_window"
+    assert not repo.states
+    assert run(service, [process()])["alerts_created"] == 1
+    outside = service.run(
+        [process()], start=date(2026, 10, 13), before=date(2026, 10, 14), regions=("Boyacá",)
+    )
+    assert outside["items"][0]["reason"] == "outside_window"
+
+
+def test_limits_do_not_starve_new_processes_behind_seen(config):
+    service, _, _ = setup(config)
+    run(service, [process()])
+    report = run(
+        service,
+        [
+            process(),
+            replace(process(), id_del_proceso="next"),
+            replace(process(), id_del_proceso="last"),
+        ],
+        max_processes=1,
+    )
+    assert report["candidates"] == 1
+    assert report["status"] == "limited"
+    assert report["items"][0]["reason"] == "already_seen"
+
+
+def test_validation_capacity_covers_1872_rows_without_limit_deferred(config):
+    service, _, pipeline = setup(config)
+    # Unit capacity check only: synthetic metadata, no documents, database or provider.
+    records = [
+        replace(
+            process(),
+            id_del_proceso=f"capacity-{i}",
+            title="Sin coincidencia",
+            description=None,
+            category_code=None,
+        )
+        for i in range(1872)
+    ]
+    report = run(service, records, max_processes=2500)
+    assert report["processes_seen"] == 1872
+    assert report["status"] == "completed"
+    assert not any(item.get("reason") == "limit_deferred" for item in report["items"])
+    pipeline.enrich.assert_not_called()
+
+
+def test_exhausted_failures_and_source_failure_are_auditable(config):
+    service, repo, pipeline = setup(config)
+    repo.states[process().identity] = {"status": "failed", "attempts": config.max_attempts}
+    assert run(service, [process()])["items"][0]["reason"] == "attempts_exhausted"
+    pipeline.enrich.assert_not_called()
+
+    def failing():
+        yield replace(process(), id_del_proceso="other")
+        raise RuntimeError("Socrata unavailable")
+
+    report = run(service, failing())
+    assert report["status"] == "failed"
+    assert report["errors"]
