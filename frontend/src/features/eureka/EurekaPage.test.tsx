@@ -133,6 +133,23 @@ function routes(data = detail()) {
 }
 afterEach(() => vi.unstubAllGlobals());
 
+it("shows the metadata-only warning in opportunity detail with unchanged score", async () => {
+  const data = detail();
+  data.opportunity = {
+    ...data.opportunity,
+    evidence_level: "metadata_only",
+    document_status: "unavailable",
+  };
+  routes(data);
+  renderWithProviders(<App />, { route: `/eureka/${ID}` });
+  expect(
+    await screen.findByText(
+      "No se pudo validar documentalmente, pero por metadatos parece viable. Revisar manualmente.",
+    ),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Score 65")).toBeInTheDocument();
+});
+
 it("lista oportunidades, filtra y abre el detalle desde la navegación", async () => {
   const mock = routes();
   const user = userEvent.setup();

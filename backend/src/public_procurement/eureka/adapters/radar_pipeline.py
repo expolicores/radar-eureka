@@ -2,6 +2,7 @@
 
 import uuid
 from collections.abc import Callable
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
 from public_procurement.documents.services import DocumentService
@@ -64,7 +65,17 @@ class ExistingRadarPipeline:
         if self.observer:
             self.observer("documents", {"count": len(inventory)})
         if not inventory:
-            raise ValueError("No hay inventario documental; el proceso queda reintentable.")
+            current = self.details.get(reference)
+            return replace(
+                current,
+                enrichment_status="documents_unavailable",
+                review_required=True,
+                quality={
+                    **current.quality,
+                    "document_status": "unavailable",
+                    "evidence_level": "metadata_only",
+                },
+            )
         stage("documents_download")
         documents = self.documents.list_documents(reference)
         if any(self.documents.latest_version(document.id) is None for document in documents):
@@ -81,12 +92,24 @@ class ExistingRadarPipeline:
                 "document_download", {"available": len(documents), "failed": 0, "reused": True}
             )
         stage("extraction")
-        results = list(self.extraction.extract_process(reference, retry_ocr=True))
-        if self.observer:
-            for result in results:
+        results = []
+        for result in self.extraction.extract_process(reference, retry_ocr=True):
+            results.append(result)
+            if self.observer:
                 self.observer(
                     "extraction_result",
                     {
+                        "document_version_id": str(result.document.document_version_id),
+                        "status": str(result.status),
+                        "error_code": result.error_code,
+                        "succeeded": (
+                            not result.error_code
+                            and str(result.status) in {"completed", "partial_text"}
+                            and result.text_length > 0
+                            and result.fragment_count > 0
+                        ),
+                        "text_length": result.text_length,
+                        "coverage_complete": result.diagnostics.get("coverage_complete"),
                         "ocr": result.diagnostics.get("status"),
                         "required": len(result.diagnostics.get("required_pages", [])),
                         "processed": 0

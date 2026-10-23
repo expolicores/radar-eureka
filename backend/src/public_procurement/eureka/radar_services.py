@@ -8,11 +8,18 @@ from collections.abc import Callable, Iterable
 from contextlib import nullcontext
 from dataclasses import asdict
 from datetime import UTC, date, datetime
+from pathlib import Path
 from typing import Any
 
-from public_procurement.ingestion.services import SecopProcess
+from public_procurement.ingestion.services import SecopProcess, canonical_process_identity
 
 from .domain.radar import RadarProcess, candidate_decision, evaluate_alert
+from .metadata_alert_policy import (
+    DEFAULT_POLICY_PATH,
+    apply_metadata_alert_exclusions,
+    load_metadata_alert_exclusions,
+    provisional_metadata_candidate,
+)
 from .ports import RadarPipeline, RadarRepository
 from .radar_config import RadarConfig
 from .radar_repositories import COUNTERS
@@ -46,6 +53,8 @@ def radar_process(record: SecopProcess) -> RadarProcess:
         record.status,
         record.category_code,
         record.base_price_cop,
+        record.offer_deadline,
+        record.offer_deadline_raw,
     )
 
 
@@ -58,10 +67,12 @@ class RadarService:
         preferred_budget_max: int,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
         observer: Callable[[str, dict[str, Any]], None] | None = None,
+        metadata_exclusion_path: Path = DEFAULT_POLICY_PATH,
     ) -> None:
         self.repository, self.pipeline, self.config = repository, pipeline, config
         self.preferred_budget_max, self.clock = preferred_budget_max, clock
         self.observer = observer
+        self.metadata_exclusion_path = metadata_exclusion_path
 
     def run(
         self,
@@ -76,6 +87,12 @@ class RadarService:
     ) -> dict[str, Any]:
         if start >= before or not regions or max_processes < 1:
             raise ValueError("Ventana, regiones o límite de procesos inválidos.")
+        try:
+            metadata_policy = load_metadata_alert_exclusions(self.metadata_exclusion_path)
+            policy_snapshot = {"status": "valid", **metadata_policy.model_dump(mode="json")}
+        except (OSError, ValueError):
+            metadata_policy = None
+            policy_snapshot = {"status": "invalid", "reason": "metadata_exclusion_policy_invalid"}
         config_snapshot = {
             **self.config.model_dump(mode="json"),
             "preferred_budget_max": self.preferred_budget_max,
@@ -85,6 +102,7 @@ class RadarService:
             "max_processes": max_processes,
             "strategy": "rescan_from_start",
             "score_gate": False,
+            "metadata_alert_exclusions": policy_snapshot,
         }
         run: dict[str, Any] = {
             "id": run_id or uuid.uuid4(),
@@ -102,6 +120,11 @@ class RadarService:
             **dict.fromkeys(COUNTERS, 0),
             "items": [],
             "dry_run": dry_run,
+            "metrics": {
+                "metadata_alerts_excluded_by_object": 0,
+                "metadata_exclusion_policy_errors": 0,
+                "metadata_alert_exclusions": [],
+            },
         }
         with nullcontext() if dry_run else self.repository.lock():
             if not dry_run:
@@ -147,8 +170,15 @@ class RadarService:
                         "outside_window",
                         "outside_region",
                         "publication_unknown",
+                        "missing_or_invalid_offer_deadline",
                     ):
                         item["reason"] = candidate.code
+                        if candidate.code == "missing_or_invalid_offer_deadline":
+                            item.update(
+                                field="fecha_de_recepcion_de",
+                                raw_value=process.offer_deadline_raw,
+                                rule="valid_offer_deadline_required",
+                            )
                         run["skipped"] += 1
                     elif state and state["status"] == "completed":
                         item["reason"] = "already_seen"
@@ -193,6 +223,7 @@ class RadarService:
                                 if details is None or details.enrichment_status not in (
                                     "consolidated",
                                     "conflict",
+                                    "documents_unavailable",
                                 ):
                                     item["outcome"], item["reason"] = (
                                         "pending_enrichment",
@@ -204,9 +235,20 @@ class RadarService:
                                         )
                                 else:
                                     item["process_id"] = str(details.process_id)
-                                    run["enriched"] += 1
-                                    if self.observer:
-                                        self.observer("enriched", {})
+                                    provisional = (
+                                        details.quality.get("document_status") == "unavailable"
+                                    )
+                                    if provisional:
+                                        item.update(
+                                            document_status="unavailable",
+                                            evidence_level="metadata_only",
+                                            retryable=True,
+                                            reason="documents_unavailable",
+                                        )
+                                    else:
+                                        run["enriched"] += 1
+                                        if self.observer:
+                                            self.observer("enriched", {})
                                     stage("alert_evaluation")
                                     decision = evaluate_alert(
                                         process,
@@ -215,11 +257,50 @@ class RadarService:
                                         self.config,
                                         self.preferred_budget_max,
                                     )
+                                    if provisional:
+                                        item["evidence_level"] = decision.snapshot["evidence_level"]
+                                    if provisional_metadata_candidate(decision, "socrata"):
+                                        object_text = (
+                                            (record.description or "").strip() or record.title or ""
+                                        )
+                                        decision = apply_metadata_alert_exclusions(
+                                            decision,
+                                            source="socrata",
+                                            object_text=object_text,
+                                            policy=metadata_policy,
+                                        )
+                                        exclusion = decision.snapshot.get(
+                                            "metadata_exclusion_reason"
+                                        )
+                                        if exclusion:
+                                            term = decision.snapshot.get("metadata_exclusion_term")
+                                            item.update(
+                                                reason=exclusion, metadata_exclusion_term=term
+                                            )
+                                            metric = (
+                                                "metadata_alerts_excluded_by_object"
+                                                if term
+                                                else "metadata_exclusion_policy_errors"
+                                            )
+                                            run["metrics"][metric] += 1
+                                            run["metrics"]["metadata_alert_exclusions"].append(
+                                                {
+                                                    "process_identity": canonical_process_identity(
+                                                        record.id_del_proceso, record.source_url
+                                                    ),
+                                                    "object": object_text,
+                                                    "matched_term": term,
+                                                    "reason": exclusion,
+                                                }
+                                            )
                                     coverage = details.quality.get("extraction_coverage", {})
                                     if coverage:
                                         item["extraction_coverage"] = coverage
                                         decision.snapshot["extraction_coverage"] = coverage
-                                    if coverage.get("coverage_complete") is False:
+                                    if (
+                                        coverage.get("coverage_complete") is False
+                                        and not provisional
+                                    ):
                                         item["coverage_incomplete"] = True
                                         item["coverage_warning"] = "document_coverage_incomplete"
                                         run["failures"] += 1
@@ -241,11 +322,21 @@ class RadarService:
                                             }
                                         )
                                     item["decision"] = asdict(decision)
+                                    decision.snapshot["canonical_identity"] = (
+                                        canonical_process_identity(
+                                            record.id_del_proceso, record.source_url
+                                        )
+                                    )
+                                    decision.snapshot.setdefault("source", "socrata")
                                     item["decision_codes"] = sorted(
                                         {r["code"] for r in decision.reasons if r.get("code")}
                                     )
                                     if not decision.confirmed:
-                                        item["decision_codes"].append("no_confirmed_affinity")
+                                        item["decision_codes"].append(
+                                            "metadata_only"
+                                            if provisional
+                                            else "no_confirmed_affinity"
+                                        )
                                     item["outcome"] = "alert" if decision.create else "no_alert"
                                     if decision.create:
                                         if dry_run:
@@ -265,6 +356,8 @@ class RadarService:
                                                 self.observer("alert_created", {"created": created})
                                             item["alert_created"] = created
                                     item["stage"] = "completed"
+                                    if provisional:
+                                        item["stage"] = "documents_pending"
                             except Exception as error:
                                 item["outcome"] = "failed"
                                 item["error"] = {
@@ -285,7 +378,16 @@ class RadarService:
                                 "stage": item["stage"],
                                 "secop_id": process.secop_id,
                                 "coverage_incomplete": item.get("coverage_incomplete", False),
+                                "document_status": item.get("document_status"),
+                                "evidence_level": item.get("evidence_level"),
+                                "retryable": item.get("retryable", False),
+                                "metadata_exclusion_term": item.get("metadata_exclusion_term"),
                                 "error_type": item.get("error", {}).get("type"),
+                                **{
+                                    key: item[key]
+                                    for key in ("field", "raw_value", "rule")
+                                    if key in item
+                                },
                             },
                         )
                     if not dry_run:

@@ -39,6 +39,8 @@ const metricLabels: Record<string, string> = {
   enriched: "Enriquecidos",
   alert_created: "Alertas nuevas",
   no_alert: "Sin alerta",
+  metadata_alerts_excluded_by_object: "Alertas provisionales excluidas por objeto",
+  metadata_exclusion_policy_errors: "Alertas provisionales bloqueadas por política inválida",
   notification_prepared: "Notificaciones preparadas",
   notification_sent: "Aceptadas por proveedor",
   notification_captured: "Capturas locales",
@@ -188,6 +190,7 @@ export function OperationsPage() {
   const query = useQuery({
     queryKey: ["operations-status"],
     queryFn: async () => unwrap(await api.GET("/api/operations/status")),
+    refetchInterval: 60_000,
   });
   const history = useQuery({
     queryKey: ["operations-cycles"],
@@ -253,13 +256,18 @@ export function OperationsPage() {
         <article className="card" aria-label="Configuración de la próxima corrida">
           <h2>Ventana de la próxima corrida manual</h2>
           <p>
+            Ventana calendario desde anteayer en Bogotá. Incluye el día actual hasta lo disponible
+            en Socrata al momento de ejecutar.
+          </p>
+          <p>
             Desde:{" "}
             {data.execution_config.start_date?.split("-").reverse().join("/") ??
               "Sin fecha configurada"}
+            {" · 00:00"}
           </p>
           <p>
-            Hasta: {data.execution_config.before_date.split("-").reverse().join("/")} — límite
-            superior exclusivo ({data.execution_config.timezone})
+            Hasta: {data.execution_config.before_date.split("-").reverse().join("/")} · 00:00 —
+            límite superior exclusivo ({data.execution_config.timezone})
           </p>
           <p>Regiones: {data.execution_config.regions.join(" · ")}</p>
           <p>Límite operativo: {data.execution_config.max_processes} procesos</p>

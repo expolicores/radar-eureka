@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import date
+from datetime import date, datetime
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 
@@ -75,6 +75,32 @@ def test_publication_interval_is_inclusive_exclusive(monkeypatch) -> None:
     assert list(adapter.SocrataProcessSource().fetch_processes(query)) == []
     assert "fecha_de_publicacion_del >= '2026-10-01'" in requests[0]["$where"][0]
     assert "fecha_de_publicacion_del < '2026-10-08'" in requests[0]["$where"][0]
+
+
+def test_requested_calendar_window_contains_no_intraday_boundaries(monkeypatch) -> None:
+    source = adapter.SocrataProcessSource()
+    requests = []
+    monkeypatch.setattr(source, "_page", lambda params: requests.append(params) or [])
+    assert (
+        list(
+            source.fetch_processes(
+                ProcessQuery(published_from=date(2026, 10, 13), published_before=date(2026, 10, 15))
+            )
+        )
+        == []
+    )
+    assert requests[0]["$where"] == (
+        "fecha_de_publicacion_del >= '2026-10-13' AND fecha_de_publicacion_del < '2026-10-15'"
+    )
+
+
+@pytest.mark.parametrize("field", ["published_from", "published_before"])
+@pytest.mark.parametrize("hour", [0, 12])
+def test_query_explicitly_rejects_datetime_boundaries(field, hour):
+    boundaries = {"published_from": date(2026, 10, 13), "published_before": date(2026, 10, 15)}
+    boundaries[field] = datetime(2026, 10, 14, hour)  # noqa: DTZ001 -- límite rechazado, sin zona
+    with pytest.raises(ValueError, match="YYYY-MM-DD sin hora"):
+        ProcessQuery(**boundaries)
 
 
 @pytest.mark.parametrize(

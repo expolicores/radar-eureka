@@ -3,9 +3,10 @@
 import uuid
 from dataclasses import asdict
 from datetime import date, datetime
+from typing import Any
 
-from sqlalchemy import BigInteger, Date, DateTime, String, Text, UniqueConstraint, or_, select
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import JSON, BigInteger, Date, DateTime, String, Text, UniqueConstraint, or_, select
+from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from public_procurement.shared.persistence import Base
@@ -37,6 +38,9 @@ class SecopProcessRecord(Base):
     category_code: Mapped[str | None] = mapped_column(Text)
     source_url: Mapped[str | None] = mapped_column(Text)
     acquired_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    offer_deadline_raw: Mapped[Any | None] = mapped_column(
+        JSON(none_as_null=True).with_variant(JSONB(none_as_null=True), "postgresql"), nullable=True
+    )
 
 
 class ProcessSyncRunRecord(Base):

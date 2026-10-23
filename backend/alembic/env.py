@@ -9,6 +9,7 @@ from public_procurement.comparison import repositories as comparison_repositorie
 from public_procurement.documents import repositories as document_repositories  # noqa: F401
 from public_procurement.eureka import radar_repositories as radar_repositories
 from public_procurement.eureka import repositories as eureka_repositories  # noqa: F401
+from public_procurement.eureka import review_repositories as review_repositories
 from public_procurement.extraction import canonical_repositories as canonical_repositories
 from public_procurement.extraction import repositories as extraction_repositories  # noqa: F401
 from public_procurement.extraction import (

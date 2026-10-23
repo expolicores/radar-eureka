@@ -47,6 +47,22 @@ export function formatBogotaDateTime(isoTimestamp: string): string {
   return `${date} ${parts.hour}:${parts.minute}`;
 }
 
+/** Timestamp persistido → DD/MM/YYYY HH:mm, siempre America/Bogota. */
+export function formatBogotaNumericDateTime(isoTimestamp: string): string {
+  const parts = Object.fromEntries(
+    bogotaParts.formatToParts(new Date(isoTimestamp)).map((part) => [part.type, part.value]),
+  );
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+/** Fecha de evento UTC → DD/MM/YYYY HH:mm:ss en Bogotá. */
+export function formatBogotaEventDateTime(isoTimestamp: string): string {
+  const date = new Date(isoTimestamp);
+  if (!Number.isFinite(date.getTime())) return "Fecha no registrada";
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+  return `${formatBogotaNumericDateTime(isoTimestamp)}:${seconds}`;
+}
+
 const percentFormatter = new Intl.NumberFormat("es-CO", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,

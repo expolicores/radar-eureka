@@ -43,6 +43,7 @@ class DocumentInput:
     original_name: str
     input_sha256: str
     observed_size: int
+    content_type: str | None = None
 
 
 @dataclass(frozen=True)

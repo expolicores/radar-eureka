@@ -14,7 +14,7 @@ from public_procurement.ingestion.process_repositories import (
     ProcessSyncRunRecord,
     SecopProcessRecord,
 )
-from public_procurement.ingestion.services import ProcessIngestionService
+from public_procurement.ingestion.services import ProcessIngestionService, ProcessQueryService
 
 
 def process(identifier="CO1.REQ.11172521", portfolio="CO1.BDOS.10985405") -> SecopProcess:
@@ -105,6 +105,22 @@ def test_repeated_sync_is_idempotent_and_updates_preserve_identity(sessions) -> 
         assert session.scalar(select(func.count()).select_from(ProcessSyncRunRecord)) == 3
 
 
+def test_deadline_raw_round_trip_and_idempotency_in_isolated_database(sessions) -> None:
+    record = replace(process(), offer_deadline_raw="2026-10-13T00:00:00.000")
+    service = ProcessIngestionService(sessions)
+    query = ProcessQuery(portfolio_id="P")
+    assert service.run(ProcessSource([record]), query).changed_count == 1
+    stored = next(ProcessQueryService(sessions).iter_processes()).process
+    assert stored.offer_deadline_raw == record.offer_deadline_raw
+    assert stored.offer_deadline == date(2026, 10, 13)
+    assert service.run(ProcessSource([record]), query).changed_count == 0
+    assert (
+        service.run(ProcessSource([replace(record, offer_deadline_raw="-")]), query).changed_count
+        == 1
+    )
+    assert next(ProcessQueryService(sessions).iter_processes()).process.offer_deadline_raw == "-"
+
+
 def test_network_failure_does_not_open_transaction(sessions) -> None:
     class FailingSource:
         def fetch_processes(self, query):
@@ -149,7 +165,12 @@ def test_migration_matches_process_models_and_reverses_in_memory() -> None:
                         c["name"]: c["nullable"]
                         for c in inspector.get_columns(model.__tablename__, schema="ingestion")
                     }
-                    assert actual == {c.name: c.nullable for c in model.__table__.columns}
+                    # 0006 no incluye la columna aditiva introducida posteriormente en 0017.
+                    assert actual == {
+                        c.name: c.nullable
+                        for c in model.__table__.columns
+                        if c.name != "offer_deadline_raw"
+                    }
                 constraints = inspector.get_unique_constraints("secop_process", schema="ingestion")
                 assert any(
                     c["column_names"] == ["dataset_id", "id_del_proceso"] for c in constraints

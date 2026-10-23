@@ -1,5 +1,27 @@
 # Ejecución manual de Eureka desde Operations
 
+## Ventana móvil actual de Operations manual
+El botón manual usa `[hoy−2, hoy+1)` en `America/Bogota`, a cualquier hora.
+El 19/10/2026 corresponde a
+`2026-10-17 00:00 <= publicación < 2026-10-20 00:00`.
+Incluye los dos días anteriores y el día actual hasta lo disponible en Socrata
+al momento de ejecutar. El fin es exclusivo y ambos límites son fechas calendario,
+sin horas intradía. No se modela la hora de carga de Socrata ni se garantiza su cobertura.
+
+`manual_operations_window` alimenta la previsualización del endpoint de estado.
+Al iniciar, `ManualCycleRunner` captura una sola pareja de fechas y la entrega al
+factory: preflight/snapshot y Radar usan esa misma pareja, sin recalcularla entre
+etapas. La UI muestra las fechas y medianoche con fin exclusivo y actualiza la
+previsualización cada minuto. La pareja persistida de cada corrida es la utilizada
+al iniciarla, incluso si la página se dejó abierta al cambiar de ventana.
+
+El cambio se limita al lanzamiento `manual_ui`. La CLI y las corridas programadas
+conservan el cálculo anterior mediante `EUREKA_RADAR_START_DATE` y su fin predeterminado.
+No se modifican scheduler, filtros, vigencia, scoring ni deduplicación/already_seen.
+Las secciones siguientes documentan las validaciones anteriores de la beta.
+
+## Historial de validaciones anteriores
+
 Abrir `/eureka/operations` y pulsar **Ejecutar corrida manual**. Se muestra confirmación
 con Cancelar / Ejecutar. Solo Ejecutar emite el POST. Se usan configuración habitual,
 fecha inicial temporal **2026-10-05** para la prueba ciega del funnel; no se admiten

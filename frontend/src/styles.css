@@ -42,8 +42,17 @@
   box-sizing: border-box;
 }
 
+/* Un solo contenedor de scroll para las vistas, también en Edge. */
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: auto;
   font-size: 14px;
   line-height: 1.45;
 }

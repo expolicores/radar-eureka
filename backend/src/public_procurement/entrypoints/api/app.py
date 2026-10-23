@@ -13,11 +13,19 @@ from fastapi import FastAPI
 from public_procurement.comparison import api as signals_api
 from public_procurement.comparison.services import build_signal_query_service
 from public_procurement.eureka import api as eureka_api
-from public_procurement.eureka.services import build_eureka_http_queries, build_radar_http_queries
+from public_procurement.eureka import review_api
+from public_procurement.eureka.services import (
+    build_eureka_http_queries,
+    build_human_review_service,
+    build_radar_http_queries,
+)
 from public_procurement.exploration import api as exploration_api
 from public_procurement.exploration.services import build_exploration_service
 from public_procurement.investigation import api as cases_api
 from public_procurement.investigation.services import build_investigation_service
+from public_procurement.licitaciones_cdp import api as cdp_api
+from public_procurement.licitaciones_cdp.background import ManualCdpRunner
+from public_procurement.licitaciones_cdp.services import LicitacionesQueries
 from public_procurement.notifications import api as notifications_api
 from public_procurement.notifications.services import NotificationQueries
 from public_procurement.operations import api as operations_api
@@ -49,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         log_event(logger, "app_started", app_env=settings.app_env.value)
         yield
         app.state.manual_cycle_runner.close()
+        app.state.manual_cdp_runner.close()
         engine.dispose()
 
     app = FastAPI(title="Seguimiento Compras Públicas", version="0.1.0", lifespan=lifespan)
@@ -60,10 +69,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.current_user_provider = demo_user_provider
     app.state.eureka_queries = build_eureka_http_queries(session_factory, settings)
     app.state.radar_queries = build_radar_http_queries(session_factory)
+    app.state.human_review_queries = build_human_review_service(session_factory, settings)
     app.state.search_queries = SearchQueries(session_factory, settings)
     app.state.notification_queries = NotificationQueries(session_factory)
     app.state.operations_queries = OperationsQueries(session_factory, settings)
     app.state.manual_cycle_runner = ManualCycleRunner(session_factory, settings)
+    app.state.manual_cdp_runner = ManualCdpRunner(session_factory, settings)
+    app.state.cdp_queries = LicitacionesQueries(session_factory)
     # También responde las excepciones no controladas (500), para no perder las cabeceras.
     app.add_middleware(CorrelationMiddleware)
     register_error_handlers(app)
@@ -76,4 +88,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(cases_api.router)
     app.include_router(eureka_api.router)
     app.include_router(eureka_api.radar_router)
+    app.include_router(review_api.router)
+    app.include_router(cdp_api.router)
     return app

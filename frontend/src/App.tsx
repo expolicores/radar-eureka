@@ -8,11 +8,13 @@ import { PurchaseDetailPage } from "./features/purchase/PurchaseDetailPage";
 import { SignalDetailPage } from "./features/signal-detail/SignalDetailPage";
 import { SignalsPage } from "./features/signals/SignalsPage";
 import { EurekaPage } from "./features/eureka/EurekaPage";
+import { HumanReviewPage } from "./features/eureka/HumanReviewPage";
 import { EurekaDetailPage } from "./features/eureka/EurekaDetailPage";
 import { EurekaAlertsPage } from "./features/eureka/EurekaAlertsPage";
 import { SearchPage } from "./features/search/SearchPage";
 import { EurekaNotificationsPage } from "./features/eureka/EurekaNotificationsPage";
 import { OperationsPage } from "./features/operations/OperationsPage";
+import { LicitacionesPage } from "./features/licitaciones/LicitacionesPage";
 
 export function App() {
   return (
@@ -22,10 +24,13 @@ export function App() {
         <Route path="/explorar" element={<ExplorePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/eureka" element={<EurekaPage />} />
+        <Route path="/eureka/revision" element={<HumanReviewPage />} />
+        <Route path="/eureka/revision/:identity" element={<HumanReviewPage />} />
         <Route path="/eureka/alerts" element={<EurekaAlertsPage />} />
         <Route path="/eureka/alerts/:alertId" element={<EurekaAlertsPage />} />
         <Route path="/eureka/notifications" element={<EurekaNotificationsPage />} />
         <Route path="/eureka/operations" element={<OperationsPage />} />
+        <Route path="/eureka/licitaciones" element={<LicitacionesPage />} />
         <Route path="/eureka/:opportunityId" element={<EurekaDetailPage />} />
         <Route path="/senales" element={<SignalsPage />} />
         <Route path="/senales/:code" element={<SignalDetailPage />} />

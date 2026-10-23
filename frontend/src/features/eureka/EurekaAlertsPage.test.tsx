@@ -15,6 +15,8 @@ const alert = {
   rule_version: "v1",
   priority: "high",
   review_required: true,
+  evidence_level: "document_confirmed",
+  document_status: "available",
   process: {
     secop_id: "CO1.REQ.11172521",
     reference: "012-2026",
@@ -98,6 +100,29 @@ it("conserva alerta con score inferior al umbral de referencia y requisitos desc
   expect(screen.getByText(/Póliza: No determinado/)).toBeInTheDocument();
 });
 
+it("shows metadata-only warning without claiming documentary confirmation", async () => {
+  routes([
+    {
+      ...alert,
+      evidence_level: "metadata_only",
+      document_status: "unavailable",
+      snapshot: { ...alert.snapshot, products: [], confirmed_matches: [] },
+    },
+  ]);
+  renderWithProviders(<App />, { route: "/eureka/alerts" });
+  expect(await screen.findByText("Alerta provisional · solo metadata")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "No se pudo validar documentalmente, pero por metadatos parece viable. Revisar manualmente.",
+    ),
+  ).toBeInTheDocument();
+  expect(screen.queryByText("Coincidencia comercial confirmada")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Afinidad confirmada en la descripción documental del ítem."),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Productos pendientes de validación documental.")).toBeInTheDocument();
+});
+
 it("maneja listado vacío y errores API", async () => {
   routes([]);
   renderWithProviders(<App />, { route: "/eureka/alerts" });
@@ -113,4 +138,30 @@ it("muestra fallo de alertas sin afirmar que no existen", async () => {
   renderWithProviders(<App />, { route: "/eureka/alerts" });
   expect(await screen.findByRole("alert")).toHaveTextContent("No fue posible cargar las alertas");
   expect(screen.queryByText("No hay alertas para esta página.")).not.toBeInTheDocument();
+});
+
+it.each([
+  ["socrata", "/eureka/alerts"],
+  ["licitaciones_info_cdp", "/eureka/alerts"],
+  ["socrata", "/eureka/alerts/alert"],
+  ["licitaciones_info_cdp", "/eureka/alerts/alert"],
+])("muestra created_at en Bogotá para %s en %s", async (source, route) => {
+  const item = {
+    ...alert,
+    source,
+    created_at: "2026-10-21T14:42:00Z",
+    process: { ...alert.process, published_at: "2026-10-01T00:00:00Z" },
+  };
+  mockApi({
+    "/api/eureka/alerts": () => ({ body: { items: [item], total: 1, page: 1, page_size: 25 } }),
+    "/api/eureka/alerts/alert": () => ({ body: item }),
+    "/api/eureka/radar-runs": () => ({ body: { items: [], total: 0, page: 1, page_size: 5 } }),
+  });
+  renderWithProviders(<App />, { route });
+  const timestamp = await screen.findByText("21/10/2026 09:42");
+  expect(timestamp.tagName).toBe("TIME");
+  expect(timestamp).toHaveAttribute("datetime", item.created_at);
+  expect(timestamp).toHaveAttribute("title", "America/Bogota");
+  expect(timestamp.parentElement).toHaveTextContent("Fecha alerta:");
+  expect(timestamp.parentElement).not.toHaveTextContent("01/10/2026");
 });

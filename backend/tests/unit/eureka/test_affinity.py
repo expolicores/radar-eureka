@@ -39,6 +39,7 @@ def process():
         2080000,
         "50192703",
         None,
+        offer_deadline_raw="2026-10-13T00:00:00.000",
     )
 
 
@@ -68,7 +69,6 @@ def test_token_matching_not_substring_and_unspsc_is_preliminary(config):
     [
         ({"published_on": date(2026, 10, 6)}, "outside_window"),
         ({"department": "Bogotá"}, "outside_region"),
-        ({"phase": "Adjudicado"}, "terminal_phase"),
         ({"title": "Interventoría", "description": ""}, "strong_exclusion"),
         ({"published_on": None}, "publication_unknown"),
     ],
@@ -83,6 +83,43 @@ def test_initial_filters(config, change, code):
     )
     assert not result.accepted
     assert result.code == code
+
+
+@pytest.mark.parametrize("raw", [None, "", "-", "   ", "not-a-date", "2026-02-30"])
+def test_offer_deadline_is_a_hard_candidate_condition(config, raw):
+    record = radar_process(replace(process(), offer_deadline_raw=raw))
+    decision = candidate_decision(
+        record, date(2026, 10, 5), date(2026, 10, 16), ("Boyacá",), config
+    )
+    assert not decision.accepted
+    assert decision.code == "missing_or_invalid_offer_deadline"
+    assert not evaluate_alert(record, decision, details(), config, 30_000_000).create
+
+
+@pytest.mark.parametrize("state", ["Proceso cancelado", "Adjudicado", "Evaluación", "Cerrado"])
+def test_parseable_past_deadline_passes_without_state_or_phase_gate(config, state):
+    record = radar_process(
+        replace(process(), status=state, phase=state, offer_deadline_raw="2026-10-01T00:00:00.000")
+    )
+    decision = candidate_decision(
+        record, date(2026, 10, 5), date(2026, 10, 16), ("Boyacá",), config
+    )
+    assert decision.accepted
+    assert decision.code == "candidate"
+
+
+def test_parentheses_in_reference_title_and_description_do_not_disqualify(config):
+    record = radar_process(
+        replace(
+            process(),
+            reference="FGN-RCS-IPSE-0042-2026 (Presentación de oferta)",
+            title="Suministro de refrigerios (Presentación de oferta)",
+            description="Comunidad educativa (actividades culturales)",
+        )
+    )
+    assert candidate_decision(
+        record, date(2026, 10, 5), date(2026, 10, 16), ("Boyacá",), config
+    ).accepted
 
 
 @pytest.mark.parametrize("score", [0, 20, 59, 65])

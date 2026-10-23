@@ -1,6 +1,7 @@
 import threading
 import time
 import uuid
+from datetime import UTC, date, datetime
 from unittest.mock import Mock
 
 import pytest
@@ -48,6 +49,22 @@ def test_post_202_after_persisting_and_before_pipeline_finishes(setup):
             assert repo.rows[identifier]["notification_summary"]["disabled"]
     finally:
         release.set()
+
+
+def test_ui_worker_captures_daily_window_once_without_using_env_start(setup):
+    service, repo, _radar, _notify, _path = setup
+    factory = Mock(return_value=service)
+    runner = ManualCycleRunner(
+        None,
+        service.settings,
+        factory=factory,
+        clock=lambda: datetime(2026, 10, 16, 20, tzinfo=UTC),
+    )
+    result = runner.start()
+    wait_for(lambda: repo.rows[result["cycle_id"]]["status"] == "completed")
+    factory.assert_called_once_with(
+        None, service.settings, (date(2026, 10, 14), date(2026, 10, 17))
+    )
 
 
 def test_global_lock_conflict_409_and_audited_skip(setup):

@@ -1,0 +1,2 @@
+# Solo para la venv local del experimento; no es una dependencia productiva.
+playwright>=1.55,<2

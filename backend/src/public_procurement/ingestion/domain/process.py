@@ -3,8 +3,23 @@
 import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
+from typing import Any
 
 SECOP_PROCESS_DATASET = "p6dx-8zbt"
+
+
+def parse_offer_deadline(raw_value: Any) -> date | None:
+    """Fecha ISO de Socrata, sin inferir vigencia ni recortar entradas malformadas."""
+    if not isinstance(raw_value, str) or not raw_value.strip():
+        return None
+    value = raw_value.strip()
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        try:
+            return datetime.fromisoformat(value).date()
+        except ValueError:
+            return None
 
 
 @dataclass(frozen=True)
@@ -26,6 +41,11 @@ class SecopProcess:
     category_code: str | None
     source_url: str | None
     dataset_id: str = SECOP_PROCESS_DATASET
+    offer_deadline_raw: Any = None
+
+    @property
+    def offer_deadline(self) -> date | None:
+        return parse_offer_deadline(self.offer_deadline_raw)
 
     def __post_init__(self) -> None:
         if not self.id_del_proceso.strip() or len(self.id_del_proceso) > 128:
@@ -50,6 +70,9 @@ class ProcessQuery:
     departments: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        for boundary in (self.published_from, self.published_before):
+            if boundary is not None and type(boundary) is not date:
+                raise ValueError("La ventana Socrata requiere fechas YYYY-MM-DD sin hora.")
         if not self.portfolio_id and not (self.published_from and self.published_before):
             raise ValueError("Indica un portafolio o un intervalo de publicación completo.")
         if (self.published_from is None) != (self.published_before is None):

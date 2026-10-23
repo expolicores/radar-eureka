@@ -16,8 +16,17 @@ class CommercialFamily(BaseModel):
     brands: tuple[str, ...] = ()
     aliases: dict[str, tuple[str, ...]] = Field(default_factory=dict)
     unspsc: tuple[str, ...] = ()
+    discovery_only: bool = False
     exclusions: tuple[str, ...] = ()
     priority: int = Field(default=1, ge=1)
+
+    @model_validator(mode="after")
+    def discovery_codes_only(self) -> "CommercialFamily":
+        if self.discovery_only and (
+            not self.unspsc or self.terms or self.phrases or self.brands or self.aliases
+        ):
+            raise ValueError("Una familia de discovery solo admite códigos UNSPSC.")
+        return self
 
 
 class RadarConfig(BaseModel):

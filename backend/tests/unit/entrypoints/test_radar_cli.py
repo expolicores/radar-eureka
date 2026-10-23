@@ -2,6 +2,7 @@ import json
 from datetime import date
 from unittest.mock import Mock
 
+import pytest
 from typer.testing import CliRunner
 
 from public_procurement.entrypoints.cli import __main__ as cli
@@ -79,3 +80,35 @@ def test_cli_partial_failure_nonzero_exit(monkeypatch):
         CliRunner().invoke(cli.app, ["run-eureka-radar", "--before-date", "2026-10-14"]).exit_code
         == 1
     )
+
+
+@pytest.mark.parametrize("option", ["--from-date", "--before-date"])
+@pytest.mark.parametrize("value", ["2026-10-14T12:00:00", "2026-10-14T00:00:00"])
+def test_cli_rejects_hours_before_consulting_source(monkeypatch, option, value):
+    service, source = configure(monkeypatch)
+    result = CliRunner().invoke(cli.app, ["run-eureka-radar", option, value])
+    assert result.exit_code == 2
+    source.fetch_processes.assert_not_called()
+    service.run.assert_not_called()
+
+
+def test_cli_accepts_exact_requested_calendar_window(monkeypatch):
+    service, source = configure(monkeypatch)
+    result = CliRunner().invoke(
+        cli.app,
+        [
+            "run-eureka-radar",
+            "--from-date",
+            "2026-10-13",
+            "--before-date",
+            "2026-10-15",
+            "--max-processes",
+            "2500",
+        ],
+    )
+    assert result.exit_code == 0
+    query = source.fetch_processes.call_args.args[0]
+    assert query.published_from == date(2026, 10, 13)
+    assert query.published_before == date(2026, 10, 15)
+    assert service.run.call_args.kwargs["start"] == date(2026, 10, 13)
+    assert service.run.call_args.kwargs["before"] == date(2026, 10, 15)

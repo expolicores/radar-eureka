@@ -78,6 +78,12 @@ def test_preflight_only_queries_config_db_ocr(monkeypatch):
 
 
 def test_status_exposes_loaded_config_shared_with_manual_runner_without_secop(monkeypatch):
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 10, 16, 20, tzinfo=UTC).astimezone(tz or UTC)
+
+    monkeypatch.setattr(services, "datetime", FrozenDatetime)
     configured = settings().model_copy(
         update={
             "eureka_radar_start_date": date(2026, 10, 5),
@@ -104,7 +110,8 @@ def test_status_exposes_loaded_config_shared_with_manual_runner_without_secop(mo
         response = client.get("/api/operations/status")
         assert response.status_code == 200
         config = response.json()["execution_config"]
-        assert config["start_date"] == "2026-10-05"
+        assert config["start_date"] == "2026-10-14"
+        assert config["before_date"] == "2026-10-17"
         assert config["before_exclusive"] is True
         assert config["max_processes"] == 2500
         assert config["regions"] == ["Boyacá", "Casanare", "Distrito Capital de Bogotá"]
@@ -123,3 +130,28 @@ def test_manual_radar_receives_configured_limit_without_calling_real_pipeline(mo
     service.radar(uuid.uuid4(), Mock())
     assert radar.run.call_args.kwargs["max_processes"] == 2500
     remote.assert_not_called()
+
+
+def test_manual_factory_uses_one_window_for_preflight_and_actual_query(monkeypatch):
+    configured = settings().model_copy(update={"eureka_radar_start_date": None})
+    radar = Mock()
+    radar.config.page_size, radar.config.max_pages = 200, 100
+    radar.run.side_effect = lambda source, **kwargs: list(source)
+    remote = Mock(return_value=iter(()))
+    monkeypatch.setattr(services, "build_radar_service", Mock(return_value=radar))
+    monkeypatch.setattr(services, "fetch_secop_processes", remote)
+    monkeypatch.setattr(services, "ocr_runtime_status", lambda _: {"available": True})
+    sessions = Mock()
+    sessions.return_value.__enter__ = Mock(return_value=Mock())
+    sessions.return_value.__exit__ = Mock(return_value=False)
+    window = services.manual_operations_window(datetime(2026, 10, 16, 19, tzinfo=UTC))
+    service = services.build_cycle_service(sessions, configured, window)
+    snapshot = service.preflight_check()
+    service.radar(uuid.uuid4(), Mock())
+    query = remote.call_args.args[0]
+    assert query.published_from == date(2026, 10, 14)
+    assert query.published_before == date(2026, 10, 17)
+    assert snapshot["window"]["from"] == query.published_from.isoformat()
+    assert snapshot["window"]["before"] == query.published_before.isoformat()
+    assert radar.run.call_args.kwargs["start"] == query.published_from
+    assert radar.run.call_args.kwargs["before"] == query.published_before

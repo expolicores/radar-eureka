@@ -81,6 +81,22 @@ def test_http_non_enriched_opportunity_remains_available(app, client):
     assert data["opportunity"]["budget"] == 2080000
 
 
+def test_detail_exposes_metadata_only_alert_without_reenrichment(app, client):
+    stored, canonical, service = configure(app, entries=[], state="not_extracted")
+    service.radar = Mock()
+    service.radar.alert_for_opportunity.return_value = {
+        "evidence_level": "metadata_only",
+        "document_status": "unavailable",
+    }
+    response = client.get(f"/api/eureka/opportunities/{stored.id}")
+    assert response.status_code == 200
+    assert response.json()["opportunity"]["evidence_level"] == "metadata_only"
+    assert response.json()["opportunity"]["document_status"] == "unavailable"
+    assert response.json()["opportunity"]["review_required"] is True
+    assert response.json()["opportunity"]["score"] == 65
+    canonical.run.assert_not_called()
+
+
 def test_http_conflict_never_selects_metadata_budget_instead(app, client):
     stored, _, _ = configure(
         app, [entry("BUDGET_COP", None, "conflict", [{"value": 123}])], state="conflict"

@@ -42,6 +42,7 @@ def test_env_example_documents_exactly_the_settings_variables_when_compared() ->
             "EUREKA_AUTOMATION_TASK_NAME",
             "EUREKA_PREFERRED_BUDGET_MAX",
             "EUREKA_RADAR_CONFIG_PATH",
+            "EUREKA_METADATA_ALERT_EXCLUSIONS_PATH",
             "LOCAL_STORAGE_PATH",
             "APP_ENV",
             "LOG_LEVEL",

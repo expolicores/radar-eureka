@@ -22,6 +22,7 @@ from ..domain.content import (
 )
 from ..domain.text import NORMALIZATION_VERSION
 from ..ports import DocumentSource
+from .format_detection import document_suffix
 
 READERS = {
     ".pdf": ("pdf-text", "pypdf"),
@@ -35,7 +36,17 @@ class IsolatedExtractor:
         self.documents, self.limits = documents, limits
 
     def identity(self, document: DocumentInput) -> ExtractorIdentity:
-        suffix = Path(document.original_name).suffix.lower()
+        prefix = b""
+        if document.document_version_id is not None:
+            try:
+                with self.documents.open_version(
+                    document.document_version_id, self.limits.max_bytes
+                ) as source:
+                    prefix = source.read(1024)
+            except (ExtractionError, OSError):
+                # extract() records the verified-storage failure through the normal attempt.
+                pass
+        suffix = document_suffix(document.original_name, document.content_type, prefix)
         reader, library = READERS.get(suffix, ("unsupported", None))
         library_version = version(library) if library else "none"
         policy = hashlib.sha256(
@@ -64,7 +75,6 @@ class IsolatedExtractor:
     def extract(self, document: DocumentInput) -> ParsedContent:
         if document.document_version_id is None:
             raise ExtractionError("not_downloaded", "El documento no tiene una versión descargada.")
-        suffix = Path(document.original_name).suffix.lower()
         with tempfile.TemporaryDirectory(prefix="extraction-") as temporary:
             snapshot = Path(temporary) / "input"
             with (
@@ -81,6 +91,10 @@ class IsolatedExtractor:
                             "too_large", "La entrada excede el límite configurado."
                         )
                     target.write(chunk)
+            with snapshot.open("rb") as verified:
+                suffix = document_suffix(
+                    document.original_name, document.content_type, verified.read(1024)
+                )
             request = dict(
                 path=str(snapshot),
                 suffix=suffix,

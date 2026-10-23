@@ -37,9 +37,13 @@ class CommercialMatch:
     origin: str
     method: str
     canonical_fact_id: str | None = None
+    discovery_only: bool = False
 
     def json(self) -> dict[str, Any]:
-        return asdict(self)
+        result = asdict(self)
+        if not self.discovery_only:
+            result.pop("discovery_only")
+        return result
 
 
 def match_catalog(
@@ -48,10 +52,14 @@ def match_catalog(
     config: RadarConfig,
     origin: str = "metadata",
     canonical_id: str | None = None,
+    *,
+    include_discovery_only: bool = False,
 ) -> list[CommercialMatch]:
     matches: list[CommercialMatch] = []
     codes = set(re.findall(r"(?<!\d)\d{8}(?!\d)", unspsc))
     for family in sorted(config.families, key=lambda item: -item.priority):
+        if family.discovery_only and not include_discovery_only:
+            continue
         if any(phrase_match(text, term, config) for term in family.exclusions):
             continue
         concepts: set[str] = set()
@@ -92,7 +100,14 @@ def match_catalog(
         for code in sorted(codes.intersection(family.unspsc)):
             matches.append(
                 CommercialMatch(
-                    family.category, family.label, code, code, origin, "unspsc", canonical_id
+                    family.category,
+                    family.label,
+                    code,
+                    code,
+                    origin,
+                    "unspsc",
+                    canonical_id,
+                    discovery_only=family.discovery_only,
                 )
             )
     return matches

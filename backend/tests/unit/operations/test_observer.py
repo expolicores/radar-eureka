@@ -12,6 +12,9 @@ def test_pipeline_observes_native_and_ocr_without_reexecuting_reused_work():
     services[2].download.return_value.available = 1
     extraction.extract_process.return_value = [
         SimpleNamespace(
+            document=SimpleNamespace(document_version_id="version"),
+            text_length=40,
+            fragment_count=2,
             error_code=None,
             status="completed",
             reused=False,
@@ -30,6 +33,7 @@ def test_pipeline_observes_native_and_ocr_without_reexecuting_reused_work():
     pipeline.enrich(process(), lambda stage: None)
     value = next(data for event, data in events if event == "extraction_result")
     assert value["native"]
+    assert value["succeeded"]
     assert value["processed"] == 1
     extraction.extract_process.return_value[0].reused = True
     # Restore the normal fake discovery/detail sequence for a second enrichment.
@@ -41,4 +45,5 @@ def test_pipeline_observes_native_and_ocr_without_reexecuting_reused_work():
     second.enrich(process(), lambda stage: None)
     value = next(data for event, data in events if event == "extraction_result")
     assert value["reused"]
+    assert value["succeeded"]
     assert value["processed"] == value["ocr_seconds"] == 0

@@ -25,6 +25,7 @@ from .radar_config import RadarConfig, load_radar_config
 from .radar_repositories import SqlRadarRepository
 from .radar_services import RadarService
 from .repositories import SqlOpportunityQueries, SqlOpportunityRepository
+from .review_services import HumanReviewService as HumanReviewService
 
 __all__ = [
     "DEFAULT_CONFIG",
@@ -299,8 +300,14 @@ def build_eureka_details_service(
 
 
 class EurekaHttpQueries:
-    def __init__(self, details: EurekaDetailsService, metadata: IngestionProcessSource) -> None:
+    def __init__(
+        self,
+        details: EurekaDetailsService,
+        metadata: IngestionProcessSource,
+        radar: SqlRadarRepository | None = None,
+    ) -> None:
         self.details, self.metadata = details, metadata
+        self.radar = radar
 
     def detail(self, identifier: uuid.UUID) -> dict[str, Any]:
         from dataclasses import asdict
@@ -322,13 +329,19 @@ class EurekaHttpQueries:
         enriched: EurekaOpportunityDetails | None = None,
     ) -> dict[str, Any]:
         enriched = enriched or self.details.get(str(opportunity.process_id))
+        alert = self.radar.alert_for_opportunity(opportunity.id) if self.radar else None
+        evidence = {}
+        if alert:
+            evidence = {key: alert[key] for key in ("evidence_level", "document_status")}
         return {
             **header,
+            **evidence,
             "opportunity_id": opportunity.id,
             "category": opportunity.categories,
             "score": opportunity.score,
             "priority": opportunity.priority,
-            "review_required": enriched.review_required,
+            "review_required": enriched.review_required
+            or evidence.get("evidence_level") == "metadata_only",
             "enrichment_status": enriched.enrichment_status,
             "product_match": enriched.commercial_profile["product_match"],
             "budget": enriched.commercial_profile["budget_cop"]
@@ -400,11 +413,98 @@ def build_eureka_http_queries(
     return EurekaHttpQueries(
         build_eureka_details_service(sessions, settings),
         IngestionProcessSource(build_process_query_service(sessions)),
+        SqlRadarRepository(sessions),
     )
 
 
 def build_radar_queries(sessions: sessionmaker[Session]) -> SqlRadarRepository:
     return SqlRadarRepository(sessions)
+
+
+def build_source_pipeline(
+    sessions: sessionmaker[Session],
+    settings: Settings,
+    inventory: Any,
+    observer: Callable[[str, dict[str, Any]], None] | None = None,
+) -> Any:
+    """Same commercial pipeline, with an explicit provider inventory port."""
+    from public_procurement.documents.services import build_document_service
+    from public_procurement.extraction.services import (
+        ConsolidationService,
+        StructuredExtractionService,
+        build_extraction_service,
+    )
+    from public_procurement.ingestion.services import build_process_ingestion_service
+
+    from .adapters.radar_pipeline import ExistingRadarPipeline
+
+    documents = build_document_service(
+        sessions, settings, inventory=inventory, retry_once=True, limit_to_synced=True
+    )
+    extraction = build_extraction_service(
+        sessions, settings, document_service=documents, ocr_page_limit=20
+    )
+    structured = StructuredExtractionService(sessions, extraction)
+    return ExistingRadarPipeline(
+        build_process_ingestion_service(sessions),
+        build_process_query_service(sessions),
+        documents,
+        extraction,
+        structured,
+        ConsolidationService(sessions, structured),
+        build_eureka_service(sessions),
+        build_eureka_details_service(sessions, settings),
+        observer=observer,
+    )
+
+
+def source_review_eligible(item: dict[str, Any]) -> bool:
+    from .review_services import review_evidence_sufficient
+
+    return review_evidence_sufficient(item)
+
+
+def evaluate_source_alert(
+    record: Any, details: EurekaOpportunityDetails, settings: Settings
+) -> Any:
+    """Use the exact existing Eureka candidate and alert decisions."""
+    from datetime import timedelta
+
+    from .domain.radar import candidate_decision, evaluate_alert
+    from .radar_services import radar_process
+
+    config = load_radar_config(settings.eureka_radar_config_path)
+    process = radar_process(record)
+    start = record.published_on
+    if start is None:
+        raise ValueError("Publicacion requerida para evaluar comercialmente.")
+    candidate = candidate_decision(
+        process, start, start + timedelta(days=1), (record.department or "",), config
+    )
+    return evaluate_alert(process, candidate, details, config, settings.eureka_preferred_budget_max)
+
+
+def source_pipeline_review(
+    pipeline: Any, reference: str, annotate: Callable[..., Any], policy: dict[str, Any]
+) -> dict[str, Any]:
+    """Review annotations preserve shared persisted facts; never gate commercial scoring."""
+    from dataclasses import asdict
+
+    facts = [asdict(f) for f in pipeline.structured.list_facts(reference)]
+    details = pipeline.details.get(reference)
+    coverage = details.quality.get("extraction_coverage", {})
+    incomplete = {
+        str(run.document.document_version_id)
+        for run in pipeline.extraction.list_extractions(reference)
+        if run.diagnostics.get("coverage_complete") is False
+    }
+    annotated = annotate(facts, incomplete, policy)
+    return {
+        "facts": annotated,
+        "suspicious_fact": any(f["suspicious"] for f in annotated),
+        "partial_document_coverage": coverage.get("coverage_complete") is False,
+        "missing_documents": details.quality.get("document_status") == "unavailable",
+    }
 
 
 class RadarHttpQueries:
@@ -442,6 +542,72 @@ def build_radar_http_queries(sessions: sessionmaker[Session]) -> RadarHttpQuerie
     )
 
 
+def build_human_review_service(
+    sessions: sessionmaker[Session], settings: Settings
+) -> HumanReviewService:
+    from public_procurement.extraction.services import (
+        StructuredExtractionService,
+        build_extraction_service,
+    )
+
+    from .review_repositories import ReviewRepository
+
+    def metadata() -> dict[str, dict[str, Any]]:
+        result = {}
+        for stored in build_process_query_service(sessions).iter_processes():
+            p = stored.process
+            result[p.id_del_proceso] = {
+                "process_id": str(stored.id),
+                "codigo_proceso": p.reference,
+                "entity_name": p.entity_name,
+                "object": p.title or p.description,
+                "department": p.department,
+                "municipality": p.municipality,
+                "amount": p.base_price_cop,
+                "published_at": p.published_on,
+                "deadline_at": p.offer_deadline_raw,
+                "source_url": p.source_url,
+            }
+        return result
+
+    def evidence(row: dict[str, Any]) -> dict[str, Any]:
+        reference = row.get("process_id") or row["canonical_identity"].split(":", 1)[1]
+        if build_process_query_service(sessions).get_process(reference) is None:
+            return {"facts": [], "documents": [], "canonicals": None}
+        extraction = build_extraction_service(sessions, settings)
+        facts = StructuredExtractionService(sessions, extraction).list_facts(
+            reference, include_history=True
+        )
+        latest = {}
+        for run in extraction.list_extractions(reference):
+            latest[str(run.document.document_version_id)] = run
+        documents = []
+        for run in latest.values():
+            diag = run.diagnostics
+            processed = (
+                len(diag.get("processed_pages", []))
+                if "processed_pages" in diag
+                else run.page_count
+            )
+            documents.append(
+                {
+                    "name": run.document.original_name,
+                    "document_version_id": str(run.document.document_version_id),
+                    "status": run.status,
+                    "extraction_mode": "ocr" if diag.get("processed_pages") else "native",
+                    "total_pages": run.page_count,
+                    "processed_pages": processed,
+                    "coverage_ratio": processed / run.page_count if run.page_count else None,
+                    "text_length": run.text_length,
+                    "warning": run.error_code or diag.get("status"),
+                }
+            )
+        details = asdict(build_eureka_details_service(sessions, settings).get(reference))
+        return {"facts": [asdict(f) for f in facts], "documents": documents, "canonicals": details}
+
+    return HumanReviewService(ReviewRepository(sessions), metadata, evidence)
+
+
 def build_radar_service(
     sessions: sessionmaker[Session],
     settings: Settings,
@@ -473,6 +639,7 @@ def build_radar_service(
         load_radar_config(settings.eureka_radar_config_path),
         settings.eureka_preferred_budget_max,
         observer=observer,
+        metadata_exclusion_path=settings.eureka_metadata_alert_exclusions_path,
     )
 
 

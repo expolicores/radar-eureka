@@ -21,7 +21,7 @@ from public_procurement.shared.config import Settings
 
 from .adapters.file_logs import CycleLogs
 from .adapters.windows_scheduler import scheduler_status
-from .domain.cycle import radar_allows_notifications, schedule
+from .domain.cycle import manual_operations_window, radar_allows_notifications, schedule
 from .ports import Observer
 from .repositories import CycleRepository, CycleSchemaPendingError
 
@@ -50,6 +50,8 @@ METRICS = (
     "enriched",
     "alert_created",
     "no_alert",
+    "metadata_alerts_excluded_by_object",
+    "metadata_exclusion_policy_errors",
     "notification_prepared",
     "notification_sent",
     "notification_captured",
@@ -57,10 +59,16 @@ METRICS = (
 )
 
 
-def preflight(settings: Settings, sessions: Any, now: datetime | None = None) -> dict[str, Any]:
+def preflight(
+    settings: Settings,
+    sessions: Any,
+    now: datetime | None = None,
+    manual_window: tuple[date, date] | None = None,
+) -> dict[str, Any]:
     now = now or datetime.now(UTC)
     local = now.astimezone(ZoneInfo(settings.eureka_automation_timezone))
-    start = settings.eureka_radar_start_date
+    start = manual_window[0] if manual_window else settings.eureka_radar_start_date
+    before = manual_window[1] if manual_window else local.date() + timedelta(days=1)
     if start is None or start > local.date():
         raise ValueError("Configura EUREKA_RADAR_START_DATE, sin fecha futura.")
     next_run = schedule(
@@ -83,9 +91,9 @@ def preflight(settings: Settings, sessions: Any, now: datetime | None = None) ->
         "ocr": ocr_runtime_status(settings),
         "window": {
             "from": start.isoformat(),
-            "before": (local.date() + timedelta(days=1)).isoformat(),
+            "before": before.isoformat(),
             "before_exclusive": True,
-            "timezone": settings.eureka_automation_timezone,
+            "timezone": "America/Bogota" if manual_window else settings.eureka_automation_timezone,
             "note": "Límite calendario exclusivo; no predice resultados SECOP.",
         },
         "next_theoretical": next_run.isoformat(),
@@ -240,6 +248,15 @@ class AutomationCycleService:
                     cycle["durations_ms"].get("ocr", 0) + data["ocr_seconds"] * 1000
                 )
             elif event == "process_result":
+                if data.get("document_status") == "unavailable":
+                    cycle["errors"].append(
+                        {
+                            "code": "documents_unavailable",
+                            "severity": "warning",
+                            "stage": "documents_sync",
+                            "secop_id": data.get("secop_id"),
+                        }
+                    )
                 cycle["processes_seen"] += 1
                 metrics["no_alert"] += int(data["outcome"] == "no_alert")
                 cycle["failures"] += int(
@@ -265,6 +282,10 @@ class AutomationCycleService:
                 reason = data.get("reason")
                 if reason:
                     cycle["reasons"][reason] = cycle["reasons"].get(reason, 0) + 1
+                    if reason == "metadata_object_exclusion":
+                        metrics["metadata_alerts_excluded_by_object"] += 1
+                    elif reason == "metadata_exclusion_policy_invalid":
+                        metrics["metadata_exclusion_policy_errors"] += 1
                     if reason in ("outside_window", "outside_region", "already_seen"):
                         metrics[reason] += 1
                     elif reason in (
@@ -272,6 +293,7 @@ class AutomationCycleService:
                         "terminal_phase",
                         "strong_exclusion",
                         "publication_unknown",
+                        "missing_or_invalid_offer_deadline",
                     ):
                         metrics["prefilter_rejected"] += 1
                 if data["outcome"] == "failed" and data["stage"].startswith("documents"):
@@ -339,6 +361,11 @@ class AutomationCycleService:
                         cycle["durations_ms"].get(name, 0) for name in names
                     )
                 metrics = cycle["metrics"]
+                for key in (
+                    "metadata_alerts_excluded_by_object",
+                    "metadata_exclusion_policy_errors",
+                ):
+                    metrics[key] = result.get("metrics", {}).get(key, 0)
                 for key, source in (
                     ("candidates", "candidates"),
                     ("enriched", "enriched"),
@@ -374,6 +401,7 @@ class AutomationCycleService:
                         "publication_unknown",
                         "no_metadata_match",
                         "terminal_phase",
+                        "missing_or_invalid_offer_deadline",
                     )
                 )
                 metrics["no_alert"] = sum(
@@ -528,7 +556,9 @@ def record_startup_failure(settings: Settings, error_type: str, trigger: str) ->
         )
 
 
-def build_cycle_service(sessions: Any, settings: Settings) -> AutomationCycleService:
+def build_cycle_service(
+    sessions: Any, settings: Settings, manual_window: tuple[date, date] | None = None
+) -> AutomationCycleService:
     def reconcile_radar(cycle: dict[str, Any]) -> None:
         try:
             run = build_radar_queries(sessions).get_run(uuid.UUID(cycle["radar_run_id"]))
@@ -541,8 +571,8 @@ def build_cycle_service(sessions: Any, settings: Settings) -> AutomationCycleSer
         service = build_radar_service(sessions, settings, observer=observer)
         today = datetime.now(ZoneInfo(settings.eureka_automation_timezone)).date()
         query = ProcessQuery(
-            published_from=settings.eureka_radar_start_date,
-            published_before=today + timedelta(days=1),
+            published_from=manual_window[0] if manual_window else settings.eureka_radar_start_date,
+            published_before=manual_window[1] if manual_window else today + timedelta(days=1),
             departments=tuple(
                 r.strip() for r in settings.eureka_radar_regions.split(",") if r.strip()
             ),
@@ -587,7 +617,7 @@ def build_cycle_service(sessions: Any, settings: Settings) -> AutomationCycleSer
         notify,
         CycleLogs(settings.eureka_automation_log_path, settings.eureka_log_retention_days),
         settings,
-        lambda: preflight(settings, sessions),
+        lambda: preflight(settings, sessions, manual_window=manual_window),
         reconcile_radar=reconcile_radar,
     )
 
@@ -598,13 +628,13 @@ class OperationsQueries:
         self.repository = CycleRepository(sessions)
 
     def status(self) -> dict[str, Any]:
-        today = datetime.now(ZoneInfo(self.settings.eureka_automation_timezone)).date()
+        start, before = manual_operations_window(datetime.now(UTC))
         result: dict[str, Any] = {
             "execution_config": {
-                "start_date": self.settings.eureka_radar_start_date,
-                "before_date": today + timedelta(days=1),
+                "start_date": start,
+                "before_date": before,
                 "before_exclusive": True,
-                "timezone": self.settings.eureka_automation_timezone,
+                "timezone": "America/Bogota",
                 "regions": [
                     r.strip() for r in self.settings.eureka_radar_regions.split(",") if r.strip()
                 ],

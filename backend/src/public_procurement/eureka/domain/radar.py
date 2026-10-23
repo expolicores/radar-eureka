@@ -24,6 +24,8 @@ class RadarProcess:
     status: str | None
     unspsc: str | None
     budget: int | None
+    offer_deadline: date | None = None
+    offer_deadline_raw: Any = None
 
     @property
     def text(self) -> str:
@@ -49,14 +51,16 @@ def candidate_decision(
         normalize(region, config) for region in regions
     }:
         return CandidateDecision(False, "outside_region", [], [])
-    if any(
-        phrase_match(" ".join((process.phase or "", process.status or "")), term, config)
-        for term in config.terminal_terms
-    ):
-        return CandidateDecision(False, "terminal_phase", [], [])
+    if process.offer_deadline is None:
+        return CandidateDecision(False, "missing_or_invalid_offer_deadline", [], [])
     if any(phrase_match(process.text, term, config) for term in config.strong_exclusions):
         return CandidateDecision(False, "strong_exclusion", [], [])
-    matches = [match.json() for match in match_catalog(process.text, process.unspsc or "", config)]
+    matches = [
+        match.json()
+        for match in match_catalog(
+            process.text, process.unspsc or "", config, include_discovery_only=True
+        )
+    ]
     matches.extend(
         {
             "category": "broad_need",
@@ -69,7 +73,9 @@ def candidate_decision(
         for term in config.candidate_terms
         if phrase_match(process.text, term, config)
     )
-    notes = ["Vigencia por confirmar: fecha de cierre de ofertas no disponible."]
+    notes = [
+        "Vigencia por confirmar: fecha de recepción válida; no se verifica vencimiento ni apertura."
+    ]
     if not any(
         phrase_match(process.phase or "", phase, config) for phase in config.preferred_phases
     ):
@@ -234,11 +240,34 @@ def evaluate_alert(
         "confirmed_matches": confirmed_matches,
     }
     confirmed = bool(confirmed_matches)
+    unavailable = details.quality.get("document_status") == "unavailable"
+    commercial_metadata_matches = [
+        match for match in candidate.matches if not match.get("discovery_only")
+    ]
+    provisional = unavailable and not confirmed and bool(commercial_metadata_matches)
+    snapshot["evidence_level"] = (
+        "metadata_only" if unavailable and not confirmed else "document_confirmed"
+    )
+    snapshot["document_status"] = "unavailable" if unavailable else "available"
+    if provisional:
+        snapshot["category"] = list(
+            dict.fromkeys(match["category"] for match in commercial_metadata_matches)
+        )
+    if unavailable and not confirmed and not commercial_metadata_matches:
+        reasons.append({"code": "discovery_only_requires_commercial_evidence", "value": True})
+    if unavailable:
+        reasons.append(
+            {
+                "code": "documents_unavailable",
+                "origin": "metadata",
+                "value": "Inventario documental vacío; revisión manual y reintento pendientes.",
+            }
+        )
     return AlertDecision(
-        candidate.accepted and confirmed and not blocked,
+        candidate.accepted and (confirmed or provisional) and not blocked,
         confirmed,
         priority,
-        review,
+        review or unavailable,
         reasons,
         snapshot,
     )

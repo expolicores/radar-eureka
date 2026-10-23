@@ -1,0 +1,19 @@
+{
+  "version": "experimental-review-v1",
+  "purpose": "Review flags only; never discard facts or change product rules. Presentation bounds describe individual servings, not bulk purchase weights.",
+  "suspicious_confidence_max": 0.35,
+  "numeric_ranges": {
+    "quantity": [0.000001, 10000000],
+    "unit_price_cop": [0.01, 1000000000],
+    "total_cop": [0.01, 10000000000000],
+    "official_budget_cop": [0.01, 10000000000000],
+    "payment_percentage": [0, 100],
+    "delivery_count": [1, 100000]
+  },
+  "presentation_ranges": {
+    "g": [0.1, 1000],
+    "ml": [0.1, 10000],
+    "kg": [0.0001, 100],
+    "l": [0.0001, 100]
+  }
+}

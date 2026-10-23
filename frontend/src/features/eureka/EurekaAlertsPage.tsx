@@ -1,6 +1,8 @@
 import { Link, useParams, useSearchParams } from "react-router";
 import { Pagination } from "../../components/Pagination";
+import { formatBogotaNumericDateTime } from "../../lib/format";
 import { SecopProcessInfo } from "./SecopProcessInfo";
+import { MetadataOnlyWarning } from "./MetadataOnlyWarning";
 import { arr, money, obj, priorityLabels, productLabel, str } from "./types";
 import { useEurekaAlerts, useRadarRuns } from "./useEureka";
 
@@ -73,8 +75,8 @@ export function EurekaAlertsPage() {
         Ver notificaciones
       </Link>
       <p className="sub">
-        Afinidad confirmada por documentos. La prioridad orienta la revisión; la alerta no determina
-        vigencia ni recomienda participar.
+        Coincidencias preliminares y confirmadas por documentos. La prioridad orienta la revisión;
+        la alerta no determina vigencia ni recomienda participar.
       </p>
       {query.isPending && <p role="status">Cargando alertas…</p>}
       {query.isError && (
@@ -90,6 +92,9 @@ export function EurekaAlertsPage() {
           {!query.data.items.length && <p>No hay alertas para esta página.</p>}
           {query.data.items.map((alert) => {
             const snapshot = alert.snapshot;
+            const metadataOnly =
+              alert.evidence_level === "metadata_only" ||
+              snapshot.evidence_level === "metadata_only";
             const categories = [
               ...new Set(arr(snapshot.confirmed_matches).map((raw) => str(obj(raw).label))),
             ];
@@ -98,16 +103,30 @@ export function EurekaAlertsPage() {
                 <h2>
                   Nueva oportunidad Eureka · {priorityLabels[alert.priority] ?? alert.priority}
                 </h2>
+                <p>
+                  Fuente:{" "}
+                  {alert.source === "licitaciones_info_cdp"
+                    ? "Licitaciones.info (CDP)"
+                    : "Socrata / SECOP"}
+                </p>
+                {snapshot.requires_manual_document_review === true && (
+                  <p role="note">Requiere revisión documental manual</p>
+                )}
+                {(metadataOnly || alert.document_status === "unavailable") && (
+                  <MetadataOnlyWarning />
+                )}
                 <SecopProcessInfo
                   process={alert.process ?? { secop_id: str(snapshot.secop_id) }}
                   opportunityId={alert.opportunity_id}
                 />
                 <p>
-                  <time dateTime={alert.created_at}>
-                    {new Date(alert.created_at).toLocaleString("es-CO")}
+                  Fecha alerta:{" "}
+                  <time dateTime={alert.created_at} title="America/Bogota">
+                    {formatBogotaNumericDateTime(alert.created_at)}
                   </time>{" "}
-                  · {str(snapshot.entity)}
+                  (Bogotá)
                 </p>
+                <p>{str(snapshot.entity)}</p>
                 <p>
                   {[snapshot.municipality, snapshot.department].filter(Boolean).map(str).join(", ")}{" "}
                   · {money(snapshot.budget)}
@@ -117,7 +136,11 @@ export function EurekaAlertsPage() {
                   {str(snapshot.score)}
                 </p>
                 <div className="row">
-                  <span className="chip">Coincidencia comercial confirmada</span>
+                  <span className="chip">
+                    {metadataOnly
+                      ? "Alerta provisional · solo metadata"
+                      : "Coincidencia comercial confirmada"}
+                  </span>
                   <span className="chip">Coincidencia preliminar: metadata</span>
                   {alert.review_required && <span className="chip">Requiere revisión</span>}
                 </div>
@@ -129,7 +152,11 @@ export function EurekaAlertsPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p>Afinidad confirmada en la descripción documental del ítem.</p>
+                  <p>
+                    {metadataOnly
+                      ? "Productos pendientes de validación documental."
+                      : "Afinidad confirmada en la descripción documental del ítem."}
+                  </p>
                 )}
                 <p>
                   Plazo: {readable(snapshot.execution_days)} días · Pago:{" "}
@@ -137,8 +164,9 @@ export function EurekaAlertsPage() {
                   {readable(snapshot.guarantee_required)}
                 </p>
                 <p>
-                  Alerta generada por región objetivo y afinidad comercial confirmada
-                  documentalmente.
+                  {metadataOnly
+                    ? "Alerta provisional por región objetivo y coincidencias comerciales en metadata. Documentos pendientes; se reintentará su adquisición."
+                    : "Alerta generada por región objetivo y afinidad comercial confirmada documentalmente."}
                 </p>
                 <Link to={`/eureka/${alert.opportunity_id}`}>
                   Ver oportunidad · {str(snapshot.secop_id)}

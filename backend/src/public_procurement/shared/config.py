@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     eureka_radar_config_path: Path = (
         Path(__file__).resolve().parents[3] / "config" / "eureka_radar.v1.json"
     )
+    eureka_metadata_alert_exclusions_path: Path = (
+        Path(__file__).resolve().parents[3] / "config/eureka_metadata_alert_exclusions.v1.json"
+    )
     local_storage_path: Path = Path(__file__).resolve().parents[3] / ".local" / "documents"
     document_timeout_seconds: PositiveFloat = 120
     document_max_bytes: PositiveInt = 50 * 1024 * 1024
@@ -118,6 +121,7 @@ class Settings(BaseSettings):
     @field_validator(
         "local_storage_path",
         "eureka_radar_config_path",
+        "eureka_metadata_alert_exclusions_path",
         "extraction_ocr_config_path",
         "eureka_notification_capture_path",
         "eureka_automation_log_path",

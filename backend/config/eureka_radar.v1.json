@@ -1,5 +1,5 @@
 {
-  "version": "eureka-radar-v1",
+  "version": "eureka-radar-v1.1",
   "families": [
     {
       "category": "packaged_food",
@@ -230,6 +230,13 @@
       ],
       "exclusions": [],
       "priority": 2
+    },
+    {
+      "category": "event_supplies_discovery",
+      "label": "Gestión de eventos: bienes por confirmar",
+      "unspsc": ["80141607"],
+      "discovery_only": true,
+      "priority": 1
     }
   ],
   "terminal_terms": [

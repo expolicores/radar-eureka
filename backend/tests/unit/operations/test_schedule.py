@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from public_procurement.operations.domain.cycle import schedule
+from public_procurement.operations.domain.cycle import manual_operations_window, schedule
 
 
 @pytest.mark.parametrize(
@@ -19,6 +19,26 @@ def test_bogota_times(utc, expected):
         schedule(datetime.fromisoformat(utc), "America/Bogota", "07:00,19:00", 12).isoformat()
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    ("now", "start", "before"),
+    [
+        ("2026-10-19T22:25:00+00:00", "2026-10-17", "2026-10-20"),
+        ("2026-10-20T07:00:00+00:00", "2026-10-18", "2026-10-21"),
+        ("2026-10-16T18:59:59+00:00", "2026-10-14", "2026-10-17"),
+        ("2026-10-16T19:00:00+00:00", "2026-10-14", "2026-10-17"),
+        ("2026-10-17T03:00:00+00:00", "2026-10-14", "2026-10-17"),
+        ("2026-10-17T05:00:00+00:00", "2026-10-15", "2026-10-18"),
+        ("2026-03-01T19:00:00+00:00", "2026-02-27", "2026-03-02"),
+        ("2024-03-01T19:00:00+00:00", "2024-02-28", "2024-03-02"),
+        ("2026-12-31T22:00:00+00:00", "2026-12-29", "2027-01-01"),
+    ],
+)
+def test_manual_window_includes_today_in_bogota_without_intraday_bounds(now, start, before):
+    window = manual_operations_window(datetime.fromisoformat(now))
+    assert tuple(value.isoformat() for value in window) == (start, before)
+    assert all(type(value).__name__ == "date" for value in window)
 
 
 def test_interval_and_invalid_hours():

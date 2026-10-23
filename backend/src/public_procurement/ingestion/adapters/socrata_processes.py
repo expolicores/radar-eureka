@@ -27,6 +27,7 @@ FIELDS = (
     "estado_del_procedimiento",
     "fecha_de_publicacion_del",
     "fecha_de_ultima_publicaci",
+    "fecha_de_recepcion_de",
     "precio_base",
     "codigo_principal_de_categoria",
     "urlproceso",
@@ -92,6 +93,7 @@ def map_process(row: dict[str, Any]) -> SecopProcess:
         base_price_cop=_price(row),
         category_code=_text(row, "codigo_principal_de_categoria"),
         source_url=url,
+        offer_deadline_raw=row.get("fecha_de_recepcion_de"),
     )
 
 

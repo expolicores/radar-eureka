@@ -80,6 +80,22 @@ def test_success_zero_processes_disabled_and_persistent_logs(setup):
     notify.assert_called_once()
 
 
+def test_metadata_exclusion_counters_are_reported_without_changing_cycle_policy(setup):
+    service, _repo, radar, notify, _path = setup
+    output = result(items=[{"reason": "metadata_object_exclusion", "outcome": "no_alert"}])
+    output["metrics"] = {
+        "metadata_alerts_excluded_by_object": 1,
+        "metadata_exclusion_policy_errors": 0,
+    }
+    radar.return_value = output
+    cycle = service.run()
+    assert cycle["metrics"]["metadata_alerts_excluded_by_object"] == 1
+    assert cycle["reasons"]["metadata_object_exclusion"] == 1
+    assert cycle["metrics"]["no_alert"] == 1
+    assert cycle["status"] == "completed"
+    notify.assert_called_once()
+
+
 @pytest.mark.parametrize("status", ["failed", "interrupted"])
 def test_incomplete_never_dispatches(setup, status):
     service, _repo, radar, notify, _path = setup
@@ -129,6 +145,35 @@ def test_global_exception_sanitized(setup):
     assert "SECRET" not in next(path.glob("*.log")).read_text()
 
 
+def test_missing_offer_deadline_counts_as_prefilter_rejection_and_preserves_trace(setup):
+    service, _repo, radar, _notify, path = setup
+    diagnostic = {
+        "reason": "missing_or_invalid_offer_deadline",
+        "field": "fecha_de_recepcion_de",
+        "raw_value": "-",
+        "rule": "valid_offer_deadline_required",
+        "outcome": "skipped",
+        "stage": "metadata",
+        "secop_id": "P",
+    }
+
+    def execute(identifier, observe):
+        observe("secop_received", {})
+        observe("process_result", diagnostic)
+        return result(items=[diagnostic])
+
+    radar.side_effect = execute
+    cycle = service.run()
+    assert cycle["status"] == "completed"
+    assert cycle["metrics"]["prefilter_rejected"] == 1
+    assert cycle["reasons"][diagnostic["reason"]] == 1
+    event = next(e for e in cycle["events"] if e["event"] == "process_result")
+    for key in ("reason", "field", "raw_value", "rule"):
+        assert event[key] == diagnostic[key]
+    saved = json.loads(next(path.glob("*.json")).read_text(encoding="utf-8"))
+    assert saved["events"] == cycle["events"]
+
+
 def test_individual_document_failure_warns_but_dispatches(setup):
     service, _repo, radar, notify, _path = setup
 
@@ -143,6 +188,29 @@ def test_individual_document_failure_warns_but_dispatches(setup):
     assert cycle["metrics"]["document_errors"] == 1
     assert cycle["metrics"]["document_sync_failed"] == 1
     notify.assert_called_once()
+
+
+def test_metadata_only_is_operational_warning_not_technical_failure(setup):
+    service, _repo, radar, _notify, _path = setup
+
+    def execute(identifier, observe):
+        observe(
+            "process_result",
+            {
+                "outcome": "alert",
+                "stage": "documents_pending",
+                "document_status": "unavailable",
+                "secop_id": "P",
+            },
+        )
+        return result(items=[{"outcome": "alert", "reason": "documents_unavailable"}])
+
+    radar.side_effect = execute
+    cycle = service.run()
+    assert cycle["status"] == "completed_with_warnings"
+    assert cycle["failures"] == 0
+    assert cycle["errors"][0]["code"] == "documents_unavailable"
+    assert cycle["errors"][0]["severity"] == "warning"
 
 
 @pytest.mark.parametrize(("ocr", "processed"), [("ocr_success", 1), ("ocr_unavailable", 0)])

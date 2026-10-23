@@ -1,0 +1,27 @@
+{
+  "version": "licitaciones-search-plan-v1",
+  "profile_id": "1086005",
+  "default_recent_days": 7,
+  "regions": {
+    "boyaca": {"ids_file": ".local/licitaciones_boyaca_ids.txt", "expected_count": 123},
+    "casanare": {
+      "ids": ["4009001", "4009002", "4009003", "4009004", "4009005", "4009006", "4009007", "4009008", "4009009", "4009010", "4009011", "4009012", "4009013", "4009014", "4009015", "4009016", "4009017", "4009018", "4009019"],
+      "expected_count": 19
+    }
+  },
+  "object_terms": ["refrigerio", "papeleria", "aseo", "cafeteria", "televisor", "tecnologia", "camiseta", "impresos", "ferreteria"],
+  "unspsc": {
+    "status": "pending_remote_mapping",
+    "catalog_file": "../config/eureka_radar.v1.json"
+  },
+  "limits": {"max_queries_per_run": 6, "limit": 30, "page": 1, "max_retries": 1},
+  "pauses": {"sleep_between_queries": 4, "retry_wait_seconds": 4},
+  "searches": [
+    {"id": "boyaca-refrigerio", "region": "boyaca", "object_term": "refrigerio"},
+    {"id": "boyaca-papeleria", "region": "boyaca", "object_term": "papeleria"},
+    {"id": "boyaca-aseo", "region": "boyaca", "object_term": "aseo"},
+    {"id": "casanare-refrigerio", "region": "casanare", "object_term": "refrigerio"},
+    {"id": "casanare-papeleria", "region": "casanare", "object_term": "papeleria"},
+    {"id": "casanare-aseo", "region": "casanare", "object_term": "aseo"}
+  ]
+}

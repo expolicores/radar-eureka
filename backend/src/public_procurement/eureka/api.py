@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .services import EurekaHttpQueries
 
@@ -28,6 +28,7 @@ class SecopPresentation(BaseModel):
 
 
 class EurekaAlertResponse(BaseModel):
+    source: str = "socrata"
     id: uuid.UUID
     opportunity_id: uuid.UUID
     run_id: uuid.UUID
@@ -39,6 +40,8 @@ class EurekaAlertResponse(BaseModel):
     reasons: list[dict[str, Any]]
     snapshot: dict[str, Any]
     process: SecopPresentation | None = None
+    evidence_level: str = "document_confirmed"
+    document_status: str = "available"
 
 
 class EurekaAlertsResponse(BaseModel):
@@ -66,6 +69,7 @@ class RadarRunResponse(BaseModel):
     skipped: int
     failures: int
     errors: list[dict[str, Any]]
+    metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class RadarRunsResponse(BaseModel):
@@ -122,6 +126,8 @@ Service = Annotated[EurekaHttpQueries, Depends(get_eureka_queries)]
 
 
 class EurekaSummaryResponse(SecopPresentation):
+    evidence_level: str | None = None
+    document_status: str | None = None
     opportunity_id: uuid.UUID
     process_id: uuid.UUID
     title: str | None

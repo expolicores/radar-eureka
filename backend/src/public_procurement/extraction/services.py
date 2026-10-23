@@ -4,7 +4,6 @@ import uuid
 from collections.abc import Iterator
 from dataclasses import replace
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -115,7 +114,7 @@ class ExtractionService:
         if no_ocr and (force_ocr or retry_ocr):
             raise ValueError("--no-ocr es incompatible con force/retry OCR.")
         native = self._perform(document, dry_run, self.extractor)
-        if no_ocr or self.ocr is None or Path(document.original_name).suffix.lower() != ".pdf":
+        if no_ocr or self.ocr is None or native.extractor.name != "pdf-text":
             return native
         if native.run_id and not native.fragments and native.fragment_count:
             with self.sessions() as session:
@@ -276,7 +275,7 @@ class ExtractionService:
             if (
                 run
                 and self.ocr
-                and Path(document.original_name).suffix.lower() == ".pdf"
+                and run.extractor.name in {"pdf-text", "pdf-hybrid-local"}
                 and "coverage_complete" not in run.diagnostics
             ):
                 if run.run_id and run.fragment_count:
@@ -348,7 +347,11 @@ class ExtractionService:
 
 
 def build_extraction_service(
-    sessions: sessionmaker[Session], settings: Settings
+    sessions: sessionmaker[Session],
+    settings: Settings,
+    *,
+    document_service: Any = None,
+    ocr_page_limit: int | None = None,
 ) -> ExtractionService:
     limits = ExtractionLimits(
         max_bytes=settings.extraction_max_bytes,
@@ -357,16 +360,29 @@ def build_extraction_service(
         max_fragments=settings.extraction_max_fragments,
         max_pages=settings.extraction_max_pages,
     )
-    documents = RegisteredDocumentSource(build_document_service(sessions, settings))
+    documents = RegisteredDocumentSource(
+        document_service
+        if document_service is not None
+        else build_document_service(sessions, settings)
+    )
+    policy = (
+        load_ocr_policy(settings.extraction_ocr_config_path)
+        if settings.extraction_ocr_enabled
+        else None
+    )
+    if policy is not None and ocr_page_limit is not None:
+        policy = policy.model_copy(
+            update={"max_ocr_pages": min(policy.max_ocr_pages, ocr_page_limit)}
+        )
     ocr = (
         LocalOcrFallback(
             documents,
             limits,
-            load_ocr_policy(settings.extraction_ocr_config_path),
+            policy,
             settings.extraction_tesseract_cmd,
             settings.extraction_tessdata_path,
         )
-        if settings.extraction_ocr_enabled
+        if policy is not None
         else None
     )
     return ExtractionService(sessions, documents, IsolatedExtractor(documents, limits), limits, ocr)

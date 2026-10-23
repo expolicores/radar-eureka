@@ -84,6 +84,18 @@ def test_native_never_calls_engine_probe(sessions, monkeypatch):
     probe.assert_not_called()
 
 
+def test_scanned_pdf_without_extension_uses_existing_ocr_fallback(sessions, simulated_engine):
+    service = build(sessions)
+    service.documents.documents[0] = replace(
+        service.documents.documents[0], original_name="8. Invitacion Guican"
+    )
+    result = service.extract_document("D")
+    assert result.extractor.name == "pdf-hybrid-local"
+    assert result.text_length > 0
+    assert result.diagnostics["coverage_complete"]
+    assert simulated_engine.called
+
+
 def test_mixed_uses_ocr_only_page_two_and_keeps_native_runs(sessions, simulated_engine):
     service = build(sessions, "mixed_refrigerios")
     result = service.extract_document("D")

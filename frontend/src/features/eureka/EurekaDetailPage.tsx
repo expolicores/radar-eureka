@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import { ApiError } from "../../api/client";
 import { EvidencePanel } from "./EvidencePanel";
 import { SecopProcessInfo } from "./SecopProcessInfo";
+import { MetadataOnlyWarning } from "./MetadataOnlyWarning";
 import {
   arr,
   categoryLabels,
@@ -59,6 +60,8 @@ export function EurekaDetailPage() {
       <Link to="/eureka">← Volver a Eureka</Link>
       <h1>Referencia del proceso: {opportunity.reference || "No disponible"}</h1>
       <SecopProcessInfo process={opportunity} showReference={false} />
+      {(opportunity.evidence_level === "metadata_only" ||
+        opportunity.document_status === "unavailable") && <MetadataOnlyWarning />}
       <p className="sub">
         {opportunity.entity} ·{" "}
         {[opportunity.municipality, opportunity.department].filter(Boolean).join(" · ")}

@@ -1,6 +1,15 @@
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
+
+
+def manual_operations_window(now: datetime) -> tuple[date, date]:
+    """Desde anteayer hasta mañana exclusivo, incluyendo hoy en Bogotá."""
+    if now.tzinfo is None or now.utcoffset() is None:
+        raise ValueError("La ventana manual requiere una hora con zona explícita.")
+    local = now.astimezone(ZoneInfo("America/Bogota"))
+    today = local.date()
+    return today - timedelta(days=2), today + timedelta(days=1)
 
 
 def schedule(now: datetime, timezone: str, run_times: str, interval: int) -> datetime:

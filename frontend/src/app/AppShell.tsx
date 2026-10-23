@@ -3,8 +3,11 @@ import { NavLink, useLocation } from "react-router";
 
 const NAVIGATION = [
   { to: "/eureka", label: "Eureka" },
+  { to: "/eureka/alerts", label: "Alertas" },
+  { to: "/eureka/revision", label: "Merecen Revisión" },
   { to: "/search", label: "Buscar SECOP" },
   { to: "/eureka/operations", label: "Operación" },
+  { to: "/eureka/licitaciones", label: "Licitaciones.info (CDP)" },
   { to: "/senales", label: "Señales" },
   { to: "/explorar", label: "Explorar compras" },
   { to: "/casos", label: "Mis casos" },

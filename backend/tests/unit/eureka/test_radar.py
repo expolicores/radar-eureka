@@ -46,10 +46,14 @@ class MemoryRepository:
         self.outcomes.append(item)
         if update_state:
             self.states[(item["dataset_id"], item["secop_id"])]["status"] = (
-                "failed"
+                "pending_documents"
+                if item.get("document_status") == "unavailable"
+                else "failed"
                 if item["outcome"] == "failed" or item.get("coverage_incomplete")
                 else "completed"
             )
+            if item.get("document_status") == "unavailable":
+                self.states[(item["dataset_id"], item["secop_id"])]["attempts"] = 0
 
     def finish(self, run):
         pass
@@ -113,6 +117,112 @@ def test_partial_failure_does_not_abort_and_failed_process_retries(config):
     assert retry["new_processes"] == 0
     assert retry["enriched"] == 1
     assert repo.states[process().identity]["attempts"] == 2
+
+
+def test_metadata_only_alert_is_not_failure_and_later_documents_reuse_identity(config):
+    service, repo, pipeline = setup(config)
+    normal = details()
+    provisional = replace(
+        normal,
+        enrichment_status="documents_unavailable",
+        quality={"document_status": "unavailable"},
+        evidence={},
+        commercial={**normal.commercial, "products": [], "purchase_items": [], "unspsc": []},
+    )
+    pipeline.enrich.return_value = provisional
+    record = replace(
+        process(),
+        id_del_proceso="CO1.REQ.11195961",
+        department="Casanare",
+        title=(
+            "SUMINISTRO DE ELEMENTOS DE OFICINA; PAPELERÍA Y CONSUMIBLES DE IMPRESORAS "
+            "PARA LA PERSONERÍA MUNICIPAL DE YOPAL."
+        ),
+        description=None,
+        category_code=None,
+    )
+    for iteration in range(5):
+        report = run(service, [record])
+        assert report["status"] == "completed"
+        assert report["failures"] == report["enriched"] == 0
+        assert report["alerts_created"] == (1 if iteration == 0 else 0)
+        item = report["items"][0]
+        assert item["outcome"] == "alert"
+        assert item["retryable"] is True
+        assert item["decision"]["confirmed"] is False
+        assert item["decision"]["snapshot"]["evidence_level"] == "metadata_only"
+        assert repo.states[record.identity]["status"] == "pending_documents"
+    pipeline.enrich.return_value = normal
+    confirmed = run(service, [record])
+    assert confirmed["enriched"] == 1
+    assert confirmed["alerts_created"] == 0
+    assert confirmed["items"][0]["decision"]["snapshot"]["evidence_level"] == "document_confirmed"
+    assert repo.states[record.identity]["status"] == "completed"
+    assert run(service, [record])["items"][0]["reason"] == "already_seen"
+
+
+def test_actual_pipeline_empty_inventory_reaches_metadata_alert(config):
+    from .test_radar_pipeline import build
+
+    pipeline, services = build()
+    normal = details()
+    empty = replace(
+        normal,
+        enrichment_status="not_extracted",
+        quality={},
+        evidence={},
+        commercial={**normal.commercial, "products": [], "purchase_items": [], "unspsc": []},
+    )
+    services[7].get.side_effect = [replace(empty, opportunity_id=None), empty]
+    services[2].sync.return_value = []
+    repository = MemoryRepository()
+    radar = RadarService(repository, pipeline, config, 30_000_000)
+    report = run(
+        radar,
+        [
+            replace(
+                process(),
+                id_del_proceso="CO1.REQ.11195961",
+                department="Casanare",
+                title=(
+                    "SUMINISTRO DE ELEMENTOS DE OFICINA; PAPELERÍA Y CONSUMIBLES DE IMPRESORAS "
+                    "PARA LA PERSONERÍA MUNICIPAL DE YOPAL."
+                ),
+                description=None,
+                category_code=None,
+            )
+        ],
+    )
+    assert report["alerts_created"] == 1
+    assert report["failures"] == report["enriched"] == 0
+    assert report["items"][0]["decision"]["snapshot"]["evidence_level"] == "metadata_only"
+    services[2].sync.assert_called_once()
+    services[3].extract_process.assert_not_called()
+
+
+@pytest.mark.parametrize("raw", [None, "", "-", " \t ", "not-a-date"])
+def test_invalid_deadline_is_traced_and_does_not_block_later_processes(config, raw):
+    service, repo, pipeline = setup(config)
+    events = []
+    service.observer = lambda event, data: events.append((event, data))
+    invalid = replace(process(), id_del_proceso="invalid-deadline", offer_deadline_raw=raw)
+    report = run(service, [invalid, process()], max_processes=1)
+    item = report["items"][0]
+    assert item["reason"] == "missing_or_invalid_offer_deadline"
+    assert item["field"] == "fecha_de_recepcion_de"
+    assert item["raw_value"] == raw
+    assert item["rule"] == "valid_offer_deadline_required"
+    assert repo.outcomes[0] == item
+    event = next(data for event, data in events if event == "process_result")
+    assert event["raw_value"] == raw
+    assert event["field"] == item["field"]
+    assert event["rule"] == item["rule"]
+    assert invalid.identity not in repo.states
+    assert report["status"] == "completed"
+    assert report["candidates"] == report["enriched"] == 1
+    assert report["new_processes"] == 1
+    assert not any(i.get("reason") == "limit_deferred" for i in report["items"])
+    pipeline.enrich.assert_called_once()
 
 
 def test_incomplete_ocr_can_alert_but_remains_retryable_without_changing_decision(config):

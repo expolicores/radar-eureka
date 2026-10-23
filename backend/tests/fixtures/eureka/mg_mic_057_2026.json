@@ -1,0 +1,11 @@
+{
+  "reference": "MG-MIC-057-2026",
+  "entity_name": "Municipio de Guateque",
+  "department": "Boyacá",
+  "municipality": "Guateque",
+  "object": "SUMINISTRO DE BIENES REQUERIDOS PARA EL DESARROLLO DE ACTIVIDADES RECREATIVAS Y DE INTEGRACIÓN EN EL MARCO DE LA CELEBRACIÓN DEL DÍA DULCE DE LA NIÑEZ EN EL MUNICIPIO DE GUATEQUE 2026.",
+  "unspsc": "80141607",
+  "budget_cop": 7926200,
+  "declared_goods": ["dulces surtidos", "500 balones personalizados", "bolsas plásticas impresas", "agua potable individual", "bolsas para residuos"],
+  "provenance": "Caso reportado por el usuario. Sin documento original, noticeUID, publicación ni deadline verificados en este fixture. Los tests usan fechas e identidad sintéticas explícitas."
+}

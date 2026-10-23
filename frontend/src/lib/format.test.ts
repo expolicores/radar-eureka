@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBogotaDateTime, formatCop, formatDate, formatInteger } from "./format";
+import {
+  formatBogotaDateTime,
+  formatCop,
+  formatDate,
+  formatInteger,
+  formatBogotaEventDateTime,
+  formatBogotaNumericDateTime,
+} from "./format";
 
 describe("formatos", () => {
+  it("separates tray entry minutes and diagnostic event seconds in Bogota", () => {
+    expect(formatBogotaNumericDateTime("2026-10-21T23:42:16Z")).toBe("21/10/2026 18:42");
+    expect(formatBogotaEventDateTime("2026-10-21T23:42:16Z")).toBe("21/10/2026 18:42:16");
+  });
   it("formatea pesos colombianos con separador de miles y sin decimales", () => {
     // Arrange
     const value = 39_600_000;

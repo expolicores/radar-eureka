@@ -30,6 +30,7 @@ __all__ = [
     "DocumentService",
     "DocumentVersion",
     "DownloadSummary",
+    "SourceDocument",
     "build_document_service",
 ]
 
@@ -47,10 +48,14 @@ class DocumentService:
         downloader: DocumentDownloader,
         storage: BinaryStorage,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+        *,
+        limit_to_synced: bool = False,
     ) -> None:
         self.sessions, self.processes = sessions, processes
         self.inventory, self.downloader, self.storage = inventory, downloader, storage
         self.clock = clock
+        self.limit_to_synced = limit_to_synced
+        self.active_source_ids: dict[str, set[str]] = {}
 
     def _resolve_process(self, reference: str) -> ProcessReference:
         process = self.processes.get_process(reference)
@@ -69,7 +74,13 @@ class DocumentService:
         if not process.portfolio_id:
             return []
         with self.sessions() as session:
-            return SqlDocumentRepository(session).list_for(process.id, process.portfolio_id or "")
+            documents = SqlDocumentRepository(session).list_for(
+                process.id, process.portfolio_id or ""
+            )
+        if self.limit_to_synced:
+            selected = self.active_source_ids.get(reference, set())
+            return [d for d in documents if d.source.id_documento in selected]
+        return documents
 
     def versions(self, document_id: uuid.UUID) -> list[DocumentVersion]:
         with self.sessions() as session:
@@ -115,6 +126,8 @@ class DocumentService:
                 raise ValueError("Inventario documental contradictorio.")
             unique[key] = source
         documents = list(unique.values())
+        if self.limit_to_synced:
+            self.active_source_ids[reference] = {d.id_documento for d in documents}
         if not dry_run:
             with self.sessions.begin() as session:
                 repository = SqlDocumentRepository(session)
@@ -127,8 +140,7 @@ class DocumentService:
         portfolio = process.portfolio_id
         if portfolio is None:
             raise ValueError("Portafolio ausente.")
-        with self.sessions() as session:
-            documents = SqlDocumentRepository(session).list_for(process.id, portfolio)
+        documents = self.list_documents(reference)
         available = failed = 0
         for document in documents:
             with self.sessions.begin() as session:
@@ -154,13 +166,26 @@ class DocumentService:
         return DownloadSummary(available, failed)
 
 
-def build_document_service(sessions: sessionmaker[Session], settings: Settings) -> DocumentService:
+def build_document_service(
+    sessions: sessionmaker[Session],
+    settings: Settings,
+    *,
+    inventory: DocumentInventorySource | None = None,
+    retry_once: bool = False,
+    limit_to_synced: bool = False,
+) -> DocumentService:
+    downloader = SecopDownloader(settings.document_timeout_seconds, settings.document_max_bytes)
+    if retry_once:
+        from .adapters.retry import RetryOnceDownloader
+
+        downloader = RetryOnceDownloader(downloader)  # type: ignore[assignment]
     return DocumentService(
         sessions,
         build_process_query_service(sessions),
-        SocrataDocumentSource(),
-        SecopDownloader(settings.document_timeout_seconds, settings.document_max_bytes),
+        inventory if inventory is not None else SocrataDocumentSource(),
+        downloader,
         LocalBinaryStorage(settings.local_storage_path),
+        limit_to_synced=limit_to_synced,
     )
 
 

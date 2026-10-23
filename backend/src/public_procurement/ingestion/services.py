@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from public_procurement.shared.logging import log_event
 
+from .domain.identity import canonical_process_identity as canonical_process_identity
 from .domain.process import ProcessQuery, ProcessSyncResult, SecopProcess, unique_processes
 from .domain.purchase import (
     IngestionRunResult,

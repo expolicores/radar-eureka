@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { App } from "../../App";
@@ -8,8 +8,8 @@ import { renderWithProviders } from "../../test/render";
 afterEach(() => vi.unstubAllGlobals());
 const status = {
   execution_config: {
-    start_date: "2026-10-05",
-    before_date: "2026-10-16",
+    start_date: "2026-10-17",
+    before_date: "2026-10-20",
     before_exclusive: true,
     timezone: "America/Bogota",
     regions: ["Boyacá", "Casanare", "Distrito Capital de Bogotá"],
@@ -30,9 +30,12 @@ const status = {
 it("shows the backend effective window and exact regions before any execution", async () => {
   const fetch = routes(() => runningCycle);
   renderWithProviders(<App />, { route: "/eureka/operations" });
-  expect(await screen.findByText("Desde: 05/10/2026")).toBeInTheDocument();
+  expect(await screen.findByText("Desde: 17/10/2026 · 00:00")).toBeInTheDocument();
+  expect(screen.getByText(/Incluye el día actual hasta lo disponible/)).toBeInTheDocument();
   expect(screen.getByText("Límite operativo: 2500 procesos")).toBeInTheDocument();
-  expect(screen.getByText(/Hasta: 16\/10\/2026.*límite superior exclusivo/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Hasta: 20\/10\/2026 · 00:00.*límite superior exclusivo/),
+  ).toBeInTheDocument();
   expect(
     screen.getByText("Regiones: Boyacá · Casanare · Distrito Capital de Bogotá"),
   ).toBeInTheDocument();
@@ -85,6 +88,18 @@ async function confirmRun() {
   await user.click(await screen.findByRole("button", { name: "Ejecutar corrida manual" }));
   await user.click(screen.getByRole("button", { name: "Ejecutar" }));
 }
+
+it("shows provisional object exclusions in the funnel", async () => {
+  routes(() => ({
+    ...runningCycle,
+    status: "completed",
+    metrics: { ...runningCycle.metrics, metadata_alerts_excluded_by_object: 4 },
+  }));
+  renderWithProviders(<App />, { route: "/eureka/operations" });
+  await confirmRun();
+  const label = await screen.findByText("Alertas provisionales excluidas por objeto");
+  expect(within(label.closest("tr")!).getByText("4")).toBeInTheDocument();
+});
 
 it("requires confirmation; cancel never posts", async () => {
   const fetch = routes(() => runningCycle);

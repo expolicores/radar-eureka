@@ -57,6 +57,35 @@ def count(sessions, model):
         return session.scalar(select(func.count()).select_from(model))
 
 
+def test_bounded_selection_does_not_download_historical_inventory(setup) -> None:
+    service, sessions, _ = setup
+    service.sync("CO1.REQ.1")
+    service.limit_to_synced = True
+    service.inventory.fetch.return_value = [
+        SourceDocument(
+            str(i), "P", f"selected-{i}.pdf", None, "https://community.secop.gov.co/file"
+        )
+        for i in (2, 3)
+    ]
+    service.sync("CO1.REQ.1")
+    assert count(sessions, DocumentRecord) == 3
+    assert {d.source.id_documento for d in service.list_documents("CO1.REQ.1")} == {"2", "3"}
+    result = service.download("CO1.REQ.1")
+    assert result.available == 2
+    assert service.downloader.download.call_count == 2
+
+
+def test_empty_bounded_selection_preserves_history_without_downloads(setup) -> None:
+    service, sessions, _ = setup
+    service.sync("CO1.REQ.1")
+    service.limit_to_synced = True
+    service.inventory.fetch.return_value = []
+    service.sync("CO1.REQ.1")
+    assert count(sessions, DocumentRecord) == 1
+    assert service.download("CO1.REQ.1").available == 0
+    service.downloader.download.assert_not_called()
+
+
 def test_dry_run_has_no_writes_or_downloads(setup) -> None:
     service, sessions, _ = setup
     assert len(service.sync("CO1.REQ.1", dry_run=True)) == 1

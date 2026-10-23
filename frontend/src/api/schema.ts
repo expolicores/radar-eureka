@@ -447,6 +447,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/eureka/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Reviews */
+        get: operations["list_reviews_api_eureka_revision_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/revision/{identity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review Detail */
+        get: operations["review_detail_api_eureka_revision__identity__get"];
+        /** Assess */
+        put: operations["assess_api_eureka_revision__identity__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/licitaciones-cdp/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Runs */
+        get: operations["runs_api_eureka_licitaciones_cdp_runs_get"];
+        put?: never;
+        /** Start Run */
+        post: operations["start_run_api_eureka_licitaciones_cdp_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eureka/licitaciones-cdp/runs/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run */
+        get: operations["get_run_api_eureka_licitaciones_cdp_runs__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -461,6 +531,16 @@ export interface components {
          * @enum {string}
          */
         AnalysisStatus: "with_signal" | "compared_no_signal" | "insufficient_comparables" | "excluded" | "quality_review" | "no_unit_price" | "vat_incomplete" | "pending_comparison";
+        /** Assessment */
+        Assessment: {
+            /** Manual Rating */
+            manual_rating?: ("high" | "medium" | "low" | "discard") | null;
+            /**
+             * Manual Note
+             * @default
+             */
+            manual_note: string;
+        };
         /** CaseCreate */
         CaseCreate: {
             /** Title */
@@ -544,6 +624,51 @@ export interface components {
              */
             last_activity_at: string;
         };
+        /** CdpRunResponse */
+        CdpRunResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Source
+             * @default licitaciones_info_cdp
+             */
+            source: string;
+            /** Status */
+            status: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at?: string | null;
+            /** Metrics */
+            metrics?: {
+                [key: string]: unknown;
+            };
+            /** Errors */
+            errors?: {
+                [key: string]: unknown;
+            }[];
+            /** Items */
+            items?: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** CdpRunsResponse */
+        CdpRunsResponse: {
+            /** Items */
+            items: components["schemas"]["CdpRunResponse"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
         /** Comparable */
         Comparable: {
             /**
@@ -587,6 +712,11 @@ export interface components {
         /** EurekaAlertResponse */
         EurekaAlertResponse: {
             /**
+             * Source
+             * @default socrata
+             */
+            source: string;
+            /**
              * Id
              * Format: uuid
              */
@@ -623,6 +753,16 @@ export interface components {
                 [key: string]: unknown;
             };
             process?: components["schemas"]["SecopPresentation"] | null;
+            /**
+             * Evidence Level
+             * @default document_confirmed
+             */
+            evidence_level: string;
+            /**
+             * Document Status
+             * @default available
+             */
+            document_status: string;
         };
         /** EurekaAlertsResponse */
         EurekaAlertsResponse: {
@@ -747,6 +887,10 @@ export interface components {
             description?: string | null;
             /** Source Url */
             source_url?: string | null;
+            /** Evidence Level */
+            evidence_level?: string | null;
+            /** Document Status */
+            document_status?: string | null;
             /**
              * Opportunity Id
              * Format: uuid
@@ -1274,6 +1418,10 @@ export interface components {
             errors: {
                 [key: string]: unknown;
             }[];
+            /** Metrics */
+            metrics?: {
+                [key: string]: unknown;
+            };
             /** Config Snapshot */
             config_snapshot: {
                 [key: string]: unknown;
@@ -1333,6 +1481,10 @@ export interface components {
             errors: {
                 [key: string]: unknown;
             }[];
+            /** Metrics */
+            metrics?: {
+                [key: string]: unknown;
+            };
         };
         /** RadarRunsResponse */
         RadarRunsResponse: {
@@ -2402,6 +2554,210 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RadarRunDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_reviews_api_eureka_revision_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                source?: ("socrata" | "licitaciones_info_cdp") | null;
+                validity?: "active" | "open" | "closed" | "unknown" | "all";
+                department?: string | null;
+                municipality?: string | null;
+                funnel_state?: string | null;
+                score_min?: number | null;
+                score_max?: number | null;
+                amount_min?: number | null;
+                amount_max?: number | null;
+                deadline_from?: string | null;
+                deadline_to?: string | null;
+                has_alert?: boolean | null;
+                requires_manual_document_review?: boolean | null;
+                include_excluded?: boolean;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_detail_api_eureka_revision__identity__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assess_api_eureka_revision__identity__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Assessment"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    runs_api_eureka_licitaciones_cdp_runs_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CdpRunsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_run_api_eureka_licitaciones_cdp_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    get_run_api_eureka_licitaciones_cdp_runs__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CdpRunResponse"];
                 };
             };
             /** @description Validation Error */

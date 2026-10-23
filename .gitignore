@@ -44,6 +44,7 @@ coverage/
 
 # PostgreSQL embebido de desarrollo local
 backend/.local/
+backend/scripts/.local/
 
 # Descargas locales del spike SECOP (no son fixtures de pruebas).
 /descargas_covarachia/

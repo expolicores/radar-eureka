@@ -20,7 +20,12 @@ class RegisteredDocumentSource:
         if version is None:
             return DocumentInput(document.id, None, document.source.original_name, "", 0)
         return DocumentInput(
-            document.id, version.id, version.original_name, version.sha256, version.observed_size
+            document.id,
+            version.id,
+            version.original_name,
+            version.sha256,
+            version.observed_size,
+            version.content_type,
         )
 
     def for_process(self, reference: str) -> list[DocumentInput]:

@@ -2,8 +2,11 @@
 
 import threading
 import uuid
+from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any
 
+from .domain.cycle import manual_operations_window
 from .services import build_cycle_service, record_startup_failure
 
 
@@ -18,9 +21,11 @@ class ManualCycleRunner:
         settings: Any,
         factory: Any = build_cycle_service,
         startup_timeout: float = 8,
+        clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.sessions, self.settings, self.factory = sessions, settings, factory
         self.startup_timeout = startup_timeout
+        self.clock = clock
         self._closing = False
         self._guard = threading.Lock()
         self._threads: set[threading.Thread] = set()
@@ -50,9 +55,9 @@ class ManualCycleRunner:
 
         def execute() -> None:
             try:
-                self.factory(self.sessions, self.settings).run(
-                    trigger="manual_ui", cycle_id=identifier, on_started=persisted
-                )
+                self.factory(
+                    self.sessions, self.settings, manual_operations_window(self.clock())
+                ).run(trigger="manual_ui", cycle_id=identifier, on_started=persisted)
             except Exception as error:
                 # Do not put provider/driver exception bodies in HTTP responses or logs.
                 with handshake:

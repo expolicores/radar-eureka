@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Date, DateTime, ForeignKey, String, UniqueConstraint, func, select
+from sqlalchemy import Date, DateTime, ForeignKey, String, UniqueConstraint, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
@@ -37,6 +37,8 @@ class RadarRunRecord(Base):
     skipped: Mapped[int] = mapped_column(default=0)
     failures: Mapped[int] = mapped_column(default=0)
     errors: Mapped[list[dict[str, Any]]] = mapped_column(JSON_TYPE)
+    source: Mapped[str] = mapped_column(String(32), default="socrata", server_default="socrata")
+    metrics: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict)
 
 
 class RadarProcessStateRecord(Base):
@@ -80,6 +82,7 @@ class AlertRecord(Base):
     review_required: Mapped[bool]
     reasons: Mapped[list[dict[str, Any]]] = mapped_column(JSON_TYPE)
     snapshot: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE)
+    canonical_key: Mapped[str | None] = mapped_column(String(180), unique=True, nullable=True)
 
 
 COUNTERS = (
@@ -105,6 +108,8 @@ def run_json(record: RadarRunRecord) -> dict[str, Any]:
         "rule_version",
         "config_hash",
         "errors",
+        "source",
+        "metrics",
         *COUNTERS,
     )
     return {name: getattr(record, name) for name in names}
@@ -122,6 +127,9 @@ def alert_json(record: AlertRecord) -> dict[str, Any]:
         "review_required": record.review_required,
         "reasons": record.reasons,
         "snapshot": record.snapshot,
+        "evidence_level": record.snapshot.get("evidence_level", "document_confirmed"),
+        "document_status": record.snapshot.get("document_status", "available"),
+        "source": record.snapshot.get("source", "socrata"),
     }
 
 
@@ -146,12 +154,34 @@ class SqlRadarRepository:
         with self.sessions.begin() as session:
             # A new lock holder proves an old running run is no longer active.
             for old in session.scalars(
-                select(RadarRunRecord).where(RadarRunRecord.status == "running")
+                select(RadarRunRecord).where(
+                    RadarRunRecord.status == "running",
+                    RadarRunRecord.source == run.get("source", "socrata"),
+                )
             ):
                 old.status, old.finished_at = "interrupted", run["started_at"]
             session.add(
                 RadarRunRecord(
-                    **{key: value for key, value in run.items() if key not in ("items", "dry_run")},
+                    **{
+                        key: value
+                        for key, value in run.items()
+                        if key
+                        in {
+                            "id",
+                            "started_at",
+                            "finished_at",
+                            "status",
+                            "start_date",
+                            "before_date",
+                            "regions",
+                            "rule_version",
+                            "config_hash",
+                            "errors",
+                            "source",
+                            "metrics",
+                            *COUNTERS,
+                        }
+                    },
                     config_snapshot=snapshot,
                 )
             )
@@ -164,11 +194,31 @@ class SqlRadarRepository:
                     RadarProcessStateRecord.secop_id == secop_id,
                 )
             )
+            if record and self._legacy_empty_inventory(session, record):
+                return {"status": "pending_documents", "attempts": 0, "stage": record.stage}
             return (
                 {"status": record.status, "attempts": record.attempts, "stage": record.stage}
                 if record
                 else None
             )
+
+    @staticmethod
+    def _legacy_empty_inventory(session: Session, record: RadarProcessStateRecord) -> bool:
+        if record.status != "failed" or record.stage != "documents_sync":
+            return False
+        result = session.scalar(
+            select(RadarRunProcessRecord.result).where(
+                RadarRunProcessRecord.run_id == record.last_run_id,
+                RadarRunProcessRecord.dataset_id == record.dataset_id,
+                RadarRunProcessRecord.secop_id == record.secop_id,
+            )
+        )
+        error = (result or {}).get("error", {})
+        return bool(
+            error.get("type") == "ValueError"
+            and error.get("message")
+            == ("No hay inventario documental; el proceso queda reintentable.")
+        )
 
     def claim(self, run_id: uuid.UUID, dataset: str, secop_id: str, at: datetime) -> None:
         with self.sessions.begin() as session:
@@ -187,6 +237,8 @@ class SqlRadarRepository:
                     attempts=0,
                 )
                 session.add(record)
+            if self._legacy_empty_inventory(session, record):
+                record.attempts = 0
             record.attempts += 1
             record.status, record.stage, record.last_run_id, record.updated_at = (
                 "processing",
@@ -209,16 +261,31 @@ class SqlRadarRepository:
     def outcome(
         self, run_id: uuid.UUID, item: dict[str, Any], at: datetime, update_state: bool
     ) -> None:
+        from .review_services import record_review_entry
+
         with self.sessions.begin() as session:
-            session.add(
-                RadarRunProcessRecord(
-                    id=uuid.uuid4(),
-                    run_id=run_id,
-                    dataset_id=item["dataset_id"],
-                    secop_id=item["secop_id"],
-                    result=item,
+            run = session.get(RadarRunRecord, run_id)
+            if run is not None:
+                record_review_entry(session, item, run.source, at)
+            existing = session.scalar(
+                select(RadarRunProcessRecord).where(
+                    RadarRunProcessRecord.run_id == run_id,
+                    RadarRunProcessRecord.dataset_id == item["dataset_id"],
+                    RadarRunProcessRecord.secop_id == item["secop_id"],
                 )
             )
+            if existing:
+                existing.result = item
+            else:
+                session.add(
+                    RadarRunProcessRecord(
+                        id=uuid.uuid4(),
+                        run_id=run_id,
+                        dataset_id=item["dataset_id"],
+                        secop_id=item["secop_id"],
+                        result=item,
+                    )
+                )
             if update_state:
                 record = session.scalar(
                     select(RadarProcessStateRecord).where(
@@ -236,13 +303,52 @@ class SqlRadarRepository:
                     record.process_id = (
                         uuid.UUID(item["process_id"]) if item.get("process_id") else None
                     )
+                    if item.get("document_status") == "unavailable":
+                        record.status = "pending_documents"
+                        # Ausencia de inventario no consume reintentos de fallos técnicos.
+                        record.attempts = 0
+
+    def document_review_history(
+        self, source: str, process_reference: str, exclude_run_id: uuid.UUID
+    ) -> list[dict[str, Any]]:
+        """Read prior operational evidence for the exact source/process, never alert state."""
+        with self.sessions() as session:
+            rows = session.execute(
+                select(RadarRunProcessRecord, RadarRunRecord)
+                .join(RadarRunRecord, RadarRunProcessRecord.run_id == RadarRunRecord.id)
+                .where(
+                    RadarRunRecord.source == source,
+                    RadarRunRecord.id != exclude_run_id,
+                    RadarRunRecord.finished_at.is_not(None),
+                    RadarRunProcessRecord.dataset_id == "licitaciones",
+                    RadarRunProcessRecord.secop_id == process_reference,
+                )
+                .order_by(RadarRunRecord.started_at, RadarRunRecord.id)
+            ).all()
+            return [
+                {
+                    "run_id": str(run.id),
+                    "result": {
+                        key: item.result[key]
+                        for key in (
+                            "document_review",
+                            "requires_manual_document_review",
+                            "warnings",
+                            "manual_review_reasons",
+                        )
+                        if key in item.result
+                    },
+                }
+                for item, run in rows
+            ]
 
     def finish(self, run: dict[str, Any]) -> None:
         with self.sessions.begin() as session:
             record = session.get(RadarRunRecord, run["id"])
             if record:
-                for key in (*COUNTERS, "status", "finished_at", "errors"):
-                    setattr(record, key, run[key])
+                for key in (*COUNTERS, "status", "finished_at", "errors", "metrics"):
+                    if key in run:
+                        setattr(record, key, run[key])
 
     def alert(
         self,
@@ -253,6 +359,40 @@ class SqlRadarRepository:
         at: datetime,
     ) -> bool:
         with self.sessions.begin() as session:
+            canonical_key = decision.snapshot.get("canonical_identity")
+            existing = session.scalar(
+                select(AlertRecord)
+                .where(
+                    or_(
+                        AlertRecord.opportunity_id == opportunity_id,
+                        AlertRecord.canonical_key == canonical_key,
+                    )
+                    if canonical_key
+                    else AlertRecord.opportunity_id == opportunity_id,
+                    AlertRecord.alert_type == "new_opportunity",
+                )
+                .with_for_update()
+            )
+            if existing:
+                if (
+                    existing.snapshot.get("evidence_level") == "metadata_only"
+                    and decision.confirmed
+                ):
+                    existing.snapshot = {
+                        **decision.snapshot,
+                        "source": existing.snapshot.get("source", "socrata"),
+                        "evidence_source": decision.snapshot.get("source", "socrata"),
+                        "initial_metadata_alert": {
+                            "snapshot": existing.snapshot,
+                            "reasons": existing.reasons,
+                        },
+                        "evidence_updated_at": at.isoformat(),
+                        "evidence_run_id": str(run_id),
+                    }
+                    existing.reasons = decision.reasons
+                    existing.priority = decision.priority
+                    existing.review_required = decision.review_required
+                return False
             statement = (
                 insert(AlertRecord)
                 if session.get_bind().dialect.name == "postgresql"
@@ -270,13 +410,29 @@ class SqlRadarRepository:
                     review_required=decision.review_required,
                     reasons=decision.reasons,
                     snapshot=decision.snapshot,
+                    canonical_key=canonical_key,
                 )
-                .on_conflict_do_nothing(
-                    index_elements=["opportunity_id", "alert_type", "rule_version"]
-                )
+                .on_conflict_do_nothing()
                 .returning(AlertRecord.id)
             )
             return result.scalar_one_or_none() is not None
+
+    def alert_for_opportunity(self, identifier: uuid.UUID) -> dict[str, Any] | None:
+        with self.sessions() as session:
+            record = session.scalar(
+                select(AlertRecord)
+                .where(AlertRecord.opportunity_id == identifier)
+                .order_by(AlertRecord.created_at.desc(), AlertRecord.id)
+                .limit(1)
+            )
+            return alert_json(record) if record else None
+
+    def alert_for_canonical(self, canonical_key: str) -> dict[str, Any] | None:
+        with self.sessions() as session:
+            record = session.scalar(
+                select(AlertRecord).where(AlertRecord.canonical_key == canonical_key)
+            )
+            return alert_json(record) if record else None
 
     def alerts(self, page: int, page_size: int) -> dict[str, Any]:
         with self.sessions() as session:
@@ -301,11 +457,19 @@ class SqlRadarRepository:
                 raise LookupError("Alerta no encontrada.")
             return alert_json(record)
 
-    def runs(self, page: int, page_size: int) -> dict[str, Any]:
+    def runs(self, page: int, page_size: int, source: str = "socrata") -> dict[str, Any]:
         with self.sessions() as session:
-            total = session.scalar(select(func.count()).select_from(RadarRunRecord)) or 0
+            total = (
+                session.scalar(
+                    select(func.count())
+                    .select_from(RadarRunRecord)
+                    .where(RadarRunRecord.source == source)
+                )
+                or 0
+            )
             rows = session.scalars(
                 select(RadarRunRecord)
+                .where(RadarRunRecord.source == source)
                 .order_by(RadarRunRecord.started_at.desc(), RadarRunRecord.id)
                 .offset((page - 1) * page_size)
                 .limit(page_size)
