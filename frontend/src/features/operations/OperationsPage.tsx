@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, unwrap } from "../../api/client";
 import { str } from "../eureka/types";
+import { SocrataAvailabilityNotice } from "./SocrataAvailabilityNotice";
 
 const timestamp = (value: unknown) =>
   typeof value === "string"
@@ -22,6 +23,15 @@ const metricLabels: Record<string, string> = {
   limit_deferred: "Diferidos por límite operativo",
   prefilter_rejected: "Descartados por prefilter",
   candidates: "Candidatos",
+  review_candidates_total: "Candidatos a revisión",
+  review_new_entries: "Nuevos en revisión",
+  review_existing_entries: "Ya existentes en revisión",
+  review_rejected_no_commercial_signal: "Sin señal comercial para revisión",
+  review_rejected_deadline_only: "Deadline desconocido sin señal comercial",
+  review_rejected_strong_exclusion: "Exclusión comercial sin evidencia adicional",
+  review_rejected_budget_limit: "Fuera del tope de presupuesto para revisión",
+  review_rejected_irrelevant_service: "Servicio fuera del alcance de revisión",
+  review_rejected_no_goods_intent: "Sin compra o suministro de bienes verificable",
   documents_processed: "Documentos inventariados",
   documents_available: "Documentos con binario disponible",
   document_download_failed: "Descargas documentales fallidas",
@@ -97,6 +107,9 @@ function Cycle({ cycle }: { cycle: Record<string, unknown> }) {
           SECOP devolvió 0 registros para la ventana y regiones consultadas, antes de los filtros
           locales.
         </p>
+      )}
+      {source?.zero_records_confirmed === true && (
+        <SocrataAvailabilityNotice diagnostic={source.socrata_availability_diagnostic} />
       )}
       {(metrics?.secop_records_fetched ?? 0) > 0 && (
         <p>

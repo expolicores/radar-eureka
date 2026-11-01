@@ -89,6 +89,27 @@ async function confirmRun() {
   await user.click(screen.getByRole("button", { name: "Ejecutar" }));
 }
 
+it("renders the persisted availability diagnostic in a completed empty cycle", async () => {
+  routes(() => ({
+    ...runningCycle,
+    status: "completed",
+    source_summary: {
+      zero_records_confirmed: true,
+      socrata_availability_diagnostic: {
+        performed: true,
+        status: "dataset_lag",
+        query_window_start: "2026-10-21",
+        query_window_before: "2026-10-24",
+        latest_available_date: "2026-10-20",
+      },
+    },
+  }));
+  renderWithProviders(<App />, { route: "/eureka/operations" });
+  await confirmRun();
+  expect(await screen.findByText(/Es probable que el dataset/)).toBeInTheDocument();
+  expect(screen.getByText(/Última fecha disponible en Socrata: 20-oct-2026/)).toBeInTheDocument();
+});
+
 it("shows provisional object exclusions in the funnel", async () => {
   routes(() => ({
     ...runningCycle,

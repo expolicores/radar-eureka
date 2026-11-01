@@ -3,7 +3,7 @@
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 from sqlalchemy import Date, DateTime, ForeignKey, String, UniqueConstraint, func, or_, select
@@ -265,8 +265,6 @@ class SqlRadarRepository:
 
         with self.sessions.begin() as session:
             run = session.get(RadarRunRecord, run_id)
-            if run is not None:
-                record_review_entry(session, item, run.source, at)
             existing = session.scalar(
                 select(RadarRunProcessRecord).where(
                     RadarRunProcessRecord.run_id == run_id,
@@ -274,9 +272,18 @@ class SqlRadarRepository:
                     RadarRunProcessRecord.secop_id == item["secop_id"],
                 )
             )
+            entry = existing.result.get("review_entry") if existing else None
+            if entry is None and run is not None and item.get("review_candidate") is True:
+                entry = record_review_entry(session, item, run.source, at)
+            if entry is not None:
+                # First successful entry attempt of this run survives subsequent outcome writes.
+                item["review_entry"] = entry
             if existing:
+                # Updates never replace the first insertion time or backfill legacy rows.
+                item["recorded_at"] = existing.result.get("recorded_at")
                 existing.result = item
             else:
+                item["recorded_at"] = at.astimezone(UTC).isoformat()
                 session.add(
                     RadarRunProcessRecord(
                         id=uuid.uuid4(),
@@ -457,6 +464,22 @@ class SqlRadarRepository:
                 raise LookupError("Alerta no encontrada.")
             return alert_json(record)
 
+    def alerts_for_run(self, run_id: uuid.UUID, limit: int = 10) -> dict[str, Any]:
+        with self.sessions() as session:
+            query = select(AlertRecord).where(AlertRecord.run_id == run_id)
+            total = (
+                session.scalar(
+                    select(func.count())
+                    .select_from(AlertRecord)
+                    .where(AlertRecord.run_id == run_id)
+                )
+                or 0
+            )
+            records = session.scalars(
+                query.order_by(AlertRecord.created_at.desc(), AlertRecord.id).limit(limit)
+            )
+            return {"items": [alert_json(r) for r in records], "total": total}
+
     def runs(self, page: int, page_size: int, source: str = "socrata") -> dict[str, Any]:
         with self.sessions() as session:
             total = (
@@ -488,12 +511,17 @@ class SqlRadarRepository:
                 raise LookupError("Corrida no encontrada.")
             result = run_json(record)
             result["config_snapshot"] = record.config_snapshot
+            ordering = (
+                RadarRunProcessRecord.result["recorded_at"].as_string().desc().nulls_last()
+                if record.source == "licitaciones_info_cdp"
+                else RadarRunProcessRecord.secop_id
+            )
             result["items"] = [
                 item.result
                 for item in session.scalars(
                     select(RadarRunProcessRecord)
                     .where(RadarRunProcessRecord.run_id == identifier)
-                    .order_by(RadarRunProcessRecord.secop_id)
+                    .order_by(ordering)
                 )
             ]
             return result

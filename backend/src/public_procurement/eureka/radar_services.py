@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Callable, Iterable
 from contextlib import nullcontext
 from dataclasses import asdict
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +23,7 @@ from .metadata_alert_policy import (
 from .ports import RadarPipeline, RadarRepository
 from .radar_config import RadarConfig
 from .radar_repositories import COUNTERS
+from .review_policy import admission
 
 
 def _stage_callback(
@@ -58,6 +59,22 @@ def radar_process(record: SecopProcess) -> RadarProcess:
     )
 
 
+def _review_admission(
+    item: dict[str, Any], record: SecopProcess, config: RadarConfig, at: datetime
+) -> None:
+    from .review_services import moment
+
+    item.update(admission(item, config))
+    deadline = moment(record.offer_deadline_raw)
+    published = moment(record.published_on.isoformat()) if record.published_on else None
+    if (
+        item.get("reason") in {"outside_window", "outside_region", "publication_unknown"}
+        or (deadline is not None and deadline <= at)
+        or (published is not None and published < at - timedelta(days=7))
+    ):
+        item["review_candidate"] = False
+
+
 class RadarService:
     def __init__(
         self,
@@ -68,11 +85,13 @@ class RadarService:
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
         observer: Callable[[str, dict[str, Any]], None] | None = None,
         metadata_exclusion_path: Path = DEFAULT_POLICY_PATH,
+        availability_diagnostic: Callable[[date, date], dict[str, Any]] | None = None,
     ) -> None:
         self.repository, self.pipeline, self.config = repository, pipeline, config
         self.preferred_budget_max, self.clock = preferred_budget_max, clock
         self.observer = observer
         self.metadata_exclusion_path = metadata_exclusion_path
+        self.availability_diagnostic = availability_diagnostic
 
     def run(
         self,
@@ -155,6 +174,22 @@ class RadarService:
                         "title": process.title,
                         "stage": "metadata",
                         "outcome": "skipped",
+                        "metadata": {
+                            "codigo_proceso": record.reference or record.id_del_proceso,
+                            "entity_name": record.entity_name,
+                            "object": record.title or record.description,
+                            "description": record.description,
+                            "department": record.department,
+                            "municipality": record.municipality,
+                            "published_at": record.published_on.isoformat()
+                            if record.published_on
+                            else None,
+                            "deadline_at": record.offer_deadline_raw,
+                            "amount": record.base_price_cop,
+                            "unspsc": record.category_code,
+                            "provider_source": "secop2",
+                            "raw_source_reference": {"Link": record.source_url},
+                        },
                     }
                     claimed = False
                     candidate = candidate_decision(process, start, before, regions, self.config)
@@ -191,6 +226,7 @@ class RadarService:
                             run["status"] = "limited"
                             item["reason"] = "limit_deferred"
                             run["skipped"] += 1
+                            _review_admission(item, record, self.config, self.clock())
                             run["items"].append(item)
                             if not dry_run:
                                 self.repository.outcome(run["id"], item, self.clock(), False)
@@ -368,6 +404,7 @@ class RadarService:
                                     else "Fallo controlado del pipeline; revisar logs de la etapa.",
                                 }
                                 run["failures"] += 1
+                    _review_admission(item, record, self.config, self.clock())
                     run["items"].append(item)
                     if self.observer:
                         self.observer(
@@ -408,6 +445,56 @@ class RadarService:
             finally:
                 if run["status"] == "running":
                     run["status"] = "partial" if run["failures"] else "completed"
+                run["metrics"].update(
+                    review_candidates_total=sum(
+                        bool(i.get("review_candidate")) for i in run["items"]
+                    ),
+                    review_new_entries=sum(
+                        bool(i.get("review_candidate"))
+                        and i.get("review_entry", {}).get("status") == "new"
+                        for i in run["items"]
+                    ),
+                    review_existing_entries=sum(
+                        bool(i.get("review_candidate"))
+                        and i.get("review_entry", {}).get("status") == "existing"
+                        for i in run["items"]
+                    ),
+                    **{
+                        reason: sum(i.get("review_rejected_reason") == reason for i in run["items"])
+                        for reason in (
+                            "review_rejected_no_commercial_signal",
+                            "review_rejected_deadline_only",
+                            "review_rejected_strong_exclusion",
+                            "review_rejected_budget_limit",
+                            "review_rejected_irrelevant_service",
+                            "review_rejected_no_goods_intent",
+                        )
+                    },
+                )
+                diagnostic: dict[str, Any] = {
+                    "performed": False,
+                    "reason": "not_completed_empty_query",
+                }
+                if (
+                    not dry_run
+                    and run["status"] == "completed"
+                    and run["processes_seen"] == 0
+                    and self.availability_diagnostic is not None
+                ):
+                    try:
+                        diagnostic = self.availability_diagnostic(start, before)
+                    except Exception as error:
+                        diagnostic = {
+                            "performed": True,
+                            "status": "diagnostic_failed",
+                            "latest_available_date": None,
+                            "query_window_start": start.isoformat(),
+                            "query_window_before": before.isoformat(),
+                            "error": {"type": type(error).__name__},
+                        }
+                run["metrics"]["socrata_availability_diagnostic"] = diagnostic
+                if self.observer:
+                    self.observer("socrata_availability_diagnostic", diagnostic)
                 run["finished_at"] = self.clock()
                 if not dry_run:
                     self.repository.finish(run)

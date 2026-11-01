@@ -13,6 +13,7 @@ from urllib.request import Request, urlopen
 from ..domain.process import SECOP_PROCESS_DATASET, ProcessQuery, SecopProcess
 
 ENDPOINT = f"https://www.datos.gov.co/resource/{SECOP_PROCESS_DATASET}.json"
+PUBLICATION_FIELD = "fecha_de_publicacion_del"
 FIELDS = (
     "id_del_proceso",
     "id_del_portafolio",
@@ -135,8 +136,8 @@ class SocrataProcessSource:
         if query.published_from and query.published_before:
             conditions.extend(
                 (
-                    "fecha_de_publicacion_del >= " + _literal(query.published_from.isoformat()),
-                    "fecha_de_publicacion_del < " + _literal(query.published_before.isoformat()),
+                    PUBLICATION_FIELD + " >= " + _literal(query.published_from.isoformat()),
+                    PUBLICATION_FIELD + " < " + _literal(query.published_before.isoformat()),
                 )
             )
         cursor: str | None = None

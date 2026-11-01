@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import CheckConstraint, DateTime, String, Text, select
+from sqlalchemy import CheckConstraint, DateTime, String, Text, func, literal_column, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
@@ -37,13 +37,77 @@ class ReviewRepository:
     def __init__(self, sessions: sessionmaker[Session]) -> None:
         self.sessions = sessions
 
-    def read(self) -> dict[str, Any]:
+    def read(self, since: datetime | None = None, identity: str | None = None) -> dict[str, Any]:
         with self.sessions() as session:
-            observations = session.execute(
-                select(RadarRunProcessRecord, RadarRunRecord)
+            result: Any = RadarRunProcessRecord.result
+            if (
+                since is not None or identity is not None
+            ) and session.get_bind().dialect.name == "postgresql":
+                # Page diagnostics can be megabytes per process. The list only needs
+                # the persisted coverage flags; full diagnostics stay in detail/history.
+                result = result.op("-")(literal_column("'extraction_coverage'")).op("#-")(
+                    literal_column("'{decision,snapshot,extraction_coverage}'")
+                )
+            query = (
+                select(result, RadarRunRecord)
                 .join(RadarRunRecord, RadarRunProcessRecord.run_id == RadarRunRecord.id)
+                .where(RadarRunRecord.source.in_(("socrata", "licitaciones_info_cdp")))
                 .order_by(RadarRunRecord.started_at, RadarRunRecord.id)
-            ).all()
+            )
+            if identity is not None:
+                payload = RadarRunProcessRecord.result
+                metadata = payload["metadata"]
+                refs = {identity, identity.removeprefix("secop:").removeprefix("secop1:")}
+                candidates = [
+                    payload["secop_id"].as_string(),
+                    *(
+                        metadata[k].as_string()
+                        for k in ("source_identity", "id_ultima_fase", "process_reference")
+                    ),
+                ]
+                if session.get_bind().dialect.name == "postgresql":
+                    link = metadata["raw_source_reference"]["Link"].as_string()
+                    candidates.extend(
+                        [
+                            func.substring(link, "(CO1[.](NTC|REQ)[.][0-9]+)"),
+                            func.substring(link, "numConstancia=([0-9]+-[0-9]+-[0-9]+)"),
+                        ]
+                    )
+                match = or_(*(candidate.in_(refs) for candidate in candidates))
+                local_refs = (
+                    select(metadata["process_reference"].as_string()).where(match).correlate(None)
+                )
+                query = query.where(
+                    or_(match, metadata["process_reference"].as_string().in_(local_refs))
+                )
+            if since is not None:
+                query = query.where(RadarRunRecord.started_at >= since)
+                # Only persisted review members can appear in this inbox. Resolve
+                # exact provider/official references in SQL before decoding large JSON.
+                if session.get_bind().dialect.name == "postgresql":
+                    identities = list(
+                        session.scalars(select(ManualProcessReviewRecord.canonical_identity))
+                    )
+                    references = set(identities)
+                    references.update(
+                        i.removeprefix("secop:").removeprefix("secop1:") for i in identities
+                    )
+                    payload = RadarRunProcessRecord.result
+                    metadata = payload["metadata"]
+                    link = metadata["raw_source_reference"]["Link"].as_string()
+                    candidates = [
+                        payload["secop_id"].as_string(),
+                        *(
+                            metadata[k].as_string()
+                            for k in ("source_identity", "id_ultima_fase", "process_reference")
+                        ),
+                        func.substring(link, "(CO1[.](NTC|REQ)[.][0-9]+)"),
+                        func.substring(link, "numConstancia=([0-9]+-[0-9]+-[0-9]+)"),
+                    ]
+                    query = query.where(
+                        or_(*(candidate.in_(references) for candidate in candidates))
+                    )
+            observations = session.execute(query).all()
             return {
                 "observations": [
                     {
@@ -51,7 +115,8 @@ class ReviewRepository:
                         "run_id": str(run.id),
                         "run_at": run.started_at,
                         "regions": run.regions,
-                        "result": item.result,
+                        "config_snapshot": run.config_snapshot,
+                        "result": item,
                     }
                     for item, run in observations
                     if run.source in {"socrata", "licitaciones_info_cdp"}

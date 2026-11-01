@@ -23,6 +23,7 @@ from public_procurement.eureka.radar_repositories import (
     RadarRunRecord,
     SqlRadarRepository,
 )
+from public_procurement.eureka.review_repositories import ManualProcessReviewRecord
 from public_procurement.ingestion.services import canonical_process_identity
 from public_procurement.licitaciones_cdp import api
 from public_procurement.licitaciones_cdp import services as operation
@@ -146,6 +147,51 @@ def service(monkeypatch, rows, *, flags=None, error=None):
         repo,
         pipeline,
     )
+
+
+@pytest.mark.parametrize("existing_count", [7, 10])
+def test_review_entry_counts_use_real_insert_results_and_survive_outcome_updates(
+    monkeypatch, existing_count
+):
+    from sqlalchemy import select
+
+    at = datetime(2026, 10, 21, 12, tzinfo=UTC)
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.execute(text("ATTACH DATABASE ':memory:' AS eureka"))
+        for model in (RadarRunRecord, RadarRunProcessRecord, ManualProcessReviewRecord):
+            model.__table__.create(connection)
+    sessions = sessionmaker(engine)
+    with sessions.begin() as session:
+        for n in range(1, existing_count + 1):
+            session.add(
+                ManualProcessReviewRecord(
+                    canonical_identity=f"secop:CO1.NTC.{n}",
+                    manual_note="Conservar nota",
+                    review_first_seen_at=at,
+                    review_first_seen_origin="observed",
+                )
+            )
+    svc, repo, _ = service(monkeypatch, [candidate(n) for n in range(1, 11)])
+    sql = SqlRadarRepository(sessions)
+    repo.start = sql.start
+    repo.outcome = sql.outcome
+    svc.clock = lambda: at
+    result = svc.run()
+    metrics = result["metrics"]
+    assert metrics["review_candidates"] == metrics["review_candidates_total"] == 10
+    assert metrics["review_existing_entries"] == existing_count
+    assert metrics["review_new_entries"] == 10 - existing_count
+    assert metrics["review_existing_entries"] + metrics["review_new_entries"] == 10
+    with sessions() as session:
+        rows = session.scalars(select(ManualProcessReviewRecord)).all()
+        assert len(rows) == 10
+        assert sum(r.manual_note == "Conservar nota" for r in rows) == existing_count
+    # Neither final outcome writes nor a subsequent run turn old entries into new ones.
+    svc.run()
+    assert repo.current["metrics"]["review_new_entries"] == 0
+    assert repo.current["metrics"]["review_existing_entries"] == 10
+    engine.dispose()
 
 
 def test_recent_open_reaches_shared_pipeline_independently_of_source(monkeypatch):

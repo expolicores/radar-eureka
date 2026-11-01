@@ -6,6 +6,61 @@ import { renderWithProviders } from "../../test/render";
 
 afterEach(() => vi.unstubAllGlobals());
 
+it("distinguishes review candidates from actual new and existing persisted entries", async () => {
+  mock({
+    ...run,
+    metrics: {
+      ...run.metrics,
+      review_candidates: 10,
+      review_candidates_total: 10,
+      review_new_entries: 0,
+      review_existing_entries: 10,
+    },
+  });
+  renderWithProviders(<App />, { route: "/eureka/licitaciones" });
+  const label = await screen.findByText("Candidatos a revisión");
+  expect(label.parentElement).toHaveTextContent("10");
+  expect(screen.getByText("Nuevos en revisión").parentElement).toHaveTextContent("0");
+  expect(screen.getByText("Ya existentes en revisión").parentElement).toHaveTextContent("10");
+});
+
+it("does not invent new/existing counts for historical runs", async () => {
+  mock({ ...run, metrics: { ...run.metrics, review_candidates: 10 } });
+  renderWithProviders(<App />, { route: "/eureka/licitaciones" });
+  await screen.findByText("Candidatos a revisión");
+  expect(screen.getByText("Nuevos en revisión").parentElement).toHaveTextContent(
+    "No registrado (histórico)",
+  );
+});
+
+it("orders process rows by their own insertion time descending with historical rows last", async () => {
+  const item = (code: string, recorded_at?: string) => ({
+    secop_id: code,
+    recorded_at,
+    metadata: {
+      codigo_proceso: code,
+      published_at: "2099-01-01T00:00:00Z",
+      deadline_at: "2100-01-01T00:00:00Z",
+    },
+  });
+  mock({
+    ...run,
+    items: [item("B", "2026-10-23T01:19:20Z"), item("C"), item("A", "2026-10-23T01:19:40Z")],
+  });
+  renderWithProviders(<App />, { route: "/eureka/licitaciones" });
+  const header = await screen.findByRole("columnheader", { name: /Registrado en esta tabla/ });
+  const rows = within(header.closest("table")!).getAllByRole("row").slice(1);
+  expect(rows).toHaveLength(3);
+  expect(rows.map((row) => within(row).getAllByRole("cell")[0]!.textContent)).toEqual([
+    "A",
+    "B",
+    "C",
+  ]);
+  expect(within(rows[0]!).getAllByRole("cell")[1]).toHaveTextContent("22/10/2026 20:19:40");
+  expect(within(rows[1]!).getAllByRole("cell")[1]).toHaveTextContent("22/10/2026 20:19:20");
+  expect(within(rows[2]!).getAllByRole("cell")[1]).toHaveTextContent("No registrada (histórico)");
+});
+
 it("separates discards warnings and technical errors without rejecting by origin", async () => {
   mock({
     ...run,
@@ -150,7 +205,7 @@ it("does not invent generation time for historical warnings", async () => {
     },
   });
   renderWithProviders(<App />, { route: "/eureka/licitaciones" });
-  expect(await screen.findByText("No registrada (histórico)")).toBeInTheDocument();
+  expect((await screen.findAllByText("No registrada (histórico)")).length).toBeGreaterThan(0);
 });
 it("shows operational source, funnel, processes, duplicate and document review", async () => {
   mock();

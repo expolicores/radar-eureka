@@ -353,6 +353,9 @@ class AutomationCycleService:
                 result = self.radar(uuid.UUID(cycle["radar_run_id"]), observe)
                 cycle["durations_ms"]["radar"] = (time.monotonic() - stage_start) * 1000
                 cycle["radar_status"] = result["status"]
+                diagnostic = result.get("metrics", {}).get("socrata_availability_diagnostic")
+                if diagnostic is not None:
+                    cycle["source_summary"]["socrata_availability_diagnostic"] = diagnostic
                 for target, names in (
                     ("documents", ("documents_sync", "documents_download")),
                     ("eureka", ("discovery", "alert_evaluation")),
@@ -364,6 +367,15 @@ class AutomationCycleService:
                 for key in (
                     "metadata_alerts_excluded_by_object",
                     "metadata_exclusion_policy_errors",
+                    "review_candidates_total",
+                    "review_new_entries",
+                    "review_existing_entries",
+                    "review_rejected_no_commercial_signal",
+                    "review_rejected_deadline_only",
+                    "review_rejected_strong_exclusion",
+                    "review_rejected_budget_limit",
+                    "review_rejected_irrelevant_service",
+                    "review_rejected_no_goods_intent",
                 ):
                     metrics[key] = result.get("metrics", {}).get(key, 0)
                 for key, source in (

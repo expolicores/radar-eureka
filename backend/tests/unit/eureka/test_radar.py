@@ -1,6 +1,6 @@
 from contextlib import nullcontext
 from dataclasses import replace
-from datetime import date
+from datetime import UTC, date, datetime
 from unittest.mock import Mock
 
 import pytest
@@ -82,6 +82,113 @@ def run(service, source, **kwargs):
         regions=("Boyacá", "Casanare"),
         **kwargs,
     )
+
+
+def test_review_admission_for_socrata_discards_never_reexecutes_the_pipeline(config):
+    service, repo, pipeline = setup(config)
+    service.clock = lambda: datetime(2026, 10, 10, tzinfo=UTC)
+    original = repo.outcome
+
+    def persist(run_id, item, at, claimed):
+        original(run_id, item, at, claimed)
+        if item.get("review_candidate"):
+            item["review_entry"] = {"status": "new"}
+
+    repo.outcome = persist
+    records = [
+        replace(
+            process(),
+            id_del_proceso="no_match",
+            title="Servicio genérico",
+            description=None,
+            category_code=None,
+        ),
+        replace(
+            process(),
+            id_del_proceso="excluded",
+            title="Interventoría general",
+            description=None,
+            category_code=None,
+        ),
+        replace(
+            process(),
+            id_del_proceso="deadline_only",
+            title="Servicio genérico",
+            description=None,
+            category_code=None,
+            offer_deadline_raw=None,
+        ),
+        replace(
+            process(),
+            id_del_proceso="commercial_unknown",
+            title="Suministro de papelería",
+            description=None,
+            category_code=None,
+            offer_deadline_raw=None,
+        ),
+    ]
+    report = run(service, records)
+    assert report["skipped"] == 4
+    pipeline.enrich.assert_not_called()
+    assert [i["review_candidate"] for i in report["items"]] == [False, False, False, True]
+    assert report["metrics"]["review_candidates_total"] == 1
+    assert report["metrics"]["review_new_entries"] == 1
+    assert report["metrics"]["review_existing_entries"] == 0
+    assert report["metrics"]["review_rejected_no_goods_intent"] == 2
+    assert report["metrics"]["review_rejected_irrelevant_service"] == 1
+
+
+def test_commercial_limit_deferred_can_enter_review_without_changing_pipeline_limit(config):
+    service, _, pipeline = setup(config)
+    service.clock = lambda: datetime(2026, 10, 10, tzinfo=UTC)
+    result = run(
+        service, [process(), replace(process(), id_del_proceso="deferred")], max_processes=1
+    )
+    assert result["status"] == "limited"
+    assert result["items"][-1]["reason"] == "limit_deferred"
+    assert result["items"][-1]["review_candidate"]
+    pipeline.enrich.assert_called_once()
+
+
+@pytest.mark.parametrize("status", ["dataset_lag", "no_rows_in_window", "diagnostic_failed"])
+def test_empty_source_availability_is_nonfatal_and_does_not_persist_processes(config, status):
+    service, repo, pipeline = setup(config)
+    service.availability_diagnostic = Mock(return_value={"performed": True, "status": status})
+    result = run(service, [])
+    service.availability_diagnostic.assert_called_once_with(date(2026, 10, 7), date(2026, 10, 14))
+    assert result["status"] == "completed"
+    assert result["metrics"]["socrata_availability_diagnostic"]["status"] == status
+    assert result["start_date"] == date(2026, 10, 7)
+    assert result["before_date"] == date(2026, 10, 14)
+    assert len(repo.runs) == 1
+    assert repo.outcomes == []
+    assert not pipeline.mock_calls
+
+
+def test_diagnostic_exception_never_changes_completed(config):
+    service, _, _ = setup(config)
+    service.availability_diagnostic = Mock(side_effect=RuntimeError("secret"))
+    result = run(service, [])
+    assert result["status"] == "completed"
+    assert result["failures"] == 0
+    assert result["errors"] == []
+    assert result["metrics"]["socrata_availability_diagnostic"]["status"] == "diagnostic_failed"
+    assert "secret" not in str(result)
+
+
+def test_nonempty_or_failed_or_dry_source_never_queries_availability(config):
+    service, _, _ = setup(config)
+    service.availability_diagnostic = Mock()
+    run(service, [process()])
+    run(service, [], dry_run=True)
+
+    def broken():
+        raise TimeoutError()
+        yield  # pragma: no cover
+
+    result = run(service, broken())
+    assert result["status"] == "failed"
+    service.availability_diagnostic.assert_not_called()
 
 
 def test_new_seen_idempotence_and_explanations(config):

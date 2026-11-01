@@ -14,7 +14,12 @@ const labels: Record<string, string> = {
   document_capable: "Abiertos con capacidad documental",
   metadata_only: "Procesados por metadata",
   processed: "Procesos procesados",
-  review_candidates: "Candidatos a revisión humana",
+  review_candidates_total: "Candidatos a revisión",
+  review_new_entries: "Nuevos en revisión",
+  review_existing_entries: "Ya existentes en revisión",
+  review_rejected_budget_limit: "Fuera del tope de presupuesto para revisión",
+  review_rejected_irrelevant_service: "Servicio fuera del alcance de revisión",
+  review_rejected_no_goods_intent: "Sin compra o suministro de bienes verificable",
   received: "Recibidos",
   unique: "Únicos",
   recent: "Recientes",
@@ -343,7 +348,13 @@ export function LicitacionesPage() {
                 <dd>
                   {str(
                     metrics[key] ??
-                      (key.startsWith("extraction_") || key.startsWith("process_") ? "—" : 0),
+                      (key === "review_candidates_total"
+                        ? (metrics.review_candidates ?? 0)
+                        : key.startsWith("review_")
+                          ? "No registrado (histórico)"
+                          : key.startsWith("extraction_") || key.startsWith("process_")
+                            ? "—"
+                            : 0),
                   )}
                 </dd>
               </div>
@@ -365,7 +376,7 @@ export function LicitacionesPage() {
                       <th>Abiertos</th>
                       <th>Procesados</th>
                       <th>Alertas</th>
-                      <th>Revisión</th>
+                      <th>Candidatos a revisión</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -398,6 +409,7 @@ export function LicitacionesPage() {
                 <tr>
                   {[
                     "Proceso",
+                    "Registrado en esta tabla (Bogotá)",
                     "Entidad",
                     "Fuente",
                     "Objeto",
@@ -416,56 +428,68 @@ export function LicitacionesPage() {
                 </tr>
               </thead>
               <tbody>
-                {(run.items ?? []).map((raw) => {
-                  const item = obj(raw);
-                  const m = obj(item.metadata);
-                  const issues = [...issueList(item.warnings), ...issueList(item.errors)];
-                  return (
-                    <tr key={str(item.secop_id)}>
-                      <td>{str(m.codigo_proceso)}</td>
-                      <td>{str(m.entity_name)}</td>
-                      <td>{str(m.provider_source) || "No registrada"}</td>
-                      <td>{str(m.object)}</td>
-                      <td>
-                        {str(m.department)} · {str(m.municipality)}
-                      </td>
-                      <td>{timestamp(m.published_at)}</td>
-                      <td>{timestamp(m.deadline_at)}</td>
-                      <td>
-                        {m.validity_status === "open"
-                          ? "Abierto"
-                          : m.validity_status === "closed"
-                            ? "Cerrado"
-                            : "No determinada"}
-                      </td>
-                      <td>{money(m.amount)}</td>
-                      <td>{stages[str(item.stage)] ?? str(item.stage)}</td>
-                      <td>
-                        {outcomes[str(item.outcome)] ?? str(item.outcome)} ·{" "}
-                        {reasons[str(item.reason)] ?? str(item.reason)}
-                        {issues.map((entry, index) => {
-                          const warning = obj(entry);
-                          return (
-                            <div key={index}>
-                              {eventTime(warning.generated_at)} · {str(warning.code)} ·{" "}
-                              {warning.message ? str(warning.message) : reasons[str(warning.code)]}
-                            </div>
-                          );
-                        })}
-                      </td>
-                      <td>
-                        {item.requires_manual_document_review
-                          ? "Requiere revisión documental manual"
-                          : m.validity_warning === "provider_status_deadline_conflict"
-                            ? "Estado del proveedor contradice el deadline"
-                            : m.validity_warning === "invalid_deadline_at"
-                              ? "Fecha límite inválida"
-                              : "—"}
-                      </td>
-                      <td>{item.alert_created ? "Sí" : "No"}</td>
-                    </tr>
-                  );
-                })}
+                {[...(run.items ?? [])]
+                  .sort((left, right) => {
+                    const time = (raw: unknown) => {
+                      const value = obj(raw).recorded_at;
+                      const parsed = typeof value === "string" ? new Date(value).getTime() : NaN;
+                      return Number.isFinite(parsed) ? parsed : -Infinity;
+                    };
+                    return time(right) - time(left) || 0;
+                  })
+                  .map((raw) => {
+                    const item = obj(raw);
+                    const m = obj(item.metadata);
+                    const issues = [...issueList(item.warnings), ...issueList(item.errors)];
+                    return (
+                      <tr key={str(item.secop_id)}>
+                        <td>{str(m.codigo_proceso)}</td>
+                        <td>{eventTime(item.recorded_at)}</td>
+                        <td>{str(m.entity_name)}</td>
+                        <td>{str(m.provider_source) || "No registrada"}</td>
+                        <td>{str(m.object)}</td>
+                        <td>
+                          {str(m.department)} · {str(m.municipality)}
+                        </td>
+                        <td>{timestamp(m.published_at)}</td>
+                        <td>{timestamp(m.deadline_at)}</td>
+                        <td>
+                          {m.validity_status === "open"
+                            ? "Abierto"
+                            : m.validity_status === "closed"
+                              ? "Cerrado"
+                              : "No determinada"}
+                        </td>
+                        <td>{money(m.amount)}</td>
+                        <td>{stages[str(item.stage)] ?? str(item.stage)}</td>
+                        <td>
+                          {outcomes[str(item.outcome)] ?? str(item.outcome)} ·{" "}
+                          {reasons[str(item.reason)] ?? str(item.reason)}
+                          {issues.map((entry, index) => {
+                            const warning = obj(entry);
+                            return (
+                              <div key={index}>
+                                {eventTime(warning.generated_at)} · {str(warning.code)} ·{" "}
+                                {warning.message
+                                  ? str(warning.message)
+                                  : reasons[str(warning.code)]}
+                              </div>
+                            );
+                          })}
+                        </td>
+                        <td>
+                          {item.requires_manual_document_review
+                            ? "Requiere revisión documental manual"
+                            : m.validity_warning === "provider_status_deadline_conflict"
+                              ? "Estado del proveedor contradice el deadline"
+                              : m.validity_warning === "invalid_deadline_at"
+                                ? "Fecha límite inválida"
+                                : "—"}
+                        </td>
+                        <td>{item.alert_created ? "Sí" : "No"}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

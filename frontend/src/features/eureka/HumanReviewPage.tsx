@@ -2,13 +2,21 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import { ApiError } from "../../api/client";
-import { formatBogotaNumericDateTime } from "../../lib/format";
+import { formatBogotaNumericDateTime, formatBogotaEventDateTime } from "../../lib/format";
 import { arr, obj, str, money, factValue } from "./types";
 
 type Rating = "high" | "medium" | "low" | "discard" | "";
 type Review = {
   canonical_identity: string;
+  equivalent_identities?: string[];
+  manual_assessments?: {
+    canonical_identity: string;
+    manual_note?: string;
+    manual_rating?: string;
+    reviewed_at?: string;
+  }[];
   codigo_proceso: string;
+  source_url?: string;
   entity_name?: string;
   municipality?: string;
   department?: string;
@@ -41,6 +49,7 @@ type Review = {
   opportunity_id?: string;
 };
 type Page = {
+  admission_policy?: { version: number; max_amount_cop: number };
   items: Review[];
   total: number;
   page: number;
@@ -187,8 +196,8 @@ function ReviewEntry({ row }: { row: Review }) {
   return (
     <>
       {row.review_first_seen_at
-        ? timestamp(row.review_first_seen_at)
-        : "Fecha original no registrada"}
+        ? formatBogotaEventDateTime(row.review_first_seen_at)
+        : "No registrada (histórico)"}
       {row.review_first_seen_origin === "historical_backfill" && (
         <small> · Registro histórico: fecha original de entrada desconocida</small>
       )}
@@ -237,6 +246,14 @@ function Detail({ identity }: { identity: string }) {
       </p>
       <p>Fuente: {row.sources.map((s) => sources[s]).join(" · ")}</p>
       <p>Identidad del proceso: {row.canonical_identity}</p>
+      {(row.equivalent_identities?.length ?? 0) > 1 && (
+        <p>
+          Identidades históricas vinculadas:{" "}
+          {row.equivalent_identities
+            ?.filter((identity) => identity !== row.canonical_identity)
+            .join(" · ")}
+        </p>
+      )}
       <p>Fuente de origen: {row.provider_source ?? "No registrada"}</p>
       {row.review_explanations?.map((message) => (
         <p key={message}>{message}</p>
@@ -262,6 +279,17 @@ function Detail({ identity }: { identity: string }) {
         </p>
       )}
       <AssessmentForm key={row.canonical_identity} row={row} />
+      {!!row.manual_assessments?.length && (
+        <details>
+          <summary>Evaluaciones conservadas por identidad</summary>
+          {row.manual_assessments.map((assessment) => (
+            <p key={assessment.canonical_identity}>
+              {assessment.canonical_identity}: {assessment.manual_rating ?? "Sin clasificación"} ·{" "}
+              {assessment.manual_note || "Sin nota"}
+            </p>
+          ))}
+        </details>
+      )}
       <h2>Canonicals relevantes</h2>
       {Object.entries({
         Presupuesto: obj(canonical.commercial).budget_cop,
@@ -346,6 +374,10 @@ function ReviewList() {
   const query = useQuery({
     queryKey: ["human-review", "list", search.toString()],
     queryFn: () => request<Page>(`?${search}`),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchInterval: 15_000,
   });
   const input = (key: string, title: string, type = "text") => (
     <label key={key}>
@@ -376,7 +408,17 @@ function ReviewList() {
   return (
     <section>
       <h1>Merecen Revisión</h1>
-      <p>Procesos detectados que no generaron alerta y pueden requerir análisis humano.</p>
+      <p>
+        Compras y suministros pertinentes que requieren análisis humano y aún no tienen alerta. Los
+        procesos con alerta se revisan únicamente en Alertas. Se muestran procesos observados en los
+        últimos 7 días.
+      </p>
+      {query.data?.admission_policy && (
+        <p>
+          Tope de presupuesto para esta bandeja: {money(query.data.admission_policy.max_amount_cop)}
+          .
+        </p>
+      )}
       <p>
         Solo datos persistidos. La evaluación humana no modifica Score Eureka ni genera alertas.
       </p>
@@ -412,7 +454,6 @@ function ReviewList() {
               (query.data?.filter_options.funnel_state ?? []).map((v) => [v, label(v)]),
             ),
           )}
-          {select("has_alert", "Alerta existente", { true: "Sí", false: "No" })}
           {select("requires_manual_document_review", "Revisión documental", {
             true: "Sí",
             false: "No",
@@ -449,6 +490,7 @@ function ReviewList() {
                   {[
                     "Código",
                     "Entidad",
+                    "URL del proceso",
                     "Municipio",
                     "Departamento",
                     "Objeto",
@@ -481,6 +523,20 @@ function ReviewList() {
                       </Link>
                     </td>
                     <td>{r.entity_name}</td>
+                    <td>
+                      {r.source_url && /^https?:\/\//i.test(r.source_url) ? (
+                        <a
+                          href={r.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={r.source_url}
+                        >
+                          Abrir proceso
+                        </a>
+                      ) : (
+                        "Sin URL disponible"
+                      )}
+                    </td>
                     <td>{r.municipality}</td>
                     <td>{r.department}</td>
                     <td>{r.object}</td>

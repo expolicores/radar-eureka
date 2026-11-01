@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "max_amount_cop": 100000000,
+  "goods_actions": ["suministro", "suministros", "suministrar", "adquisición", "adquirir", "compra", "comprar", "compraventa", "dotación", "provisión", "proveer"],
+  "nominal_goods_prefixes": ["papelería", "elementos de ferretería", "materiales de ferretería", "elementos de aseo", "insumos de aseo", "útiles de oficina", "refrigerios", "resmas", "tóner", "tintas", "impresoras", "computadores", "sillas", "archivadores", "material didáctico"],
+  "physical_fulfillment": ["diseño e impresión", "impresión de", "estampado de", "personalización de"],
+  "professional_services": ["asistencia jurídica", "asesoría jurídica", "servicios jurídicos", "representación judicial", "defensa judicial", "servicios profesionales", "interventoría", "consultoría especializada"]
+}

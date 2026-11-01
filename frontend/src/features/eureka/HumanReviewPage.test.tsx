@@ -1,10 +1,61 @@
-import { screen, within } from "@testing-library/react";
+import { screen, within, waitFor, act } from "@testing-library/react";
+import { focusManager } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { App } from "../../App";
 import { renderWithProviders } from "../../test/render";
 
 afterEach(() => vi.unstubAllGlobals());
+
+it("refreshes actual membership after cleanup without retaining deleted cached rows", async () => {
+  let removed = false;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            items: removed ? [] : [row],
+            total: removed ? 0 : 1,
+            page: 1,
+            page_size: 25,
+            filter_options: {},
+          }),
+        ),
+      ),
+    ),
+  );
+  renderWithProviders(<App />, { route: "/eureka/revision" });
+  expect(await screen.findByRole("link", { name: "CMI-2026078" })).toBeInTheDocument();
+  removed = true;
+  act(() => {
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+  });
+  await waitFor(() =>
+    expect(screen.queryByRole("link", { name: "CMI-2026078" })).not.toBeInTheDocument(),
+  );
+  focusManager.setFocused(undefined);
+});
+
+it("shows immutable review entry time with seconds in Bogota", async () => {
+  const sample = {
+    ...row,
+    review_first_seen_at: "2026-10-23T01:19:37Z",
+    reviewed_at: "2099-01-01T00:00:00Z",
+  };
+  mock(sample);
+  renderWithProviders(<App />, { route: "/eureka/revision" });
+  await screen.findByRole("columnheader", { name: "Entró a revisión" });
+  expect(screen.getByText("22/10/2026 20:19:37")).toBeInTheDocument();
+});
+
+it("shows unknown historical entry explicitly without provider-date fallbacks", async () => {
+  const sample = { ...row, review_first_seen_at: "", review_first_seen_origin: "legacy_unknown" };
+  mock(sample);
+  renderWithProviders(<App />, { route: "/eureka/revision" });
+  expect(await screen.findByText("No registrada (histórico)")).toBeInTheDocument();
+});
 
 it("shows public origin and readable warning explanation without starting a run", async () => {
   const sample = {
@@ -21,6 +72,7 @@ it("shows public origin and readable warning explanation without starting a run"
   expect(fetch.mock.calls.every(([request]) => request.method === "GET")).toBe(true);
 });
 const row = {
+  source_url: "",
   canonical_identity: "secop:CO1.NTC.11093676",
   codigo_proceso: "CMI-2026078",
   entity_name: "Municipio de Duitama",
@@ -106,20 +158,21 @@ it("keeps a metadata-excluded process visible with the readable alert reason", a
 });
 
 it("shows one unified process with distinct score and human evaluation", async () => {
-  mock();
+  mock({ ...row, has_alert: false, alert_ids: [] });
   renderWithProviders(<App />, { route: "/eureka/revision" });
   const link = await screen.findByRole("link", { name: "CMI-2026078" });
   const tr = link.closest("tr")!;
   expect(within(tr).getByText("35")).toBeInTheDocument();
   expect(within(tr).getByText("Media")).toBeInTheDocument();
   expect(within(tr).getByText("Socrata / Eureka · Licitaciones.info (CDP)")).toBeInTheDocument();
-  expect(within(tr).getByRole("link", { name: "Alerta existente" })).toHaveAttribute(
-    "href",
-    "/eureka/alerts/existing",
-  );
+  expect(within(tr).queryByRole("link", { name: "Alerta existente" })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Alerta existente")).not.toBeInTheDocument();
+  expect(
+    screen.getByText(/Los procesos con alerta se revisan únicamente en Alertas/),
+  ).toBeInTheDocument();
   expect(within(tr).getByText(row.no_alert_reason)).toBeInTheDocument();
   expect(screen.getByRole("columnheader", { name: "Entró a revisión" })).toBeInTheDocument();
-  expect(within(tr).getByText("21/10/2026 18:42")).toBeInTheDocument();
+  expect(within(tr).getByText("21/10/2026 18:42:00")).toBeInTheDocument();
   expect(screen.getAllByRole("link", { name: "CMI-2026078" })).toHaveLength(1);
 });
 
@@ -132,6 +185,25 @@ it("applies filters without triggering any source run", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Aplicar filtros" }));
   expect(fetch.mock.calls.some(([r]) => new URL(r.url).searchParams.get("q") === "CMI")).toBe(true);
   expect(fetch.mock.calls.every(([r]) => r.method === "GET")).toBe(true);
+});
+
+it("opens the process URL directly in a separate tab", async () => {
+  const url =
+    "https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.1";
+  mock({ ...row, source_url: url });
+  renderWithProviders(<App />, { route: "/eureka/revision" });
+  const link = await screen.findByRole("link", { name: "Abrir proceso" });
+  expect(link).toHaveAttribute("href", url);
+  expect(link).toHaveAttribute("target", "_blank");
+  expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  expect(screen.getByRole("columnheader", { name: "URL del proceso" })).toBeInTheDocument();
+});
+
+it("does not invent a URL or render unsafe protocols", async () => {
+  mock({ ...row, source_url: "javascript:alert(1)" });
+  renderWithProviders(<App />, { route: "/eureka/revision" });
+  expect(await screen.findByText("Sin URL disponible")).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Abrir proceso" })).not.toBeInTheDocument();
 });
 
 it("saves rating and note independently of score and displays persisted suspicious facts", async () => {

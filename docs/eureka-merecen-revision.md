@@ -1,5 +1,23 @@
 # Merecen Revisión
 
+## Carga de la bandeja: últimos siete días
+
+La lista consulta observaciones de corridas iniciadas en los últimos siete días
+(`radar_run.started_at >= now - 7 días`), antes de proyectar y paginar. En PostgreSQL
+se restringe además a referencias exactas de miembros persistidos de revisión,
+incluyendo la identidad oficial explícita en la URL de origen. No se infieren
+equivalencias NTC–REQ. Se omiten del listado los diagnósticos extensos de cobertura;
+las banderas persistidas de cobertura parcial se conservan.
+
+La ventana se refiere a cuándo se observó el proceso, no cambia su fecha inmutable
+`review_first_seen_at` ni el orden por primera entrada. No se borran históricos,
+evaluaciones ni evidencia: el detalle sigue disponible por identidad. La metadata
+de procesos ya presente en resultados recientes se reutiliza; solo los resultados
+incompletos necesitan una consulta puntual al proceso almacenado.
+
+La tabla incluye «URL del proceso»: enlace HTTP/HTTPS de la fuente persistida,
+abierto en otra pestaña; si falta, muestra «Sin URL disponible». No fabrica URLs.
+
 Ruta local: `/eureka/revision`. Lista y detalle para analizar procesos ya descubiertos,
 sin ejecutar discovery, descarga, OCR, consolidación, scoring ni creación de alertas.
 
@@ -17,23 +35,79 @@ Se conservan todas las fuentes (`socrata`, `licitaciones_info_cdp`), corridas y 
 en el historial. No se infieren equivalencias NTC–REQ. Una alerta existente se enlaza
 por identidad canónica exacta; esta vista nunca crea ni promueve alertas.
 
+La proyección consolida referencias históricas `licitaciones_info:<perfil>:<id>`
+con identidades oficiales SECOP I/II cuando una observación CDP persistida vincula
+esa referencia exacta con una única identidad oficial. Una referencia ambigua no
+se fusiona; tampoco se compara por texto, entidad o número de proceso aproximado.
+`equivalent_identities` y el historial conservan las identidades originales y la
+referencia del proveedor. La consolidación ocurre antes de filtros, orden y paginación.
+
+Se toma el menor `review_first_seen_at` válido de las identidades equivalentes,
+sin modificar las filas originales. Se reúnen sus alertas y evaluaciones humanas;
+la evaluación visible es la más reciente por `reviewed_at`, y `manual_assessments`
+conserva todas las notas/evaluaciones para consulta en el detalle. No se borran datos.
+`source_metadata_review` se omite de los motivos visibles, incluso si aparece en
+evidencia histórica. La fuente se conserva como provenance, no como motivo negativo.
+
+## Contadores de corrida CDP
+
+`review_candidates` mantiene su significado y `review_candidates_total` lo hace
+explícito: procesos que cumplen el criterio de revisión. No significa nuevas entradas.
+`review_new_entries` cuenta inserciones confirmadas con `INSERT … ON CONFLICT DO NOTHING
+RETURNING`; `review_existing_entries` cuenta conflictos con entradas ya existentes.
+El resultado se guarda en el outcome del proceso como `review_entry` y se conserva
+durante las posteriores actualizaciones de esa misma corrida. Así, una entrada
+insertada al persistir metadata no se reclasifica como existente al guardar el resultado.
+Para candidatos persistidos: `new + existing = total`. Estos contadores históricos
+no representan el número visible en la bandeja. Si existe una alerta nueva o previa
+para la identidad exacta (o un alias comprobado), el proceso se muestra únicamente
+en Alertas. Se excluye de Merecen Revisión antes de filtros y paginación, incluso
+con `include_excluded=true`. Se conservan notas, primera entrada y evidencia histórica;
+no se borran alertas ni se alteran scoring o dedupe. Esta vista nunca promueve alertas.
+
+Las corridas históricas sin ese desglose muestran «No registrado (histórico)»;
+no se rellenan contadores retrospectivos a partir de la UI.
+
 ## Inclusión y orden
+
+Desde la corrección de admisión de 24/10/2026, la pertenencia persistida en
+`manual_process_review` es obligatoria: los resultados de corrida por sí solos no
+crean una fila visible. Socrata no tiene un bypass de evidencia. Ambos orígenes
+necesitan señal comercial real: coincidencia del catálogo/UNSPSC/candidate_terms,
+búsqueda comercial validada, score preliminar positivo o facts comerciales relevantes.
+Título, ubicación, monto, publicación y deadline desconocido no bastan.
+
+Una exclusión fuerte requiere evidencia independiente adicional, como score positivo
+o facts comerciales confirmados; su propio trigger textual no es una excepción.
+Un deadline desconocido con señal comercial puede entrar como «Deadline por verificar».
+Los descartes sin señal no se insertan y permanecen íntegros en el detalle de corrida.
+`record_review_entry` se llama únicamente si `review_candidate=true`.
+
+La admisión de revisión usa los matchers existentes, sin modificar sus reglas ni la
+decisión comercial. La metadata completa se conserva ahora en los outcomes Socrata,
+incluido el deadline, para evitar que una fila descartada pierda su información al
+proyectarse. Los contadores añaden rechazos de revisión por falta de señal,
+deadline-only y exclusión fuerte; no reemplazan los del funnel comercial.
+
+La lista se revalida al volver a la pestaña y cada 15 segundos; el endpoint usa
+`Cache-Control: no-store`. Una limpieza en DB elimina su pertenencia efectiva y la
+UI sustituye el resultado almacenado en caché por la respuesta real del backend.
 
 Entran observaciones SECOP identificables con objeto disponible, incluidos diferidos
 por límite, evaluados no elegibles, procesos sin alerta, con score, con canonicals o
-con revisión documental. Las alertas existentes también pueden consultarse y filtrarse.
-Las filas inválidas y las fuentes externas no SECOP no se proyectan.
+con revisión documental. Los procesos que ya tienen alerta se consultan en Alertas.
+Las filas sin identidad o metadata mínima útil no entran a la vista predeterminada.
 
 Por defecto se ocultan deadlines vencidos, publicaciones anteriores a siete días y
 resultados marcados fuera de alcance/ventana o sin publicación válida. La vigencia
 se calcula al consultar contra el deadline, interpretando fechas sin zona en Bogotá.
 Los deadlines desconocidos se conservan: no se equiparan a cerrados.
 Los filtros permiten consultar cerrados y, con `include_excluded`, históricos/fuera
-de alcance; no recuperan filas inválidas ni fuentes externas.
+de alcance; no fabrican evidencia ni identidades para filas inválidas.
 
-Orden: abiertos primero, deadline más cercano, score descendente, publicación
-descendente e identidad para desempatar. Hay búsqueda por código, entidad y objeto;
-filtros de fuente, vigencia, ubicación, score, monto, deadline, funnel, alerta existente
+Orden: `review_first_seen_at DESC NULLS LAST`, antes de paginar. No utiliza
+vigencia, deadline, score, publicación ni identidad como criterios de orden. Hay búsqueda por código, entidad y objeto;
+filtros de fuente, vigencia, ubicación, score, monto, deadline, funnel
 y revisión documental. Score Eureka y evaluación humana se muestran por separado.
 
 ## Evaluación humana
@@ -67,19 +141,17 @@ actualiza únicamente los campos humanos, conservando la entrada original.
 Antes de esta versión no había un evento de entrada persistido. No se puede reconstruir
 su hora exacta con la fecha de corrida, publicación, deadline o evaluación humana.
 La migración conserva los registros humanos anteriores con fecha NULL y
-`origin=legacy_unknown`. Al consultar procesos históricos activos que no tienen registro,
-se crea una sola entrada con la hora actual de registro y `origin=historical_backfill`.
-La UI indica expresamente «Registro histórico: fecha original de entrada desconocida».
-Esa fecha significa **registrado desde**, no una supuesta fecha histórica exacta.
-No se inventan timestamps ni se reescriben eventos antiguos de fuentes.
+`origin=legacy_unknown`. Consultar procesos históricos sin registro no crea una
+fecha con la hora de lectura. Se muestran como «No registrada (histórico)» y
+quedan al final. Los backfills que ya estaban persistidos conservan su fecha y
+su marca explícita de histórico con fecha original desconocida; no se reescriben.
 
 Lista, detalle y respuesta de evaluación incluyen ambos campos. La columna
-«Entró a revisión» y el detalle usan DD/MM/YYYY HH:mm en America/Bogota;
+«Entró a revisión» y el detalle usan DD/MM/YYYY HH:mm:ss en America/Bogota;
 publicación, deadline y «Última revisión» humana permanecen separados.
-La primera consulta puede escribir exclusivamente estos registros de entrada,
-sin lanzar adquisición ni modificar los resultados del funnel.
+Las consultas de lista/detalle no escriben registros de entrada histórica.
 
-Los criterios y el orden de la bandeja permanecen iguales. Este registro no promueve
+Los criterios de inclusión de la bandeja permanecen iguales. Este registro no promueve
 alertas ni interviene en scoring o dedupe comercial.
 
 ## API y frontend

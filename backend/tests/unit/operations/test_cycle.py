@@ -80,6 +80,24 @@ def test_success_zero_processes_disabled_and_persistent_logs(setup):
     notify.assert_called_once()
 
 
+def test_availability_failure_is_persisted_and_does_not_repeat_run(setup):
+    service, repo, radar, notify, _ = setup
+    diagnostic = {
+        "performed": True,
+        "status": "diagnostic_failed",
+        "latest_available_date": None,
+        "query_window_start": "2026-10-13",
+        "query_window_before": "2026-10-15",
+    }
+    radar.return_value = {**result(), "metrics": {"socrata_availability_diagnostic": diagnostic}}
+    cycle = service.run()
+    assert cycle["status"] == "completed"
+    assert cycle["source_summary"]["socrata_availability_diagnostic"] == diagnostic
+    assert repo.rows[cycle["id"]] == cycle
+    radar.assert_called_once()
+    notify.assert_called_once()
+
+
 def test_metadata_exclusion_counters_are_reported_without_changing_cycle_policy(setup):
     service, _repo, radar, notify, _path = setup
     output = result(items=[{"reason": "metadata_object_exclusion", "outcome": "no_alert"}])

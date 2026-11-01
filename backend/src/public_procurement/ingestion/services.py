@@ -4,7 +4,7 @@ import logging
 import uuid
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from types import TracebackType
 from typing import Any, Protocol, Self
 
@@ -292,6 +292,13 @@ def search_process_records(
     from .search_queries import records
 
     return records(session, identifiers, expressions)
+
+
+def diagnose_secop_availability(start: date, before: date) -> dict[str, Any]:
+    """Read-only publication coverage diagnostic; exactly one request attempt, no retries."""
+    from .adapters.socrata_availability import diagnose_availability
+
+    return diagnose_availability(start, before)
 
 
 def fetch_secop_processes(query: ProcessQuery) -> Iterator[SecopProcess]:

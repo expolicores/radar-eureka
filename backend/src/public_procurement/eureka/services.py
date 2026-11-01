@@ -421,6 +421,65 @@ def build_radar_queries(sessions: sessionmaker[Session]) -> SqlRadarRepository:
     return SqlRadarRepository(sessions)
 
 
+def build_assistant_read_queries(sessions: sessionmaker[Session], settings: Settings) -> Any:
+    from public_procurement.documents.services import build_document_service
+
+    from .assistant_queries import AssistantReadQueries
+
+    def canonical(reference: str) -> list[dict[str, Any]]:
+        state = build_consolidation_service(sessions, settings).read_state(reference)
+        return [asdict(f) for f in state.summary.facts]
+
+    def documents(reference: str) -> list[dict[str, Any]]:
+        return [
+            {"id": str(d.id), "name": d.source.original_name, "status": str(d.status)}
+            for d in build_document_service(sessions, settings).list_documents(reference)
+        ]
+
+    return AssistantReadQueries(
+        build_human_review_service(sessions, settings),
+        build_radar_queries(sessions),
+        canonical,
+        documents,
+    )
+
+
+def get_eureka_commercial_profile(settings: Settings) -> dict[str, Any]:
+    """Live configuration projection; no scoring, discovery or database access."""
+    from .review_fit import load_review_fit_config
+
+    catalog = load_radar_config(settings.eureka_radar_config_path)
+    return {
+        "regions": list(
+            dict.fromkeys(r.strip() for r in settings.eureka_radar_regions.split(",") if r.strip())
+        ),
+        "commercial_categories": [
+            {"category": f.category, "label": f.label, "priority_weight": f.priority}
+            for f in catalog.families
+            if not f.discovery_only
+        ],
+        "discovery_only_categories": [
+            {"category": f.category, "label": f.label} for f in catalog.families if f.discovery_only
+        ],
+        "preferred_amount_max": settings.eureka_preferred_budget_max,
+        "currency": "COP",
+        "above_preferred_amount_automatically_excluded": False,
+        "above_preferred_amount_requires_review": True,
+        "review_inbox_amount_cap": load_review_fit_config().max_amount_cop,
+        "review_inbox_cap_scope": "Merecen Revisión; distinto del monto preferido y de alertas",
+        "complexity_review_terms": list(catalog.review_terms),
+        "manageable_execution_days": catalog.manageable_execution_days,
+        "manageable_payment_days": catalog.manageable_payment_days,
+        "provenance": {
+            "catalog_version": catalog.version,
+            "catalog_fingerprint": catalog.fingerprint,
+            "catalog_file": settings.eureka_radar_config_path.name,
+            "regions_setting": "EUREKA_RADAR_REGIONS",
+            "preferred_amount_setting": "EUREKA_PREFERRED_BUDGET_MAX",
+        },
+    }
+
+
 def build_source_pipeline(
     sessions: sessionmaker[Session],
     settings: Settings,
@@ -462,6 +521,12 @@ def source_review_eligible(item: dict[str, Any]) -> bool:
     from .review_services import review_evidence_sufficient
 
     return review_evidence_sufficient(item)
+
+
+def source_review_decision(item: dict[str, Any]) -> dict[str, Any]:
+    from .review_policy import admission
+
+    return admission(item)
 
 
 def evaluate_source_alert(
@@ -552,9 +617,15 @@ def build_human_review_service(
 
     from .review_repositories import ReviewRepository
 
-    def metadata() -> dict[str, dict[str, Any]]:
+    def metadata(references: set[str] | None = None) -> dict[str, dict[str, Any]]:
         result = {}
-        for stored in build_process_query_service(sessions).iter_processes():
+        query = build_process_query_service(sessions)
+        records = (
+            query.iter_processes()
+            if references is None
+            else (stored for ref in references for stored in query.iter_processes(reference=ref))
+        )
+        for stored in records:
             p = stored.process
             result[p.id_del_proceso] = {
                 "process_id": str(stored.id),
@@ -569,6 +640,21 @@ def build_human_review_service(
                 "source_url": p.source_url,
             }
         return result
+
+    def scoped_metadata(observations: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        references = set()
+        for obs in observations:
+            item = obs["result"]
+            m = item.get("metadata") or {}
+            # Modern outcomes already contain the display metadata. Only resolve
+            # incomplete legacy observations, never scan every ingested process.
+            if not all(
+                m.get(k) for k in ("object", "entity_name", "department", "published_at")
+            ) or not (m.get("raw_source_reference") or {}).get("Link"):
+                ref = m.get("source_identity") or m.get("id_ultima_fase") or item.get("secop_id")
+                if ref:
+                    references.add(str(ref))
+        return metadata(references)
 
     def evidence(row: dict[str, Any]) -> dict[str, Any]:
         reference = row.get("process_id") or row["canonical_identity"].split(":", 1)[1]
@@ -600,12 +686,16 @@ def build_human_review_service(
                     "coverage_ratio": processed / run.page_count if run.page_count else None,
                     "text_length": run.text_length,
                     "warning": run.error_code or diag.get("status"),
+                    "coverage_complete": diag.get("coverage_complete"),
+                    "omitted_pages": diag.get("omitted_pages"),
                 }
             )
         details = asdict(build_eureka_details_service(sessions, settings).get(reference))
         return {"facts": [asdict(f) for f in facts], "documents": documents, "canonicals": details}
 
-    return HumanReviewService(ReviewRepository(sessions), metadata, evidence)
+    return HumanReviewService(
+        ReviewRepository(sessions), metadata, evidence, scoped_metadata=scoped_metadata
+    )
 
 
 def build_radar_service(
@@ -618,7 +708,10 @@ def build_radar_service(
         build_extraction_service,
         build_structured_service,
     )
-    from public_procurement.ingestion.services import build_process_ingestion_service
+    from public_procurement.ingestion.services import (
+        build_process_ingestion_service,
+        diagnose_secop_availability,
+    )
 
     from .adapters.radar_pipeline import ExistingRadarPipeline
 
@@ -640,6 +733,7 @@ def build_radar_service(
         settings.eureka_preferred_budget_max,
         observer=observer,
         metadata_exclusion_path=settings.eureka_metadata_alert_exclusions_path,
+        availability_diagnostic=diagnose_secop_availability,
     )
 
 

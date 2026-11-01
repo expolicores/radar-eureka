@@ -16,6 +16,7 @@ from public_procurement.eureka.services import (
     build_source_pipeline,
     evaluate_source_alert,
     load_radar_config,
+    source_review_decision,
     source_review_eligible,
 )
 from public_procurement.ingestion.services import SecopProcess, canonical_process_identity
@@ -136,6 +137,9 @@ class LicitacionesInfoRunService:
                     "alerts_created",
                     "duplicate_alerts_skipped",
                     "manual_review",
+                    "review_candidates_total",
+                    "review_new_entries",
+                    "review_existing_entries",
                 ),
                 0,
             )
@@ -273,7 +277,9 @@ class LicitacionesInfoRunService:
                     selected = 0
                     # Persist every discovered result before any slow document operation.
                     for process in discovery["processes"]:
+                        recorded_at = self.clock()
                         item = {
+                            "recorded_at": recorded_at.astimezone(UTC).isoformat(),
                             "dataset_id": "licitaciones",
                             "secop_id": process["process_reference"],
                             "metadata": process,
@@ -283,7 +289,10 @@ class LicitacionesInfoRunService:
                             "alert_created": False,
                         }
                         run["items"].append(item)
-                        self.repository.outcome(run["id"], safe_json(item), self.clock(), False)
+                        persisted_item = safe_json(item)
+                        self.repository.outcome(run["id"], persisted_item, recorded_at, False)
+                        if "review_entry" in persisted_item:
+                            item["review_entry"] = persisted_item["review_entry"]
                     run["processes_seen"] = len(run["items"])
                     persist()
                     for item in run["items"]:
@@ -468,6 +477,7 @@ class LicitacionesInfoRunService:
                                 ),
                             )
                         finally:
+                            item.update(source_review_decision(item))
                             item["review_candidate"] = bool(
                                 process.get("recent")
                                 and process.get("validity_status") == "open"
@@ -480,7 +490,10 @@ class LicitacionesInfoRunService:
                                 and source_review_eligible(item)
                             )
                             run["skipped"] += int(item["outcome"] == "skipped")
-                            self.repository.outcome(run["id"], safe_json(item), self.clock(), False)
+                            persisted_item = safe_json(item)
+                            self.repository.outcome(run["id"], persisted_item, self.clock(), False)
+                            if "review_entry" in persisted_item:
+                                item["review_entry"] = persisted_item["review_entry"]
                             persist()
                     run["status"] = (
                         "completed_with_warnings"
@@ -546,6 +559,25 @@ class LicitacionesInfoRunService:
                         i.get("outcome") in {"alert", "no_alert", "failed"} for i in items
                     ),
                     review_candidates=sum(bool(i.get("review_candidate")) for i in items),
+                    review_candidates_total=sum(bool(i.get("review_candidate")) for i in items),
+                    review_new_entries=sum(
+                        bool(i.get("review_candidate"))
+                        and i.get("review_entry", {}).get("status") == "new"
+                        for i in items
+                    ),
+                    review_existing_entries=sum(
+                        bool(i.get("review_candidate"))
+                        and i.get("review_entry", {}).get("status") == "existing"
+                        for i in items
+                    ),
+                    **{
+                        reason: sum(i.get("review_rejected_reason") == reason for i in items)
+                        for reason in (
+                            "review_rejected_budget_limit",
+                            "review_rejected_irrelevant_service",
+                            "review_rejected_no_goods_intent",
+                        )
+                    },
                 )
                 metrics["by_source"] = {}
                 for item in items:

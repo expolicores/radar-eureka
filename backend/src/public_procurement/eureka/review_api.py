@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/eureka/revision", tags=["Merecen Revisión"])
@@ -17,6 +17,7 @@ class Assessment(BaseModel):
 @router.get("")
 def list_reviews(
     request: Request,
+    response: Response,
     q: str | None = Query(None, max_length=200),
     source: Literal["socrata", "licitaciones_info_cdp"] | None = None,
     validity: Literal["active", "open", "closed", "unknown", "all"] = "active",
@@ -35,7 +36,8 @@ def list_reviews(
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
 ) -> dict[str, Any]:
-    filters = {k: v for k, v in locals().items() if k != "request"}
+    response.headers["Cache-Control"] = "no-store"
+    filters = {k: v for k, v in locals().items() if k not in {"request", "response"}}
     return dict(request.app.state.human_review_queries.list(filters))
 
 

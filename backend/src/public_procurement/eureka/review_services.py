@@ -8,6 +8,9 @@ from zoneinfo import ZoneInfo
 
 from public_procurement.ingestion.services import canonical_process_identity
 
+from .review_fit import load_review_fit_config, review_fit
+from .review_identity import review_aliases
+from .review_policy import POLICY_VERSION, admission, documentary_reasons, historical_config
 from .review_repositories import ReviewRepository
 
 BOGOTA = ZoneInfo("America/Bogota")
@@ -19,7 +22,6 @@ REVIEW_MESSAGES = {
     "partial_coverage": "Información documental incompleta.",
     "missing_documents": "Sin documentos disponibles; evaluación basada en metadata.",
     "metadata_only": "Sin documentos disponibles; evaluación basada en metadata.",
-    "source_metadata_review": "Fuente distinta a SECOP II; metadata suficiente para revisión.",
     "unknown_source": "Origen por verificar; metadata suficiente para revisión.",
     "provider_status_deadline_conflict": (
         "El estado del proveedor contradice la fecha límite; prevalece el deadline."
@@ -36,14 +38,7 @@ def review_evidence_sufficient(item: dict[str, Any]) -> bool:
         and normalized(m.get("department")) in {"boyaca", "casanare"}
         and moment(m.get("published_at")) is not None
     )
-    signals = (
-        m.get("amount") is not None
-        or bool(m.get("matched_searches"))
-        or item.get("decision", {}).get("snapshot", {}).get("score") is not None
-        or bool(item.get("document_review", {}).get("facts"))
-        or item.get("stage")
-        in {"structured", "consolidation", "canonical_reused", "extraction_partial"}
-    )
+    signals = admission(item)["review_candidate"]
     return bool(baseline and signals)
 
 
@@ -125,6 +120,8 @@ def project(
 ) -> list[dict[str, Any]]:
     """Exact identities only. Preserve all observations while selecting latest metadata."""
     index: dict[str, dict[str, Any]] = {}
+    aliases = review_aliases(data["observations"])
+    configs = {}
     for obs in data["observations"]:
         item = obs["result"]
         if not isinstance(item, dict):
@@ -145,6 +142,8 @@ def project(
             str(reference),
             m.get("raw_source_reference", {}).get("Link") or stored.get("source_url"),
         )
+        observed_identity = identity
+        identity = aliases.get(identity, identity)
         if obs["source"] == "licitaciones_info_cdp" and not identity.startswith(
             ("secop:", "licitaciones_info:", "secop1:")
         ):
@@ -161,8 +160,15 @@ def project(
                 "decision": None,
                 "score": None,
                 "opportunity_id": None,
+                "equivalent_identities": [identity],
+                "review_evidence_sufficient": False,
             },
         )
+        for equivalent in [observed_identity] + [
+            a for a, target in aliases.items() if target == identity
+        ]:
+            if equivalent not in row["equivalent_identities"]:
+                row["equivalent_identities"].append(equivalent)
         for key, value in {
             "codigo_proceso": m.get("codigo_proceso") or stored.get("codigo_proceso") or reference,
             "entity_name": m.get("entity_name") or stored.get("entity_name"),
@@ -191,8 +197,17 @@ def project(
             "cruz_roja": "cruz_roja",
             "universidad": "universidad",
         }.get(str(m.get("key_config") or "").casefold(), "unknown")
-        row["review_evidence_sufficient"] = (
-            review_evidence_sufficient(item) if obs["source"] == "licitaciones_info_cdp" else True
+        review_item = {**item, "metadata": {**stored, **m}}
+        config_key = obs["run_id"]
+        if config_key not in configs:
+            configs[config_key] = historical_config(obs.get("config_snapshot"))
+        review_policy = admission(review_item, configs[config_key])
+        row["review_evidence_sufficient"] |= review_policy["review_candidate"]
+        row.setdefault("review_admission_reasons", [])
+        row["review_admission_reasons"] = list(
+            dict.fromkeys(
+                row["review_admission_reasons"] + review_policy["review_admission_reasons"]
+            )
         )
         stage = item.get("stage", "metadata")
         if STAGES.get(stage, 0) > STAGES.get(row["stage_max"], 0):
@@ -213,7 +228,8 @@ def project(
                 row["score"] = opportunity["score"]
         review = item.get("document_review", {})
         reasons = item.get("manual_review_reasons") or review.get("manual_review_reasons", [])
-        reasons = list(reasons)
+        reasons = [reason for reason in reasons if reason != "source_metadata_review"]
+        reasons.extend(documentary_reasons(item))
         for flag in (
             "suspicious_fact",
             "ocr_truncated",
@@ -232,8 +248,6 @@ def project(
             code = warning.get("code") if isinstance(warning, dict) else warning
             if code in REVIEW_MESSAGES:
                 reasons.append("suspicious_facts" if code == "suspicious_fact" else str(code))
-        if row["provider_source"] != "secop2" and not m.get("document_capable"):
-            reasons.append("source_metadata_review")
         row["requires_manual_document_review"] |= bool(
             item.get("requires_manual_document_review") or reasons
         )
@@ -247,10 +261,18 @@ def project(
                 "run_id": obs["run_id"],
                 "run_at": obs["run_at"],
                 "source": obs["source"],
+                "observed_identity": observed_identity,
+                "provider_reference": m.get("process_reference"),
                 "result": item,
             }
         )
     for row in index.values():
+        fit_rejection = review_fit(
+            {"metadata": row, "decision": row.get("decision")}, historical_config(None)
+        )
+        row["review_fit_rejected_reason"] = fit_rejection
+        if fit_rejection:
+            row["review_evidence_sufficient"] = False
         deadline = moment(row.get("deadline_at"))
         published = moment(row.get("published_at"))
         row["validity_status"] = (
@@ -261,7 +283,7 @@ def project(
             a["id"]
             for a in data["alerts"]
             if (a["canonical_identity"] or a["snapshot"].get("canonical_identity"))
-            == row["canonical_identity"]
+            in row["equivalent_identities"]
         ]
         row["has_alert"] = bool(row["alert_ids"])
         decision = row["decision"]
@@ -273,6 +295,8 @@ def project(
             else "No elegible"
         )
         state = row["funnel_state"]
+        if state == "missing_or_invalid_offer_deadline" and row["review_evidence_sufficient"]:
+            row["review_explanations"].append("Deadline por verificar")
         row["no_alert_reason"] = REASONS.get(state)
         term = (decision or {}).get("snapshot", {}).get("metadata_exclusion_term")
         if term and not (decision or {}).get("create"):
@@ -294,54 +318,98 @@ def project(
                 if row["score"] is not None
                 else "Pendiente de revisión humana"
             )
-        row.update(
-            data["ratings"].get(
-                row["canonical_identity"],
-                {
-                    "review_first_seen_at": None,
-                    "review_first_seen_origin": "legacy_unknown",
-                    "manual_rating": None,
-                    "manual_note": "",
-                    "reviewed_at": None,
-                    "reviewed_by": None,
-                },
-            )
+        # Presentation reasons do not change the documentary manual-review flag.
+        if not row["review_explanations"]:
+            if state == "limit_deferred":
+                row["review_explanations"] = [REASONS["limit_deferred"]]
+            elif decision is None and row["score"] is None:
+                row["review_explanations"] = ["Sin evaluación comercial registrada todavía."]
+        ratings = [
+            {"canonical_identity": identity, **data["ratings"][identity]}
+            for identity in row["equivalent_identities"]
+            if identity in data["ratings"]
+        ]
+        row["manual_assessments"] = [
+            rating
+            for rating in ratings
+            if rating.get("reviewed_at") or rating.get("manual_rating") or rating.get("manual_note")
+        ]
+        row["review_protected_by_human"] = bool(row["manual_assessments"])
+        selected: dict[str, Any] = max(
+            row["manual_assessments"] or ratings,
+            key=lambda r: moment(r.get("reviewed_at")) or datetime.min.replace(tzinfo=UTC),
+            default={},
         )
+        row.update(
+            {
+                "review_first_seen_at": None,
+                "review_first_seen_origin": "legacy_unknown",
+                "manual_rating": None,
+                "manual_note": "",
+                "reviewed_at": None,
+                "reviewed_by": None,
+            }
+            | selected
+        )
+        valid_entries = [r for r in ratings if moment(r.get("review_first_seen_at")) is not None]
+        if valid_entries:
+            first = min(
+                valid_entries,
+                key=lambda r: moment(r["review_first_seen_at"]) or datetime.max.replace(tzinfo=UTC),
+            )
+            row["review_first_seen_at"] = first["review_first_seen_at"]
+            row["review_first_seen_origin"] = first.get("review_first_seen_origin", "observed")
+        else:
+            row["review_first_seen_at"] = None
+            row["review_first_seen_origin"] = "legacy_unknown"
+        row["canonical_identity"] = row["equivalent_identities"][0]
     return list(index.values())
 
 
 class HumanReviewService:
     def __init__(
-        self, repository: ReviewRepository, metadata: Any, evidence: Any, clock: Any = None
+        self,
+        repository: ReviewRepository,
+        metadata: Any,
+        evidence: Any,
+        clock: Any = None,
+        scoped_metadata: Any = None,
     ) -> None:
         self.repository, self.metadata, self.evidence = repository, metadata, evidence
         self.clock = clock or (lambda: datetime.now(UTC))
+        self.scoped_metadata = scoped_metadata
 
-    def rows(self) -> list[dict[str, Any]]:
+    def rows(self, since: datetime | None = None) -> list[dict[str, Any]]:
         at = self.clock()
-        data = self.repository.read()
-        rows = project(data, self.metadata(), at)
-        missing = [
-            r["canonical_identity"]
-            for r in rows
-            if default_review_entry(r)
-            and r["review_first_seen_origin"] == "legacy_unknown"
-            and r["canonical_identity"] not in data["ratings"]
-        ]
-        if missing:
-            entries = self.repository.enter(missing, at, "historical_backfill")
-            for row in rows:
-                row.update(entries.get(row["canonical_identity"], {}))
-        return rows
+        data = self.repository.read(since=since) if since is not None else self.repository.read()
+        metadata = (
+            self.scoped_metadata(data["observations"])
+            if since is not None and self.scoped_metadata is not None
+            else self.metadata()
+        )
+        rows = project(data, metadata, at)
+        # Reading an old result is not an observed entry into the review tray.
+        # Only record_review_entry records new first-entry events at persistence time.
+        return [r for r in rows if any(i in data["ratings"] for i in r["equivalent_identities"])]
 
     def list(self, filters: dict[str, Any]) -> dict[str, Any]:
-        rows = self.rows()
+        # Alerts own their operational queue. Keep historical review assessments/evidence,
+        # but never show the same exact/equivalent identity in both inboxes. Apply before
+        # options, optional filters and pagination; include_excluded cannot undo it.
+        since = self.clock() - timedelta(days=7)
+        rows = [row for row in self.rows(since=since) if not row["has_alert"]]
         options = {
             key: sorted({str(r[key]) for r in rows if r.get(key)})
             for key in ("department", "municipality", "funnel_state")
         }
         accepted = []
         for row in rows:
+            if filters.get("identity") and filters["identity"] not in row["equivalent_identities"]:
+                continue
+            if filters.get("run_id") and not any(
+                h["run_id"] == filters["run_id"] for h in row["history"]
+            ):
+                continue
             validity = filters.get("validity", "active")
             if validity == "active" and row["validity_status"] == "closed":
                 continue
@@ -349,8 +417,12 @@ class HumanReviewService:
                 continue
             if not filters.get("include_excluded") and (
                 row["stale"]
+                or row.get("review_fit_rejected_reason")
                 or row["funnel_state"] in EXCLUDED
-                or not row.get("review_evidence_sufficient", True)
+                or (
+                    not row.get("review_evidence_sufficient", False)
+                    and not row.get("review_protected_by_human", False)
+                )
             ):
                 continue
             if filters.get("source") and filters["source"] not in row["sources"]:
@@ -400,17 +472,26 @@ class HumanReviewService:
                 accepted.append(row)
         accepted.sort(
             key=lambda r: (
-                r["validity_status"] != "open",
-                moment(r.get("deadline_at")) or datetime.max.replace(tzinfo=UTC),
-                -(r["score"] if r["score"] is not None else -1),
-                -(moment(r.get("published_at")) or datetime(1970, 1, 1, tzinfo=UTC)).timestamp(),
-                r["canonical_identity"],
+                not any(
+                    h["run_id"] == filters.get("run_id")
+                    and h["result"].get("review_entry", {}).get("status") == "new"
+                    for h in r["history"]
+                )
+                if filters.get("run_id")
+                else False,
+                (first_seen := moment(r.get("review_first_seen_at"))) is None,
+                -first_seen.timestamp() if first_seen else 0,
             )
         )
         page, size = filters.get("page", 1), filters.get("page_size", 25)
         return {
             "items": [self.present(r) for r in accepted[(page - 1) * size : page * size]],
+            "admission_policy": {
+                "version": POLICY_VERSION,
+                "max_amount_cop": load_review_fit_config().max_amount_cop,
+            },
             "total": len(accepted),
+            "observed_since": since.isoformat(),
             "page": page,
             "page_size": size,
             "filter_options": options,
@@ -424,15 +505,16 @@ class HumanReviewService:
         }
 
     def get(self, identity: str) -> dict[str, Any]:
-        row = next((r for r in self.rows() if r["canonical_identity"] == identity), None)
+        row = next((r for r in self.rows() if identity in r["equivalent_identities"]), None)
         if row is None:
             raise LookupError("Proceso no encontrado en las corridas persistidas")
         return {**row, "evidence": self.evidence(row)}
 
     def save(self, identity: str, rating: str | None, note: str, user: uuid.UUID) -> dict[str, Any]:
-        if not any(r["canonical_identity"] == identity for r in self.rows()):
+        row = next((r for r in self.rows() if identity in r["equivalent_identities"]), None)
+        if row is None:
             raise LookupError("Proceso no encontrado")
-        return self.repository.save(identity, rating, note, user, self.clock())
+        return self.repository.save(row["canonical_identity"], rating, note, user, self.clock())
 
 
 def default_review_entry(row: dict[str, Any]) -> bool:
@@ -445,14 +527,19 @@ def default_review_entry(row: dict[str, Any]) -> bool:
     )
 
 
-def record_review_entry(session: Any, item: dict[str, Any], source: str, at: datetime) -> None:
+def record_review_entry(
+    session: Any, item: dict[str, Any], source: str, at: datetime
+) -> dict[str, Any] | None:
     """Observe persisted outcomes without affecting funnel, scoring, or source requests."""
     from sqlalchemy.dialects.postgresql import insert
 
     from .review_repositories import ManualProcessReviewRecord
 
-    if source not in {"socrata", "licitaciones_info_cdp"}:
-        return
+    if (
+        source not in {"socrata", "licitaciones_info_cdp"}
+        or item.get("review_candidate") is not True
+    ):
+        return None
     stored = {}
     if source == "socrata" and item.get("process_id"):
         from sqlalchemy.orm import sessionmaker
@@ -485,8 +572,8 @@ def record_review_entry(session: Any, item: dict[str, Any], source: str, at: dat
         at,
     )
     for row in rows:
-        if default_review_entry(row):
-            session.execute(
+        if item.get("review_candidate") is True:
+            inserted = session.execute(
                 insert(ManualProcessReviewRecord)
                 .values(
                     canonical_identity=row["canonical_identity"],
@@ -495,4 +582,10 @@ def record_review_entry(session: Any, item: dict[str, Any], source: str, at: dat
                     review_first_seen_origin="observed",
                 )
                 .on_conflict_do_nothing(index_elements=["canonical_identity"])
-            )
+                .returning(ManualProcessReviewRecord.canonical_identity)
+            ).scalar_one_or_none()
+            return {
+                "canonical_identity": row["canonical_identity"],
+                "status": "new" if inserted else "existing",
+            }
+    return None
