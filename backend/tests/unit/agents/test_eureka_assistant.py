@@ -250,7 +250,7 @@ def test_pinned_existing_version_does_not_create_an_extra_version():
     project.agents.get.assert_not_called()
 
 
-@pytest.mark.parametrize("changes", [{"model": "other"}, {"tools": [{"type": "web_search"}]}])
+@pytest.mark.parametrize("changes", [{"model": "other"}, {"tools": [{"type": "mcp"}]}])
 def test_unexpected_remote_configuration_does_not_create_version(changes):
     project = remote_project({"kind": "prompt", "model": "gpt-4.1-mini-eureka", **changes})
     with pytest.raises(SpikeError):

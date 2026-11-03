@@ -10,6 +10,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from public_procurement.agents.eureka_assistant import api as assistant_api
+from public_procurement.agents.eureka_assistant.chat import build_assistant_chat
 from public_procurement.comparison import api as signals_api
 from public_procurement.comparison.services import build_signal_query_service
 from public_procurement.eureka import api as eureka_api
@@ -58,6 +60,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
         app.state.manual_cycle_runner.close()
         app.state.manual_cdp_runner.close()
+        app.state.assistant_chat.clear()
         engine.dispose()
 
     app = FastAPI(title="Seguimiento Compras Públicas", version="0.1.0", lifespan=lifespan)
@@ -76,6 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.manual_cycle_runner = ManualCycleRunner(session_factory, settings)
     app.state.manual_cdp_runner = ManualCdpRunner(session_factory, settings)
     app.state.cdp_queries = LicitacionesQueries(session_factory)
+    app.state.assistant_chat = build_assistant_chat(settings)
     # También responde las excepciones no controladas (500), para no perder las cabeceras.
     app.add_middleware(CorrelationMiddleware)
     register_error_handlers(app)
@@ -90,4 +94,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(eureka_api.radar_router)
     app.include_router(review_api.router)
     app.include_router(cdp_api.router)
+    app.include_router(assistant_api.router)
     return app

@@ -48,3 +48,6 @@ backend/scripts/.local/
 
 # Descargas locales del spike SECOP (no son fixtures de pruebas).
 /descargas_covarachia/
+
+# Paquetes analíticos locales; pueden contener evidencia y datos de desarrollo.
+/exports/yipitdata_lab/

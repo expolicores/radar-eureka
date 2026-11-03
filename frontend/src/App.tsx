@@ -15,6 +15,7 @@ import { SearchPage } from "./features/search/SearchPage";
 import { EurekaNotificationsPage } from "./features/eureka/EurekaNotificationsPage";
 import { OperationsPage } from "./features/operations/OperationsPage";
 import { LicitacionesPage } from "./features/licitaciones/LicitacionesPage";
+import { AssistantPage } from "./features/assistant/AssistantPage";
 
 export function App() {
   return (
@@ -24,6 +25,7 @@ export function App() {
         <Route path="/explorar" element={<ExplorePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/eureka" element={<EurekaPage />} />
+        <Route path="/eureka/asistente" element={<AssistantPage />} />
         <Route path="/eureka/revision" element={<HumanReviewPage />} />
         <Route path="/eureka/revision/:identity" element={<HumanReviewPage />} />
         <Route path="/eureka/alerts" element={<EurekaAlertsPage />} />

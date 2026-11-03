@@ -14,9 +14,12 @@ class FoundryClient:
         config: FoundrySettings,
         *,
         agent_version: str | None = None,
+        reuse_existing_version: bool = False,
     ) -> None:
         self.project, self.openai, self.config = project, responses_client, config
         self.agent_version = agent_version
+        self.reuse_existing_version = reuse_existing_version
+        self.web_search_available = False
 
     def prepare_version(self) -> tuple[str, str]:
         from azure.ai.projects.models import PromptAgentDefinition
@@ -38,17 +41,24 @@ class FoundryClient:
         # Fail closed if the remote agent has acquired capabilities outside this spike.
         tools = definition.get("tools") or []
         names = {t["name"] for t in TOOL_SCHEMAS}
-        if any(t.get("type") != "function" or t.get("name") not in names for t in tools):
+        functions = [t for t in tools if t.get("type") == "function"]
+        web = [t for t in tools if t.get("type") == "web_search"]
+        if (
+            len(web) > 1
+            or len(functions) + len(web) != len(tools)
+            or any(t.get("name") not in names for t in functions)
+        ):
             raise SpikeError("El agente tiene otras tools; revisa su definición antes del spike.")
-        if self.agent_version is not None:
+        self.web_search_available = bool(web)
+        if self.agent_version is not None or self.reuse_existing_version:
             expected = {t["name"]: t["parameters"] for t in TOOL_SCHEMAS}
             if (
-                len(tools) != len(expected)
-                or {t["name"]: t.get("parameters") for t in tools} != expected
+                len(functions) != len(expected)
+                or {t["name"]: t.get("parameters") for t in functions} != expected
             ):
                 raise SpikeError("La versión indicada no tiene el contrato de tool esperado.")
             return str(current.name), str(current.version)
-        definition["tools"] = deepcopy(TOOL_SCHEMAS)
+        definition["tools"] = deepcopy(TOOL_SCHEMAS) + deepcopy(web)
         # All stored instructions and other definition settings remain authoritative.
         version = self.project.agents.create_version(
             agent_name=self.config.eureka_foundry_agent_name,
@@ -69,14 +79,30 @@ class FoundryClient:
         *,
         first: bool,
         first_tool: str = TOOL_NAME,
+        web_mode: bool = False,
+        force_web: bool = False,
     ) -> Any:
+        choice: Any = "auto"
+        if first:
+            choice = {"type": "function", "name": first_tool}
+        elif self.web_search_available:
+            allowed = [{"type": "function", "name": t["name"]} for t in TOOL_SCHEMAS]
+            if web_mode:
+                allowed.append({"type": "web_search"})
+            choice = {
+                "type": "allowed_tools",
+                "mode": "required" if force_web else "auto",
+                "tools": [{"type": "web_search"}] if force_web else allowed,
+            }
+        options = {"include": ["web_search_call.action.sources"]} if web_mode else {}
         return self.openai.responses.create(
             conversation=conversation,
             input=inputs,
             extra_body={
                 "agent_reference": {"type": "agent_reference", "name": name, "version": version}
             },
-            tool_choice={"type": "function", "name": first_tool} if first else "auto",
+            tool_choice=choice,
             parallel_tool_calls=False,
             timeout=timeout,
+            **options,
         )

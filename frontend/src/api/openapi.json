@@ -2367,6 +2367,107 @@
           }
         }
       }
+    },
+    "/api/eureka/assistant/chat": {
+      "post": {
+        "tags": [
+          "Asistente Eureka"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_api_eureka_assistant_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatReply"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatFailure"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2686,6 +2787,97 @@
           "page_size"
         ],
         "title": "CdpRunsResponse"
+      },
+      "ChatFailure": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "reset_conversation": {
+            "type": "boolean",
+            "title": "Reset Conversation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "reset_conversation"
+        ],
+        "title": "ChatFailure"
+      },
+      "ChatReply": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conversation Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "process_references": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessReference"
+            },
+            "type": "array",
+            "title": "Process References"
+          },
+          "external_references": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalReference"
+            },
+            "type": "array",
+            "title": "External References"
+          },
+          "web_searches": {
+            "items": {
+              "$ref": "#/components/schemas/WebSearchAction"
+            },
+            "type": "array",
+            "title": "Web Searches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "message"
+        ],
+        "title": "ChatReply"
+      },
+      "ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Message"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest"
       },
       "Comparable": {
         "properties": {
@@ -3383,6 +3575,73 @@
           "max_processes"
         ],
         "title": "ExecutionConfiguration"
+      },
+      "ExternalReference": {
+        "properties": {
+          "citation_number": {
+            "type": "integer",
+            "title": "Citation Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "confidence": {
+            "type": "string",
+            "const": "preliminar",
+            "title": "Confidence",
+            "default": "preliminar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "citation_number",
+          "title",
+          "source",
+          "url"
+        ],
+        "title": "ExternalReference"
       },
       "FilterOptions": {
         "properties": {
@@ -4314,6 +4573,75 @@
           "detail"
         ],
         "title": "ProblemDetails"
+      },
+      "ProcessReference": {
+        "properties": {
+          "identity": {
+            "type": "string",
+            "title": "Identity"
+          },
+          "process_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process Code"
+          },
+          "entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity"
+          },
+          "municipality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "identity"
+        ],
+        "title": "ProcessReference"
       },
       "PurchaseDetail": {
         "properties": {
@@ -5516,6 +5844,40 @@
           "undetermined"
         ],
         "title": "VatBasis"
+      },
+      "WebSearchAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "queries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Queries"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "WebSearchAction"
       }
     }
   }

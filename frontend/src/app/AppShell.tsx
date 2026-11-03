@@ -5,6 +5,7 @@ const NAVIGATION = [
   { to: "/eureka", label: "Eureka" },
   { to: "/eureka/alerts", label: "Alertas" },
   { to: "/eureka/revision", label: "Merecen Revisión" },
+  { to: "/eureka/asistente", label: "Asistente Eureka" },
   { to: "/search", label: "Buscar SECOP" },
   { to: "/eureka/operations", label: "Operación" },
   { to: "/eureka/licitaciones", label: "Licitaciones.info (CDP)" },

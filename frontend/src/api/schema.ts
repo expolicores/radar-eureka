@@ -517,6 +517,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/eureka/assistant/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Chat */
+        post: operations["chat_api_eureka_assistant_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -668,6 +685,38 @@ export interface components {
             page: number;
             /** Page Size */
             page_size: number;
+        };
+        /** ChatFailure */
+        ChatFailure: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+            /** Reset Conversation */
+            reset_conversation: boolean;
+        };
+        /** ChatReply */
+        ChatReply: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Message */
+            message: string;
+            /** Process References */
+            process_references?: components["schemas"]["ProcessReference"][];
+            /** External References */
+            external_references?: components["schemas"]["ExternalReference"][];
+            /** Web Searches */
+            web_searches?: components["schemas"]["WebSearchAction"][];
+        };
+        /** ChatRequest */
+        ChatRequest: {
+            /** Message */
+            message: string;
+            /** Conversation Id */
+            conversation_id?: string | null;
         };
         /** Comparable */
         Comparable: {
@@ -943,6 +992,29 @@ export interface components {
             regions: string[];
             /** Max Processes */
             max_processes: number;
+        };
+        /** ExternalReference */
+        ExternalReference: {
+            /** Citation Number */
+            citation_number: number;
+            /** Title */
+            title: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url: string;
+            /** Published At */
+            published_at?: string | null;
+            /** Entity */
+            entity?: string | null;
+            /** Location */
+            location?: string | null;
+            /**
+             * Confidence
+             * @default preliminar
+             * @constant
+             */
+            confidence: "preliminar";
         };
         /** FilterOptions */
         FilterOptions: {
@@ -1247,6 +1319,21 @@ export interface components {
             status: number;
             /** Detail */
             detail: string;
+        };
+        /** ProcessReference */
+        ProcessReference: {
+            /** Identity */
+            identity: string;
+            /** Process Code */
+            process_code?: string | null;
+            /** Entity */
+            entity?: string | null;
+            /** Municipality */
+            municipality?: string | null;
+            /** Department */
+            department?: string | null;
+            /** Source Url */
+            source_url?: string | null;
         };
         /** PurchaseDetail */
         PurchaseDetail: {
@@ -1681,6 +1768,17 @@ export interface components {
          * @enum {string}
          */
         VatBasis: "included" | "excluded" | "undetermined";
+        /** WebSearchAction */
+        WebSearchAction: {
+            /** Action */
+            action: string;
+            /** Queries */
+            queries?: string[];
+            /** Sources */
+            sources?: string[];
+            /** Warnings */
+            warnings?: string[];
+        };
     };
     responses: never;
     parameters: never;
@@ -2767,6 +2865,93 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    chat_api_eureka_assistant_chat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatReply"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
+                };
+            };
+            /** @description Gateway Timeout */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFailure"];
                 };
             };
         };

@@ -1,7 +1,9 @@
 """Small allowlisted payloads; never serialize raw run/provider data to the model."""
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, field_validator
@@ -132,6 +134,10 @@ class LatestCdpRunSummary(BaseModel):
 class SpikeError(RuntimeError):
     """Only safe, application-owned messages may reach the CLI."""
 
+    def __init__(self, message: str, *, code: str = "foundry_unavailable") -> None:
+        super().__init__(message)
+        self.code = code
+
 
 class SpikeResult(BaseModel):
     agent_name: str
@@ -139,3 +145,26 @@ class SpikeResult(BaseModel):
     conversation_id: str
     tool_results: list[LatestCdpRunSummary | dict[str, Any]]
     answer: str
+    external_references: list[ExternalReference] = Field(default_factory=list)
+    web_searches: list[WebSearchAction] = Field(default_factory=list)
+
+
+class ExternalReference(BaseModel):
+    citation_number: int
+    title: str
+    source: str
+    url: str
+    published_at: str | None = None
+    entity: str | None = None
+    location: str | None = None
+    confidence: Literal["preliminar"] = "preliminar"
+
+
+class WebSearchAction(BaseModel):
+    action: str
+    queries: list[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+SpikeResult.model_rebuild()
