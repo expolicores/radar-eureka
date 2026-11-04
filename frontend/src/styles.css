@@ -1,18 +1,18 @@
 /* Tokens y estilos base tomados del mockup de demostración
    (docs/propuesta/06-mockups/mockup-demo-seguimiento-compras-publicas.html). */
 :root {
-  --surface-0: #f4f3f0;
-  --surface-1: #fcfcfb;
+  --surface-0: #f5f6f8;
+  --surface-1: #fafbfc;
   --surface-2: #ffffff;
-  --border: #e2e1dc;
-  --border-strong: #cfcdc6;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #7a7974;
-  --accent: #2a78d6;
-  --accent-ink: #184f95;
-  --accent-soft: #e6f0fc;
-  --series-1: #2a78d6;
+  --border: #e5e9ec;
+  --border-strong: #cbd4da;
+  --text-primary: #193541;
+  --text-secondary: #526873;
+  --text-muted: #697c85;
+  --accent: #c64b12;
+  --accent-ink: #a43c0c;
+  --accent-soft: #fff0e6;
+  --series-1: #c64b12;
   --series-2: #eb6834;
   --series-3: #1baf7a;
   --ref-line: #8a8984;
@@ -827,5 +827,423 @@ textarea {
     display: flex;
     overflow-x: auto;
     max-width: 100%;
+  }
+}
+
+/* Radar: identidad naranja, blanco y azul petróleo. */
+.radar-shell {
+  min-height: 100%;
+}
+.radar-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 238px;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 30px 16px 18px;
+  z-index: 30;
+  overflow-y: auto;
+}
+.radar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 28px;
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 750;
+  letter-spacing: -1.4px;
+}
+.radar-brand:hover {
+  text-decoration: none;
+}
+.radar-brand small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+.radar-mark {
+  width: 43px;
+  height: 43px;
+  background: #fff0e6;
+  color: var(--accent);
+  border-radius: 14px;
+  padding: 7px;
+}
+.radar-mark svg {
+  width: 100%;
+  height: 100%;
+}
+.radar-nav-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 8px 12px 14px;
+}
+.radar-navigation {
+  display: grid;
+  gap: 5px;
+}
+.radar-navigation a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 550;
+  min-height: 44px;
+}
+.radar-navigation svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+.radar-navigation a:hover {
+  background: var(--surface-0);
+  text-decoration: none;
+}
+.radar-navigation a.active {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  box-shadow: inset 3px 0 var(--accent);
+  font-weight: 700;
+}
+.radar-sidebar-footer {
+  margin-top: auto;
+  padding: 28px 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+  font-size: 12px;
+}
+.radar-sidebar-footer small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 9px;
+  margin-top: 3px;
+  font-weight: 400;
+}
+.radar-footer-symbol {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #193f4c;
+  color: #fff;
+}
+.radar-workspace {
+  margin-left: 238px;
+  min-width: 0;
+}
+.radar-header {
+  background: white;
+  min-height: 78px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.radar-breadcrumb {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.radar-breadcrumb span {
+  margin: 0 12px;
+  color: #b6c1c6;
+}
+.radar-breadcrumb strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.radar-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.radar-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border: 1px solid #f7d5bf;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+.radar-context {
+  padding: 13px 32px 0;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.radar-context b {
+  color: var(--accent-ink);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+main.radar-main {
+  max-width: 1760px;
+  padding: 28px 32px 60px;
+}
+.radar-main h1 {
+  font-size: 27px;
+  letter-spacing: -0.8px;
+}
+.radar-main th {
+  background: #204653;
+  color: white;
+  padding: 13px 12px;
+  font-weight: 550;
+  border-bottom: 0;
+}
+.radar-main td {
+  padding: 16px 12px;
+}
+.radar-main tbody tr:hover td {
+  background: #fff9f4;
+}
+.radar-main .table-wrap {
+  box-shadow: 0 3px 14px #19354105;
+}
+.radar-main .card {
+  box-shadow: 0 3px 16px #19354104;
+}
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #b75b2d;
+  outline-offset: 3px;
+}
+.btn.primary:hover:not(:disabled) {
+  background: #a43c0c;
+}
+.assistant-page {
+  max-width: 1120px;
+  padding-top: 0;
+}
+.assistant-heading {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.assistant-heading h1 {
+  margin-top: 8px;
+}
+.assistant-heading p {
+  margin-bottom: 0;
+  font-size: 13px;
+}
+.assistant-eyebrow {
+  display: block;
+  color: var(--accent-ink);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+}
+.assistant-heading button {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.assistant-welcome {
+  text-align: center;
+  padding: 44px 24px 24px;
+}
+.assistant-welcome-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 39px;
+}
+.assistant-welcome h2 {
+  font-size: clamp(23px, 2.4vw, 32px);
+  font-weight: 650;
+  letter-spacing: -0.8px;
+  max-width: 580px;
+  margin: 15px auto;
+  line-height: 1.25;
+}
+.assistant-welcome > p {
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: 13px;
+}
+.assistant-suggestions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 30px 0 0;
+}
+.assistant-suggestions button {
+  text-align: left;
+  padding: 18px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-size: 12px;
+  border-color: var(--border);
+  box-shadow: 0 3px 12px #19354103;
+}
+.assistant-suggestions button::after {
+  content: "↗";
+  display: block;
+  font-size: 18px;
+  color: var(--accent);
+  margin-top: 14px;
+}
+.assistant-suggestions button:hover:not(:disabled) {
+  border-color: #d98e66;
+  background: #fffaf6;
+}
+.assistant-message {
+  padding: 24px 28px;
+  border-radius: 14px;
+  line-height: 1.8;
+  box-shadow: 0 3px 14px #19354103;
+}
+.assistant-message-user {
+  background: #fff3eb;
+  border-color: #f3dacb;
+}
+.assistant-speaker {
+  display: block;
+  color: var(--accent-ink);
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.assistant-process {
+  background: var(--surface-1);
+  border-radius: 10px;
+  border-top: 3px solid #e9854d;
+}
+.assistant-process > strong {
+  color: #204653;
+}
+.assistant-composer {
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 28px #19354107;
+}
+.assistant-composer label {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-secondary);
+}
+.assistant-composer textarea {
+  border-color: var(--border);
+  background: #fafbfc;
+  padding: 14px;
+  border-radius: 10px;
+}
+.assistant-composer .btn {
+  padding: 9px 25px;
+}
+@media (min-width: 1600px) {
+  .radar-sidebar {
+    width: 254px;
+  }
+  .radar-workspace {
+    margin-left: 254px;
+  }
+  main.radar-main {
+    padding-left: 44px;
+    padding-right: 44px;
+  }
+}
+@media (max-width: 1000px) {
+  .radar-sidebar {
+    width: 202px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .radar-workspace {
+    margin-left: 202px;
+  }
+  .radar-brand {
+    font-size: 28px;
+  }
+  .radar-brand small {
+    font-size: 7px;
+  }
+  main.radar-main {
+    padding: 24px 20px 48px;
+  }
+  .radar-header {
+    padding: 16px 20px;
+  }
+  .radar-context {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+@media (max-width: 700px) {
+  .radar-sidebar {
+    position: static;
+    width: auto;
+    padding: 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .radar-brand {
+    padding-bottom: 16px;
+  }
+  .radar-nav-label,
+  .radar-sidebar-footer {
+    display: none;
+  }
+  .radar-navigation {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  .radar-navigation a {
+    white-space: nowrap;
+    padding: 10px;
+  }
+  .radar-workspace {
+    margin-left: 0;
+  }
+  .radar-header {
+    min-height: 60px;
+  }
+  .radar-header-meta > span:first-child {
+    display: none;
+  }
+  main.radar-main {
+    padding: 22px 16px 40px;
+  }
+  .assistant-welcome {
+    padding: 28px 0 12px;
+  }
+  .assistant-suggestions {
+    grid-template-columns: 1fr;
+  }
+  .assistant-suggestions button {
+    padding: 14px;
+  }
+  .assistant-suggestions button::after {
+    display: inline;
+    margin-left: 12px;
+  }
+  .assistant-message {
+    padding: 18px;
   }
 }

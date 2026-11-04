@@ -1427,6 +1427,29 @@
         }
       }
     },
+    "/api/v1/investigation/research": {
+      "get": {
+        "tags": [
+          "Investigación SECOP"
+        ],
+        "summary": "Research Report",
+        "operationId": "research_report_api_v1_investigation_research_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Research Report Api V1 Investigation Research Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/eureka/opportunities": {
       "get": {
         "tags": [

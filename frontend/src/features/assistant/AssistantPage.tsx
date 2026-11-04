@@ -145,6 +145,7 @@ export function AssistantPage() {
     <section className="assistant-page" aria-labelledby="assistant-title">
       <div className="assistant-heading">
         <div>
+          <span className="assistant-eyebrow">RADAR / ASISTENTE COMERCIAL</span>
           <h1 id="assistant-title">Asistente Eureka</h1>
           <p>Consulta corridas, oportunidades y evidencia para decidir qué revisar.</p>
         </div>
@@ -154,17 +155,27 @@ export function AssistantPage() {
       </div>
 
       {messages.length === 0 && (
-        <div className="assistant-suggestions" aria-label="Preguntas sugeridas">
-          {SUGGESTIONS.map((question) => (
-            <button
-              key={question}
-              type="button"
-              disabled={pending}
-              onClick={() => void send(question)}
-            >
-              {question}
-            </button>
-          ))}
+        <div className="assistant-welcome">
+          <span className="assistant-welcome-icon" aria-hidden="true">
+            ✧
+          </span>
+          <span className="assistant-eyebrow">MENOS BÚSQUEDA. MÁS CRITERIO.</span>
+          <h2>Tu próxima oportunidad empieza con una pregunta.</h2>
+          <p>
+            Explora los hallazgos de Radar, contrasta la evidencia y decide qué merece tu atención.
+          </p>
+          <div className="assistant-suggestions" aria-label="Preguntas sugeridas">
+            {SUGGESTIONS.map((question) => (
+              <button
+                key={question}
+                type="button"
+                disabled={pending}
+                onClick={() => void send(question)}
+              >
+                {question}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

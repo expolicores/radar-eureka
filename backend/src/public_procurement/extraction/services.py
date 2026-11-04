@@ -1,7 +1,7 @@
 """Extracción y búsqueda compartidas: no modifica scoring de Eureka ni tablas documentales."""
 
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
@@ -42,6 +42,7 @@ from .structured_repositories import SqlStructuredRepository
 from .structured_rules import extract_facts
 
 __all__ = [
+    "TV_RESEARCH_CANONICAL_VERSION",
     "CanonicalFact",
     "CanonicalReadState",
     "CanonicalSummary",
@@ -54,8 +55,11 @@ __all__ = [
     "build_consolidation_service",
     "build_extraction_service",
     "build_structured_service",
+    "build_tv_research_structured_service",
     "extraction_metrics",
 ]
+
+TV_RESEARCH_CANONICAL_VERSION = "canonical-tv-research-v3"
 
 
 def extraction_metrics(results: list[ExtractionResult]) -> dict[str, int | float]:
@@ -394,14 +398,18 @@ class StructuredExtractionService:
         sessions: sessionmaker[Session],
         content: ExtractionService,
         rule_version: str = RULE_VERSION,
+        rule_set: Callable[
+            [uuid.UUID, list[EvidenceFragment], str], list[StructuredFact]
+        ] = extract_facts,
     ) -> None:
         self.sessions, self.content, self.rule_version = sessions, content, rule_version
+        self.rule_set = rule_set
 
     def extract(self, reference: str, dry_run: bool = False) -> tuple[list[StructuredFact], int]:
         process_id, fragments = self.content.content_for_process(reference)
         if not fragments:
             raise ValueError("No hay fragmentos persistidos: ejecute extract-documents primero.")
-        facts = extract_facts(process_id, fragments, self.rule_version)
+        facts = self.rule_set(process_id, fragments, self.rule_version)
         inserted = 0
         if not dry_run:
             with self.sessions.begin() as session:
@@ -434,6 +442,20 @@ def build_structured_service(
     settings: Settings,
 ) -> StructuredExtractionService:
     return StructuredExtractionService(sessions, build_extraction_service(sessions, settings))
+
+
+def build_tv_research_structured_service(
+    sessions: sessionmaker[Session], settings: Settings, *, content: ExtractionService | None = None
+) -> StructuredExtractionService:
+    """Explicit research rule set, keeping Radar's default structured-v1 unchanged."""
+    from .research_tv_rules import RESEARCH_TV_RULE_VERSION, extract_tv_research_facts
+
+    return StructuredExtractionService(
+        sessions,
+        content if content is not None else build_extraction_service(sessions, settings),
+        RESEARCH_TV_RULE_VERSION,
+        extract_tv_research_facts,
+    )
 
 
 class ConsolidationService:

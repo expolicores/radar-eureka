@@ -105,6 +105,17 @@ def test_repeated_sync_and_download_preserve_identity_and_version(setup) -> None
     assert count(sessions, AcquisitionAttemptRecord) == 2
 
 
+def test_only_missing_reuses_existing_versions_without_new_download_attempt(setup) -> None:
+    service, sessions, _ = setup
+    service.sync("CO1.REQ.1")
+    service.download("CO1.REQ.1")
+    result = service.download("CO1.REQ.1", only_missing=True)
+    assert result.available == 0
+    assert result.failed == 0
+    assert service.downloader.download.call_count == 1
+    assert count(sessions, AcquisitionAttemptRecord) == 1
+
+
 def test_content_changes_create_version_and_failure_preserves_previous(setup) -> None:
     service, sessions, _ = setup
     service.sync("CO1.REQ.1")

@@ -62,6 +62,14 @@ class SocrataDocumentSource:
         raise RuntimeError("Consulta de inventario agotada.")
 
     def fetch(self, portfolio_id: str) -> list[SourceDocument]:
+        return self._fetch_identifier(portfolio_id, "proceso")
+
+    def fetch_by_contract(self, contract_id: str) -> list[SourceDocument]:
+        """Official contract column; a PCCNTR is not the proceso/BDOS column."""
+        return self._fetch_identifier(contract_id, "n_mero_de_contrato")
+
+    def _fetch_identifier(self, identifier: str, field: str) -> list[SourceDocument]:
+        portfolio_id = identifier
         if not portfolio_id or len(portfolio_id) > 128:
             raise ValueError("Portafolio inválido.")
         escaped = portfolio_id.replace("'", "''")
@@ -69,7 +77,7 @@ class SocrataDocumentSource:
         seen_cursors: set[str] = set()
         unique: dict[str, SourceDocument] = {}
         for _ in range(100):
-            where = f"proceso = '{escaped}'"
+            where = f"{field} = '{escaped}'"
             if cursor:
                 where += " AND :id > '" + cursor.replace("'", "''") + "'"
             rows = self._page(
@@ -77,6 +85,7 @@ class SocrataDocumentSource:
                     "$select": (
                         ":id AS source_row_id,id_documento,proceso,nombre_archivo,"
                         "fecha_carga,url_descarga_documento"
+                        + (",n_mero_de_contrato" if field == "n_mero_de_contrato" else "")
                     ),
                     "$where": where,
                     "$order": ":id ASC",
@@ -94,7 +103,15 @@ class SocrataDocumentSource:
                 # :id es un rowIdentifier opaco; su orden lo define Socrata, no Python.
                 seen_cursors.add(next_cursor)
                 cursor = next_cursor
-                document = map_document(row, portfolio_id)
+                source_portfolio = portfolio_id
+                if field == "n_mero_de_contrato":
+                    if row.get(field) != identifier:
+                        raise ValueError("Socrata devolvió un documento de otro contrato.")
+                    provider_key = row.get("proceso")
+                    if not isinstance(provider_key, str) or not provider_key:
+                        raise ValueError("Documento contractual sin llave de proceso oficial.")
+                    source_portfolio = provider_key
+                document = map_document(row, source_portfolio)
                 previous = unique.get(document.id_documento)
                 if previous and previous != document:
                     raise ValueError(

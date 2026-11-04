@@ -16,13 +16,16 @@ import { EurekaNotificationsPage } from "./features/eureka/EurekaNotificationsPa
 import { OperationsPage } from "./features/operations/OperationsPage";
 import { LicitacionesPage } from "./features/licitaciones/LicitacionesPage";
 import { AssistantPage } from "./features/assistant/AssistantPage";
+import { ResearchPage } from "./features/research/ResearchPage";
 
 export function App() {
   return (
     <AppShell>
       <Routes>
         <Route path="/" element={<Navigate to="/senales" replace />} />
-        <Route path="/explorar" element={<ExplorePage />} />
+        <Route path="/explorar" element={<ResearchPage />} />
+        <Route path="/demo/explorar" element={<ExplorePage />} />
+        <Route path="/demo/senales" element={<SignalsPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/eureka" element={<EurekaPage />} />
         <Route path="/eureka/asistente" element={<AssistantPage />} />
@@ -34,7 +37,7 @@ export function App() {
         <Route path="/eureka/operations" element={<OperationsPage />} />
         <Route path="/eureka/licitaciones" element={<LicitacionesPage />} />
         <Route path="/eureka/:opportunityId" element={<EurekaDetailPage />} />
-        <Route path="/senales" element={<SignalsPage />} />
+        <Route path="/senales" element={<ResearchPage view="signals" />} />
         <Route path="/senales/:code" element={<SignalDetailPage />} />
         <Route path="/casos" element={<CasesPage />} />
         <Route path="/casos/:caseId" element={<CasesPage />} />

@@ -135,12 +135,16 @@ class DocumentService:
                     repository.sync(process.id, document, self.clock())
         return documents
 
-    def download(self, reference: str) -> DownloadSummary:
+    def download(self, reference: str, *, only_missing: bool = False) -> DownloadSummary:
         process = self._process(reference)
         portfolio = process.portfolio_id
         if portfolio is None:
             raise ValueError("Portafolio ausente.")
         documents = self.list_documents(reference)
+        if only_missing:
+            documents = [
+                document for document in documents if self.latest_version(document.id) is None
+            ]
         available = failed = 0
         for document in documents:
             with self.sessions.begin() as session:
@@ -164,6 +168,11 @@ class DocumentService:
             else:
                 available += 1
         return DownloadSummary(available, failed)
+
+
+def build_document_inventory_source() -> SocrataDocumentSource:
+    """Official inventory adapter, including opt-in contract-key lookup."""
+    return SocrataDocumentSource()
 
 
 def build_document_service(

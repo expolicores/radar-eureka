@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
-import { FILTER_OPTIONS, SIGNAL_SUMMARY, mockApi, signalList } from "./test/api";
+import { mockApi } from "./test/api";
 import { renderWithProviders } from "./test/render";
 
 afterEach(() => {
@@ -11,21 +11,28 @@ afterEach(() => {
 });
 
 describe("Marco de la aplicación", () => {
-  it("lleva la ruta raíz a Señales y advierte que los datos son ficticios", async () => {
+  it("lleva la raíz a investigación real sin usar señales demo como fallback", async () => {
     // Arrange
     mockApi({
-      "/api/v1/signals": () => ({ body: signalList([]) }),
-      "/api/v1/signals/summary": () => ({ body: SIGNAL_SUMMARY }),
-      "/api/v1/purchases/filters": () => ({ body: FILTER_OPTIONS }),
+      "/api/v1/investigation/research": () => ({
+        body: {
+          source: "socrata_secop",
+          processes: [],
+          signals: [],
+          comparisons: [],
+          signal_status: "not_run",
+          signal_reason: "Sin muestra",
+        },
+      }),
     });
     // Act
     renderWithProviders(<App />, { route: "/" });
     // Assert
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Señales que merecen revisión" }),
+      await screen.findByRole("heading", { level: 1, name: "Señales investigativas" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Señales" })).toHaveClass("active");
-    expect(screen.getAllByRole("note")[0]).toHaveTextContent("ficticios");
+    expect(screen.getAllByRole("note")[0]).toHaveTextContent("SECOP REAL");
   });
 
   it("muestra las secciones pendientes como próximos incrementos", async () => {

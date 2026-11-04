@@ -24,6 +24,8 @@ from public_procurement.eureka.services import (
 from public_procurement.exploration import api as exploration_api
 from public_procurement.exploration.services import build_exploration_service
 from public_procurement.investigation import api as cases_api
+from public_procurement.investigation import research_api
+from public_procurement.investigation.research import ResearchReportStore
 from public_procurement.investigation.services import build_investigation_service
 from public_procurement.licitaciones_cdp import api as cdp_api
 from public_procurement.licitaciones_cdp.background import ManualCdpRunner
@@ -69,6 +71,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.exploration_service = build_exploration_service(session_factory)
     app.state.signal_service = build_signal_query_service(session_factory)
     app.state.investigation_service = build_investigation_service(session_factory)
+    app.state.research_reports = ResearchReportStore(
+        settings.local_storage_path.parent / "investigation"
+    )
     app.state.current_user_provider = demo_user_provider
     app.state.eureka_queries = build_eureka_http_queries(session_factory, settings)
     app.state.radar_queries = build_radar_http_queries(session_factory)
@@ -90,6 +95,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(exploration_api.router)
     app.include_router(signals_api.router)
     app.include_router(cases_api.router)
+    app.include_router(research_api.router)
     app.include_router(eureka_api.router)
     app.include_router(eureka_api.radar_router)
     app.include_router(review_api.router)
