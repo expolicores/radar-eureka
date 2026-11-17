@@ -1450,6 +1450,29 @@
         }
       }
     },
+    "/api/v1/investigation/private-market": {
+      "get": {
+        "tags": [
+          "Investigación SECOP"
+        ],
+        "summary": "Private Market Report",
+        "operationId": "private_market_report_api_v1_investigation_private_market_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Private Market Report Api V1 Investigation Private Market Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/eureka/opportunities": {
       "get": {
         "tags": [

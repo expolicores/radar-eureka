@@ -28,6 +28,7 @@ ceiba-worktree.js
 .env
 .env.*
 !.env.example
+/MERCALIBRE DEVELOPERS.txt
 
 # Python
 __pycache__/

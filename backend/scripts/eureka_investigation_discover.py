@@ -14,6 +14,7 @@ from urllib.request import Request, urlopen
 from public_procurement.documents.adapters.socrata import SocrataDocumentSource
 from public_procurement.ingestion.adapters.socrata_processes import FIELDS, SocrataProcessSource
 from public_procurement.investigation.economic_cycle import classify_stage
+from public_procurement.investigation.run_contracts import MAX_RESEARCH_DAYS
 from public_procurement.shared.text import normalize_text
 
 TERMS = (
@@ -117,7 +118,7 @@ def dump(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2, default=str), encoding="utf8")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample-directory", type=Path, required=True)
     parser.add_argument("--before", type=date.fromisoformat, required=True)
@@ -126,9 +127,9 @@ def main() -> None:
     parser.add_argument("--max-documents", type=int, default=10)
     parser.add_argument("--reuse-directory", type=Path)
     parser.add_argument("--prepare", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if (
-        not 1 <= args.days <= 60
+        not 1 <= args.days <= MAX_RESEARCH_DAYS
         or not 1 <= args.max_processes <= 80
         or not 1 <= args.max_documents <= 16
     ):
@@ -281,14 +282,16 @@ def main() -> None:
         + ")",
         "$limit": "1000",
     }
-    with urlopen(
-        Request(
-            "https://www.datos.gov.co/resource/jbjy-vk9h.json?" + urlencode(params),
-            headers={"User-Agent": "PublicProcurement/0.1"},
-        ),
-        timeout=45,
-    ) as response:
-        contracts = json.load(response)
+    contracts = []
+    if ids:
+        with urlopen(
+            Request(
+                "https://www.datos.gov.co/resource/jbjy-vk9h.json?" + urlencode(params),
+                headers={"User-Agent": "PublicProcurement/0.1"},
+            ),
+            timeout=45,
+        ) as response:
+            contracts = json.load(response)
     if len(contracts) >= 1000:
         raise ValueError("Contract query truncated")
     dump(
@@ -302,6 +305,9 @@ def main() -> None:
     )
     cached = json.loads((reuse / "inventories.json").read_text(encoding="utf8")) if reuse else {}
     errors, selected_docs, reused_inventories = {}, {}, []
+    dump(out / "inventories.json", inventories)
+    dump(out / "selected-documents.json", selected_docs)
+    dump(out / "inventory-errors.json", errors)
     for row in chosen:
         ref = row["id_del_proceso"]
         try:

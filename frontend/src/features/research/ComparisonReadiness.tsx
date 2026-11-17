@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { researchProcessUrl } from "./researchNavigation";
 import { formatCop } from "../../lib/format";
 import { HumanReviewNotice } from "./HumanReviewNotice";
 
@@ -48,6 +49,7 @@ const LABELS: Record<string, string> = {
 };
 
 export function ComparisonReadiness({ audit }: { audit: ReadinessAudit }) {
+  const [params] = useSearchParams();
   return (
     <section aria-label="Cierre económico de pares técnicos" className="notice">
       <p>
@@ -81,13 +83,13 @@ export function ComparisonReadiness({ audit }: { audit: ReadinessAudit }) {
                 <tr key={pair.id}>
                   <td>{pair.number}</td>
                   <td>
-                    <Link to={`/explorar?process=${encodeURIComponent(pair.processes[0])}`}>
+                    <Link to={researchProcessUrl(pair.processes[0], params)}>
                       {pair.process_code_a}
                     </Link>
                     <div className="small muted">{pair.observation_ids[0].slice(0, 12)}</div>
                   </td>
                   <td>
-                    <Link to={`/explorar?process=${encodeURIComponent(pair.processes[1])}`}>
+                    <Link to={researchProcessUrl(pair.processes[1], params)}>
                       {pair.process_code_b}
                     </Link>
                     <div className="small muted">{pair.observation_ids[1].slice(0, 12)}</div>

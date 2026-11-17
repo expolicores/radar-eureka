@@ -1,0 +1,108 @@
+export type Observation = {
+  retailer: string;
+  market_product_title: string;
+  price: string | null;
+  url: string | null;
+  model?: string | null;
+  currency?: string | null;
+  rejection_reason?: string | null;
+  match_level: string;
+  match_reason: string;
+  captured_at: string;
+  availability: string;
+  valid_for_benchmark: boolean;
+  notes: string[];
+  promotion_detected: boolean;
+  source_type?: string;
+  seller_id?: string | null;
+  seller_name?: string | null;
+  listing_id?: string | null;
+  condition?: string | null;
+  duplicate_of?: string | null;
+  web_source_kind?: string | null;
+  domain_id?: string | null;
+  page_type?: string;
+  discovery_score?: number;
+  discovery_method?: string;
+  extraction_method?: string;
+  price_evidence_level?: string;
+  currency_inferred?: boolean;
+  shipping?: string | Record<string, unknown> | null;
+};
+type Comparison = {
+  public_entity: string;
+  public_unit_price: string;
+  private_median_price: string;
+  absolute_difference: string;
+  percentage_difference: string;
+  public_price_date: string;
+  market_captured_at: string;
+  time_gap_days: string;
+};
+export type MarketReport = {
+  report_id?: string;
+  status?: string;
+  preliminary_comparison?: { status: string; limitations: string[] } | null;
+  product: { brand: string; model: string; canonical_model?: string | null };
+  web_discovery?: {
+    queries_planned: number;
+    queries_executed: number;
+    unique_strong_page_urls: number;
+    canonical_model_used: string | null;
+  };
+  market_price_scout?: {
+    activated: boolean;
+    status: string;
+    requested_missing_observations: number;
+    candidates_received: number;
+  };
+  shopping_discovery?: {
+    source_status?: string;
+    request_count?: number;
+    valid_observations?: number;
+  };
+  public_product: {
+    public_process_identity?: string;
+    public_entity?: string;
+    public_product_description?: string;
+    quantity?: string | null;
+    supplier?: string | null;
+    public_price_date?: string | null;
+    public_document_url?: string | null;
+    document_heading_process_code?: string | null;
+    public_process_code: string;
+    public_unit_price: string;
+    public_document: string;
+    public_page_reference: string;
+    public_evidence_ref: string;
+    public_price_stage: string;
+    price_origin: string;
+    price_tax_basis?: string;
+    evidence_warnings?: string[];
+  } | null;
+  public_evidence_status: string;
+  benchmark: {
+    benchmark_status: string;
+    valid_observations_count: number;
+    retailers_count: number;
+    independent_sources_count?: number;
+    distinct_sellers_count?: number;
+    evidence_sufficiency?: string;
+    duplicates?: Observation[];
+    min_price: string | null;
+    median_price: string | null;
+    max_price: string | null;
+    captured_at: string;
+    confidence: number;
+    limitations: string[];
+    observations: Observation[];
+  };
+  comparison: Comparison | null;
+  signal: { type: string; meaning: string } | null;
+  errors?: { code: string; http_status?: number | null }[];
+  mercadolibre?: {
+    catalog_product_id: string | null;
+    catalog_selection_reason: string;
+    source_status?: string;
+  };
+};

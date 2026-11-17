@@ -7,6 +7,104 @@ import { ResearchPage } from "./ResearchPage";
 
 afterEach(() => vi.unstubAllGlobals());
 
+it("private result uses only its archived public evidence and candidate decisions", async () => {
+  const id = "c15dd5d5-30cf-4d24-bb9e-c6a40d2c8983";
+  const fetch = mockApi({
+    "/api/v1/investigation/private-market": (url) => {
+      expect(url.searchParams.get("run_id")).toBe(id);
+      return { body: { reports: [] } };
+    },
+    "/api/v1/investigation/runs/policy": () => ({ body: { max_window_days: 60 } }),
+    [`/api/v1/investigation/market-runs/${id}/research`]: () => ({
+      body: {
+        source: "socrata_secop",
+        processes: [],
+        comparisons: [],
+        signals: [],
+        signal_status: "insufficient_evidence",
+        signal_reason: "Sin comparación",
+        private_market_candidates: [
+          {
+            candidate_id: "new",
+            process_identity: "CO1.REQ.NEW",
+            process_code: "NEW-2026",
+            description: "Televisor identificado durante esta ventana",
+            brand: "LG",
+            model: "55NANO80",
+            status: "pending_review",
+            reasons: ["missing_document_page_provenance"],
+            public_evidence_status: "unresolved",
+            market_status: "not_attempted",
+            market_report_id: null,
+            warnings: [],
+          },
+        ],
+      },
+    }),
+  });
+  renderWithProviders(<ResearchPage />, {
+    route: `/explorar?private_run=${id}&market_run=${id}&run=unrelated`,
+  });
+  expect(await screen.findByText("NEW-2026")).toBeInTheDocument();
+  expect(screen.getByText("Pendiente de revisión")).toBeInTheDocument();
+  expect(screen.getByText("Falta documento, página o referencia de evidencia")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "NEW-2026" })).toHaveAttribute(
+    "href",
+    expect.stringContaining(`private_run=${id}`),
+  );
+  expect(
+    fetch.mock.calls.some(([r]) => new URL(r.url).pathname === "/api/v1/investigation/research"),
+  ).toBe(false);
+});
+
+it("abrir y cerrar un proceso conserva el run seleccionado", async () => {
+  const runId = "c15dd5d5-30cf-4d24-bb9e-c6a40d2c8983";
+  const windows: (string | null)[] = [];
+  mockApi({
+    "/api/v1/investigation/private-market": () => ({ body: { reports: [] } }),
+    "/api/v1/investigation/runs/policy": () => ({ body: { max_window_days: 60 } }),
+    [`/api/v1/investigation/runs/${runId}`]: () => ({
+      body: {
+        run_id: runId,
+        status: "completed",
+        start_date: "2026-10-01",
+        end_date: "2026-10-31",
+        created_at: "2026-11-05T15:00:00Z",
+        started_at: null,
+        finished_at: "2026-11-05T15:05:00Z",
+        stage: "finished",
+        warnings: [],
+        errors: [],
+        counts: {},
+        result_url: `/explorar?run=${runId}`,
+      },
+    }),
+    "/api/v1/investigation/research": (url) => {
+      windows.push(url.searchParams.get("run_id"));
+      return {
+        body: {
+          source: "socrata_secop",
+          processes: [process],
+          comparisons: [],
+          signals: [],
+          signal_status: "insufficient_evidence",
+          signal_reason: "Sin comparación",
+        },
+      };
+    },
+  });
+  renderWithProviders(<ResearchPage />, { route: `/explorar?run=${runId}` });
+  await userEvent.click(await screen.findByRole("button", { name: "REAL-2026" }));
+  expect(screen.getByLabelText("Detalle investigativo")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Ver señales" })).toHaveAttribute(
+    "href",
+    `/senales?run=${runId}`,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Cerrar detalle" }));
+  expect(screen.queryByLabelText("Detalle investigativo")).not.toBeInTheDocument();
+  expect(windows.every((value) => value === runId)).toBe(true);
+});
+
 const process = {
   id: "CO1.REQ.REAL",
   reference: "REAL-2026",
@@ -79,7 +177,7 @@ it("señales reales no usa la demo para rellenar una muestra insuficiente", asyn
 it("un fallo del informe real se muestra sin sustituirlo con fixtures", async () => {
   mockApi({ "/api/v1/investigation/research": () => ({ status: 503, body: {} }) });
   renderWithProviders(<ResearchPage />);
-  expect(await screen.findByRole("alert")).toHaveTextContent(
+  expect(await screen.findByText(/No fue posible cargar el informe real/)).toHaveTextContent(
     "No se sustituyó con datos de demostración",
   );
 });

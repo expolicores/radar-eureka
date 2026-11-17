@@ -1099,7 +1099,10 @@ def purchase_date_for_item(
 
 
 def build_cycles(
-    report: dict[str, Any], fragments_by_process: dict[str, list[dict[str, Any]]]
+    report: dict[str, Any],
+    fragments_by_process: dict[str, list[dict[str, Any]]],
+    *,
+    compare_state: bool = True,
 ) -> dict[str, Any]:
     cycles = []
     comparison_products = []
@@ -1279,15 +1282,24 @@ def build_cycles(
         if policy_60d
         else all_records
     )
-    comparison = (
-        compare_public_purchases(
-            comparison_products,
-            window_start=report["window_start"],
-            window_before=report["window_before"],
+    if compare_state:
+        comparison = (
+            compare_public_purchases(
+                comparison_products,
+                window_start=report["window_start"],
+                window_before=report["window_before"],
+            )
+            if policy_60d
+            else compare_observations(comparison_products)
         )
-        if policy_60d
-        else compare_observations(comparison_products)
-    )
+    else:
+        comparison = {
+            "comparisons": [],
+            "comparable_groups": [],
+            "signals": [],
+            "comparability_counts": {},
+            "comparisons_possible": 0,
+        }
     total = len(all_items)
     priced = sum(p["purchase_price"] is not None for p in all_items)
     return {

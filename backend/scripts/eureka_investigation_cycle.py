@@ -4,13 +4,14 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from typing import Any
 
 from public_procurement.investigation.economic_cycle import ECONOMIC_FIELDS, build_cycles
 from public_procurement.investigation.research import ResearchReportStore
 from public_procurement.shared.config import Settings
 
 
-def write_markdown(cycle: dict, directory: Path) -> None:
+def write_markdown(cycle: dict[str, Any], directory: Path) -> None:
     def cell(value: object) -> str:
         return (
             str(value if value is not None else "Desconocido").replace("|", "/").replace("\n", " ")
@@ -19,7 +20,7 @@ def write_markdown(cycle: dict, directory: Path) -> None:
     lines = [
         "# Reconstrucción económica determinística",
         "",
-        "Solo los 12 procesos con TV documental de la muestra previa. "
+        "Procesos con TV documental de la ventana investigada. "
         "Sin requests, descargas, OCR adicional, IA ni cambios en DB.",
         "",
         "## Métricas",
@@ -134,11 +135,12 @@ def write_markdown(cycle: dict, directory: Path) -> None:
     (directory / "economic-cycle.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample-directory", type=Path, required=True)
     parser.add_argument("--publish", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--public-evidence-only", action="store_true")
+    args = parser.parse_args(argv)
     directory = args.sample_directory.resolve()
     report = json.loads((directory / "research-report.json").read_text(encoding="utf-8"))
     fragments = {
@@ -150,7 +152,7 @@ def main() -> None:
         for p in report["processes"]
         if p.get("tv_confirmed")
     }
-    cycle = build_cycles(report, fragments)
+    cycle = build_cycles(report, fragments, compare_state=not args.public_evidence_only)
     write_markdown(cycle, directory)
     (directory / "economic-cycle.json").write_text(
         json.dumps(cycle, ensure_ascii=False, indent=2), encoding="utf-8"

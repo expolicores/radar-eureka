@@ -5,6 +5,10 @@ import { formatCop, formatDate } from "../../lib/format";
 import { EconomicCycle, type EconomicCycleData } from "./EconomicCycle";
 import { PublicPriceComparison, type PurchaseSide } from "./PublicPriceComparison";
 import { ComparisonReadiness, type ReadinessAudit } from "./ComparisonReadiness";
+import { MarketBenchmarks } from "./MarketBenchmark";
+import { ResearchRuns } from "./ResearchRuns";
+import { MarketRuns } from "./MarketRuns";
+import { researchProcessUrl } from "./researchNavigation";
 import { HumanReviewNotice, type ResearchHumanReview } from "./HumanReviewNotice";
 
 type Document = {
@@ -92,7 +96,33 @@ type Process = {
   }[];
   specification_evidence: ProductEvidence[];
 };
+type PrivateCandidate = {
+  candidate_id: string;
+  process_identity: string;
+  process_code: string;
+  description: string;
+  brand: string | null;
+  model: string | null;
+  status: "eligible" | "ineligible" | "pending_review";
+  reasons: string[];
+  public_evidence_status: string;
+  market_status: string;
+  market_report_id: string | null;
+  warnings: string[];
+};
+const candidateReasons: Record<string, string> = {
+  unresolved_product_identity: "Marca o referencia no resuelta",
+  conflicting_or_uncertain_product_identity: "Identidad incierta o conflictiva",
+  no_documented_public_unit_price: "Sin precio unitario público documentado",
+  unresolved_public_price_stage: "Etapa económica no resuelta",
+  missing_document_page_provenance: "Falta documento, página o referencia de evidencia",
+  missing_verified_purchase_date: "Fecha de compra no acreditada",
+  incomplete_structured_public_evidence: "Evidencia estructurada incompleta",
+  structured_documented_public_product: "Producto identificado con precio y provenance documental",
+};
 type Report = {
+  run_type?: string;
+  private_market_candidates?: PrivateCandidate[];
   comparison_readiness?: ReadinessAudit;
   comparison_policy?: string;
   economic_cycle_summary?: {
@@ -178,11 +208,20 @@ function secopUrl(value: string | null) {
 export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "signals" }) {
   const [pairLimit, setPairLimit] = useState(50);
   const [params, setParams] = useSearchParams();
+  const privateRun = params.get("private_run");
   const report = useQuery<Report>({
-    queryKey: ["investigation", "real-research"],
+    queryKey: ["investigation", "real-research", privateRun, params.get("run")],
     queryFn: async () => {
       const response = await fetch(
-        new Request(new URL("/api/v1/investigation/research", location.origin)),
+        new Request(
+          new URL(
+            privateRun
+              ? `/api/v1/investigation/market-runs/${encodeURIComponent(privateRun)}/research`
+              : "/api/v1/investigation/research" +
+                  (params.get("run") ? `?run_id=${encodeURIComponent(params.get("run")!)}` : ""),
+            location.origin,
+          ),
+        ),
       );
       if (!response.ok) throw new Error("research_unavailable");
       return (await response.json()) as Report;
@@ -196,10 +235,107 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
   return (
     <section>
       <h1>{view === "signals" ? "Señales investigativas" : "Explorar compras reales"}</h1>
+      {view === "purchases" && (
+        <div className="research-actions">
+          <ResearchRuns />
+          <MarketRuns />
+        </div>
+      )}
+      {params.get("run") && !privateRun && (
+        <p className="small muted">
+          Los benchmarks privados previamente publicados son independientes y no se recalculan en
+          esta corrida por fechas.
+        </p>
+      )}
+      {privateRun && (
+        <section className="card" aria-label="Elegibilidad de productos para mercado privado">
+          <h2>Productos de esta corrida: paso a mercado privado</h2>
+          <p>
+            La identidad y el precio se reconstruyen desde los documentos de la ventana
+            seleccionada. Una oferta documentada no equivale a compra confirmada.
+          </p>
+          {report.data && !report.data.private_market_candidates?.length && (
+            <p>No se identificaron productos elegibles. No se consultaron fuentes privadas.</p>
+          )}
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Proceso / producto</th>
+                  <th>Elegibilidad</th>
+                  <th>Evidencia pública</th>
+                  <th>Mercado privado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.data?.private_market_candidates?.map((c) => (
+                  <tr key={c.candidate_id}>
+                    <td>
+                      <Link to={researchProcessUrl(c.process_identity, params)}>
+                        {c.process_code}
+                      </Link>
+                      <p>{c.description}</p>
+                      <small>{[c.brand, c.model].filter(Boolean).join(" · ")}</small>
+                    </td>
+                    <td>
+                      {c.status === "eligible"
+                        ? "Elegible"
+                        : c.status === "ineligible"
+                          ? "No elegible"
+                          : "Pendiente de revisión"}
+                      <p>{c.reasons.map((r) => candidateReasons[r] ?? r).join(" · ")}</p>
+                    </td>
+                    <td>
+                      {c.public_evidence_status === "documented_unconfirmed_offer"
+                        ? "Oferta documentada; aceptación no confirmada"
+                        : c.public_evidence_status === "contract_confirmed"
+                          ? "Contrato confirmado"
+                          : c.public_evidence_status === "awarded_confirmed"
+                            ? "Adjudicación confirmada"
+                            : c.public_evidence_status === "accepted_offer_confirmed"
+                              ? "Oferta aceptada confirmada"
+                              : "Sin resolver"}
+                      {c.warnings.length > 0 && (
+                        <p className="small">Evidencia con limitaciones; revisar detalle.</p>
+                      )}
+                    </td>
+                    <td>
+                      {c.market_status === "processed"
+                        ? "Benchmark procesado"
+                        : c.market_status === "failed"
+                          ? "Consulta fallida; evidencia pública conservada"
+                          : "No consultado"}
+                      {c.market_report_id && (
+                        <p>
+                          <Link
+                            to={`/explorar?private_run=${encodeURIComponent(privateRun)}&market_run=${encodeURIComponent(privateRun)}&market=${encodeURIComponent(c.market_report_id)}&process=${encodeURIComponent(c.process_identity)}`}
+                          >
+                            Ver benchmark de este producto
+                          </Link>
+                        </p>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+      <MarketBenchmarks signals={view === "signals"} />
       <p className="sub">Investigación / observatorio · Televisores · Socrata / SECOP II</p>
       <div className="row" style={{ marginBottom: 18 }}>
         <span className="chip">Datos reales · muestra exploratoria</span>
-        <Link to={view === "signals" ? "/explorar" : "/senales"}>
+        <Link
+          to={
+            (view === "signals" ? "/explorar" : "/senales") +
+            (privateRun
+              ? `?private_run=${encodeURIComponent(privateRun)}&market_run=${encodeURIComponent(privateRun)}`
+              : params.get("run")
+                ? `?run=${encodeURIComponent(params.get("run")!)}`
+                : "")
+          }
+        >
           {view === "signals" ? "Ver procesos y evidencia" : "Ver señales"}
         </Link>
         <Link to={view === "signals" ? "/demo/senales" : "/demo/explorar"} className="small muted">
@@ -244,7 +380,7 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
             </div>
             <div className="card">
               <span className="muted">Señales sustentadas</span>
-              <h2>{report.data.signals.length}</h2>
+              <h2>{privateRun ? "Ver benchmarks por producto" : report.data.signals.length}</h2>
             </div>
           </div>
           {report.data.summary && (
@@ -296,7 +432,7 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
               discovery. Sin umbral porcentual ni ajuste por inflación o TRM.
             </p>
           )}
-          {view === "signals" ? (
+          {view === "signals" && !privateRun ? (
             <>
               <div className="notice info">
                 <div>
@@ -325,9 +461,7 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
                   </p>
                   {signal.processes.map((p) => (
                     <p key={p}>
-                      <Link to={`/explorar?process=${encodeURIComponent(p)}`}>
-                        {p} · revisar evidencia
-                      </Link>
+                      <Link to={researchProcessUrl(p, params)}>{p} · revisar evidencia</Link>
                     </p>
                   ))}
                   {signal.sides && (
@@ -386,9 +520,7 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
                     <p>{pair.limitations.join(" · ")}</p>
                     {pair.processes.map((p) => (
                       <p key={p}>
-                        <Link to={`/explorar?process=${encodeURIComponent(p)}`}>
-                          {p} · evidencia
-                        </Link>
+                        <Link to={researchProcessUrl(p, params)}>{p} · evidencia</Link>
                       </p>
                     ))}
                   </div>
@@ -426,7 +558,13 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
                             <button
                               type="button"
                               className="btn"
-                              onClick={() => setParams({ process: p.id })}
+                              onClick={() =>
+                                setParams(
+                                  new URLSearchParams(
+                                    researchProcessUrl(p.id, params).split("?")[1],
+                                  ),
+                                )
+                              }
                             >
                               {p.reference || p.id}
                             </button>
@@ -487,7 +625,14 @@ export function ResearchPage({ view = "purchases" }: { view?: "purchases" | "sig
                     <h2>
                       {selected.reference} · {selected.entity}
                     </h2>
-                    <button className="btn" onClick={() => setParams({})}>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const next = new URLSearchParams(params);
+                        next.delete("process");
+                        setParams(next);
+                      }}
+                    >
                       Cerrar detalle
                     </button>
                   </div>

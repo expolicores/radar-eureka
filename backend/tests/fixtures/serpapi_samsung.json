@@ -1,0 +1,42 @@
+{
+  "shopping": {
+    "search_parameters": {"engine": "google_shopping", "gl": "co", "hl": "es"},
+    "shopping_results": [{
+      "position": 1, "title": "Samsung Televisor Smart Crystal Uhd 4K U8000h", "source": "exito.com",
+      "price": "$ 1.799.900", "extracted_price": 1799900,
+      "product_id": "5647722602654877558",
+      "product_link": "https://www.google.com/shopping/product/5647722602654877558"
+    }]
+  },
+  "product": {
+    "search_parameters": {"engine": "google_product", "gl": "co", "hl": "es"},
+    "search_metadata": {"id": "fixture-from-20261105T005209Z"},
+    "product_results": {
+      "title": "Samsung Televisor Smart Crystal Uhd 4K U8000h", "brand": "Samsung",
+      "product_attributes": [{"name": "Tamaño", "value": "58 pulgadas"}],
+      "page_token": "fixture-public-product-token",
+      "stores": [
+        {
+          "position": 1, "name": "exito.com",
+          "title": "Televisor SAMSUNG 58 pulgadas LED Uhd4K Smart TV UN58U8000HKXZL",
+          "link": "https://www.exito.com/televisor-samsung-58-pulgadas-led-uhd4k-smart-tv-un58u8000hkxzl-3254967/p?idsku=3856068",
+          "price": "$ 1.799.900", "extracted_price": 1799900, "shipping": "Gratis",
+          "details_and_offers": ["En stock para compras en línea"], "rating": 3.9, "reviews": 561
+        },
+        {
+          "position": 2, "name": "Tienda Online Puntos Colombia",
+          "title": "Televisor SAMSUNG 58 pulgadas LED Uhd4K Smart TV UN58U8000HKXZL",
+          "link": "https://tiendaonline.puntoscolombia.com/televisor-samsung-58-pulgadas-led-uhd4k-smart-tv-un58u8000hkxzl-925434/p?idsku=2245927",
+          "price": "$ 3.339.900", "extracted_price": 3339900, "shipping": "+ $ 7.500",
+          "details_and_offers": ["En stock para compras en línea"]
+        },
+        {
+          "position": 3, "name": "Addi", "title": "Televisor SAMSUNG 58 pulgadas LED Uhd4K Smart TV",
+          "link": "https://marketplace.addi.com/producto/4958940",
+          "price": "$ 2.270.000", "extracted_price": 2270000, "shipping": "+ $ 10.000",
+          "details_and_offers": ["En stock para compras en línea"]
+        }
+      ]
+    }
+  }
+}

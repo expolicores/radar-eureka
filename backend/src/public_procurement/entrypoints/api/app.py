@@ -12,6 +12,8 @@ from fastapi import FastAPI
 
 from public_procurement.agents.eureka_assistant import api as assistant_api
 from public_procurement.agents.eureka_assistant.chat import build_assistant_chat
+from public_procurement.agents.investigation_assistant import api as investigation_assistant_api
+from public_procurement.agents.investigation_assistant.chat import InvestigationChat
 from public_procurement.comparison import api as signals_api
 from public_procurement.comparison.services import build_signal_query_service
 from public_procurement.eureka import api as eureka_api
@@ -25,7 +27,9 @@ from public_procurement.exploration import api as exploration_api
 from public_procurement.exploration.services import build_exploration_service
 from public_procurement.investigation import api as cases_api
 from public_procurement.investigation import research_api
+from public_procurement.investigation.market_runs import ManualMarketRunner
 from public_procurement.investigation.research import ResearchReportStore
+from public_procurement.investigation.run_background import ManualResearchRunner
 from public_procurement.investigation.services import build_investigation_service
 from public_procurement.licitaciones_cdp import api as cdp_api
 from public_procurement.licitaciones_cdp.background import ManualCdpRunner
@@ -62,7 +66,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
         app.state.manual_cycle_runner.close()
         app.state.manual_cdp_runner.close()
+        app.state.manual_research_runner.close()
+        app.state.manual_market_runner.close()
         app.state.assistant_chat.clear()
+        app.state.investigation_assistant_chat.clear()
         engine.dispose()
 
     app = FastAPI(title="Seguimiento Compras Públicas", version="0.1.0", lifespan=lifespan)
@@ -75,6 +82,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         settings.local_storage_path.parent / "investigation"
     )
     app.state.current_user_provider = demo_user_provider
+    app.state.manual_research_runner = ManualResearchRunner(
+        settings.local_storage_path.parent / "investigation"
+    )
+    app.state.manual_market_runner = ManualMarketRunner(
+        settings.local_storage_path.parent / "investigation"
+    )
     app.state.eureka_queries = build_eureka_http_queries(session_factory, settings)
     app.state.radar_queries = build_radar_http_queries(session_factory)
     app.state.human_review_queries = build_human_review_service(session_factory, settings)
@@ -85,6 +98,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.manual_cdp_runner = ManualCdpRunner(session_factory, settings)
     app.state.cdp_queries = LicitacionesQueries(session_factory)
     app.state.assistant_chat = build_assistant_chat(settings)
+    app.state.investigation_assistant_chat = InvestigationChat(settings)
     # También responde las excepciones no controladas (500), para no perder las cabeceras.
     app.add_middleware(CorrelationMiddleware)
     register_error_handlers(app)
@@ -101,4 +115,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(review_api.router)
     app.include_router(cdp_api.router)
     app.include_router(assistant_api.router)
+    app.include_router(investigation_assistant_api.router)
     return app

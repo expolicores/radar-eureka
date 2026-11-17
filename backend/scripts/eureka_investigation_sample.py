@@ -62,11 +62,11 @@ class ReceiptInventory:
         ]
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample-directory", type=Path, required=True)
     parser.add_argument("--execute", action="store_true", required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     out = args.sample_directory.resolve()
     if (out / "sample-result.json").exists():
         raise ValueError("La muestra ya finalizó; no se ejecuta otra corrida implícita.")

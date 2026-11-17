@@ -9,7 +9,7 @@ from public_procurement.investigation.research import ResearchReportStore, build
 from public_procurement.shared.config import Settings
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample-directory", type=Path, required=True)
     parser.add_argument("--publish", action="store_true")
@@ -18,7 +18,7 @@ def main() -> None:
         action="store_true",
         help="Offline: versioned research rules on existing fragments; no OCR or downloads",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     directory = args.sample_directory.resolve()
     sample_path = directory / "sample-result.json"
     if not args.refresh_research_facts and (directory / "sample-research.json").exists():

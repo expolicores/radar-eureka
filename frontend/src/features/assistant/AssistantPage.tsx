@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { InvestigationChat } from "./InvestigationChat";
+import "./InvestigationChat.css";
 
 import { AssistantText } from "./AssistantText";
 import {
@@ -69,6 +71,38 @@ function ExternalSources({ references }: { references: ExternalReference[] }) {
 }
 
 export function AssistantPage() {
+  const [mode, setMode] = useState<"commercial" | "investigation">("commercial");
+  const [params] = useSearchParams();
+  const runId = params.get("run_id") || null;
+  return (
+    <div className="assistant-workspace">
+      <div className="assistant-mode-selector" role="group" aria-label="Seleccionar asistente">
+        <button
+          type="button"
+          aria-pressed={mode === "commercial"}
+          onClick={() => setMode("commercial")}
+        >
+          Asistente comercial
+        </button>
+        <button
+          type="button"
+          aria-pressed={mode === "investigation"}
+          onClick={() => setMode("investigation")}
+        >
+          Asistente investigativo
+        </button>
+      </div>
+      <div hidden={mode !== "commercial"}>
+        <CommercialChat />
+      </div>
+      <div hidden={mode !== "investigation"}>
+        <InvestigationChat key={runId ?? "latest"} runId={runId} />
+      </div>
+    </div>
+  );
+}
+
+function CommercialChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");

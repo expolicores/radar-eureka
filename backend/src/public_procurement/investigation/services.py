@@ -23,6 +23,7 @@ from public_procurement.exploration.services import (
     build_exploration_service,
 )
 
+from .assistant_queries import InvestigationAssistantQueries, build_assistant_queries
 from .domain.case import (
     CaseDetail,
     CaseItem,
@@ -46,10 +47,12 @@ __all__ = [
     "CaseNotFoundError",
     "CaseSummary",
     "InvalidCaseDataError",
+    "InvestigationAssistantQueries",
     "InvestigationError",
     "InvestigationService",
     "ReferenceNotFoundError",
     "SaveResult",
+    "build_assistant_queries",
     "build_investigation_service",
 ]
 

@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { researchProcessUrl } from "./researchNavigation";
 import { formatCop, formatDate } from "../../lib/format";
 
 type DocumentEvidence = {
@@ -37,6 +38,7 @@ export function PublicPriceComparison({
   days: number | null;
   limitations: string[];
 }) {
+  const [params] = useSearchParams();
   const labels: Record<string, string> = {
     product_class: "Clase de producto",
     brand: "Marca",
@@ -88,7 +90,7 @@ export function PublicPriceComparison({
               <td>Proceso</td>
               {sides.map((s) => (
                 <td key={s.process_identity}>
-                  <Link to={`/explorar?process=${encodeURIComponent(s.process_identity)}`}>
+                  <Link to={researchProcessUrl(s.process_identity, params)}>
                     {s.process_code ?? s.process_identity}
                   </Link>
                 </td>

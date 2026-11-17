@@ -29,9 +29,11 @@ function inline(text: string, references: ExternalReference[]): ReactNode {
 export function AssistantText({
   text,
   externalReferences = [],
+  tables = false,
 }: {
   text: string;
   externalReferences?: ExternalReference[];
+  tables?: boolean;
 }) {
   const blocks: ReactNode[] = [];
   const lines = text.replace(/\r\n/g, "\n").split("\n");
@@ -39,6 +41,51 @@ export function AssistantText({
     const line = lines[i] ?? "";
     if (!line.trim()) {
       i++;
+      continue;
+    }
+    if (tables && line.trim().startsWith("|") && /^\s*\|\s*:?-{3,}/.test(lines[i + 1] ?? "")) {
+      const cells = (value: string) =>
+        value
+          .trim()
+          .replace(/^\||\|$/g, "")
+          .split("|")
+          .map((cell) => cell.trim());
+      const headers = cells(line);
+      i += 2;
+      const rows: string[][] = [];
+      while (i < lines.length && (lines[i] ?? "").trim().startsWith("|")) {
+        rows.push(cells(lines[i++]!));
+      }
+      blocks.push(
+        <div
+          key={i}
+          className="assistant-table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Tabla de evidencia investigativa"
+        >
+          <table>
+            <thead>
+              <tr>
+                {headers.map((cell, col) => (
+                  <th scope="col" key={col}>
+                    {inline(cell, externalReferences)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={index}>
+                  {headers.map((_, col) => (
+                    <td key={col}>{inline(row[col] ?? "", externalReferences)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      );
       continue;
     }
     const list = /^\s*(?:[-*]|\d+\.)\s+/.test(line);

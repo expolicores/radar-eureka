@@ -1,0 +1,56 @@
+.research-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.research-actions > .card {
+  min-width: 0;
+}
+.research-market-select {
+  display: grid;
+  gap: 8px;
+  margin-block: 16px;
+}
+.research-market-select select {
+  font: inherit;
+  padding: 9px;
+  max-width: 100%;
+  width: 100%;
+}
+@media (max-width: 1000px) {
+  .research-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.research-run-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-block: 16px;
+}
+.research-run-dates label {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+.research-run-dates input {
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+.research-run-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+}
+.research-run-counts dt {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.research-run-counts dd {
+  margin: 6px 0;
+  font-weight: 600;
+}
