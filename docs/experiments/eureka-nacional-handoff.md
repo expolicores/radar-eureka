@@ -48,8 +48,26 @@ dependientes de fecha de la baseline quedaron fuera de esta selección. Ruff y
 formato pasaron en los archivos Python modificados.
 
 En el próximo smoke, revisar la forma y disponibilidad del campo UNSPSC
-recibido, la paginación sin filtro geográfico, la presencia de candidatos A y B
+recibido, la paginación con el filtro geográfico explícito, la presencia de candidatos A y B
 y los casos excluidos. La corrida sigue pendiente de autorización.
+
+## Cobertura geográfica explícita
+
+La configuración `backend/scripts/eureka_nacional_geography(from_licitaciones_info).v1.json`
+coincide con el adjunto del propietario y conserva el orden de sus 1.130
+identificadores únicos. EN-01 valida el archivo antes de conectar a CDP y
+reutiliza `build_process_payload`. Cada página envía la lista completa en
+`query.ubicacion_filter`. El perfil comercial y el pipeline documental
+conservan sus reglas.
+
+La cadena exacta transmitida contiene 1.129 comas y tiene SHA-256
+`f4f1d02fd12e1738402c8ef4a261ff1d13a427198f26293b0d024fa8afd0619b`.
+Pasaron 134 pruebas offline de EN-01, del constructor compartido y del plan regional. Ruff y formato pasaron en los archivos Python modificados.
+
+El smoke conserva los límites anteriores. Queda por observar si el endpoint
+acepta la longitud del filtro nacional y cómo pagina bajo el perfil activo.
+El [comando actualizado](eureka-nacional-experience-spike.md#smoke-test-preparado)
+indica explícitamente la ruta de la captura.
 
 ## Verificación de EN-01
 

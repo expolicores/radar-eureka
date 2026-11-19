@@ -24,8 +24,9 @@ Registrar documentos, páginas, OCR, duración, volumen, llamadas IA y costos co
 
 ## Estrategia implementada
 
-- **Discovery.** Consulta get-info en orden descendente por FechaPublicacion, sin
-  filtro geográfico ni términos enviados al proveedor. Aplica localmente el
+- **Discovery.** Consulta get-info en orden descendente por FechaPublicacion. Envía
+  los 1.130 identificadores capturados como un solo `query.ubicacion_filter`
+  por página. Aplica localmente el
   [perfil comercial nacional](eureka-nacional-universo-comercial.md) por UNSPSC
   verificado y evidencia textual. Conserva el motivo de inclusión o exclusión y
   los solapamientos. Prioriza procesos vigentes y mínima cuantía, con turnos entre
@@ -70,6 +71,7 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 & $spikePython '.\backend\scripts\eureka_nacional_en01.py' --processes 5 --documents 5 `
   --discovery-pages 4 --recent-days 30 --cdp-url 'http://127.0.0.1:9232' `
   --commercial-profile '.\backend\config\eureka_nacional_commercial.v1.json' `
+  --geography '.\backend\scripts\eureka_nacional_geography(from_licitaciones_info).v1.json' `
   --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
 ```
 
@@ -80,7 +82,7 @@ URL de base deshabilitada y su extractor llama al servicio compartido en dry-run
 | Tope del smoke propuesto | Valor |
 |---|---:|
 | Procesos seleccionados | 5. La CLI acepta 5–10. |
-| Discovery | 4 páginas de hasta 30 filas, 30 días de publicación de Bogotá. |
+| Discovery | 4 páginas de hasta 30 filas y 30 días de publicación en hora de Bogotá. Cada página recibe el filtro completo de 1.130 ubicaciones. |
 | Inventario | Hasta 10 páginas por proceso, con detección de página repetida. |
 | Descargas | 5 totales, máximo 2 por proceso y 10 MiB por PDF. |
 | Extracción nativa | Hasta 12 páginas por PDF y 60 páginas de documento por corrida. |

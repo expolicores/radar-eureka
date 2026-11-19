@@ -1,6 +1,7 @@
 """EN-01: bounded national SECOP II supply sampling with local, deterministic evidence."""
 
 import argparse
+import hashlib
 import json
 import re
 import tempfile
@@ -47,6 +48,11 @@ from public_procurement.extraction.adapters.ocr import probe_engine
 
 PROFILE = "1086005"
 DISCOVERY_PAGE_SIZE = 30
+GEOGRAPHY_SOURCE = "Licitaciones.info"
+NATIONAL_LOCATION_COUNT = 1130
+DEFAULT_GEOGRAPHY = Path(__file__).with_name(
+    "eureka_nacional_geography(from_licitaciones_info).v1.json"
+)
 PAGES_PER_DOCUMENT = 12
 OCR_PER_DOCUMENT = 2
 REQUEST_CREDITS = 60
@@ -85,7 +91,40 @@ def safe_public_url(value, identifier):
     return urlunsplit(("https", "community.secop.gov.co", parts.path, query, ""))
 
 
-def discover(client, args, now, discovery, profile):
+def load_national_locations(path=DEFAULT_GEOGRAPHY):
+    try:
+        config = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as error:
+        raise spike.SpikeError(
+            "No se pudo leer la configuraci\u00f3n geogr\u00e1fica nacional."
+        ) from error
+    if not isinstance(config, dict) or config.get("source") != GEOGRAPHY_SOURCE:
+        raise spike.SpikeError(
+            "La geograf\u00eda nacional debe identificar a Licitaciones.info como fuente."
+        )
+
+    ids = config.get("location_ids")
+    if (
+        not isinstance(ids, list)
+        or config.get("location_count") != NATIONAL_LOCATION_COUNT
+        or len(ids) != NATIONAL_LOCATION_COUNT
+        or not all(isinstance(item, str) and re.fullmatch(r"[0-9]+", item) for item in ids)
+        or len(set(ids)) != NATIONAL_LOCATION_COUNT
+    ):
+        raise spike.SpikeError(
+            "Se requieren los 1.130 identificadores de ubicaci\u00f3n capturados, \u00fanicos."
+        )
+    return tuple(ids)
+
+
+def discover(client, args, now, discovery, profile, locations):
+    location_filter = ",".join(locations)
+    payload = spike.build_process_payload(location_filter, None, DISCOVERY_PAGE_SIZE)
+    discovery["geography"] = {
+        "source": GEOGRAPHY_SOURCE,
+        "location_count": len(locations),
+        "ubicacion_filter_sha256": hashlib.sha256(location_filter.encode("ascii")).hexdigest(),
+    }
     candidates = {}
     signatures = set()
     provider_fields = {
@@ -98,16 +137,7 @@ def discover(client, args, now, discovery, profile):
     try:
         for page in range(1, args.discovery_pages + 1):
             body = client.post(
-                f"/cliente/contratos/get-info/MP?perfiles={PROFILE}",
-                {
-                    "query": {},
-                    "limit": DISCOVERY_PAGE_SIZE,
-                    "ascending": 0,
-                    "page": page,
-                    "byColumn": 1,
-                    "orderBy": "FechaPublicacion",
-                    "columns": spike.COLUMNS,
-                },
+                f"/cliente/contratos/get-info/MP?perfiles={PROFILE}", {**payload, "page": page}
             )
             rows = validate_discovery(body, DISCOVERY_PAGE_SIZE, validate_dates=False)
             signature = frozenset(str(row["idContrato"]) for row in rows)
@@ -366,11 +396,12 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
     }
 
 
-def run(client, args, settings, output, *, now=None, profile=None):
+def run(client, args, settings, output, *, now=None, profile=None, locations=None):
     profile = profile or load_commercial_profile()
+    locations = load_national_locations() if locations is None else locations
     started, now = time.monotonic(), now or local_now()
     discovery = {
-        "scope": "profile_feed_without_geographic_filter",
+        "scope": "national_explicit_location_filter",
         "commercial_profile": {
             "version": profile.version,
             "sha256": profile.fingerprint,
@@ -406,7 +437,7 @@ def run(client, args, settings, output, *, now=None, profile=None):
     exit_code = 1
     try:
         check_session(client, PROFILE, aggregator=True)
-        sample = discover(client, args, now, discovery, profile)
+        sample = discover(client, args, now, discovery, profile, locations)
         write_json(output / "processes.json", discovery)
         storage = spike.LocalBinaryStorage(output / "binaries")
         for index, process in enumerate(sample):
@@ -575,12 +606,14 @@ def main(argv=None):
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
+    parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
     from playwright.sync_api import sync_playwright
 
     try:
         validate_cdp_url(args.cdp_url)
         profile = load_commercial_profile(args.commercial_profile)
+        locations = load_national_locations(args.geography)
         if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
             raise ValueError("Ruta de salida fuera del directorio experimental.")
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -591,7 +624,12 @@ def main(argv=None):
         with sync_playwright() as playwright:
             browser = connect_browser(playwright, args.cdp_url)
             return run(
-                SmokeClient(find_page(browser), deadline), args, settings, output, profile=profile
+                SmokeClient(find_page(browser), deadline),
+                args,
+                settings,
+                output,
+                profile=profile,
+                locations=locations,
             )
     except spike.SpikeError as error:
         print(f"EN-01: {error.code}" if isinstance(error, CandidateError) else f"EN-01: {error}")

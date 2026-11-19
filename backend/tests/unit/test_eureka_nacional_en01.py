@@ -1,5 +1,6 @@
 """Offline EN-01 smoke and shared-reader checks."""
 
+import hashlib
 import json
 import os
 import sys
@@ -21,6 +22,7 @@ from licitaciones_cdp_runtime import DOCUMENT_ENDPOINT  # noqa: E402
 from licitaciones_freshness import BOGOTA  # noqa: E402
 from spike_licitaciones_info import SpikeDocument  # noqa: E402
 
+NATIONAL_FILTER_SHA256 = "f4f1d02fd12e1738402c8ef4a261ff1d13a427198f26293b0d024fa8afd0619b"
 CUTOFF = datetime(2026, 11, 19, 12, tzinfo=BOGOTA)
 REQUIRED = "El proponente deberá acreditar experiencia contractual con dos contratos ejecutados."
 WAIVED = "No se exige experiencia contractual al proponente."
@@ -218,7 +220,24 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
     assert metrics["ai_calls"] == 0
     assert "11" not in downloaded
     assert "21" not in downloaded
-    assert all(payload["query"] == {} for path, payload in calls if path != DOCUMENT_ENDPOINT)
+    geography = ",".join(en01.load_national_locations())
+    national_calls = [payload for path, payload in calls if path != DOCUMENT_ENDPOINT]
+    assert [p["page"] for p in national_calls] == [1, 2]
+    assert all(p["query"] == {"ubicacion_filter": geography} for p in national_calls)
+    assert national_calls[0] == {
+        "query": {"ubicacion_filter": geography},
+        "limit": 30,
+        "ascending": 0,
+        "page": 1,
+        "byColumn": 1,
+        "orderBy": "FechaPublicacion",
+        "columns": en01.spike.COLUMNS,
+    }
+    assert report(tmp_path, "processes.json")["geography"] == {
+        "source": "Licitaciones.info",
+        "location_count": 1130,
+        "ubicacion_filter_sha256": NATIONAL_FILTER_SHA256,
+    }
     results = report(tmp_path, "experience_requirements.json")
     assert results[0]["evidence"][0]["page"] == 1
     assert results[0]["evidence"][0]["method"] == "native_pdf_text"
@@ -471,7 +490,9 @@ def test_prefers_open_minimum_quantities_and_keeps_category_overlap():
     client = SimpleNamespace(post=Mock(return_value={"count": len(data), "data": data}))
     discovery = {"pages": [], "duplicates": 0}
     profile = commercial.load_commercial_profile()
-    selected = en01.discover(client, args, CUTOFF, discovery, profile)
+    selected = en01.discover(
+        client, args, CUTOFF, discovery, profile, en01.load_national_locations()
+    )
     assert [item["id_contrato"] for item in selected] == ["3", "2"]
     assert discovery["processes"][0]["validity_status"] == "closed"
     assert discovery["processes"][0]["validity_warning"] == "terminal_provider_status"
@@ -485,3 +506,29 @@ def test_prefers_open_minimum_quantities_and_keeps_category_overlap():
     assert stats["multi_category_processes_deduplicated"] == 3
     assert stats["categories"]["papeleria"]["matches_by_method"]["both"] == 3
     assert sum(stats["candidates_by_commercial_family"].values()) == 3
+
+
+def test_geography_preserves_every_id_in_capture_order():
+    ids = en01.load_national_locations()
+    assert len(ids) == len(set(ids)) == 1130
+    assert hashlib.sha256(",".join(ids).encode("ascii")).hexdigest() == NATIONAL_FILTER_SHA256
+
+
+@pytest.mark.parametrize("error", ["count", "duplicate", "non_string", "invalid_id", "missing"])
+def test_geography_rejects_invalid_capture(tmp_path, error):
+    config = json.loads(en01.DEFAULT_GEOGRAPHY.read_text(encoding="utf-8-sig"))
+    if error == "count":
+        config["location_count"] -= 1
+    elif error == "duplicate":
+        config["location_ids"][-1] = config["location_ids"][0]
+    elif error == "non_string":
+        config["location_ids"][0] = int(config["location_ids"][0])
+    elif error == "invalid_id":
+        config["location_ids"][0] += " "
+    else:
+        config["location_ids"].pop()
+
+    geography = tmp_path / "geography.json"
+    geography.write_text(json.dumps(config), encoding="utf-8")
+    with pytest.raises(en01.spike.SpikeError, match=r"1.130"):
+        en01.load_national_locations(geography)

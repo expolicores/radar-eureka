@@ -10,6 +10,17 @@ conserva familias regionales pertinentes y combina coincidencias UNSPSC
 verificadas con objeto y descripción. La oferta y la disponibilidad de los
 bienes requieren validación comercial.
 
+La cobertura de discovery usa los 1.130 identificadores internos capturados en
+Licitaciones.info, conservados en
+`backend/scripts/eureka_nacional_geography(from_licitaciones_info).v1.json`.
+Cada página reutiliza `query.ubicacion_filter` con la lista completa, separada
+por comas.
+
+El descubrimiento nacional será una capacidad común para participación
+tradicional, adquisición estratégica de experiencia contractual e
+intermediación multiproducto. EN-01 prepara esa capacidad mediante un solo
+flujo experimental.
+
 ## Arquitectura y alcance
 
 - Reutilizar `LicitacionesInfoSource` en `backend/src/public_procurement/licitaciones_cdp/adapters.py`, y `PageClient` y `fetch_inventory` en `backend/scripts/licitaciones_cdp_runtime.py`. Usar el mecanismo autorizado de `backend/scripts/licitaciones_auth.py`.

@@ -106,11 +106,16 @@ def parse_process_rows(payload: Any) -> list[dict[str, Any]]:
     return result
 
 
-def build_process_payload(locations: str, term: str, limit: int = 30) -> dict[str, Any]:
+def build_process_payload(locations: str, term: str | None, limit: int = 30) -> dict[str, Any]:
     if not 1 <= limit <= 30 or not re.fullmatch(r"\d+(,\d+)*", locations):
         raise SpikeError("Use 1–30 procesos y IDs de ubicación separados por comas.")
+    query = (
+        {"Objeto": term, "ubicacion_filter": locations}
+        if term is not None
+        else {"ubicacion_filter": locations}
+    )
     return {
-        "query": {"Objeto": term, "ubicacion_filter": locations},
+        "query": query,
         "limit": limit,
         "ascending": 0,
         "page": 1,
