@@ -52,3 +52,11 @@ backend/scripts/.local/
 
 # Paquetes analíticos locales; pueden contener evidencia y datos de desarrollo.
 /exports/yipitdata_lab/
+
+
+# Eureka Nacional: resultados locales y archivos de sesión generados por CDP.
+/.local/
+storage_state*.json
+request_headers*.json
+browser_header_presence*.json
+*.har
