@@ -4,16 +4,6 @@ import re
 
 from spike_licitaciones_info import normalized
 
-SUPPLY = re.compile(
-    r"\b(?:suministro(?: e instalacion)?|adquisicion|compraventa|compra|dotacion)"
-    r"\s+(?:de|del|para)\b"
-)
-SERVICE = re.compile(
-    r"\b(?:obra civil|obras publicas|interventoria|consultoria|arrendamiento|"
-    r"transporte|servicios? profesionales?|prestacion de servicios?|"
-    r"servicio de (?:aseo|vigilancia|mantenimiento|conectividad)|"
-    r"(?:compra|adquisicion|contratacion) de servicios?)\b"
-)
 PRIMARY = re.compile(r"\b(?:invitacion|pliegos?|condiciones definitivas|terminos de referencia)\b")
 AMENDMENT = re.compile(r"\b(?:adendas?|modificaci(?:on|ones)|aclaraci(?:on|ones)|enmiendas?)\b")
 SUPPORT = re.compile(
@@ -59,11 +49,6 @@ REQUIREMENT_REFERENCE = re.compile(
     r"\b(?:anexo|archivo|documento)\b"
 )
 STATUSES = ("experience_required", "no_experience_required", "experience_ambiguous", "not_resolved")
-
-
-def supply_candidate(description):
-    text = normalized(description)
-    return bool(SUPPLY.search(text) and not SERVICE.search(text))
 
 
 def document_role(name):

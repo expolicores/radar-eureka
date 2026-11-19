@@ -14,6 +14,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
+import eureka_nacional_commercial as commercial  # noqa: E402
 import eureka_nacional_en01 as en01  # noqa: E402
 import eureka_nacional_experience as rules  # noqa: E402
 from licitaciones_cdp_runtime import DOCUMENT_ENDPOINT  # noqa: E402
@@ -103,7 +104,7 @@ def test_coverage_and_conflicts(documents, status):
     assert rules.classify_experience(documents)["status"] == status
 
 
-def row(identifier, department, description="Suministro de bienes"):
+def row(identifier, department, description="Suministro de computadores"):
     return {
         "idContrato": identifier,
         "id_fuente_contract": 3,
@@ -199,6 +200,13 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
     assert metrics["unique_document_hashes"] == 1
     assert metrics["duplicates"] == 1
     assert metrics["supply_candidates"] == 5
+    assert metrics["open_commercial_candidates"] == 5
+    assert metrics["categories"]["informatica"]["matches_by_method"]["keywords"] == 5
+    assert metrics["categories"]["informatica"]["resolution_rate"]["value"] == 0.8
+    assert metrics["categories"]["informatica"]["operational_cost"]["downloads"] == 5
+    assert (
+        len(report(tmp_path, "processes.json")["exclusion_review_sample"]["primary_service"]) == 1
+    )
     assert metrics["resolved"] == 4
     assert metrics["classification"]["not_resolved"] == 1
     assert metrics["by_validity"] == {
@@ -303,3 +311,177 @@ def test_shared_ocr_extractor_uses_en01_policy(tmp_path):
     assert detail["status"] == "completed"
     assert detail["ocr_pages"] == [1]
     assert fragments[0].source_locator["extraction_method"] == "ocr_text"
+
+
+@pytest.mark.parametrize(
+    ("obj", "description", "unspsc", "category", "reason", "method"),
+    [
+        (
+            "Adquisición de bienes",
+            "",
+            ["43211503"],
+            "informatica",
+            "matched_commercial_goods",
+            "unspsc",
+        ),
+        (
+            "Adquisición de bienes",
+            "Computadores portátiles",
+            [],
+            "informatica",
+            "matched_commercial_goods",
+            "keywords",
+        ),
+        (
+            "Suministro de tabletas e impresoras",
+            "",
+            ["43212105"],
+            "informatica",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Suministro de bienes",
+            "",
+            ["43000000", "43210000", "43219999"],
+            None,
+            "outside_commercial_profile",
+            None,
+        ),
+        (
+            "Suministro e instalación de cámaras de seguridad",
+            "",
+            ["46171610"],
+            "videovigilancia",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Adquisición de detergente para el servicio de aseo",
+            "",
+            ["47131800"],
+            "aseo",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Prestación del servicio de aseo con suministro de detergente",
+            "",
+            ["47131800"],
+            None,
+            "primary_service",
+            None,
+        ),
+        (
+            "Suministro de materiales de ferretería para obra civil",
+            "",
+            ["27111700"],
+            "ferreteria",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Construcción de obras civiles y suministro de materiales de ferretería",
+            "",
+            ["27111700"],
+            None,
+            "obra_civil",
+            None,
+        ),
+        ("Compra de camioneta y repuestos", "", ["25172500"], None, "vehiculos_completos", None),
+        (
+            "Suministro de llantas para camionetas",
+            "",
+            ["25172500"],
+            "repuestos",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Adquisición de bienes",
+            "",
+            ["25132100"],
+            None,
+            "outside_commercial_profile",
+            None,
+        ),
+        (
+            "Adquisición de drones comerciales",
+            "",
+            ["25132100"],
+            "drones",
+            "matched_commercial_goods",
+            "both",
+        ),
+        (
+            "Adquisición de bienes",
+            "",
+            ["25132103"],
+            "drones",
+            "matched_commercial_goods",
+            "unspsc",
+        ),
+        (
+            "Adquisición de drones",
+            "",
+            ["25132102", "25132103"],
+            None,
+            "excluded_product_code",
+            None,
+        ),
+    ],
+)
+def test_commercial_profile(obj, description, unspsc, category, reason, method):
+    result = commercial.assess_commercial(
+        commercial.load_commercial_profile(), obj, description, unspsc
+    )
+    assert result["primary_category"] == category
+    assert result["commercial_reason"] == reason
+    if category:
+        assert (
+            next(m["method"] for m in result["category_matches"] if m["category"] == category)
+            == method
+        )
+
+
+def test_normalizes_only_eight_digit_unspsc_tokens():
+    assert commercial.parse_unspsc([43211503, "43212105-impresora; 43211503", "432115"]) == [
+        "43211503",
+        "43212105",
+    ]
+    assert commercial.parse_unspsc({"code": "43211503"}) == []
+
+
+def test_prefers_open_minimum_quantities_and_keeps_category_overlap():
+    def candidate(identifier, municipality, modality=None, end="2026-11-20 09:00:00", status=None):
+        return {
+            **row(identifier, municipality, "Compra de computadores e impresoras y papelería"),
+            "modalidad": modality,
+            "FechaVencimiento": end,
+            "EstadoProceso": status,
+            "UNSPSC": ["43211503", "14111507"],
+        }
+
+    data = [
+        candidate(1, "Bogotá", "Mínima cuantía", status="Adjudicado"),
+        candidate(2, "Boyacá", "Selección abreviada"),
+        candidate(3, "Valle", "Mínima cuantía"),
+    ]
+    args = SimpleNamespace(discovery_pages=1, processes=2, recent_days=30)
+    client = SimpleNamespace(post=Mock(return_value={"count": len(data), "data": data}))
+    discovery = {"pages": [], "duplicates": 0}
+    profile = commercial.load_commercial_profile()
+    selected = en01.discover(client, args, CUTOFF, discovery, profile)
+    assert [item["id_contrato"] for item in selected] == ["3", "2"]
+    assert discovery["processes"][0]["validity_status"] == "closed"
+    assert discovery["processes"][0]["validity_warning"] == "terminal_provider_status"
+    assert discovery["provider_fields"] == {
+        "unspsc_shapes": {"list": 3},
+        "unspsc_rows_parsed": 3,
+        "description_rows": 0,
+        "modality_rows": 3,
+    }
+    stats = commercial.commercial_metrics(discovery["processes"], [], profile)
+    assert stats["multi_category_processes_deduplicated"] == 3
+    assert stats["categories"]["papeleria"]["matches_by_method"]["both"] == 3
+    assert sum(stats["candidates_by_commercial_family"].values()) == 3

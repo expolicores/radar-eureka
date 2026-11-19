@@ -10,11 +10,20 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import spike_licitaciones_info as spike
+from eureka_nacional_commercial import (
+    DEFAULT_PROFILE,
+    assess_commercial,
+    commercial_metrics,
+    fraction,
+    load_commercial_profile,
+    parse_unspsc,
+    plain,
+    selection_rank,
+)
 from eureka_nacional_experience import (
     STATUSES,
     classify_experience,
     document_role,
-    supply_candidate,
 )
 from licitaciones_candidate_contracts import CandidateProcess
 from licitaciones_cdp_runtime import (
@@ -76,9 +85,16 @@ def safe_public_url(value, identifier):
     return urlunsplit(("https", "community.secop.gov.co", parts.path, query, ""))
 
 
-def discover(client, args, now, discovery):
+def discover(client, args, now, discovery, profile):
     candidates = {}
     signatures = set()
+    provider_fields = {
+        "unspsc_shapes": Counter(),
+        "unspsc_rows_parsed": 0,
+        "description_rows": 0,
+        "modality_rows": 0,
+    }
+    discovery["provider_fields"] = provider_fields
     try:
         for page in range(1, args.discovery_pages + 1):
             body = client.post(
@@ -109,8 +125,31 @@ def discover(client, args, now, discovery):
                 kind = source_kind(process)
                 identity = process_identity(process)
                 key = identity or candidate.reference
+                raw_unspsc = row.get("UNSPSC")
+                unspsc = parse_unspsc(raw_unspsc)
+                provider_fields["unspsc_shapes"][
+                    "missing" if raw_unspsc is None else type(raw_unspsc).__name__
+                ] += 1
+                provider_fields["unspsc_rows_parsed"] += bool(unspsc)
+                description = next(
+                    (
+                        row[field]
+                        for field in ("Descripcion", "Descripci\u00f3n", "DescripcionProceso")
+                        if isinstance(row.get(field), str) and row[field].strip()
+                    ),
+                    "",
+                )
+                modality = row.get("modalidad") or row.get("Modalidad")
+                provider_fields["description_rows"] += bool(description)
+                provider_fields["modality_rows"] += isinstance(modality, str) and bool(
+                    modality.strip()
+                )
                 if key in candidates:
                     discovery["duplicates"] += 1
+                    existing = candidates[key]
+                    existing["unspsc"] = sorted(set(existing["unspsc"]) | set(unspsc))
+                    if not existing["description"]:
+                        existing["description"] = description
                     continue
                 phase = candidate.id_ultima_fase
                 if not phase and identity and identity.startswith("CO1.NTC."):
@@ -119,7 +158,9 @@ def discover(client, args, now, discovery):
                     source=kind,
                     source_identity=identity,
                     source_url=safe_public_url(row.get("Link"), "noticeUID"),
-                    modality=row.get("modalidad"),
+                    modality=modality,
+                    unspsc=unspsc,
+                    description=description,
                     inventory_capable=document_capable(process),
                     inventory_keys={
                         "idContrato": row["idContrato"],
@@ -134,42 +175,63 @@ def discover(client, args, now, discovery):
         else:
             discovery["stop_reason"] = "page_budget"
     finally:
-        sample = select_processes(candidates, args, now, discovery)
+        sample = select_processes(candidates, args, now, discovery, profile)
     return sample
 
 
-def select_processes(candidates, args, now, discovery):
+def select_processes(candidates, args, now, discovery, profile):
     processes, _, _ = apply_freshness(list(candidates.values()), args.recent_days, now)
     processes, _, _ = apply_validity(processes, now)
-    by_department = {}
+    preferred = {plain(value) for value in profile.preferred_modalities}
+    terminal = {plain(value) for value in profile.terminal_states}
+    buckets = {}
+    excluded_samples = {}
     for process in processes:
         process.pop("raw_source_reference")
-        process["supply_prefilter_match"] = process["recent"] and supply_candidate(
-            process["object"]
+        process.update(
+            assess_commercial(
+                profile, process["object"], process.pop("description"), process["unspsc"]
+            )
         )
-        reason = None
+        process["preferred_modality"] = plain(process["modality"]) in preferred
+        provider_terminal = plain(process["provider_status"]).removeprefix("proceso ") in terminal
+        if provider_terminal:
+            process["validity_status"] = "closed"
+            process["validity_warning"] = "terminal_provider_status"
+        process["supply_prefilter_match"] = (
+            process["recent"] and process["commercial_exclusion"] is None
+        )
+        reason = process["commercial_exclusion"]
         if not process["recent"]:
             reason = "outside_publication_window"
-        elif not process["supply_prefilter_match"]:
-            reason = "outside_supply_prefilter"
-        elif process["source"] != "secop2" or not process["inventory_capable"]:
+        elif not reason and (process["source"] != "secop2" or not process["inventory_capable"]):
             reason = "inventory_unavailable_for_source"
         process["excluded_reason"] = reason
         process["sampled"] = False
-        if reason is None:
-            department = spike.normalized(process["department"]).strip()
-            by_department.setdefault(department, deque()).append(process)
+        if reason:
+            examples = excluded_samples.setdefault(reason, [])
+            if len(examples) < 2:
+                examples.append(process["process_reference"])
+            continue
+        departments = buckets.setdefault(selection_rank(process), {})
+        department = plain(process["department"])
+        departments.setdefault(department, deque()).append(process)
     sample = []
-    while len(sample) < args.processes and by_department:
-        for department, queue in list(by_department.items()):
-            process = queue.popleft()
-            process["sampled"] = True
-            sample.append(process)
-            if not queue:
-                del by_department[department]
-            if len(sample) == args.processes:
-                break
+    for rank in sorted(buckets):
+        departments = buckets[rank]
+        while departments and len(sample) < args.processes:
+            for department, queue in list(departments.items()):
+                process = queue.popleft()
+                process["sampled"] = True
+                sample.append(process)
+                if not queue:
+                    del departments[department]
+                if len(sample) == args.processes:
+                    break
+        if len(sample) == args.processes:
+            break
     discovery["processes"] = processes
+    discovery["exclusion_review_sample"] = excluded_samples
     return sample
 
 
@@ -266,22 +328,16 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
             metrics[f"{stage}_failures"] += 1
 
 
-def metrics_summary(discovery, results, metrics, client, started):
+def metrics_summary(discovery, results, metrics, client, started, profile):
     counts = Counter(result["status"] for result in results)
     analyzed = len(results)
     resolved = counts["experience_required"] + counts["no_experience_required"]
     supply = sum(p["supply_prefilter_match"] for p in discovery["processes"])
     eligible = sum(p["excluded_reason"] is None for p in discovery["processes"])
 
-    def rate(numerator, denominator):
-        return {
-            "numerator": numerator,
-            "denominator": denominator,
-            "value": numerator / denominator if denominator else None,
-        }
-
     return {
         **metrics,
+        **commercial_metrics(discovery["processes"], results, profile),
         "discovered_rows": sum(page["received"] for page in discovery["pages"]),
         "duplicates": discovery["duplicates"],
         "unique_processes": len(discovery["processes"]),
@@ -298,11 +354,11 @@ def metrics_summary(discovery, results, metrics, client, started):
             status: dict(Counter(r["status"] for r in results if r["validity_status"] == status))
             for status in ("open", "closed", "unknown")
         },
-        "no_experience_rate_among_resolved": rate(counts["no_experience_required"], resolved),
-        "experience_rate_among_resolved": rate(counts["experience_required"], resolved),
-        "resolution_rate": rate(resolved, analyzed),
-        "unresolved_rate": rate(analyzed - resolved, analyzed),
-        "candidate_yield": rate(counts["no_experience_required"], supply),
+        "no_experience_rate_among_resolved": fraction(counts["no_experience_required"], resolved),
+        "experience_rate_among_resolved": fraction(counts["experience_required"], resolved),
+        "resolution_rate": fraction(resolved, analyzed),
+        "unresolved_rate": fraction(analyzed - resolved, analyzed),
+        "candidate_yield": fraction(counts["no_experience_required"], supply),
         "request_credits_used": client.requests,
         "elapsed_seconds": round(time.monotonic() - started, 3),
         "ai_calls": 0,
@@ -310,10 +366,16 @@ def metrics_summary(discovery, results, metrics, client, started):
     }
 
 
-def run(client, args, settings, output, *, now=None):
+def run(client, args, settings, output, *, now=None, profile=None):
+    profile = profile or load_commercial_profile()
     started, now = time.monotonic(), now or local_now()
     discovery = {
         "scope": "profile_feed_without_geographic_filter",
+        "commercial_profile": {
+            "version": profile.version,
+            "sha256": profile.fingerprint,
+            "catalog_version": profile.catalog["version"],
+        },
         "cutoff": now.isoformat(),
         "date_field": "FechaPublicacion",
         "recent_days": args.recent_days,
@@ -344,7 +406,7 @@ def run(client, args, settings, output, *, now=None):
     exit_code = 1
     try:
         check_session(client, PROFILE, aggregator=True)
-        sample = discover(client, args, now, discovery)
+        sample = discover(client, args, now, discovery, profile)
         write_json(output / "processes.json", discovery)
         storage = spike.LocalBinaryStorage(output / "binaries")
         for index, process in enumerate(sample):
@@ -353,6 +415,10 @@ def run(client, args, settings, output, *, now=None):
             remaining = args.documents - metrics["documents_attempted"]
             allowance = min(2, remaining, max(1, remaining - (len(sample) - index - 1)))
             stop = None
+            request_start = client.requests
+            process_start = time.monotonic()
+            downloads_before = metrics["documents_downloaded"]
+            ocr_before = metrics["ocr_pages_reported"]
             try:
                 analyze_documents(
                     client,
@@ -391,6 +457,14 @@ def run(client, args, settings, output, *, now=None):
                     "run_id": output.name,
                     "process_reference": reference,
                     "validity_status": process["validity_status"],
+                    "commercial_category": process["primary_category"],
+                    "commercial_priority": process["commercial_priority"],
+                    "operational_cost": {
+                        "elapsed_seconds": round(time.monotonic() - process_start, 3),
+                        "request_credits": client.requests - request_start,
+                        "downloads": metrics["documents_downloaded"] - downloads_before,
+                        "ocr_pages_reported": metrics["ocr_pages_reported"] - ocr_before,
+                    },
                     "coverage": {
                         "inventory_available": bool(documents),
                         "documents_complete": sum(d["complete"] for d in documents),
@@ -438,7 +512,7 @@ def run(client, args, settings, output, *, now=None):
             "run_id": output.name,
             "status": status,
             "limits": limits,
-            **metrics_summary(discovery, results, metrics, client, started),
+            **metrics_summary(discovery, results, metrics, client, started, profile),
         }
         for filename, data in (
             ("processes.json", discovery),
@@ -500,11 +574,13 @@ def main(argv=None):
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
+    parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     args = parser.parse_args(argv)
     from playwright.sync_api import sync_playwright
 
     try:
         validate_cdp_url(args.cdp_url)
+        profile = load_commercial_profile(args.commercial_profile)
         if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
             raise ValueError("Ruta de salida fuera del directorio experimental.")
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -514,7 +590,9 @@ def main(argv=None):
         settings = settings_for_run(output, args.tesseract, args.tessdata)
         with sync_playwright() as playwright:
             browser = connect_browser(playwright, args.cdp_url)
-            return run(SmokeClient(find_page(browser), deadline), args, settings, output)
+            return run(
+                SmokeClient(find_page(browser), deadline), args, settings, output, profile=profile
+            )
     except spike.SpikeError as error:
         print(f"EN-01: {error.code}" if isinstance(error, CandidateError) else f"EN-01: {error}")
         return error.exit_code if isinstance(error, CandidateError) else 1
