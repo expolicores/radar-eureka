@@ -1,6 +1,6 @@
 # EN-01 · Experiencia contractual en procesos de suministro
 
-**Estado:** preparación documental. Implementación y corridas pendientes de autorización. Las cifras de este informe quedan pendientes hasta contar con evidencia.
+**Estado:** implementación mínima preparada. Corrida real pendiente de revisión y autorización. Las cifras de este informe quedan pendientes hasta contar con evidencia.
 
 ## Pregunta e hipótesis
 
@@ -21,3 +21,77 @@ La progresión propuesta es 5–10 procesos de humo, 30–50 candidatos explorat
 Registrar por corrida los parámetros, el embudo desde discovery hasta resolución, los cuatro resultados de clasificación, el denominador de cada métrica, las discrepancias humanas, errores, sesgos y ejemplos redactados. Calcular la proporción con y sin requisito entre los resueltos, la tasa de resolución entre analizados y el rendimiento sobre candidatos. Distinguir candidatos automáticos y confirmados.
 
 Registrar documentos, páginas, OCR, duración, volumen, llamadas IA y costos conocidos o estimados. Calcular costo por proceso resuelto y por candidato confirmado cuando existan datos. Las pruebas de regresión se compararán con el baseline del handoff. Los resultados, conclusiones y recomendaciones de iteración quedan pendientes.
+
+## Estrategia implementada
+
+- **Discovery.** Usa get-info ordenado por FechaPublicacion descendente, sin filtro
+  de geografía ni términos y con el perfil autorizado. Valida respuesta, registra
+  tamaño y conteo por página, y deduplica por identidad SECOP o referencia del
+  proveedor. El prefiltro local busca operaciones de suministro, adquisición,
+  compraventa, compra o dotación, y descarta señales explícitas de obras y servicios.
+  Candidatos SECOP II con inventario se seleccionan por ronda entre departamentos
+  observados. Se registra el estado de apertura que se desprende del plazo del
+  proveedor. La cobertura real y la paginación del perfil aún deben contrastarse
+  en vivo. La muestra es exploratoria y no estima el universo nacional.
+- **Documentos.** Prioriza invitación/pliego/condiciones, adendas y estudios o
+  anexos. Excluye nombres de borradores y documentos posteriores claramente
+  identificados. La primera entrega procesa PDF y registra el resto del inventario,
+  formatos omitidos, límites y páginas sin cobertura. Reutiliza el inventario CDP,
+  el descargador seguro de SECOP y el almacén por hash.
+- **Experiencia.** Una obligación explícita y aplicable al proponente en un texto
+  rector puede clasificar como experiencia exigida. Para clasificar ausencia se
+  exige exención explícita, páginas con cobertura completa y documentos relevantes
+  cubiertos. Una coincidencia con RUP, personal o fabricante no indica por sí sola
+  experiencia contractual. Contradicciones, lotes, referencias a anexos y lenguaje
+  condicional producen ambigüedad. Una cobertura insuficiente produce un caso sin
+  resolver. La evidencia conserva regla, documento, URL, hash, página, localizador,
+  método de extracción y fragmento.
+- **Medición.** La CLI registra embudo, razones de exclusión, estados de apertura,
+  categorías, proporciones con numerador y denominador, descargas, bytes, páginas
+  y duración. La revisión humana y los costos monetarios quedan para la corrida.
+
+## Smoke test preparado
+
+Ejecutar únicamente tras autorizar la corrida real. Usar un Edge CDP de loopback
+dedicado a Eureka Nacional, con perfil local restringido fuera de los worktrees.
+Si el puerto indicado ya pertenece a Eureka Regional, usar otro puerto.
+Iniciar sesión manualmente, seleccionar el perfil autorizado de Licitaciones.info y
+dejar abierta una sola pestaña de Contratos desktop. La CLI valida el endpoint y
+reutiliza la sesión en memoria mediante CDP.
+
+Desde la raíz del worktree experimental, en PowerShell:
+
+```powershell
+$spikePython = if (Test-Path '.\backend\.venv\Scripts\python.exe') {
+    (Resolve-Path '.\backend\.venv\Scripts\python.exe').Path
+} else {
+    (Resolve-Path '..\COMPRAS PUBLICAS\backend\.venv\Scripts\python.exe').Path
+}
+$env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython '.\backend\scripts\eureka_nacional_en01.py' --processes 5 --documents 5 `
+  --discovery-pages 4 --recent-days 30 --cdp-url 'http://127.0.0.1:9232' `
+  --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
+
+El intérprete alternativo reutiliza dependencias Python 3.12 ya instaladas de solo
+lectura. Las importaciones de la aplicación apuntan a este worktree. La CLI usa una
+URL de base deshabilitada y su extractor llama al servicio compartido en dry-run.
+
+| Tope del smoke propuesto | Valor |
+|---|---:|
+| Procesos seleccionados | 5. La CLI acepta 5–10. |
+| Discovery | 4 páginas de hasta 30 filas, 30 días de publicación de Bogotá. |
+| Inventario | Hasta 10 páginas por proceso, con detección de página repetida. |
+| Descargas | 5 totales, máximo 2 por proceso y 10 MiB por PDF. |
+| Extracción nativa | Hasta 12 páginas por PDF y 60 páginas de documento por corrida. |
+| OCR | Hasta 2 páginas por PDF y 10 por corrida, con Tesseract local en español. |
+| Red | 60 créditos compartidos. Cada descarga reserva 6 por posibles redirecciones. |
+| Tiempo | Presupuesto operativo de 360 s con margen antes de cada operación. CDP tiene timeout de 20 s por solicitud, descarga de 12 s, extracción nativa de 12 s y OCR de 14 s por PDF con 6 s por página. |
+| IA | 0 llamadas. |
+
+Salida en `/.local/eureka-nacional-spike/en01-*/` con procesos, inventario,
+clasificaciones, métricas, errores, resumen y binarios locales. Los resultados
+pueden quedar parciales por límites, sesión, paginación o faltantes documentales.
+El código 2 indica resultado parcial. Los códigos CDP identifican fallos de sesión
+o de contrato de la fuente. Los valores y fragmentos de los documentos son privados.

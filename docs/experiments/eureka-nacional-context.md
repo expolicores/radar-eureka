@@ -10,7 +10,7 @@ EN-01 pregunta si podemos identificar a escala nacional procesos de suministro d
 - La fuente de discovery e inventario de EN-01 es Licitaciones.info vía CDP. Contrastar después con Socrata si aporta valor. La cobertura nacional, la paginación y el flujo vivo requieren validación.
 - Reutilizar `backend/src/public_procurement/documents/ports.py`, `SecopDownloader` en `documents/adapters/secop.py`, `LocalBinaryStorage` en `documents/adapters/local_storage.py` y la extracción híbrida de `extraction/adapters/hybrid.py` con Tesseract `spa`. Las rutas abreviadas parten de `backend/src/public_procurement/`.
 - La orquestación experimental será manual y aislada. Los servicios regionales con persistencia, el scheduler, las migraciones, los agentes regionales, la UI y los despliegues quedan fuera del alcance de EN-01.
-- Acotar procesos, documentos, páginas, OCR, duración, llamadas de IA y costo antes de cada corrida. El inicio de implementación, corridas y consumo de IA requiere autorización posterior.
+- Acotar procesos, documentos, páginas, OCR, duración, llamadas de IA y costo antes de cada corrida. La implementación mínima está autorizada. La corrida real y el consumo de IA se autorizan por separado.
 
 ## Privacidad y custodia
 
