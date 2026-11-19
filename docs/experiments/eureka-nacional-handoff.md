@@ -32,6 +32,25 @@ clasificaciones de ausencia antes de interpretar el rendimiento comercial.
 
 La ejecución base de GitHub Actions es la [44119052812](https://github.com/expolicores/radar-eureka/actions/runs/44119052812). El único workflow observado ejecuta CI ante pushes de ramas y tags y ante pull requests. El workflow carece de pasos de despliegue. GitHub mostró cero entornos y despliegues y Pages desactivado. Webhooks privados, permisos e instalaciones requieren revisión administrativa. Si se aprueba atender la deuda técnica, usar `fix/mvp-ci-stability` por separado. Distinguir fallos heredados de regresiones de EN-01.
 
+## Perfil comercial nacional
+
+El [informe del universo comercial](eureka-nacional-universo-comercial.md)
+recupera los filtros regionales y valida la matriz oficial UNSPSC UNv260801.
+El archivo de configuración es
+`backend/config/eureka_nacional_commercial.v1.json`. La CLI lo aplica antes del
+inventario y registra cobertura de metadatos, coincidencias, categorías, motivos
+de exclusión, muestra de revisión y costo operativo. La modalidad de mínima
+cuantía y el estado abierto ordenan la selección.
+
+La verificación del perfil encontró 127 nodos en el catálogo oficial. Pasaron
+43 pruebas de EN-01 y 312 de regresión compartida. Las cuatro pruebas CDP
+dependientes de fecha de la baseline quedaron fuera de esta selección. Ruff y
+formato pasaron en los archivos Python modificados.
+
+En el próximo smoke, revisar la forma y disponibilidad del campo UNSPSC
+recibido, la paginación sin filtro geográfico, la presencia de candidatos A y B
+y los casos excluidos. La corrida sigue pendiente de autorización.
+
 ## Verificación de EN-01
 
 - 26 pruebas de EN-01 pasaron en local, con respuestas CDP simuladas, almacenamiento

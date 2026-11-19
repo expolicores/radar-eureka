@@ -24,15 +24,13 @@ Registrar documentos, páginas, OCR, duración, volumen, llamadas IA y costos co
 
 ## Estrategia implementada
 
-- **Discovery.** Usa get-info ordenado por FechaPublicacion descendente, sin filtro
-  de geografía ni términos y con el perfil autorizado. Valida respuesta, registra
-  tamaño y conteo por página, y deduplica por identidad SECOP o referencia del
-  proveedor. El prefiltro local busca operaciones de suministro, adquisición,
-  compraventa, compra o dotación, y descarta señales explícitas de obras y servicios.
-  Candidatos SECOP II con inventario se seleccionan por ronda entre departamentos
-  observados. Se registra el estado de apertura que se desprende del plazo del
-  proveedor. La cobertura real y la paginación del perfil aún deben contrastarse
-  en vivo. La muestra es exploratoria y no estima el universo nacional.
+- **Discovery.** Consulta get-info en orden descendente por FechaPublicacion, sin
+  filtro geográfico ni términos enviados al proveedor. Aplica localmente el
+  [perfil comercial nacional](eureka-nacional-universo-comercial.md) por UNSPSC
+  verificado y evidencia textual. Conserva el motivo de inclusión o exclusión y
+  los solapamientos. Prioriza procesos vigentes y mínima cuantía, con turnos entre
+  departamentos dentro de cada nivel. La cobertura real y la paginación del perfil
+  aún deben contrastarse en vivo.
 - **Documentos.** Prioriza invitación/pliego/condiciones, adendas y estudios o
   anexos. Excluye nombres de borradores y documentos posteriores claramente
   identificados. La primera entrega procesa PDF y registra el resto del inventario,
@@ -71,6 +69,7 @@ $env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
 $env:PYTHONDONTWRITEBYTECODE = '1'
 & $spikePython '.\backend\scripts\eureka_nacional_en01.py' --processes 5 --documents 5 `
   --discovery-pages 4 --recent-days 30 --cdp-url 'http://127.0.0.1:9232' `
+  --commercial-profile '.\backend\config\eureka_nacional_commercial.v1.json' `
   --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
 ```
 

@@ -4,6 +4,12 @@ Eureka Regional conserva en `main` el MVP funcional para compras públicas, con 
 
 EN-01 pregunta si podemos identificar a escala nacional procesos de suministro donde la experiencia contractual no sea una barrera de entrada. La percepción inicial del 80–90 % de procesos con requisito es una hipótesis por medir. La suficiencia documental sobre experiencia aporta una señal comercial. La elegibilidad integral requiere evaluación adicional.
 
+El [perfil comercial nacional](eureka-nacional-universo-comercial.md) acota la
+muestra a bienes comercializables por terceros. Separa prioridades A y B,
+conserva familias regionales pertinentes y combina coincidencias UNSPSC
+verificadas con objeto y descripción. La oferta y la disponibilidad de los
+bienes requieren validación comercial.
+
 ## Arquitectura y alcance
 
 - Reutilizar `LicitacionesInfoSource` en `backend/src/public_procurement/licitaciones_cdp/adapters.py`, y `PageClient` y `fetch_inventory` en `backend/scripts/licitaciones_cdp_runtime.py`. Usar el mecanismo autorizado de `backend/scripts/licitaciones_auth.py`.
