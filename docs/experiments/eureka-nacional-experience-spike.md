@@ -1,6 +1,6 @@
 # EN-01 · Experiencia contractual en procesos de suministro
 
-**Estado:** implementación mínima preparada. Corrida real pendiente de revisión y autorización. Las cifras de este informe quedan pendientes hasta contar con evidencia.
+**Estado:** primer smoke real parcial. Cinco procesos con inventario y experiencia contractual sin resolver.
 
 ## Pregunta e hipótesis
 
@@ -20,7 +20,7 @@ La progresión propuesta es 5–10 procesos de humo, 30–50 candidatos explorat
 
 Registrar por corrida los parámetros, el embudo desde discovery hasta resolución, los cuatro resultados de clasificación, el denominador de cada métrica, las discrepancias humanas, errores, sesgos y ejemplos redactados. Calcular la proporción con y sin requisito entre los resueltos, la tasa de resolución entre analizados y el rendimiento sobre candidatos. Distinguir candidatos automáticos y confirmados.
 
-Registrar documentos, páginas, OCR, duración, volumen, llamadas IA y costos conocidos o estimados. Calcular costo por proceso resuelto y por candidato confirmado cuando existan datos. Las pruebas de regresión se compararán con el baseline del handoff. Los resultados, conclusiones y recomendaciones de iteración quedan pendientes.
+Registrar documentos, páginas, OCR, duración, volumen, llamadas IA y costos conocidos o estimados. Calcular costo por proceso resuelto y por candidato confirmado cuando existan datos. Las pruebas de regresión se compararán con el baseline del handoff.
 
 ## Estrategia implementada
 
@@ -96,3 +96,62 @@ clasificaciones, métricas, errores, resumen y binarios locales. Los resultados
 pueden quedar parciales por límites, sesión, paginación o faltantes documentales.
 El código 2 indica resultado parcial. Los códigos CDP identifican fallos de sesión
 o de contrato de la fuente. Los valores y fragmentos de los documentos son privados.
+
+## Primer smoke real · 19 de noviembre de 2026
+
+La corrida `en01-ms7c7hyc`, iniciada a las 22:03 hora de Bogotá desde
+`11cad4d`, terminó parcial (código de salida `2`). El preflight autenticado
+pasó y el endpoint devolvió cuatro respuestas válidas con el filtro explícito de
+1.130 ubicaciones. Las páginas 1–4 devolvieron 30 filas cada una, con conteos del
+proveedor de 31, 61, 91 y 121 respectivamente. El cambio entre páginas impide
+interpretar 121 como total del universo.
+
+| Control | Resultado |
+|---|---:|
+| Filas recibidas y únicas | 120 de 120 |
+| Departamentos observados | 26 en el feed y 4 en los cinco seleccionados |
+| Fuentes | 64 SECOP II, 54 SECOP I, 1 universidad y 1 otro portal |
+| Candidatos comerciales | 19 |
+| Elegibles para inventario | 8, de los cuales 4 estaban abiertos al corte |
+| Seleccionados con inventario | 5 de 5 |
+| Documentos inventariados | 43 |
+| Descargas | 4 de 5 intentos, 2.903.078 bytes |
+| Extracción | 1 página de texto nativo, 0 páginas OCR |
+| Casos sin resolver | 5 de 5 |
+| Recursos | 45,125 s del runner, 46 de 60 créditos de red y 0 llamadas de IA |
+
+Los ocho elegibles se identificaron por palabras clave. Sus categorías
+principales fueron ferretería (3), informática (2), uniformes y EPP (2), y
+papelería (1). Hubo cuatro procesos con coincidencias en más de una categoría.
+Las 120 filas incluyeron modalidad. El artefacto registró 0 filas con UNSPSC
+interpretable y 0 con descripción independiente en los campos leídos.
+
+De las 120 filas, 112 quedaron fuera del funnel documental: 66 fuera del perfil
+comercial, 30 por servicio principal, 11 por fuente o inventario no compatible,
+4 por falta de evidencia clara de bien físico y 1 por obra civil. Otros tres
+elegibles quedaron fuera de la selección de cinco.
+
+Se inventariaron 30 PDF, 9 DOCX, 1 XLSX y 3 formatos indeterminados. Quedaron 25
+documentos sin seleccionar por presupuesto y 13 por formato. Una invitación
+superó 10 MiB (`too_large`) y tres PDF superaron 12 páginas (`page_limit`). El
+único PDF leído por completo fue una cotización de una página. Los cinco
+inventarios produjeron `governing_documents_incomplete` y cero cláusulas
+clasificables. La tasa de resolución fue 0/5. La tasa de ausencia de experiencia
+entre los resueltos queda indeterminada.
+
+### Siguiente corrida
+
+1. Probar offline la selección de documentos rectores con nombres que comienzan
+   por numeración. Esta corrida seleccionó un proyecto de pliego con prefijo
+   numérico y lo trató como documento principal. Verificar también que una
+   cotización genérica no desplace un rector.
+2. Evaluar cómo anticipar tamaño y páginas donde existan metadatos disponibles.
+   Si el documento rector supera un límite, conservar la causa y evaluar
+   alternativas verificables dentro del presupuesto antes de proponer otro tope.
+3. Verificar en otra corrida autorizada la cobertura documental, OCR sobre un
+   documento aplicable y el significado operativo de `count`. La muestra actual
+   demuestra diversidad geográfica observada y acceso a inventarios.
+
+Los archivos de procesos, inventarios, errores, métricas, binarios y resultados
+por caso permanecen en `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Se ejecutó
+una sola corrida real. La siguiente requiere autorización.

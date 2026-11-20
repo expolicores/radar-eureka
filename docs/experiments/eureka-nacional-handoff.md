@@ -9,16 +9,20 @@
 
 ## Estado de EN-01
 
-El 19 de noviembre de 2026 se verificaron el tag anotado publicado, el checkpoint de
-`main` y la rama remota. La implementación mínima vive en
-`backend/scripts/eureka_nacional_en01.py` y las reglas determinísticas en
-`backend/scripts/eureka_nacional_experience.py`. No se abrió una sesión real ni se
-realizaron consultas a Licitaciones.info, descargas SECOP ni llamadas de IA.
+El primer smoke real se ejecutó el 19 de noviembre de 2026 en Edge CDP dedicado
+con el runner `11cad4d`. Resultado parcial, `en01-ms7c7hyc` (salida `2`). El
+preflight pasó y el endpoint devolvió 120 registros únicos de 26 departamentos
+en cuatro páginas. Los cinco candidatos seleccionados tuvieron inventario. De
+43 documentos se intentaron cinco descargas y se obtuvieron cuatro. Una
+descarga superó 10 MiB y tres PDF superaron 12 páginas. Se extrajo una página
+nativa, se usaron 46 créditos de red y se registraron 0 páginas OCR y 0 llamadas
+de IA. Los cinco casos siguen `not_resolved`.
 
-El [informe de EN-01](eureka-nacional-experience-spike.md) contiene la estrategia,
-los límites y el comando del smoke test. Continuar con una corrida real de cinco
-procesos únicamente tras la revisión y autorización del propietario. Revisar las
-clasificaciones de ausencia antes de interpretar el rendimiento comercial.
+El [informe agregado](eureka-nacional-experience-spike.md#primer-smoke-real--19-de-noviembre-de-2026)
+contiene el funnel, los errores y las recomendaciones. El detalle permanece
+bajo `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Antes de solicitar otra
+corrida, revisar offline la prioridad documental en títulos numerados y
+cotizaciones. La siguiente ejecución requiere autorización.
 
 ## Baseline aceptada
 
@@ -47,9 +51,7 @@ La verificación del perfil encontró 127 nodos en el catálogo oficial. Pasaron
 dependientes de fecha de la baseline quedaron fuera de esta selección. Ruff y
 formato pasaron en los archivos Python modificados.
 
-En el próximo smoke, revisar la forma y disponibilidad del campo UNSPSC
-recibido, la paginación con el filtro geográfico explícito, la presencia de candidatos A y B
-y los casos excluidos. La corrida sigue pendiente de autorización.
+En el primer smoke, las coincidencias elegibles provinieron de palabras clave. El campo UNSPSC estuvo ausente en las 120 filas.
 
 ## Cobertura geográfica explícita
 
@@ -64,8 +66,7 @@ La cadena exacta transmitida contiene 1.129 comas y tiene SHA-256
 `f4f1d02fd12e1738402c8ef4a261ff1d13a427198f26293b0d024fa8afd0619b`.
 Pasaron 134 pruebas offline de EN-01, del constructor compartido y del plan regional. Ruff y formato pasaron en los archivos Python modificados.
 
-El smoke conserva los límites anteriores. Queda por observar si el endpoint
-acepta la longitud del filtro nacional y cómo pagina bajo el perfil activo.
+El endpoint aceptó el filtro explícito y devolvió cuatro páginas de 30 filas únicas. Los conteos del proveedor variaron por página.
 El [comando actualizado](eureka-nacional-experience-spike.md#smoke-test-preparado)
 indica explícitamente la ruta de la captura.
 
@@ -76,8 +77,7 @@ indica explícitamente la ruta de la captura.
 - La selección de regresión documental y CDP pasó 312 pruebas compartidas y
   reprodujo las cuatro fallas dependientes de fecha de la baseline.
 - Ruff y la comprobación de formato pasaron en los tres archivos Python nuevos.
-- La validación de cobertura, autenticación y paginación del proveedor queda para
-  el smoke test real. Las salidas de prueba se guardaron en .local y quedan fuera de Git.
+- Las pruebas offline y la corrida real generaron salidas locales excluidas de Git.
 
 ## Verificación reproducible
 
