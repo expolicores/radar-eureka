@@ -28,7 +28,7 @@ POLICY_PATH = ROOT / "scripts" / "licitaciones_fact_policy.v1.json"
 SESSION_ENRICHED_RATIO_MIN = 0.8
 MANUAL_LOGIN = (
     "Inicia sesión manualmente y vuelve a ejecutar. "
-    "Abre Contratos desktop desde el perfil Vila Frontier en el mismo Edge CDP."
+    "Abre Contratos desktop desde el perfil comercial configurado en el mismo Edge CDP."
 )
 
 
@@ -162,7 +162,7 @@ class PageClient:
             raise CandidateError(
                 "profile_unavailable",
                 "El endpoint del perfil no esta disponible. "
-                "Selecciona Vila Frontier desde la UI y vuelve a ejecutar.",
+                "Selecciona el perfil comercial configurado desde la UI y vuelve a ejecutar.",
             )
         if result.get("status") != 200 or not result.get("json") or not result.get("sameEndpoint"):
             code = "invalid_response" if path == discovery else "preflight_failed"

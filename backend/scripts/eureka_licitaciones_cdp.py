@@ -47,6 +47,11 @@ from licitaciones_search_plan import DEFAULT_PLAN, load_plan, run_plan
 from licitaciones_sources import document_capable, process_identity
 from licitaciones_validity import apply_validity
 
+from public_procurement.licitaciones_cdp.configuration import (
+    ProfileConfigurationError,
+    resolve_profile_id,
+)
+
 
 def check_ocr(settings):
     if not settings.extraction_ocr_enabled:
@@ -384,7 +389,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--region", choices=["boyaca"], default="boyaca")
     parser.add_argument("--object", dest="term", default="refrigerio")
-    parser.add_argument("--profile-id", choices=["1086005"], default="1086005")
+    parser.add_argument(
+        "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
+    )
     parser.add_argument("--max-processes", type=int, choices=range(1, 31), default=30)
     parser.add_argument("--max-document-processes", type=int, choices=range(1, 4), default=3)
     parser.add_argument("--max-documents", type=int, choices=range(1, 3), default=2)
@@ -423,9 +430,14 @@ def main(argv=None):
     if args.recent_days is not None and args.recent_days < 1:
         parser.error("--recent-days debe ser un entero positivo")
     try:
+        args.profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
         settings, ocr = None, None
-        plan = load_plan(args.search_plan or DEFAULT_PLAN) if args.discovery_plan_only else None
+        plan = (
+            load_plan(args.search_plan or DEFAULT_PLAN, profile_id=args.profile_id)
+            if args.discovery_plan_only
+            else None
+        )
         if not args.check_session:
             defaults = (
                 plan if plan is not None else json.loads(DEFAULT_PLAN.read_text(encoding="utf-8"))
@@ -464,7 +476,15 @@ def main(argv=None):
                         print("DIAGNOSTIC=" + str(diagnostic_path))
                 print(
                     json.dumps(
-                        {"stage": "preflight", "status": "healthy", **health}, ensure_ascii=True
+                        {
+                            "stage": "preflight",
+                            **health,
+                            "status": "healthy",
+                            "cdp_reachable": True,
+                            "session_authenticated": True,
+                            "configured_profile_id": args.profile_id,
+                        },
+                        ensure_ascii=True,
                     )
                 )
                 return 0
@@ -486,6 +506,9 @@ def main(argv=None):
                 )
             # Exiting Playwright disconnects; never browser.close() on the user's Edge.
             return run(page, args, settings, output, ocr)
+    except ProfileConfigurationError as error:
+        print(f"configuration_error: {error}")
+        return 2
     except CandidateError as error:
         print(f"{error.code}: {error}")
         return error.exit_code

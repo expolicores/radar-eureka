@@ -23,13 +23,15 @@ from public_procurement.ingestion.services import SecopProcess, canonical_proces
 from public_procurement.shared.config import Settings
 
 from .adapters import LicitacionesInfoSource, provider_identity, provider_metadata
+from .configuration import resolve_profile_id
 from .events import annotate_run, notice
 from .review import REASON_FLAGS, REVIEW_FLAGS, combine_document_reviews, review_reasons
 
 SOURCE = "licitaciones_info_cdp"
 SESSION_HELP = (
     "Sesión de Licitaciones.info no disponible. Abre el Edge CDP, inicia sesión, "
-    "selecciona Vila Frontier y deja abierta la vista Contratos desktop. Luego vuelve a ejecutar."
+    "selecciona el perfil comercial configurado y deja abierta Contratos desktop. "
+    "Vuelve a ejecutar."
 )
 
 
@@ -85,6 +87,7 @@ class LicitacionesInfoRunService:
         identifier: uuid.UUID | None = None,
         on_started: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
+        profile_id = resolve_profile_id(settings=self.settings)
         at = self.clock()
         config = load_radar_config(self.settings.eureka_radar_config_path)
         run: dict[str, Any] = {
@@ -232,7 +235,7 @@ class LicitacionesInfoRunService:
                 run,
                 {
                     "source": SOURCE,
-                    "profile_id": "1086005",
+                    "profile_id": profile_id,
                     "recent_days": 7,
                     "max_queries": 6,
                     "pause_seconds": 4,
@@ -244,7 +247,12 @@ class LicitacionesInfoRunService:
             if on_started:
                 on_started(run)
             try:
-                with self.source_factory(event) as source:
+                source_instance = (
+                    self.source_factory(event, profile_id=profile_id)
+                    if self.source_factory is LicitacionesInfoSource
+                    else self.source_factory(event)
+                )
+                with source_instance as source:
                     discovery, summary = source.discover()
                     discovery["processes"] = [provider_metadata(p) for p in discovery["processes"]]
                     for key in (

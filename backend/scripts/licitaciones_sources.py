@@ -54,7 +54,16 @@ def process_identity(process):
             return "secop1:" + constancy
     # Provider contract ID is stable within the existing provider/profile namespace.
     identifier = str(process.get("id_contrato") or "")
-    profile = str(process.get("profile_id") or "1086005")
+    profile = str(process.get("profile_id") or "")
+    if not profile:
+        # Persisted references retain their original namespace after account changes.
+        existing = re.fullmatch(
+            r"licitaciones_info:([1-9][0-9]*):[A-Za-z0-9_-]{1,64}",
+            str(process.get("process_reference") or ""),
+        )
+        profile = existing.group(1) if existing else ""
+    if not re.fullmatch(r"[1-9][0-9]*", profile):
+        return None
     if identifier and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", identifier):
         return f"licitaciones_info:{profile}:{identifier}"
     return None

@@ -1,5 +1,48 @@
 # Spike CDP: navegador iniciado manualmente
 
+## Perfil comercial configurable (CDP)
+
+El perfil comercial se resuelve desde una única configuración runtime:
+
+1. CLI explícito: --profile-id <ID> (solo esa ejecución).
+2. LICITACIONES_PROFILE_ID del entorno del proceso o backend/.env, mediante Settings.
+3. Si falta, error configuration_error antes de conectar a CDP. No hay fallback al perfil histórico.
+
+Ejemplo local (no secreto): LICITACIONES_PROFILE_ID=1130951. La cuenta/perfil visible
+actual es infoexpress; su nombre es informativo y no interviene en la lógica.
+El plan licitaciones_search_plan.v1.json describe búsquedas y ya no admite profile_id;
+el loader añade el ID resuelto solo al plan en memoria. Los planes antiguos con esa
+clave deben quitarla: se rechazan para impedir dos fuentes de verdad.
+El adaptador recibe el ID por inyección y la corrida conserva ese mismo ID en su snapshot.
+Las identidades históricas conservan su namespace original; no se les asigna el perfil nuevo.
+
+Desde backend:
+
+    .\.venv\Scripts\python.exe scripts\licitaciones_cdp_open.py
+
+Después: login manual en el Edge dedicado, seleccionar el perfil comercial y dejar una
+única pestaña Contratos desktop en col.licitaciones.info. No cambiar el perfil Microsoft
+ni el directorio del navegador. Reiniciar backend si ya estaba abierto antes de cambiar .env.
+
+Smoke sin discovery comercial/documentos/OCR/DB:
+
+    .\.venv\Scripts\python.exe scripts\eureka_licitaciones_cdp.py --check-session
+
+Salida segura de éxito: cdp_reachable=true, session_authenticated=true,
+configured_profile_id, profile_available=true, get_config_user_status=200,
+get_info_status=200, status=healthy. Usa get-config-user y get-info con query={},
+limit=30, page=1. La validación de calidad mantiene el umbral SECOP del 80%.
+401/419 detienen con session_expired; 403/404 de get-info con profile_unavailable.
+No se imprimen credenciales/headers ni se copian cookies a Python. El smoke verifica
+acceso al ID configurado; no certifica por nombre la identidad del usuario remoto.
+
+Los archivos storage_state.json, request_headers.json y session.json del spike legado
+no se leen ni se modifican por este flujo CDP. Las referencias 1086005 que aparecen más
+abajo en ejemplos/capturas anteriores son históricas, no defaults runtime actuales.
+Los scripts antiguos licitaciones_auth.py/spike_licitaciones_info.py conservan su contrato
+experimental ajeno al runtime CDP; no usar sus comandos de sesión para esta integración.
+
+
 ## Vigencia local desde get-info
 
 El candidate adapter preserva `data[].FechaVencimiento` y `data[].EstadoProceso`

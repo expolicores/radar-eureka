@@ -562,3 +562,13 @@ def test_source_classification_does_not_depend_on_enrichment(link, phase, expect
     assert runtime.classify_preflight_source(row) == expected
     row.update(id_fuente_contract=3, key_config="secop2", EsSecop=True)
     assert runtime.classify_preflight_source(row) == expected
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    from datetime import datetime
+
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")
+    monkeypatch.setattr(
+        flow, "local_now", lambda: datetime.fromisoformat("2026-10-20T16:00:00-05:00")
+    )

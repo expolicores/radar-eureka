@@ -368,7 +368,7 @@ def test_cli_plan_bypasses_settings_ocr_and_old_pipeline(config, tmp_path, monke
     monkeypatch.setattr(flow, "connect_browser", lambda *a: Mock())
     monkeypatch.setattr(flow, "find_page", lambda *a: page)
     monkeypatch.setattr(flow, "LOCAL", tmp_path / "output")
-    monkeypatch.setattr(flow, "load_plan", lambda _: plan)
+    monkeypatch.setattr(flow, "load_plan", lambda _, **kwargs: plan)
     monkeypatch.setattr(
         flow.spike, "Settings", Mock(side_effect=AssertionError("Settings forbidden"))
     )
@@ -389,3 +389,8 @@ def test_cli_plan_bypasses_settings_ocr_and_old_pipeline(config, tmp_path, monke
 def test_search_plan_cannot_accidentally_enter_full_mode():
     with pytest.raises(SystemExit):
         flow.main(["--search-plan", "offline.json"])
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")
