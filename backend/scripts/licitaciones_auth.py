@@ -12,7 +12,7 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL = ROOT / ".local" / "spike_licitaciones_info"
 ORIGIN = "https://col.licitaciones.info"
-ENDPOINT = "/cliente/contratos/get-info/MP?perfiles=1086005"
+ENDPOINT = "/cliente/contratos/get-info/MP"
 HEADERS = (
     "Cookie",
     "Origin",
@@ -158,13 +158,13 @@ def validation_report(response, browser_headers, script_headers):
     }
 
 
-def validate_context(context, headers, browser_presence, payload):
+def validate_context(context, headers, browser_presence, payload, profile_id):
     observed = dict(headers)
     observed["content-type"] = "application/json"
     if context.cookies(ORIGIN):
         observed["cookie"] = "managed-by-browser"
     response = context.request.post(
-        ORIGIN + ENDPOINT,
+        f"{ORIGIN}{ENDPOINT}?perfiles={profile_id}",
         data=payload,
         headers=headers,
         max_redirects=0,

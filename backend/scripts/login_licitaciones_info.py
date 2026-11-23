@@ -20,8 +20,13 @@ from licitaciones_auth import (
 )
 from spike_licitaciones_info import build_process_payload
 
+from public_procurement.licitaciones_cdp.configuration import (
+    ProfileConfigurationError,
+    resolve_profile_id,
+)
 
-def run_visible(playwright, context, browser, payload, minutes, stamp):
+
+def run_visible(playwright, context, browser, payload, minutes, stamp, profile_id):
     trace = local_path(LOCAL / f"browser-network-{stamp}.jsonl")
     trace.parent.mkdir(parents=True, exist_ok=True)
     pending = []
@@ -42,7 +47,7 @@ def run_visible(playwright, context, browser, payload, minutes, stamp):
             )
         )
         if (
-            response.url.split("?")[0] == ORIGIN + ENDPOINT.split("?")[0]
+            response.url.split("?")[0] == ORIGIN + ENDPOINT
             and response.request.method == "POST"
             and response.status == 200
             and "json" in response.headers.get("content-type", "").lower()
@@ -79,7 +84,7 @@ def run_visible(playwright, context, browser, payload, minutes, stamp):
             browser_names = pending[-1]
             headers = capture_headers(browser_names)
             try:
-                report = validate_context(context, headers, browser_names, payload)
+                report = validate_context(context, headers, browser_names, payload, profile_id)
                 legacy_file = LOCAL / "legacy_auth_diagnostic.json"
                 if legacy_file.exists():
                     legacy = json.loads(legacy_file.read_text(encoding="utf-8"))
@@ -126,7 +131,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--timeout-minutes", type=int, choices=range(1, 481), default=120)
+    parser.add_argument(
+        "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
+    )
     args = parser.parse_args()
+    try:
+        profile_id = resolve_profile_id(args.profile_id)
+    except ProfileConfigurationError as error:
+        print(str(error))
+        return 1
     state = local_path(LOCAL / "storage_state.json")
     headers_file = local_path(LOCAL / "request_headers.json")
     comparison_file = LOCAL / "browser_header_presence.json"
@@ -151,13 +164,13 @@ def main():
             context = browser.new_context(storage_state=str(state) if state.exists() else None)
             if not args.validate_only:
                 return run_visible(
-                    playwright, context, browser, payload, args.timeout_minutes, stamp
+                    playwright, context, browser, payload, args.timeout_minutes, stamp, profile_id
                 )
             if args.validate_only:
                 headers = json.loads(headers_file.read_text(encoding="utf-8"))
                 browser_presence = json.loads(comparison_file.read_text(encoding="utf-8"))
                 browser_names = {key: True for key, value in browser_presence.items() if value}
-            report = validate_context(context, headers, browser_names, payload)
+            report = validate_context(context, headers, browser_names, payload, profile_id)
             legacy_file = LOCAL / "legacy_auth_diagnostic.json"
             if legacy_file.exists():
                 legacy = json.loads(legacy_file.read_text(encoding="utf-8"))

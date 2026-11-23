@@ -1,9 +1,52 @@
 # Spike CDP: navegador iniciado manualmente
 
+## Perfil comercial configurable (CDP)
+
+El perfil comercial se resuelve desde una única configuración runtime:
+
+1. CLI explícito: --profile-id <ID> (solo esa ejecución).
+2. LICITACIONES_PROFILE_ID del entorno del proceso o backend/.env, mediante Settings.
+3. Si falta, error configuration_error antes de conectar a CDP. No hay fallback al perfil histórico.
+
+Configura el valor en `backend/.env` como `LICITACIONES_PROFILE_ID=<ID_DEL_PERFIL>`.
+Para un override en PowerShell, usa `--profile-id $env:LICITACIONES_PROFILE_ID`
+con la variable ya cargada en la sesión.
+El plan licitaciones_search_plan.v1.json describe búsquedas y ya no admite profile_id;
+el loader añade el ID resuelto solo al plan en memoria. Los planes antiguos con esa
+clave deben quitarla: se rechazan para impedir dos fuentes de verdad.
+El adaptador recibe el ID por inyección y la corrida conserva ese mismo ID en su snapshot.
+Las identidades históricas conservan su namespace original; no se les asigna el perfil nuevo.
+
+Desde backend:
+
+    .\.venv\Scripts\python.exe scripts\licitaciones_cdp_open.py
+
+Después: login manual en el Edge dedicado, seleccionar el perfil comercial y dejar una
+única pestaña Contratos desktop en col.licitaciones.info. No cambiar el perfil Microsoft
+ni el directorio del navegador. Reiniciar backend si ya estaba abierto antes de cambiar .env.
+
+Smoke sin discovery comercial/documentos/OCR/DB:
+
+    .\.venv\Scripts\python.exe scripts\eureka_licitaciones_cdp.py --check-session
+
+Salida segura de éxito: cdp_reachable=true, session_authenticated=true,
+configured_profile_id, profile_available=true, get_config_user_status=200,
+get_info_status=200, status=healthy. Usa get-config-user y get-info con query={},
+limit=30, page=1. La validación de calidad mantiene el umbral SECOP del 80%.
+401/419 detienen con session_expired; 403/404 de get-info con profile_unavailable.
+No se imprimen credenciales/headers ni se copian cookies a Python. El smoke verifica
+acceso al ID configurado; no certifica por nombre la identidad del usuario remoto.
+
+Los archivos storage_state.json, request_headers.json y session.json del spike legado
+quedan separados de este flujo CDP.
+Los scripts antiguos licitaciones_auth.py/spike_licitaciones_info.py conservan su contrato
+experimental ajeno al runtime CDP; no usar sus comandos de sesión para esta integración.
+
+
 ## Vigencia local desde get-info
 
 El candidate adapter preserva `data[].FechaVencimiento` y `data[].EstadoProceso`
-de POST `/cliente/contratos/get-info/MP?perfiles=1086005`. No añade requests,
+de POST `/cliente/contratos/get-info/MP?perfiles=<ID_DEL_PERFIL>`. No añade requests,
 endpoints ni filtros remotos. El formato observado `YYYY-MM-DD HH:mm:ss` se
 interpreta en America/Bogota (UTC−5), contrastado con seis fechas manuales.
 Los timestamps con offset explícito se normalizan a Bogotá.
@@ -50,7 +93,7 @@ Comandos desde `backend/`, para ejecutar solo tras autorización:
 
 # Corrida completa individual: documentos solo de recientes SECOP II open
 .\.venv\Scripts\python.exe scripts/eureka_licitaciones_cdp.py `
-  --region boyaca --object refrigerio --profile-id 1086005 `
+  --region boyaca --object refrigerio `
   --recent-days 7 --max-processes 30 --max-document-processes 3 --max-documents 2
 ```
 
@@ -141,7 +184,7 @@ Boyacá reutiliza el archivo local ignorado de 123 IDs existente, conservando su
 orden; Casanare contiene exactamente los 19 IDs validados, 4009001–4009019.
 Las rutas del archivo de IDs y del catálogo son relativas al JSON del plan.
 
-Los límites se validan antes de conectar CDP: perfil 1086005, máximo seis búsquedas,
+Los límites se validan antes de conectar CDP: perfil configurado, máximo seis búsquedas,
 30 resultados solicitados, página 1, un retry como máximo y pausas entre 3 y 60
 segundos. Por defecto se esperan cuatro segundos entre búsquedas y cuatro antes
 del único retry. Se reutilizan las columnas, byColumn=1, FechaPublicacion DESC y
@@ -216,7 +259,7 @@ C. Comprobar salud:
 ```
 
 Este modo valida CDP, una pestaña desktop válida, sesión y acceso al endpoint del
-perfil `1086005`. Envía GET get-config-user y un POST mínimo a get-info/MP con
+perfil configurado. Envía GET get-config-user y un POST mínimo a get-info/MP con
 `limit=30`, `page=1`, `query={}`, FechaPublicacion DESC y las columnas validadas.
 La respuesta debe tener filas y exponer CodigoProceso, FechaPublicacion,
 id_fuente_contract y key_config. Al menos el 80 % de las filas debe tener referencia,
@@ -279,7 +322,7 @@ D. Opcionalmente ejecutar solo discovery:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/eureka_licitaciones_cdp.py --discovery-only `
-  --region boyaca --object refrigerio --profile-id 1086005 --max-processes 30
+  --region boyaca --object refrigerio --max-processes 30
 ```
 
 Genera únicamente `discovery.json` y `run_summary.json` en un directorio nuevo.
@@ -394,7 +437,6 @@ Después, únicamente cuando se autorice la corrida real:
 .\.venv\Scripts\python.exe scripts/eureka_licitaciones_cdp.py `
   --region boyaca `
   --object refrigerio `
-  --profile-id 1086005 `
   --max-processes 30 `
   --max-document-processes 3 `
   --max-documents 2
@@ -412,7 +454,7 @@ el cliente `window.axios` de la aplicación: el `fetch` independiente del primer
 spike no conservaba todo el contexto necesario para documentos. El bootstrap pide
 `get-config-user` y exige 200 JSON en el endpoint esperado; sus datos de usuario
 no se trasladan al script. Luego ejecuta una sola primera página de
-`get-info/MP?perfiles=1086005` con el contrato validado. Exige filas identificables,
+`get-info/MP?perfiles=<ID_DEL_PERFIL>` con el contrato validado. Exige filas identificables,
 fechas parseables y `id_fuente_contract`/`key_config`; rechaza el universo genérico
 observado y respuestas que ignoran el límite. Un resultado filtrado vacío se
 registra con advertencia: no permite demostrar campos enriquecidos. No se fuerza

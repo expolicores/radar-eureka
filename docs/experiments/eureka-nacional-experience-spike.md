@@ -56,7 +56,9 @@ dedicado a Eureka Nacional, con perfil local restringido fuera de los worktrees.
 Si el puerto indicado ya pertenece a Eureka Regional, usar otro puerto.
 Iniciar sesión manualmente, seleccionar el perfil autorizado de Licitaciones.info y
 dejar abierta una sola pestaña de Contratos desktop. La CLI valida el endpoint y
-reutiliza la sesión en memoria mediante CDP.
+reutiliza la sesión en memoria mediante CDP. El resolver de perfiles compartido
+aplica `--profile-id`, luego `LICITACIONES_PROFILE_ID` del entorno o de
+`backend/.env`, y devuelve un error si falta el ID.
 
 Desde la raíz del worktree experimental, en PowerShell:
 
@@ -68,6 +70,12 @@ $spikePython = if (Test-Path '.\backend\.venv\Scripts\python.exe') {
 }
 $env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
 $env:PYTHONDONTWRITEBYTECODE = '1'
+if (!(Test-Path Env:LICITACIONES_PROFILE_ID) -and !(Test-Path '.\backend\.env')) {
+    $regionalEnv = (Resolve-Path '..\COMPRAS PUBLICAS\backend\.env').Path
+    $readCdpProfile = "import sys; from public_procurement.shared.config import Settings; from public_procurement.licitaciones_cdp.configuration import resolve_profile_id; print(resolve_profile_id(settings=Settings(_env_file=sys.argv[1], database_url='disabled://no-db')))"
+    $env:LICITACIONES_PROFILE_ID = & $spikePython -c $readCdpProfile $regionalEnv
+    if ($LASTEXITCODE -ne 0) { throw 'No se pudo resolver LICITACIONES_PROFILE_ID.' }
+}
 & $spikePython '.\backend\scripts\eureka_nacional_en01.py' --processes 5 --documents 5 `
   --discovery-pages 4 --recent-days 30 --cdp-url 'http://127.0.0.1:9232' `
   --commercial-profile '.\backend\config\eureka_nacional_commercial.v1.json' `
@@ -76,7 +84,9 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 ```
 
 El intérprete alternativo reutiliza dependencias Python 3.12 ya instaladas de solo
-lectura. Las importaciones de la aplicación apuntan a este worktree. La CLI usa una
+lectura. Las importaciones de la aplicación apuntan a este worktree. El comando
+transfiere solo el valor resuelto del perfil para el proceso actual cuando la
+configuración local vive en el otro worktree. La CLI usa una
 URL de base deshabilitada y su extractor llama al servicio compartido en dry-run.
 
 | Tope del smoke propuesto | Valor |

@@ -215,3 +215,8 @@ def test_stale_only_full_run_never_opens_inventory_or_downloads(monkeypatch, tmp
     extract.assert_not_called()
     assert json.loads((tmp_path / "documents.json").read_text()) == []
     assert json.loads((tmp_path / "run_summary.json").read_text())["stale_processes"] == 1
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")

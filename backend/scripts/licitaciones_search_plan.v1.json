@@ -1,6 +1,5 @@
 {
   "version": "licitaciones-search-plan-v1",
-  "profile_id": "1086005",
   "default_recent_days": 7,
   "regions": {
     "boyaca": {"ids_file": ".local/licitaciones_boyaca_ids.txt", "expected_count": 123},

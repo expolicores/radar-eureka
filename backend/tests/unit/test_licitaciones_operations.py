@@ -66,6 +66,7 @@ class FakeRepository:
 
     def start(self, run, snapshot):
         self.current = run
+        self.snapshot = snapshot
 
     def finish(self, run):
         self.current = run
@@ -139,7 +140,7 @@ def service(monkeypatch, rows, *, flags=None, error=None):
         "evaluate_source_alert",
         lambda *a: AlertDecision(True, True, "high", False, [], {}),
     )
-    settings = Settings(database_url="sqlite://", _env_file=None)
+    settings = Settings(database_url="sqlite://", _env_file=None, licitaciones_profile_id="730001")
     return (
         operation.LicitacionesInfoRunService(
             repo, settings, lambda observer: source, lambda *a: pipeline
@@ -528,3 +529,17 @@ def test_operational_endpoints_read_and_manual_start_without_live_worker():
         )
         app.state.manual_cdp_runner.start.side_effect = RuntimeError("Ya activa")
         assert client.post("/api/eureka/licitaciones-cdp/runs").status_code == 409
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")
+
+
+def test_run_snapshot_records_configured_commercial_profile(monkeypatch):
+    operation_service, repository, _ = service(monkeypatch, [])
+    operation_service.settings = operation_service.settings.model_copy(
+        update={"licitaciones_profile_id": "730014"}
+    )
+    operation_service.run()
+    assert repository.snapshot["profile_id"] == "730014"

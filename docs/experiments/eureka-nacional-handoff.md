@@ -10,19 +10,44 @@
 ## Estado de EN-01
 
 El primer smoke real se ejecutó el 19 de noviembre de 2026 en Edge CDP dedicado
-con el runner `11cad4d`. Resultado parcial, `en01-ms7c7hyc` (salida `2`). El
-preflight pasó y el endpoint devolvió 120 registros únicos de 26 departamentos
-en cuatro páginas. Los cinco candidatos seleccionados tuvieron inventario. De
-43 documentos se intentaron cinco descargas y se obtuvieron cuatro. Una
-descarga superó 10 MiB y tres PDF superaron 12 páginas. Se extrajo una página
-nativa, se usaron 46 créditos de red y se registraron 0 páginas OCR y 0 llamadas
-de IA. Los cinco casos siguen `not_resolved`.
+con el runner `11cad4d`. Resultado parcial, `en01-ms7c7hyc` (salida `2`).
+El endpoint devolvió 120 procesos únicos de 26 departamentos en cuatro páginas.
+Se identificaron 19 candidatos comerciales, 8 elegibles para inventario y 5
+seleccionados. Se inventariaron 43 documentos y se completaron 4 de 5 descargas.
+El runner tardó 45,125 segundos y consumió 46 créditos de red y 0 llamadas de IA.
+
+Se extrajo una página nativa y 0 páginas OCR. Una invitación superó 10 MiB y
+tres PDF superaron 12 páginas. Los cinco casos quedaron `not_resolved` y hubo
+0 procesos documentalmente resueltos. Los valores `count` por página fueron
+31, 61, 91 y 121. El tamaño del universo nacional sigue indeterminado.
 
 El [informe agregado](eureka-nacional-experience-spike.md#primer-smoke-real--19-de-noviembre-de-2026)
 contiene el funnel, los errores y las recomendaciones. El detalle permanece
 bajo `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Antes de solicitar otra
 corrida, revisar offline la prioridad documental en títulos numerados y
 cotizaciones. La siguiente ejecución requiere autorización.
+
+## Plan acotado para el segundo smoke
+
+1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
+   Probar con una invitación numerada, un proyecto de pliego numerado y una
+   cotización. Exigir evidencia de vigencia para tratar un rector como definitivo.
+2. Priorizar rector vigente, invitación o pliego definitivo, y anexos habilitantes.
+   Incorporar adendas aplicables que modifiquen la cláusula relevante. Reservar
+   los cupos habilitantes para esas fuentes y excluir cotizaciones de esa cola.
+3. Cuando un documento exceda tamaño o páginas, registrar la causa y considerar
+   el siguiente rector o anexo aplicable dentro del presupuesto restante. Un
+   intento fallido consume su cupo. Con cobertura insuficiente, conservar
+   `not_resolved` y el motivo. Con evidencia concluyente, conservar versión,
+   página y cláusula para revisión humana.
+4. Validar offline con inventarios y fixtures locales. Comparar cobertura,
+   causas de descarte y créditos por caso resuelto frente al primer smoke.
+   La implementación de este plan y una corrida nueva quedan por autorizar.
+
+Límites propuestos, iguales al primer smoke: 5 procesos, 30 días, hasta 4 páginas
+de 30 filas, 5 intentos de descarga (máximo 2 por proceso y 10 MiB por PDF), 12
+páginas por PDF, 2 páginas OCR por PDF, 60 créditos de red, 360 segundos y 0
+llamadas de IA.
 
 ## Baseline aceptada
 
@@ -35,6 +60,20 @@ cotizaciones. La siguiente ejecución requiere autorización.
 | Integración PostgreSQL | Pendiente en un entorno de pruebas aislado. |
 
 La ejecución base de GitHub Actions es la [44119052812](https://github.com/expolicores/radar-eureka/actions/runs/44119052812). El único workflow observado ejecuta CI ante pushes de ramas y tags y ante pull requests. El workflow carece de pasos de despliegue. GitHub mostró cero entornos y despliegues y Pages desactivado. Webhooks privados, permisos e instalaciones requieren revisión administrativa. Si se aprueba atender la deuda técnica, usar `fix/mvp-ci-stability` por separado. Distinguir fallos heredados de regresiones de EN-01.
+
+## Perfil CDP configurable
+
+EN-01 usa `resolve_profile_id` del repositorio antes de abrir CDP. La precedencia
+es `--profile-id`, `LICITACIONES_PROFILE_ID` en el entorno o en `backend/.env`,
+y error si falta. El mismo ID se usa en el preflight, las consultas y las
+referencias de procesos. El [comando del smoke](eureka-nacional-experience-spike.md#smoke-test-preparado)
+muestra cómo cargar el valor desde el `.env` existente cuando se trabaja desde
+el worktree experimental.
+
+El propietario confirmó que el preflight del nuevo perfil devolvió
+`status: healthy`, `profile_available: true` y `get_info_status: 200`.
+La autenticación sigue siendo manual en Edge CDP. La próxima corrida de EN-01
+requiere autorización.
 
 ## Perfil comercial nacional
 

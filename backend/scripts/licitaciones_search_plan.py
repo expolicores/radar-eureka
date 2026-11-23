@@ -24,16 +24,19 @@ from licitaciones_sources import annotate_source, source_kind
 from licitaciones_validity import apply_validity, validity_counts
 from spike_licitaciones_info import SpikeError, build_process_payload, normalized
 
+from public_procurement.licitaciones_cdp.configuration import resolve_profile_id
+
 DEFAULT_PLAN = Path(__file__).with_name("licitaciones_search_plan.v1.json")
 VERSION = "licitaciones-search-plan-v1"
 
 
-def load_plan(path):
+def load_plan(path, *, profile_id=None):
     """Reject unsupported filters/volume before connecting to any browser."""
     try:
-        return _load_plan(Path(path))
+        plan = _load_plan(Path(path))
     except (KeyError, TypeError, ValueError, OSError, AttributeError) as error:
         raise SpikeError("Plan invalido: revisa estructura, IDs y limites locales.") from error
+    return {**plan, "profile_id": resolve_profile_id(profile_id)}
 
 
 def _load_plan(path):
@@ -42,7 +45,6 @@ def _load_plan(path):
         set(config) - {"default_recent_days"}
         != {
             "version",
-            "profile_id",
             "regions",
             "object_terms",
             "unspsc",
@@ -51,7 +53,6 @@ def _load_plan(path):
             "searches",
         }
         or config["version"] != VERSION
-        or config["profile_id"] != "1086005"
     ):
         raise ValueError("Unsupported contract")
     config["default_recent_days"] = validate_recent_days(

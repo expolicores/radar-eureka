@@ -177,3 +177,8 @@ def test_conflicts_on_stale_or_non_secop_rows_stay_in_evidence_not_recent_counte
     assert all(p["validity_warning"] == "provider_status_deadline_conflict" for p in processes)
     assert counts["secop_ii_recent"] == counts["provider_status_deadline_conflicts"] == 0
     assert not warnings
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")

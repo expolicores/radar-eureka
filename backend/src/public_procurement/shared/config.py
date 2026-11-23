@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", frozen=True)
 
     database_url: str
+    licitaciones_profile_id: str | None = None
     test_database_url: str | None = None
     eureka_radar_start_date: date | None = None
     eureka_radar_regions: str = "Boyacá,Casanare"

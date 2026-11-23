@@ -3,6 +3,7 @@
 import ast
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -14,6 +15,14 @@ sys.path.insert(0, str(SCRIPTS))
 import eureka_licitaciones_cdp as flow  # noqa: E402 -- standalone scripts directory
 import licitaciones_cdp_open as opener  # noqa: E402
 import licitaciones_cdp_runtime as runtime  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def fixed_discovery_clock(monkeypatch):
+    monkeypatch.setattr(
+        flow, "local_now", lambda: datetime.fromisoformat("2026-10-20T16:00:00-05:00")
+    )
+
 
 URL = "https://community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=doc-1"
 PROCESS = {

@@ -45,8 +45,11 @@ from licitaciones_validity import apply_validity
 
 from public_procurement.documents.domain.document import AcquisitionError
 from public_procurement.extraction.adapters.ocr import probe_engine
+from public_procurement.licitaciones_cdp.configuration import (
+    ProfileConfigurationError,
+    resolve_profile_id,
+)
 
-PROFILE = "1086005"
 DISCOVERY_PAGE_SIZE = 30
 GEOGRAPHY_SOURCE = "Licitaciones.info"
 NATIONAL_LOCATION_COUNT = 1130
@@ -68,8 +71,8 @@ class BudgetReached(spike.SpikeError):
 
 
 class SmokeClient(PageClient):
-    def __init__(self, page, deadline):
-        super().__init__(page, PROFILE, lambda _event: None)
+    def __init__(self, page, profile_id, deadline):
+        super().__init__(page, profile_id, lambda _event: None)
         self.deadline = deadline
 
     def reserve(self, count=1):
@@ -137,7 +140,8 @@ def discover(client, args, now, discovery, profile, locations):
     try:
         for page in range(1, args.discovery_pages + 1):
             body = client.post(
-                f"/cliente/contratos/get-info/MP?perfiles={PROFILE}", {**payload, "page": page}
+                f"/cliente/contratos/get-info/MP?perfiles={client.profile_id}",
+                {**payload, "page": page},
             )
             rows = validate_discovery(body, DISCOVERY_PAGE_SIZE, validate_dates=False)
             signature = frozenset(str(row["idContrato"]) for row in rows)
@@ -150,7 +154,7 @@ def discover(client, args, now, discovery, profile, locations):
                 break
             signatures.add(signature)
             for row in rows:
-                candidate = CandidateProcess.from_source(row, PROFILE)
+                candidate = CandidateProcess.from_source(row, client.profile_id)
                 process = candidate.to_dict()
                 kind = source_kind(process)
                 identity = process_identity(process)
@@ -436,7 +440,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     status = "failed"
     exit_code = 1
     try:
-        check_session(client, PROFILE, aggregator=True)
+        check_session(client, client.profile_id, aggregator=True)
         sample = discover(client, args, now, discovery, profile, locations)
         write_json(output / "processes.json", discovery)
         storage = spike.LocalBinaryStorage(output / "binaries")
@@ -605,15 +609,19 @@ def main(argv=None):
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
+    parser.add_argument(
+        "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
+    )
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
-    from playwright.sync_api import sync_playwright
-
     try:
+        profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
         profile = load_commercial_profile(args.commercial_profile)
         locations = load_national_locations(args.geography)
+        from playwright.sync_api import sync_playwright
+
         if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
             raise ValueError("Ruta de salida fuera del directorio experimental.")
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -624,13 +632,16 @@ def main(argv=None):
         with sync_playwright() as playwright:
             browser = connect_browser(playwright, args.cdp_url)
             return run(
-                SmokeClient(find_page(browser), deadline),
+                SmokeClient(find_page(browser), profile_id, deadline),
                 args,
                 settings,
                 output,
                 profile=profile,
                 locations=locations,
             )
+    except ProfileConfigurationError as error:
+        print(f"EN-01: {error}")
+        return 1
     except spike.SpikeError as error:
         print(f"EN-01: {error.code}" if isinstance(error, CandidateError) else f"EN-01: {error}")
         return error.exit_code if isinstance(error, CandidateError) else 1

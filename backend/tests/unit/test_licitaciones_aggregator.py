@@ -181,3 +181,8 @@ def test_secop_constancy_exact_identity_and_provider_ids_do_not_invent_equivalen
         candidate(key_config="fao", id_ultima_fase=None, raw_source_reference={})
     )
     assert external["source_identity"] == "licitaciones_info:1086005:1"
+
+
+@pytest.fixture(autouse=True)
+def configured_commercial_profile(monkeypatch):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", "730001")

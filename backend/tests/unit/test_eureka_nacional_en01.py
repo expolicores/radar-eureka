@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +23,9 @@ from licitaciones_cdp_runtime import DOCUMENT_ENDPOINT  # noqa: E402
 from licitaciones_freshness import BOGOTA  # noqa: E402
 from spike_licitaciones_info import SpikeDocument  # noqa: E402
 
+from public_procurement.licitaciones_cdp import configuration  # noqa: E402
+
+EXAMPLE_PROFILE = "1234567"
 NATIONAL_FILTER_SHA256 = "f4f1d02fd12e1738402c8ef4a261ff1d13a427198f26293b0d024fa8afd0619b"
 CUTOFF = datetime(2026, 11, 19, 12, tzinfo=BOGOTA)
 REQUIRED = "El proponente deberá acreditar experiencia contractual con dos contratos ejecutados."
@@ -167,7 +171,8 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
             },
         }
 
-    monkeypatch.setattr(en01, "check_session", Mock())
+    preflight = Mock()
+    monkeypatch.setattr(en01, "check_session", preflight)
     downloaded = []
     fixture = Path(__file__).resolve().parents[1] / "fixtures/extraction/native_refrigerios.pdf"
     pdf = fixture.read_bytes()
@@ -193,9 +198,22 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
 
     monkeypatch.setattr(en01.spike, "download_document", download)
     monkeypatch.setattr(en01.spike, "run_existing_extractor", extract)
-    client = SimpleNamespace(post=post, deadline=time.monotonic() + 360, requests=12)
+    client = SimpleNamespace(
+        post=post, profile_id=EXAMPLE_PROFILE, deadline=time.monotonic() + 360, requests=12
+    )
     args = SimpleNamespace(discovery_pages=4, documents=5, processes=5, recent_days=30)
     assert en01.run(client, args, None, tmp_path, now=CUTOFF) == 0
+    preflight.assert_called_once_with(client, EXAMPLE_PROFILE, aggregator=True)
+    assert all(
+        path == f"/cliente/contratos/get-info/MP?perfiles={EXAMPLE_PROFILE}"
+        for path, _ in calls
+        if path != DOCUMENT_ENDPOINT
+    )
+    assert all(
+        p["profile_id"] == EXAMPLE_PROFILE
+        and p["process_reference"].startswith(f"licitaciones_info:{EXAMPLE_PROFILE}:")
+        for p in report(tmp_path, "processes.json")["processes"]
+    )
 
     metrics = report(tmp_path, "metrics.json")
     assert metrics["documents_downloaded"] == 5
@@ -248,6 +266,7 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
 def test_repeated_provider_page_is_partial_and_counted(tmp_path, monkeypatch):
     monkeypatch.setattr(en01, "check_session", Mock())
     client = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE,
         post=Mock(return_value={"count": 70, "data": [row(1, "Boyacá", "Consultoría")]}),
         deadline=time.monotonic() + 360,
         requests=3,
@@ -262,7 +281,7 @@ def test_repeated_provider_page_is_partial_and_counted(tmp_path, monkeypatch):
 
 
 def test_budget_stops_before_cdp_or_download():
-    client = en01.SmokeClient(Mock(), time.monotonic())
+    client = en01.SmokeClient(Mock(), EXAMPLE_PROFILE, time.monotonic())
     with pytest.raises(en01.BudgetReached, match="duration_budget"):
         client.reserve()
     client.deadline = time.monotonic() + 360
@@ -299,6 +318,7 @@ def test_discovery_preserves_completed_pages_on_provider_failure(tmp_path, monke
     monkeypatch.setattr(en01, "check_session", Mock())
     failure = en01.CandidateError("session_expired", "private response details")
     client = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE,
         post=Mock(side_effect=[{"count": 80, "data": [row(1, "Bogotá")]}, failure]),
         deadline=time.monotonic() + 360,
         requests=4,
@@ -487,7 +507,9 @@ def test_prefers_open_minimum_quantities_and_keeps_category_overlap():
         candidate(3, "Valle", "Mínima cuantía"),
     ]
     args = SimpleNamespace(discovery_pages=1, processes=2, recent_days=30)
-    client = SimpleNamespace(post=Mock(return_value={"count": len(data), "data": data}))
+    client = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE, post=Mock(return_value={"count": len(data), "data": data})
+    )
     discovery = {"pages": [], "duplicates": 0}
     profile = commercial.load_commercial_profile()
     selected = en01.discover(
@@ -532,3 +554,43 @@ def test_geography_rejects_invalid_capture(tmp_path, error):
     geography.write_text(json.dumps(config), encoding="utf-8")
     with pytest.raises(en01.spike.SpikeError, match=r"1.130"):
         en01.load_national_locations(geography)
+
+
+@pytest.mark.parametrize(
+    ("override", "env", "expected"),
+    [
+        (None, None, "2345678"),
+        (None, EXAMPLE_PROFILE, EXAMPLE_PROFILE),
+        ("3456789", EXAMPLE_PROFILE, "3456789"),
+    ],
+)
+def test_cli_passes_resolved_profile_to_cdp(tmp_path, monkeypatch, override, env, expected):
+    monkeypatch.setattr(configuration, "BACKEND", tmp_path)
+    (tmp_path / ".env").write_text("LICITACIONES_PROFILE_ID=2345678\n", encoding="utf-8")
+    monkeypatch.delenv("LICITACIONES_PROFILE_ID", raising=False)
+    if env is not None:
+        monkeypatch.setenv("LICITACIONES_PROFILE_ID", env)
+
+    monkeypatch.setitem(
+        sys.modules, "playwright.sync_api", SimpleNamespace(sync_playwright=nullcontext)
+    )
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path / "runs")
+    monkeypatch.setattr(en01, "settings_for_run", Mock())
+    monkeypatch.setattr(en01, "connect_browser", Mock())
+    monkeypatch.setattr(en01, "find_page", Mock())
+    run = Mock(return_value=0)
+    monkeypatch.setattr(en01, "run", run)
+
+    assert en01.main(["--profile-id", override] if override is not None else []) == 0
+    assert run.call_args.args[0].profile_id == expected
+
+
+def test_cli_missing_profile_fails_before_starting_cdp(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(configuration, "BACKEND", tmp_path)
+    monkeypatch.delenv("LICITACIONES_PROFILE_ID", raising=False)
+    connect = Mock()
+    monkeypatch.setattr(en01, "connect_browser", connect)
+
+    assert en01.main([]) == 1
+    assert "Falta LICITACIONES_PROFILE_ID" in capsys.readouterr().out
+    connect.assert_not_called()

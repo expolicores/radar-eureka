@@ -12,6 +12,8 @@ from typing import Any
 
 from public_procurement.documents.services import SourceDocument
 
+from .configuration import resolve_profile_id
+
 BACKEND = Path(__file__).resolve().parents[3]
 SCRIPTS = BACKEND / "scripts"
 
@@ -34,8 +36,11 @@ class SourceUnavailableError(RuntimeError):
 
 
 class LicitacionesInfoSource:
-    def __init__(self, observer: Callable[[str, dict[str, Any]], None]) -> None:
+    def __init__(
+        self, observer: Callable[[str, dict[str, Any]], None], *, profile_id: str | None = None
+    ) -> None:
         self.observer = observer
+        self.profile_id = resolve_profile_id(profile_id)
         self.modules = validated_modules()
         self.processes: dict[str, dict[str, Any]] = {}
 
@@ -50,7 +55,7 @@ class LicitacionesInfoSource:
         except Exception:
             self.context.stop()
             raise
-        self.client = runtime.PageClient(self.page, "1086005", lambda event: None)
+        self.client = runtime.PageClient(self.page, self.profile_id, lambda event: None)
         return self
 
     def __exit__(self, *args: Any) -> None:
@@ -59,7 +64,7 @@ class LicitacionesInfoSource:
 
     def discover(self) -> tuple[dict[str, Any], dict[str, Any]]:
         module = self.modules["search_plan"]
-        plan = module.load_plan(module.DEFAULT_PLAN)
+        plan = module.load_plan(module.DEFAULT_PLAN, profile_id=self.profile_id)
         # Operational contract stays exactly the validated six searches and low-volume policy.
         expected = [
             (region, term)
