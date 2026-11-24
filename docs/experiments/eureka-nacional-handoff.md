@@ -102,8 +102,8 @@ CDP, descargas o llamadas de IA. La próxima corrida real requiere autorización
 ## Corrida exploratoria EN-01.4 preparada
 
 El [plan de ejecución](eureka-nacional-experience-spike.md#en-014--plan-de-corrida-exploratoria-nacional)
-incluye comando, selección y métricas. El modo `--exploratory` queda a la espera
-de autorización. Propone hasta 15 procesos, 30 días, ocho páginas de 30 filas,
+incluye comando, selección y métricas. El modo `--exploratory` se ejecutó
+una vez con autorización. Propone hasta 15 procesos, 30 días, ocho páginas de 30 filas,
 24 intentos de descarga y tres por proceso, 10 MiB por PDF, OCR selectivo de
 hasta dos páginas por PDF, 200 créditos, 720 s y cero llamadas de IA. La
 extracción nativa sigue sin tope por cantidad de páginas.
@@ -112,7 +112,21 @@ Registrar por separado clasificación formal, prioridad comercial, motivos de
 parada y cobertura pendiente. Reservar hasta cuatro intentos para corroborar
 ausencias explícitas y conservar hasta tres casos despriorizados para revisión
 humana. La evaluación usa el perfil comercial, la cobertura geográfica y el
-clasificador ya aceptados. La corrida real no se ha iniciado.
+clasificador ya aceptados.
+
+El [resultado agregado](eureka-nacional-experience-spike.md#en-014--resultados-de-la-primera-corrida-exploratoria)
+registra 240 procesos únicos, 37 candidatos comerciales, 22 elegibles y 15
+analizados. Hubo 17 PDF descargados, 12 rectores, 641 páginas con texto nativo
+y 0 OCR. La conclusión formal fue una exigencia confirmada, con 14 casos
+pendientes. Siete tuvieron prioridad comercial de exigencia y ninguno tuvo
+ausencia explícita o favorable. Se usaron 160 créditos y 179,141 s, sin IA.
+La salida fue parcial por tres descargas sobre el umbral de tamaño.
+
+El cotejo offline encontró requisitos de experiencia en los tres silencios
+del runner. Mantener la salida original y usar esos casos como regresiones
+del siguiente incremento. El detalle y la muestra de tres despriorizados
+están en `.local/eureka-nacional-spike/en01-le73ddhz/`. Una nueva corrida
+requiere autorización.
 
 ## Plan aplicado para el segundo smoke
 

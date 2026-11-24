@@ -420,7 +420,7 @@ página queda bajo `.local/`. Una tercera corrida real requiere autorización.
 
 ## EN-01.4 · Plan de corrida exploratoria nacional
 
-**Preparada. Requiere autorización antes de ejecutar.** El modo optativo
+El plan que se autorizó el 23 de noviembre de 2026 está registrado abajo. El modo optativo
 `--exploratory` usa la misma fuente, los 1.130 identificadores, las 21
 categorías del perfil comercial, la sesión manual de Edge CDP y el resolver
 de perfiles compartido. Conserva EN-01.3, la extracción nativa completa
@@ -518,3 +518,91 @@ corroboración depende de los nombres y del formato de los anexos disponibles.
 El uso de complementos sigue el orden de procesos y la reserva de intentos.
 Ni el número de ausencias ni la cobertura geográfica observada se asumirán por
 adelantado. La muestra será exploratoria y no representativa de Colombia.
+
+
+## EN-01.4 · Resultados de la primera corrida exploratoria
+
+Se ejecutó una vez el 23 de noviembre de 2026 con el runner publicado en
+`2de3a32`. Pasó la validación del perfil compartido y el endpoint aceptó
+el filtro de 1.130 ubicaciones. El runner terminó con salida `2`
+(parcial por tres PDF que superaron el umbral de 10 MiB). Los 15 procesos
+seleccionados se analizaron. No se repitió la corrida.
+
+### Embudo y cobertura
+
+| Tramo | Resultado |
+|---|---:|
+| Páginas del feed | 8 de 8, 30 filas cada una |
+| Filas / únicos / duplicados | 240 / 240 / 0 |
+| Departamentos observados / seleccionados según la fuente | 31 / 9 |
+| Candidatos en el perfil comercial | 37 |
+| Con inventario elegible / seleccionados / analizados | 22 / 15 / 15 |
+| Categorías comerciales representadas en la selección | 11 de 21 |
+| Inventarios / documentos registrados | 15 / 111 |
+| Intentos de descarga / descargas exitosas / rectores descargados | 20 / 17 / 12 |
+| PDF con cobertura completa / con algún texto | 15 / 16 |
+| Páginas informadas / con texto nativo / con cobertura útil | 651 / 641 / 640 |
+| Páginas pendientes / intentos de OCR | 11 / 0 |
+
+Los valores `count` fueron 31, 61, 91, 121, 151, 181, 211 y 241. La
+paginación se detuvo por presupuesto de feed. Los 203 registros que no
+pasaron el perfil comercial se distribuyeron en 135 fuera del perfil,
+60 de servicio principal, cinco de bien poco claro, dos de salud compleja
+y uno de vehículos completos. Entre los 37 candidatos comerciales,
+15 quedaron fuera por capacidad de inventario de la fuente y siete elegibles
+quedaron fuera del cupo. Los 15 seleccionados figuraban abiertos en la fuente.
+Cinco coincidían con el segundo smoke y diez eran adicionales a esa muestra.
+El valor de `count` y esta selección no permiten estimar el universo nacional.
+
+Los tres intentos fallidos por tamaño fueron dos invitaciones y un estudio
+previo. No hubo errores técnicos de extracción. Las once páginas con texto
+nativo insuficiente quedaron pendientes porque la política OCR no seleccionó
+ninguna. Un archivo titulado como pliego final fue excluido por tener una
+portada que lo identificaba como proyecto de pliego.
+
+### Decisión formal y señales comerciales
+
+| Resultado | Casos |
+|---|---:|
+| Experiencia exigida, formalmente resuelta | 1 |
+| Ausencia confirmada / ausencia explícita identificada | 0 / 0 |
+| Formalmente ambiguos / sin resolver | 3 / 11 |
+| Exigencias explícitas detectadas en bruto / procesos con detecciones | 13 / 9 |
+| Exigencia aplicable y despriorizada comercialmente | 7 |
+| Silencio para revisión / alcance limitado o ambiguo / insuficiencia | 3 / 3 / 2 |
+| Contradicciones detectadas / candidatos favorables | 0 / 0 |
+| Casos despriorizados guardados para revisión | 3 |
+
+La salida automática detuvo el análisis documental en seis casos por
+exigencia aplicable y en uno por conclusión formal. Tres pararon en silencio
+secundario y cinco por el cupo ordinario. No se usó la reserva de intentos de
+corroboración porque no se detectaron ausencias explícitas.
+
+Un cotejo posterior de los PDF locales encontró cláusulas de experiencia
+en los tres silencios del runner. Dos se expresaban con un imperativo o
+una construcción indirecta y una estaba en una tabla de requisitos
+diferenciales por tamaño empresarial. Se conserva la salida automática
+y se registran estas omisiones por separado. Las detecciones en bruto
+también requieren revisión, porque pueden incluir requisitos de experiencia
+del personal, además de los del oferente.
+
+### Costo y siguiente incremento
+
+Se procesaron 17.971.247 bytes descargados. La corrida tomó 179,141 s,
+con 65,814 s acumulados de extracción, 55,563 s de CPU de lectores nativos y
+10,906 s de CPU del coordinador. Consumió 160 créditos, cero páginas OCR y
+cero llamadas de IA. El promedio global fue 10,67 créditos, 11,94 s de
+ejecución y 4,43 s de CPU registrada por proceso analizado. No hay costo
+unitario por candidato favorable porque el denominador fue cero.
+
+Para el siguiente incremento, convertir en regresiones offline los tres
+silencios cotejados y el requisito del personal, medir su efecto con los
+rectores ya guardados y conservar las comprobaciones sobre falsos positivos
+de ausencia. Verificar la versión cuando título y portada discrepen. En los
+casos bloqueados por tamaño, priorizar alternativas rectoras ya inventariadas
+dentro del presupuesto aprobado. La corrida no justifica cambiar los topes ni
+hacer inferencias estadísticas sobre Colombia.
+
+Los PDF, los fragmentos por página, la cola y la muestra de auditoría quedan
+en `.local/eureka-nacional-spike/en01-le73ddhz/`. Una nueva corrida real
+requiere autorización.
