@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+from collections import Counter
 from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
@@ -54,20 +55,20 @@ def evidence_document(text, role="primary", *, complete=True, identifier="1"):
 @pytest.mark.parametrize(
     ("clause", "expected"),
     [
-        (REQUIRED, "positive"),
-        (WAIVED, "negative"),
-        ("La experiencia del proponente no es requisito habilitante.", "negative"),
-        ("No se exige el RUP para acreditar la experiencia del oferente.", "ambiguous"),
-        ("No se exige experiencia específica del proponente.", "ambiguous"),
-        ("No se exige experiencia del proponente para el lote 1.", "ambiguous"),
-        ("La experiencia del personal debe ser de cinco años.", None),
-        ("Experiencia del proponente según el anexo 3.", "ambiguous"),
-        ("Experiencia del proponente evaluada con puntos.", "ambiguous"),
-        ("Experiencia mínima del proponente", "ambiguous"),
-        ("Los requisitos habilitantes se detallan en el Anexo 4.", "ambiguous"),
+        (REQUIRED, rules.REQ),
+        (WAIVED, rules.NEG),
+        ("La experiencia del proponente no es requisito habilitante.", rules.NEG),
+        ("No se exige el RUP para acreditar la experiencia del oferente.", rules.CONDITIONAL),
+        ("No se exige experiencia específica del proponente.", rules.CONDITIONAL),
+        ("No se exige experiencia del proponente para el lote 1.", rules.CONDITIONAL),
+        ("La experiencia del personal debe ser de cinco años.", rules.OTHER),
+        ("Experiencia del proponente según el anexo 3.", rules.CONDITIONAL),
+        ("Experiencia del proponente evaluada con puntos.", rules.OTHER),
+        ("Experiencia mínima del proponente", rules.CONDITIONAL),
+        ("Los requisitos habilitantes se detallan en el Anexo 4.", rules.CONDITIONAL),
         (
             "El proponente deberá acreditar experiencia contractual para obtener puntaje.",
-            "ambiguous",
+            rules.OTHER,
         ),
     ],
 )
@@ -594,3 +595,164 @@ def test_cli_missing_profile_fails_before_starting_cdp(tmp_path, monkeypatch, ca
     assert en01.main([]) == 1
     assert "Falta LICITACIONES_PROFILE_ID" in capsys.readouterr().out
     connect.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("text", "method", "kind"),
+    [
+        (
+            "15. ACREDITACIÓN DE EXPERIENCIA MÍNIMA:\nEn este caso no se requiere de experiencia.",
+            "native_pdf_text",
+            rules.NEG,
+        ),
+        ("EXPERIENCIA: No aplica.", "native_pdf_text", rules.NEG),
+        ("EXPERIENCIA:\nNO APLICA.", "native_pdf_text", rules.NEG),
+        (
+            "3.3 EXPERIENCIA MÍNIMA REQUERIDA:\nNo se requiere\n3.4 PROPUESTA ECONÓMICA",
+            "native_pdf_text",
+            rules.NEG,
+        ),
+        ("EXPERIENClA:\nNo se requlere.", "ocr_text", rules.NEG),
+        (
+            "EXPERIENCIA: El oferente deberá acreditar dos contratos ejecutados.",
+            "native_pdf_text",
+            rules.REQ,
+        ),
+        ("No se aceptarán ofertas que no acrediten experiencia.", "native_pdf_text", rules.REQ),
+        (
+            "Las entidades no están obligadas a establecer experiencia habilitante.",
+            "native_pdf_text",
+            rules.CONDITIONAL,
+        ),
+        (
+            "Se solicitarán certificados de experiencia cuando sean exigidos.",
+            "native_pdf_text",
+            rules.CONDITIONAL,
+        ),
+        (
+            "La experiencia del fabricante es obligatoria.",
+            "native_pdf_text",
+            rules.OTHER,
+        ),
+        (
+            "Las mipymes aporten mínimo el 25 % de la experiencia general acreditada en la oferta.",
+            "native_pdf_text",
+            rules.OTHER,
+        ),
+        (
+            "No se excluye que no se requiera experiencia del ofertante.",
+            "native_pdf_text",
+            rules.CONDITIONAL,
+        ),
+        ("No aplica.", "native_pdf_text", None),
+    ],
+)
+def test_contextual_assertions_keep_page_provenance(text, method, kind):
+    doc = evidence_document("")
+    doc["fragments"] = [fragment(text, page=11, method=method)]
+    result = rules.classify_experience([doc], inventory_complete=False)
+    matches = [e for e in result["evidence"] if e["assertion_type"] == kind]
+    if kind is None:
+        assert result["evidence"] == []
+    else:
+        assert matches[0]["page"] == 11
+        assert matches[0]["method"] == method
+    assert result["status"] != "no_experience_required"
+
+
+@pytest.mark.parametrize(
+    ("name", "role"),
+    [
+        ("3.PROYECTO_PLIEGO_INVITACIÓN.pdf", "excluded"),
+        ("02. Cotización previa.pdf", "excluded"),
+        ("03. Invitación Pública N.pdf", "primary"),
+        ("2. Adenda aplicable.pdf", "amendment"),
+        ("2. ANEXO HABILITANTE.pdf", "support"),
+    ],
+)
+def test_numbered_document_titles(name, role):
+    assert rules.document_role(name) == role
+
+
+def test_review_priority_distinguishes_support_and_silence():
+    favorable = rules.classify_experience([evidence_document(WAIVED, "support")])
+    assert favorable["status"] == "not_resolved"
+    assert favorable["review_category"] == "explicit_favorable"
+    silence = rules.classify_experience(
+        [evidence_document("Las verificaciones se regirán por el reglamento interno.")]
+    )
+    assert silence["status"] == "not_resolved"
+    assert silence["review_category"] == "documentary_silence"
+    assert silence["dependencies"][0]["page"] == 1
+
+
+def test_document_alternative_uses_remaining_attempt_without_selecting_quote(monkeypatch):
+    quote = SpikeDocument("01. Cotización.pdf", "pdf", SECOP + "1", "1")
+    draft = SpikeDocument("02. Proyecto_Pliego.pdf", "pdf", SECOP + "2", "2")
+    rector = SpikeDocument("03. Invitación definitiva.pdf", "pdf", SECOP + "3", "3")
+    annex = SpikeDocument("04. Anexo habilitante.pdf", "pdf", SECOP + "4", "4")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[quote, draft, annex, rector]))
+    download = Mock(
+        side_effect=[
+            en01.AcquisitionError("too_large", "fixture"),
+            SimpleNamespace(sha256="a" * 64, observed_size=25),
+        ]
+    )
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    monkeypatch.setattr(
+        en01.spike,
+        "run_existing_extractor",
+        Mock(
+            return_value=(
+                {
+                    "status": "completed",
+                    "page_count": 1,
+                    "elapsed_seconds": 0.01,
+                    "fragments": [{"source_locator": fragment(WAIVED).source_locator}],
+                },
+                [fragment(WAIVED)],
+            )
+        ),
+    )
+    metrics, documents, errors = Counter(), [], []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        None,
+        None,
+        2,
+        metrics,
+        documents,
+        errors,
+    )
+    assert [call.args[1] for call in download.call_args_list] == [rector, annex]
+    assert metrics["documents_attempted"] == 2
+    assert documents[2]["selection_reason"] == "alternative_after_limit"
+    assert rules.classify_experience(documents)["review_category"] == "explicit_favorable"
+    assert errors[0]["code"] == "too_large"
+
+
+def test_local_replay_counts_missed_favorable_evidence():
+    import eureka_nacional_replay as replay
+
+    doc = evidence_document("")
+    case = {
+        "documents": [doc],
+        "inventory_complete": False,
+        "expected_status": "not_resolved",
+        "expected_favorable": True,
+    }
+    assert replay.evaluate([case]) == {
+        "matched": 0,
+        "discrepancies": 1,
+        "false_positive_favorable": 0,
+        "false_negative_favorable": 1,
+    }
+
+
+def test_cover_metadata_records_explicit_date_and_role():
+    role, version = rules.document_cover_metadata(
+        "03. PLIEGO DEFINITIVO\nFecha de publicación: 23/11/2026"
+    )
+    assert role == "primary"
+    assert version == {"version_marker": "definitivo", "labeled_date": "23/11/2026"}

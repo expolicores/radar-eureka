@@ -22,8 +22,11 @@ from eureka_nacional_commercial import (
     selection_rank,
 )
 from eureka_nacional_experience import (
+    ASSERTION_TYPES,
     STATUSES,
     classify_experience,
+    document_cover_metadata,
+    document_priority,
     document_role,
 )
 from licitaciones_candidate_contracts import CandidateProcess
@@ -63,7 +66,6 @@ DURATION_SECONDS = 360
 START_EXTRACTION_MARGIN = 50
 DOCUMENT_BYTES = 10 * 1024 * 1024
 OUTPUT_ROOT = spike.ROOT.parent / ".local" / "eureka-nacional-spike"
-ROLE_ORDER = {"primary": 0, "amendment": 1, "support": 2, "unknown": 3}
 
 
 class BudgetReached(spike.SpikeError):
@@ -282,6 +284,7 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
             "url": safe_public_url(document.source_url, "DocumentId"),
             "extension": document.extension,
             "role": document_role(document.original_name),
+            "role_source": "filename",
             "status": "not_selected",
             "complete": False,
         }
@@ -293,23 +296,30 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
             if document.extension == "pdf"
             and all_documents[document.document_id]["role"] != "excluded"
         ),
-        key=lambda document: ROLE_ORDER[all_documents[document.document_id]["role"]],
+        key=lambda document: document_priority(
+            document.original_name, all_documents[document.document_id]["role"]
+        ),
     )
-    selected_ids = {document.document_id for document in eligible[:allowance]}
     for entry in documents:
         entry["selection"] = (
-            "selected"
-            if entry["document_id"] in selected_ids
-            else "post_award_or_draft"
+            "irrelevant_document"
             if entry["role"] == "excluded"
             else "unsupported_format"
             if entry["extension"] != "pdf"
             else "document_limit"
         )
-    for document in eligible[:allowance]:
+    prior_limit = False
+    for index, document in enumerate(eligible[:allowance]):
+        if index and classify_experience(documents)["status"] in {
+            "experience_required",
+            "no_experience_required",
+        }:
+            break
         if time.monotonic() + START_EXTRACTION_MARGIN + 12 > client.deadline:
             raise BudgetReached("duration_budget")
         entry = all_documents[document.document_id]
+        entry["selection"] = "selected"
+        entry["selection_reason"] = "alternative_after_limit" if prior_limit else "priority"
         stage = "download"
         try:
             metrics["documents_attempted"] += 1
@@ -323,6 +333,15 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
                 raise BudgetReached("duration_budget")
             detail, fragments = spike.run_existing_extractor(document, stored, storage, settings)
             result = coverage(detail)
+            prior_limit = detail.get("error_code") in {"page_limit", "too_large"}
+            first_page = next(
+                (f.text for f in fragments if f.source_locator.get("page_number") == 1), ""
+            )
+            cover_role, cover_metadata = document_cover_metadata(first_page)
+            entry["cover_metadata"] = cover_metadata
+            if cover_role == "excluded" or (cover_role and entry["role"] == "unknown"):
+                entry["role"] = cover_role
+                entry["role_source"] = "cover"
             processed = {fragment.source_locator.get("page_number") for fragment in fragments}
             processed.discard(None)
             entry.update(
@@ -338,6 +357,7 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
                 extraction_seconds=detail["elapsed_seconds"],
                 fragments=fragments,
             )
+            metrics["documents_processed"] += bool(processed)
             metrics["pages_reported"] += result["total_pages"]
             metrics["pages_with_text"] += len(processed)
             metrics["ocr_pages_reported"] += len(result["ocr_processed_pages"])
@@ -357,6 +377,7 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
             raise
         except (AcquisitionError, spike.SpikeError, OSError) as error:
             code = getattr(error, "code", type(error).__name__)
+            prior_limit = code in {"page_limit", "too_large"}
             entry.update(status=f"{stage}_failed", error_code=code)
             errors.append({"stage": stage, "code": code, "document_id": document.document_id})
             metrics[f"{stage}_failures"] += 1
@@ -368,8 +389,16 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
     resolved = counts["experience_required"] + counts["no_experience_required"]
     supply = sum(p["supply_prefilter_match"] for p in discovery["processes"])
     eligible = sum(p["excluded_reason"] is None for p in discovery["processes"])
+    assertions = Counter(
+        item["assertion_type"] for result in results for item in result["evidence"]
+    )
+    review = Counter(result["review_category"] for result in results)
 
     return {
+        "assertions": {kind: assertions[kind] for kind in ASSERTION_TYPES},
+        "review_categories": dict(review),
+        "review_prioritized": sum(r["review_priority"] <= 3 for r in results),
+        "human_verified_errors": None,
         **metrics,
         **commercial_metrics(discovery["processes"], results, profile),
         "discovered_rows": sum(page["received"] for page in discovery["pages"]),
@@ -427,6 +456,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 "documents_downloaded",
                 "download_failures",
                 "extraction_failures",
+                "documents_processed",
                 "bytes_downloaded",
                 "pages_reported",
                 "pages_with_text",
@@ -479,7 +509,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 )
             if allowance == 0:
                 process_errors.append({"stage": "selection", "code": "document_budget"})
-            classification = classify_experience(documents)
+            classification = classify_experience(documents, inventory_complete=bool(documents))
             if not documents and not process_errors:
                 classification["reason"] = "empty_inventory"
             for document in documents:
@@ -553,6 +583,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             ("processes.json", discovery),
             ("documents.json", inventories),
             ("experience_requirements.json", results),
+            ("review_queue.json", sorted(results, key=lambda result: result["review_priority"])),
             ("metrics.json", summary),
             ("errors.json", errors),
         ):

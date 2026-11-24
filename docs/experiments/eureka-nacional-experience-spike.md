@@ -165,3 +165,72 @@ entre los resueltos queda indeterminada.
 Los archivos de procesos, inventarios, errores, métricas, binarios y resultados
 por caso permanecen en `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Se ejecutó
 una sola corrida real. La siguiente requiere autorización.
+
+## EN-01.1 · Clasificación contextual offline
+
+La selección normaliza prefijos numéricos y prioriza invitaciones, pliegos
+definitivos, adendas y anexos habilitantes. Excluye cotizaciones y borradores
+identificados por nombre. Usa señales de portada y conserva las marcas de
+versión y fechas etiquetadas que puede reconocer. Ante un límite, prueba una
+alternativa dentro de los cupos restantes. El extractor nativo y la
+recuperación OCR selectiva siguen siendo los compartidos.
+
+El motor registra `NEG_CONCLUSIVA`, `EXIGENCIA`, `NORMATIVA_CONDICIONAL` y
+`OTRO`, con documento, hash, página, método y fragmento. Una respuesta breve
+adquiere significado bajo su encabezado de experiencia. Se conserva la
+polaridad de la doble negación y se separan hipótesis normativas, puntaje,
+desempates y experiencia de terceros. Las condiciones por lote, referencias
+a reglamentos o anexos y versiones contradictorias se conservan para revisión.
+La fecha declarada en portada se conserva como señal, junto con la naturaleza
+del documento. La resolución de supersesión requiere evidencia aplicable.
+
+La revisión se prioriza de forma independiente del estado del proceso. Se
+ordenan la evidencia favorable, las contradicciones, el silencio con cobertura,
+la evidencia insuficiente y la exigencia explícita. El runner deja la cola y
+las métricas de afirmaciones en el directorio local de cada corrida.
+
+| Caso real | Evidencia nativa | Revisión | Estado del expediente aportado |
+|---|---|---|---|
+| Pore, PMP-005-2026 | Pág. 11, sección 15. «En este caso no se requiere de experiencia». | Favorable explícita | `not_resolved`. Inventario del proceso por corroborar. |
+| El Plato, P-MC-MP-051-2026 | Pág. 13, «EXPERIENCIA: No aplica». El desempate se trató como otro criterio. | Favorable explícita | `not_resolved`. Inventario del proceso por corroborar. |
+| La Capilla, ventiladores | Pág. 20, sección 3.3. «No se requiere» en estudios previos. | Favorable explícita | `not_resolved`. Falta contrastar con invitación y modificaciones aplicables. |
+| Chivatá, invitación 21 | Págs. 1 y 4, menciones condicionadas y remisiones al reglamento interno. | Silencio documental y dependencia | `not_resolved`. Revisar el reglamento aplicable. |
+| Chivatá, invitación 22 | Págs. 1 y 4, menciones condicionadas y remisiones al reglamento interno. | Silencio documental y dependencia | `not_resolved`. Revisar el reglamento aplicable. |
+
+Se leyeron 5 PDF y 82 páginas con texto nativo. Se registraron 25
+afirmaciones en estos casos, 3 favorables, 19 normativas o condicionales,
+3 de otro tipo y 0 exigencias explícitas. El replay coincidió con las 5
+etiquetas de estado y evidencia favorable. Los recuentos de falsos positivos y
+negativos favorables fueron 0 y 0 en estos casos. Son semillas conocidas y
+sirven como regresión. Los ejemplos sintéticos se verifican aparte.
+
+El procesamiento local de lectura y clasificación inicial de estos PDF tomó
+15,304 s. Reclasificar el texto ya extraído con la regla final tomó 0,52 s
+sumando los cinco casos. La validación usó 0 páginas OCR, 0 créditos de red
+y 0 llamadas de IA. Se leyó completo el material local de hasta 28 páginas
+por PDF. El runner nacional conserva su tope previo de 12 páginas por PDF.
+
+### Correcciones humanas locales
+
+`review_queue.json` sugiere qué casos revisar. Guardar las correcciones
+en JSONL bajo `.local/`, una por línea, con `case`, `inventory_complete`,
+`expected_status`, `expected_favorable` y `documents`. Cada documento
+incluye `document_id`, `name`, `role`, `complete` y `fragments`. Cada
+fragmento contiene `text` y `source_locator` con `page_number` y
+`extraction_method`. Registrar por separado el motivo de la corrección
+si se necesita para revisión. Se acepta `sha256` y `url` para trazabilidad.
+
+Con el intérprete y `PYTHONPATH` del smoke preparados, reproducir:
+`& $spikePython backend/scripts/eureka_nacional_replay.py .local/en01-1-validation/review-cases.jsonl`.
+El replay imprime solo conteos. `.local/en01-1-validation/results.json`
+conserva la evidencia detallada de la validación real.
+
+### Criterios para el segundo smoke
+
+Conservar 5 procesos, ventana de 30 días, 4 páginas de 30 filas, 5 intentos
+de descarga, máximo 2 por proceso, 10 MiB y 12 páginas por PDF, máximo 2
+páginas OCR por PDF, 60 créditos, 360 s y 0 IA. Medir si la selección alcanza
+más documentos rectores y aporta evidencia útil por crédito. Revisar los
+casos favorables y las dependencias antes de inferir accesibilidad. Los PDF
+largos pueden seguir bloqueando conclusiones si falta una alternativa
+aplicable. La segunda corrida requiere autorización.

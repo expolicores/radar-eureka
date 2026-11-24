@@ -27,6 +27,20 @@ bajo `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Antes de solicitar otra
 corrida, revisar offline la prioridad documental en títulos numerados y
 cotizaciones. La siguiente ejecución requiere autorización.
 
+## EN-01.1 listo para validación en el segundo smoke
+
+La selección documental normaliza títulos numerados, excluye cotizaciones y
+proyectos identificados, y prueba alternativas dentro de los presupuestos
+existentes. El clasificador contextual deja estados oficiales y prioridad de
+revisión independientes. El replay local permite reproducir correcciones
+humanas. Ver [método y validación de EN-01.1](eureka-nacional-experience-spike.md#en-011--clasificación-contextual-offline).
+
+Cinco PDF locales y 82 páginas nativas. Pore p. 11, El Plato p. 13 y La Capilla
+p. 20 produjeron evidencia favorable. Chivatá 21 y 22, págs. 1 y 4, mantuvieron
+dependencias de reglamento. Los cinco expedientes aportados quedaron
+`not_resolved`. Todo el detalle está en `.local/en01-1-validation/`. La segunda
+corrida sigue pendiente de autorización.
+
 ## Plan acotado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
@@ -42,7 +56,7 @@ cotizaciones. La siguiente ejecución requiere autorización.
    página y cláusula para revisión humana.
 4. Validar offline con inventarios y fixtures locales. Comparar cobertura,
    causas de descarte y créditos por caso resuelto frente al primer smoke.
-   La implementación de este plan y una corrida nueva quedan por autorizar.
+   La corrida nueva queda pendiente de autorización.
 
 Límites propuestos, iguales al primer smoke: 5 procesos, 30 días, hasta 4 páginas
 de 30 filas, 5 intentos de descarga (máximo 2 por proceso y 10 MiB por PDF), 12
