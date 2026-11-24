@@ -279,6 +279,22 @@ vigente del mismo documento y el acceso permitido. Después, recuperar los
 rectores de los procesos ya descubiertos sin repetir la búsqueda. No hubo
 consulta de feed, inventario ni recuperación adicional.
 
+## Alternativa Edge para adquisición de EN-01
+
+La [implementación experimental](eureka-nacional-experience-spike.md#en-01--alternativa-acotada-de-descarga-mediante-edge)
+conserva `urllib` y permite un piloto optativo de lectura limitada con
+Edge tras 403. La transferencia requiere tamaño declarado y se
+cancela al superar la guarda o el plazo. La vía permanece desactivada
+por defecto hasta comprobar Fetch/CORS con una prueba real autorizada.
+Pasaron 262 pruebas offline.
+
+La reanudación conserva los procesos pendientes de `en01-hsxjhqpg`
+y sus claves, refresca únicamente sus inventarios y reutiliza
+binarios verificados y resultados ya resueltos. Quedó preparado
+el comando para un piloto de un proceso y dos intentos, seguido
+del lote de 12 solo con autorización adicional. No se hizo una
+nueva descarga ni una corrida nacional.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

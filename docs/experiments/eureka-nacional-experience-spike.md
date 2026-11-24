@@ -1258,3 +1258,88 @@ consumir más intentos. Una vez recuperada la descarga, usar los avisos
 y las claves ya guardadas y procesar primero los rectores pendientes con
 las guardas existentes. No se consultaron el feed ni inventarios, y no
 se ejecutó la recuperación de los 12 procesos.
+
+
+## EN-01 · Alternativa acotada de descarga mediante Edge
+
+En la prueba autorizada de Moniquirá, el enlace de inventario coincidió
+con el archivado. Un solo clic desde Edge recibió HTTP 200, sin
+redirecciones, y el PDF fue idéntico a la copia manual de 595.065 bytes.
+El GET archivado anterior había recibido 403 mediante `urllib`. La
+diferencia comprobada fue el contexto del navegador. Esa prueba no
+establece cuál de sus propiedades influyó en el resultado.
+
+EN-01 conserva `urllib` como vía principal. El indicador optativo
+`--edge-download-fallback` solo considera continuar mediante Edge si
+el descargador registra `http_error` con HTTP 403, el tipo esperado
+es PDF o DOCX y queda cupo. La alternativa utiliza la URL vigente
+entregada por el inventario, valida la ruta SECOP y el
+`DocumentId`, y deja los demás parámetros en memoria. La solicitud
+se hace desde la pestaña de Contratos de Edge con sus credenciales
+administradas por el navegador. Las trazas guardan mecanismo, estado,
+etapa y motivo. No registran la URL completa, cookies ni tokens.
+
+El lector alternativo usa un GET de navegador con redirecciones
+deshabilitadas y `AbortController`. Acepta una respuesta directa HTTP
+200 con tamaño declarado dentro del tope. Si falta el tamaño,
+se rechaza la respuesta. Lee el cuerpo por bloques, cancela cuando
+supera el tamaño declarado o se agota el plazo y comprueba el formato
+antes de publicar. El almacenamiento compartido verifica tamaño,
+estructura mínima y hash. El candado de volumen es de 10 MiB por
+defecto y respeta el tope ya autorizado para un rector si la corrida
+lo habilita. El plazo máximo de la vía Edge es de 12 s. Si se pierde
+CDP o no se confirma la cancelación, se suspende Edge para el resto
+de la ejecución.
+
+Un intento Edge consume un intento documental adicional y un crédito
+del presupuesto existente. El intento directo conserva sus créditos
+y ambos cuentan frente a los topes nacionales y por proceso. El
+runner registra fallos por documento y detiene la adquisición si hay
+tres fallos consecutivos repartidos entre al menos dos procesos.
+La alternativa queda **desactivada por defecto**. La descarga
+normal de Edge comprobada en Moniquirá no demuestra que SECOP permita
+la lectura por Fetch entre orígenes. Si CORS bloquea la respuesta, se
+registra el rechazo y no se cambia de mecanismo. El límite de bytes
+se aplica a lo leído y almacenado, con cancelación en el navegador.
+Los buffers internos de la red del navegador quedan fuera del control
+del runner. Si CDP se bloquea, Python puede tardar en recibir el acuse
+del temporizador del navegador. Estas limitaciones requieren validar
+la alternativa con un piloto autorizado antes de usarla en un lote.
+
+### Reanudación acotada de los 12 procesos
+
+La opción `--resume-inventory-from` utiliza la selección y las claves
+guardadas de una corrida local. Omite el discovery y el preflight
+que consultaría el feed. Solo refresca inventarios de los procesos
+pendientes seleccionados. Los binarios ya guardados se verifican por
+hash, tamaño y tipo antes de reutilizarlos. Se conserva el avance
+y las resoluciones en un directorio local de reanudación ligado a
+la corrida original. Las reanudaciones de un mismo lote deben
+ejecutarse de forma serial para compartir correctamente ese avance.
+
+Después de una autorización específica, iniciar con una reanudación
+de un proceso y dos intentos máximos para comprobar el diagnóstico
+de `urllib`, el comportamiento Fetch/CORS y la cancelación. Si la
+validación lo permite, una autorización siguiente puede aplicar el
+mismo flujo al resto del lote. El comando preparado para ese lote
+desde el worktree experimental es:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython '.\backend\scripts\eureka_nacional_en01.py' --exploratory `
+  --resume-inventory-from en01-hsxjhqpg --processes 12 --documents 24 --ocr-pages 2 `
+  --edge-download-fallback --cdp-url 'http://127.0.0.1:9232' `
+  --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
+
+Para el piloto de un proceso, sustituir `--processes 12 --documents 24`
+por `--processes 1 --documents 2`. Mantener 200 créditos, 720 s, el
+tope ordinario de 10 MiB y 2 páginas OCR por PDF y 48 en total para
+el lote. No se ejecutó el piloto ni se reanudaron los 12 procesos.
+
+Pasaron 262 pruebas offline. Las regresiones cubren éxito, fallos de
+ambas vías, activación solo ante HTTP 403, presupuesto de intento,
+cancelación, tamaño, plazo, tipo, reutilización y reanudación sin
+feed. Una simulación offline ejecutó el JavaScript de control y
+verificó la señal de aborto por tamaño declarado, sobrelectura y plazo.

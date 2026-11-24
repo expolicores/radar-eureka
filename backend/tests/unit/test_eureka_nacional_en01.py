@@ -1676,3 +1676,156 @@ def test_archived_probe_is_bounded_and_skips_discovery(monkeypatch, tmp_path):
     en01.write_json(run / "documents.json", [{"process_reference": "proc", "documents": [entry]}])
     with pytest.raises(ValueError, match="enlace archivado"):
         probe.archived_document(run, "SIMULADO")
+
+
+def test_verified_document_receipt_survives_restart(tmp_path):
+    storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
+    doc = SpikeDocument("Invitación", "pdf", SECOP + "1", "1")
+    pdf = b"%PDF-1.4\ncontenido\n%%EOF"
+    stored = storage.store(
+        [pdf],
+        original_name="file.pdf",
+        content_type="application/pdf",
+        expected_size=len(pdf),
+        max_bytes=1000,
+    )
+    en01.DownloadState(tmp_path, storage).remember(doc, stored)
+    state = en01.DownloadState(tmp_path, storage)
+    assert state.cached(doc, 1000) == stored
+    (storage.root / stored.storage_path).write_bytes(b"misma ruta, contenido alterado")
+    assert state.cached(doc, 1000) is None
+
+
+def test_resume_keeps_saved_selection_and_never_probes_feed(tmp_path, monkeypatch):
+    selected = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE, requests=0, deadline=time.monotonic() + 360
+    )
+    sample = row(1, "Boyacá")
+    n = en01.discover(
+        SimpleNamespace(
+            profile_id=EXAMPLE_PROFILE, post=Mock(return_value={"count": 1, "data": [sample]})
+        ),
+        SimpleNamespace(processes=1, recent_days=30, discovery_pages=4),
+        CUTOFF,
+        {"pages": [], "duplicates": 0},
+        commercial.load_commercial_profile(),
+        en01.load_national_locations(),
+    )
+    check = Mock(side_effect=AssertionError("feed preflight"))
+    discover = Mock(side_effect=AssertionError("feed"))
+    inventory = Mock(return_value=[])
+    monkeypatch.setattr(en01, "check_session", check)
+    monkeypatch.setattr(en01, "discover", discover)
+    monkeypatch.setattr(en01, "fetch_inventory", inventory)
+    args = SimpleNamespace(
+        processes=1,
+        documents=5,
+        recent_days=30,
+        discovery_pages=8,
+        resume_snapshot=n,
+        resume_inventory_from="en01-source",
+        exploratory=True,
+    )
+    assert en01.run(selected, args, None, tmp_path, now=CUTOFF) == 0
+    assert report(tmp_path, "metrics.json")["discovered_rows"] == 0
+    assert inventory.call_count == 1
+    check.assert_not_called()
+    discover.assert_not_called()
+
+
+@pytest.mark.parametrize("edge_fails", [False, True])
+def test_edge_fallback_uses_second_budget_slot_only_after_403(tmp_path, monkeypatch, edge_fails):
+    import eureka_nacional_edge_download as edge
+
+    doc = SpikeDocument("Invitación", "pdf", SECOP + "1", "1")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[doc]))
+
+    def direct(*args, diagnostics):
+        diagnostics["http_status"] = 403
+        raise en01.AcquisitionError("http_error", "rechazado")
+
+    def browser(*args):
+        args[-1]["cancellation_confirmed"] = True
+        if edge_fails:
+            raise en01.AcquisitionError("edge_fetch_rejected", "rechazado")
+        return SimpleNamespace(sha256="a" * 64, observed_size=44)
+
+    monkeypatch.setattr(en01.spike, "download_document", direct)
+    monkeypatch.setattr(edge, "download_from_edge", Mock(side_effect=browser))
+    monkeypatch.setattr(
+        en01.spike,
+        "run_existing_extractor",
+        Mock(
+            return_value=(
+                {"status": "completed", "page_count": 1, "elapsed_seconds": 0.01},
+                [fragment(REQUIRED)],
+            )
+        ),
+    )
+    client = SimpleNamespace(deadline=time.monotonic() + 360, page=Mock(), reserve=Mock())
+    settings = en01.settings_for_run(tmp_path, "tesseract", None)
+    storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
+    state = en01.DownloadState(tmp_path, storage, edge_enabled=True)
+    inv, errors, metrics = [], [], Counter()
+    en01.analyze_documents(
+        client,
+        {"inventory_keys": {}},
+        storage,
+        settings,
+        2,
+        metrics,
+        inv,
+        errors,
+        download_state=state,
+    )
+    client.reserve.assert_called_once_with(1)
+    assert metrics["documents_attempted"] == 2
+    assert metrics["edge_downloaded"] == (not edge_fails)
+    assert bool(errors) == edge_fails
+    assert errors[0]["code"] == "edge_fetch_rejected" if edge_fails else inv[0]["complete"]
+
+
+def test_download_circuit_requires_repeated_failures_across_processes(tmp_path):
+    state = en01.DownloadState(tmp_path, en01.spike.LocalBinaryStorage(tmp_path / "binaries"))
+    assert not state.record_failure("one")
+    assert not state.record_failure("one")
+    assert not state.record_failure("one")
+    assert state.record_failure("two")
+
+
+@pytest.mark.parametrize(
+    ("enabled", "status", "allowance"), [(False, 403, 2), (True, 429, 2), (True, 403, 1)]
+)
+def test_edge_cannot_spend_an_unapproved_fallback_slot(
+    tmp_path, monkeypatch, enabled, status, allowance
+):
+    import eureka_nacional_edge_download as edge
+
+    doc = SpikeDocument("Invitación", "pdf", SECOP + "1", "1")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[doc]))
+
+    def direct(*args, diagnostics):
+        diagnostics["http_status"] = status
+        raise en01.AcquisitionError("http_error", "rechazado")
+
+    monkeypatch.setattr(en01.spike, "download_document", direct)
+    fallback = Mock()
+    monkeypatch.setattr(edge, "download_from_edge", fallback)
+    settings = en01.settings_for_run(tmp_path, "tesseract", None)
+    storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
+    state = en01.DownloadState(tmp_path, storage, edge_enabled=enabled)
+    metrics, errors = Counter(), []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        storage,
+        settings,
+        allowance,
+        metrics,
+        [],
+        errors,
+        download_state=state,
+    )
+    assert metrics["documents_attempted"] == 1
+    assert errors[0]["code"] == "http_error"
+    fallback.assert_not_called()

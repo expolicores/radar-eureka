@@ -48,7 +48,7 @@ from licitaciones_freshness import apply_freshness, local_now
 from licitaciones_sources import document_capable, process_identity, source_kind
 from licitaciones_validity import apply_validity
 
-from public_procurement.documents.domain.document import AcquisitionError
+from public_procurement.documents.domain.document import AcquisitionError, StoredBinary
 from public_procurement.licitaciones_cdp.configuration import (
     ProfileConfigurationError,
     resolve_profile_id,
@@ -507,6 +507,92 @@ def document_settings(settings, entry, governing_pdf_max_bytes):
     return settings
 
 
+def verify_document_type(storage, stored, document, max_bytes):
+    if not isinstance(stored, StoredBinary) or document.extension not in {"pdf", "docx"}:
+        return
+    expected = b"%PDF-" if document.extension == "pdf" else b"PK\x03\x04"
+    with storage.open_verified(
+        stored.storage_path, stored.sha256, stored.observed_size, max_bytes
+    ) as stream:
+        if stream.read(len(expected)) != expected:
+            raise AcquisitionError(
+                "invalid_content", "El binario no coincide con el tipo anunciado."
+            )
+
+
+class DownloadState:
+    def __init__(self, output, storage, *, edge_enabled=False, source=None):
+        self.output = output
+        self.storage = storage
+        self.edge_enabled = edge_enabled
+        self.failed_processes = []
+        self.receipts_path = output / "download_receipts.json"
+        self.receipts = (
+            json.loads(self.receipts_path.read_text(encoding="utf-8"))
+            if self.receipts_path.is_file()
+            else {}
+        )
+
+        self.previous_storage = spike.LocalBinaryStorage(source / "binaries") if source else None
+        self.previous_hashes = (
+            {
+                f"{doc['document_id']}:{doc['extension']}": doc["sha256"]
+                for case in json.loads((source / "documents.json").read_text(encoding="utf-8"))
+                for doc in case["documents"]
+                if re.fullmatch(r"[a-f0-9]{64}", doc.get("sha256") or "")
+            }
+            if source
+            else {}
+        )
+
+    def key(self, document):
+        return f"{document.document_id}:{document.extension}"
+
+    def cached(self, document, max_bytes):
+        key = self.key(document)
+        if record := self.receipts.get(key):
+            try:
+                stored = StoredBinary(**record)
+                verify_document_type(self.storage, stored, document, max_bytes)
+                return stored
+            except (AcquisitionError, TypeError):
+                pass
+        digest = self.previous_hashes.get(key)
+        if not digest:
+            return None
+        path = f"sha256/{digest[:2]}/{digest}"
+        try:
+            size = (self.previous_storage.root / path).stat().st_size
+            with self.previous_storage.open_verified(path, digest, size, max_bytes) as stream:
+                stored = self.storage.store(
+                    iter(lambda: stream.read(65536), b""),
+                    original_name=f"{document.original_name}.{document.extension}",
+                    content_type="application/octet-stream",
+                    expected_size=size,
+                    max_bytes=max_bytes,
+                )
+            verify_document_type(self.storage, stored, document, max_bytes)
+        except (AcquisitionError, OSError):
+            return None
+        self.remember(document, stored)
+        return stored
+
+    def remember(self, document, stored):
+        if isinstance(stored, StoredBinary):
+            self.receipts[self.key(document)] = {
+                "storage_path": stored.storage_path,
+                "sha256": stored.sha256,
+                "observed_size": stored.observed_size,
+                "content_type": stored.content_type,
+            }
+            write_json(self.receipts_path, self.receipts)
+
+    def record_failure(self, process):
+        self.failed_processes.append(process)
+        self.failed_processes = self.failed_processes[-3:]
+        return len(self.failed_processes) == 3 and len(set(self.failed_processes)) >= 2
+
+
 def analyze_documents(
     client,
     process,
@@ -521,6 +607,7 @@ def analyze_documents(
     exploratory=False,
     ordinary_allowance=None,
     governing_pdf_max_bytes=DOCUMENT_BYTES,
+    download_state=None,
 ):
     inventory = fetch_inventory(client, process["inventory_keys"])
     if not inventory:
@@ -563,9 +650,10 @@ def analyze_documents(
         )
     prior_limit = False
     attempted = 0
+    reviewed_document = False
     while eligible and attempted < allowance:
         corroborating = False
-        if attempted:
+        if reviewed_document:
             classification = classify_experience(documents)
             if exploratory:
                 stop = progressive_stop(
@@ -588,7 +676,7 @@ def analyze_documents(
             elif classification["status"] in {"experience_required", "no_experience_required"}:
                 return "formal_conclusion"
         document = eligible.pop(0)
-        attempted += 1
+        reviewed_document = True
         if time.monotonic() + START_EXTRACTION_MARGIN + 12 > client.deadline:
             raise BudgetReached("duration_budget")
         entry = all_documents[document.document_id]
@@ -607,13 +695,64 @@ def analyze_documents(
         stage = "download"
         diagnostics = {}
         try:
-            metrics["documents_attempted"] += 1
-            stored = spike.download_document(
-                client, document, storage, scoped_settings, diagnostics=diagnostics
+            stored = (
+                download_state.cached(document, entry["document_max_bytes"])
+                if download_state
+                else None
             )
-            metrics["documents_downloaded"] += 1
+            if stored:
+                diagnostics["mechanism"] = "verified_cache"
+                metrics["documents_reused"] += 1
+            else:
+                attempted += 1
+                metrics["documents_attempted"] += 1
+                try:
+                    stored = spike.download_document(
+                        client, document, storage, scoped_settings, diagnostics=diagnostics
+                    )
+                except AcquisitionError as direct_error:
+                    available = (
+                        allowance
+                        if corroborating or ordinary_allowance is None
+                        else (min(allowance, ordinary_allowance))
+                    )
+                    if not (
+                        download_state
+                        and download_state.edge_enabled
+                        and direct_error.code == "http_error"
+                        and diagnostics.get("http_status") == 403
+                        and attempted < available
+                        and document.extension in {"pdf", "docx"}
+                    ):
+                        raise
+                    try:
+                        client.reserve(1)
+                    except BudgetReached:
+                        diagnostics["edge_skipped"] = "budget"
+                        raise direct_error from None
+                    else:
+                        from eureka_nacional_edge_download import download_from_edge
+
+                        attempted += 1
+                        metrics["documents_attempted"] += 1
+                        metrics["edge_attempts"] += 1
+                        edge_diagnostics = {}
+                        diagnostics["edge"] = edge_diagnostics
+                        try:
+                            stored = download_from_edge(
+                                client.page, document, storage, scoped_settings, edge_diagnostics
+                            )
+                        finally:
+                            if not edge_diagnostics.get("cancellation_confirmed"):
+                                download_state.edge_enabled = False
+                        metrics["edge_downloaded"] += 1
+                verify_document_type(storage, stored, document, entry["document_max_bytes"])
+                metrics["documents_downloaded"] += 1
+                metrics["bytes_downloaded"] += stored.observed_size
+                if download_state:
+                    download_state.remember(document, stored)
+                    download_state.failed_processes.clear()
             metrics["governing_downloads"] += entry["role"] == "primary"
-            metrics["bytes_downloaded"] += stored.observed_size
             entry["sha256"] = stored.sha256
             stage = "extraction"
             if time.monotonic() + START_EXTRACTION_MARGIN > client.deadline:
@@ -666,13 +805,19 @@ def analyze_documents(
                 failure["download_diagnostics"] = diagnostics
             errors.append(failure)
             metrics[f"{stage}_failures"] += 1
+            if (
+                stage == "download"
+                and download_state
+                and download_state.record_failure(process.get("process_reference", ""))
+            ):
+                raise BudgetReached("download_circuit_open") from None
         finally:
             if diagnostics:
                 entry["download_diagnostics"] = diagnostics
             if corroborating and entry["status"] != "download_not_started":
                 metrics["corroboration_attempts"] += 1
 
-    if exploratory and attempted:
+    if exploratory and reviewed_document:
         stop = progressive_stop(
             classify_experience(documents),
             any(corroboration_rank(all_documents[doc.document_id]) == 0 for doc in eligible),
@@ -772,6 +917,9 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 "with_inventory",
                 "documents_attempted",
                 "documents_downloaded",
+                "documents_reused",
+                "edge_attempts",
+                "edge_downloaded",
                 "governing_downloads",
                 "corroboration_attempts",
                 "native_cpu_seconds",
@@ -795,10 +943,26 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     status = "failed"
     exit_code = 1
     try:
-        check_session(client, client.profile_id, aggregator=True)
-        sample = discover(client, args, now, discovery, profile, locations)
+        resume = getattr(args, "resume_snapshot", None)
+        if resume is None:
+            check_session(client, client.profile_id, aggregator=True)
+            sample = discover(client, args, now, discovery, profile, locations)
+        else:
+            sample = [{**row, "sampled": True} for row in resume[: args.processes]]
+            discovery.update(
+                scope="resume_saved_selection",
+                processes=sample,
+                stop_reason="saved_selection",
+                resumed_from=args.resume_inventory_from,
+            )
         write_json(output / "processes.json", discovery)
         storage = spike.LocalBinaryStorage(output / "binaries")
+        download_state = DownloadState(
+            output,
+            storage,
+            edge_enabled=getattr(args, "edge_download_fallback", False),
+            source=getattr(args, "resume_source", None),
+        )
         favorable_reserve = min(FAVORABLE_RESERVE, max(0, args.documents - len(sample)))
         for index, process in enumerate(sample):
             reference = process["process_reference"]
@@ -832,9 +996,15 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                     exploratory=exploratory,
                     ordinary_allowance=ordinary_allowance,
                     governing_pdf_max_bytes=governing_pdf_max_bytes,
+                    download_state=download_state,
                 )
             except (BudgetReached, CandidateError) as error:
-                stop = error
+                if (
+                    resume is None
+                    or isinstance(error, BudgetReached)
+                    or error.code in {"session_expired", "invalid_tab"}
+                ):
+                    stop = error
                 document_stop = error.code if isinstance(error, CandidateError) else str(error)
                 process_errors.append(
                     {
@@ -849,6 +1019,18 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             if allowance == 0:
                 process_errors.append({"stage": "selection", "code": "document_budget"})
             classification = classify_experience(documents, inventory_complete=bool(documents))
+            if resume is not None and classification["status"] in {
+                "experience_required",
+                "no_experience_required",
+            }:
+                completed_path = output / "resume_completed.json"
+                completed = (
+                    json.loads(completed_path.read_text(encoding="utf-8"))
+                    if completed_path.is_file()
+                    else {}
+                )
+                completed[reference] = classification
+                write_json(completed_path, completed)
             if not documents and not process_errors:
                 classification["reason"] = "empty_inventory"
                 classification["review_reason"] = "empty_inventory"
@@ -990,6 +1172,16 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
     parser.add_argument(
+        "--edge-download-fallback",
+        action="store_true",
+        help="Piloto optativo de lectura acotada en Edge tras HTTP 403.",
+    )
+    parser.add_argument(
+        "--resume-inventory-from",
+        metavar="CORRIDA",
+        help="Reanudar procesos pendientes de una corrida local sin consultar el feed.",
+    )
+    parser.add_argument(
         "--exclude-analyzed-from",
         action="append",
         default=[],
@@ -1055,6 +1247,35 @@ def main(argv=None):
         parser.error("Las páginas adicionales requieren 8 páginas, 15 procesos e historial local.")
     try:
         args.excluded_secop_ids = load_analyzed_secop_ids(OUTPUT_ROOT, args.exclude_analyzed_from)
+        if args.resume_inventory_from:
+            if not re.fullmatch(r"en01-[a-z0-9_]+", args.resume_inventory_from):
+                raise ValueError("Nombre de corrida histórica inválido.")
+            source = OUTPUT_ROOT / args.resume_inventory_from
+            args.resume_source = source
+            if source.resolve() != source:
+                raise ValueError("Historial fuera del almacenamiento local.")
+            rows = json.loads((source / "processes.json").read_text(encoding="utf-8"))
+            results = json.loads(
+                (source / "experience_requirements.json").read_text(encoding="utf-8")
+            )
+            pending = {
+                result["process_reference"]
+                for result in results
+                if result["status"] in {"not_resolved", "experience_ambiguous"}
+            }
+            args.resume_snapshot = [
+                row
+                for row in rows["processes"]
+                if row["process_reference"] in pending
+                and row["sampled"]
+                and row.get("source") == "secop2"
+                and all(
+                    row.get("inventory_keys", {}).get(k)
+                    for k in ("idContrato", "id_fuente_contract", "idUltimaFase")
+                )
+            ]
+            if not args.resume_snapshot:
+                raise spike.SpikeError("La corrida no contiene procesos pendientes verificables.")
         profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
         profile = load_commercial_profile(args.commercial_profile)
@@ -1064,7 +1285,22 @@ def main(argv=None):
         if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
             raise ValueError("Ruta de salida fuera del directorio experimental.")
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-        output = Path(tempfile.mkdtemp(prefix="en01-", dir=OUTPUT_ROOT))
+        if args.resume_inventory_from:
+            output = OUTPUT_ROOT / f"en01-resume_{args.resume_inventory_from[5:]}"
+            if output.resolve() != output or output == source:
+                raise ValueError("Salida de reanudación inválida.")
+            output.mkdir(exist_ok=True)
+            previous = output / "resume_completed.json"
+            if previous.is_file():
+                finished = set(json.loads(previous.read_text(encoding="utf-8")))
+                args.resume_snapshot = [
+                    row for row in args.resume_snapshot if row["process_reference"] not in finished
+                ]
+                if not args.resume_snapshot:
+                    print("Los procesos de la selección local ya están resueltos.")
+                    return 0
+        else:
+            output = Path(tempfile.mkdtemp(prefix="en01-", dir=OUTPUT_ROOT))
         print(json.dumps({"output": str(output)}), flush=True)
         duration = EXPLORATORY_DURATION_SECONDS if args.exploratory else DURATION_SECONDS
         credits = EXPLORATORY_REQUEST_CREDITS if args.exploratory else REQUEST_CREDITS
