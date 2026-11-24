@@ -233,4 +233,62 @@ páginas OCR por PDF, 60 créditos, 360 s y 0 IA. Medir si la selección alcanza
 más documentos rectores y aporta evidencia útil por crédito. Revisar los
 casos favorables y las dependencias antes de inferir accesibilidad. Los PDF
 largos pueden seguir bloqueando conclusiones si falta una alternativa
-aplicable. La segunda corrida requiere autorización.
+aplicable. La segunda corrida se ejecutó con ese presupuesto.
+
+## Segundo smoke real · 23 de noviembre de 2026
+
+La corrida `en01-ifqy1v2y` terminó parcial (salida `2`) con EN-01.1 desde
+`6e66d57`. El preflight con el perfil configurado pasó. El lanzador local
+priorizó las cinco identidades SECOP del primer smoke si estaban presentes y
+eran elegibles en la consulta actual. Las cuatro páginas autorizadas
+devolvieron 120 filas de 26 departamentos, sin coincidencias con esas cinco
+identidades. Se eligieron cinco procesos nuevos con las reglas vigentes.
+El cambio de fecha, perfil y muestra limita la comparación causal.
+
+| Métrica | Primer smoke | Segundo smoke |
+|---|---:|---:|
+| Archivos etiquetados como rector | 4 | 5 |
+| Invitaciones o pliegos rectores aparentes por título | 3 | 4 |
+| Cotizaciones seleccionadas | 1 | 0 |
+| Borradores seleccionados | 1 | 0 |
+| Intentos de descarga | 5 | 5 |
+| Descargas exitosas | 4 | 5 |
+| Páginas nativas con texto | 1 | 0 |
+| Páginas OCR | 0 | 0 |
+| Afirmaciones recuperadas | 0 | 0 |
+| Evidencias explícitas favorables | 0 | 0 |
+| Silencio documental con cobertura | Sin métrica contextual | 0 |
+| Casos contradictorios | 0 registrados | 0 |
+| Casos resueltos | 0 | 0 |
+| Casos sin resolver | 5 | 5 |
+| Créditos de red | 46 | 46 |
+| Tiempo del runner | 45,125 s | 44,609 s |
+| Llamadas de IA | 0 | 0 |
+
+Se obtuvieron los cinco inventarios, con 44 documentos. La selección dejó
+fuera cinco cotizaciones. Cuatro de los cinco títulos seleccionados
+correspondían aparentemente a invitaciones. El quinto era un archivo de
+formatos cuyo título incluía «invitación». Se le asignó el rol de rector
+aunque el inventario incluía también una invitación pública. La vigencia de
+los documentos quedó sin corroborar porque no se leyó su contenido.
+
+Se descargaron 7.061.340 bytes. Los cinco PDF superaron 12 páginas y
+devolvieron `page_limit` antes de extracción nativa u OCR. Los cinco
+inventarios tenían otros PDF elegibles. El reparto consumió los cinco
+intentos en un documento por proceso y dejó cero intentos para alternativas.
+Por ello su ejecución en vivo queda sin validar. Pasaron seis pruebas offline de alternativas y títulos numerados. Los cinco casos quedaron
+con prioridad de revisión por evidencia insuficiente, sin candidatos
+favorables detectados.
+
+El ranking eligió cuatro invitaciones en esta muestra y dejó las
+cotizaciones fuera. La evidencia útil recuperada fue cero en ambas corridas.
+La ausencia de texto habilitante dejó sin medir una mejora de clasificación
+en vivo. El diferente tamaño de los documentos impide atribuir el descenso
+de páginas leídas a una regresión del extractor.
+
+Para un próximo ensayo autorizado, distinguir archivos de formatos o anexos
+de la invitación que los contiene, y definir cómo reservar un intento para
+alternativas dentro del presupuesto. Conservar la evidencia de la versión y
+la causa de cada límite. El detalle permanece en
+`.local/eureka-nacional-spike/en01-ifqy1v2y/`. La tercera corrida requiere
+autorización.

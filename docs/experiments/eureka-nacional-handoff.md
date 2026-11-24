@@ -27,7 +27,7 @@ bajo `.local/eureka-nacional-spike/en01-ms7c7hyc/`. Antes de solicitar otra
 corrida, revisar offline la prioridad documental en títulos numerados y
 cotizaciones. La siguiente ejecución requiere autorización.
 
-## EN-01.1 listo para validación en el segundo smoke
+## Preparación y validación offline de EN-01.1
 
 La selección documental normaliza títulos numerados, excluye cotizaciones y
 proyectos identificados, y prueba alternativas dentro de los presupuestos
@@ -38,10 +38,27 @@ humanas. Ver [método y validación de EN-01.1](eureka-nacional-experience-spike
 Cinco PDF locales y 82 páginas nativas. Pore p. 11, El Plato p. 13 y La Capilla
 p. 20 produjeron evidencia favorable. Chivatá 21 y 22, págs. 1 y 4, mantuvieron
 dependencias de reglamento. Los cinco expedientes aportados quedaron
-`not_resolved`. Todo el detalle está en `.local/en01-1-validation/`. La segunda
-corrida sigue pendiente de autorización.
+`not_resolved`. Todo el detalle está en `.local/en01-1-validation/`. La segunda corrida se resume a continuación.
 
-## Plan acotado para el segundo smoke
+## Segundo smoke real de EN-01.1
+
+El 23 de noviembre de 2026 se ejecutó `en01-ifqy1v2y` desde `6e66d57`.
+El preflight pasó. El lanzador local buscó la cohorte anterior entre las
+cuatro páginas autorizadas y obtuvo cero coincidencias. Se analizaron cinco
+procesos nuevos con 44 documentos inventariados y cinco descargas exitosas.
+
+Los cinco PDF superaron el límite de 12 páginas. Resultado parcial,
+`not_resolved` en cinco casos, con 0 páginas nativas, 0 OCR, 0 afirmaciones
+y 0 IA. Se consumieron 46 créditos y 44,609 s. La exclusión de cotizaciones
+funcionó. Un archivo de formatos fue etiquetado como rector. Los intentos se
+agotaron antes de probar alternativas. El detalle está en
+`.local/eureka-nacional-spike/en01-ifqy1v2y/`.
+
+Ver la [comparación agregada](eureka-nacional-experience-spike.md#segundo-smoke-real--23-de-noviembre-de-2026).
+Próxima revisión offline: distinguir formatos auxiliares y prever un cupo de
+alternativa dentro del presupuesto. Una tercera corrida requiere autorización.
+
+## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
    Probar con una invitación numerada, un proyecto de pliego numerado y una
@@ -56,7 +73,7 @@ corrida sigue pendiente de autorización.
    página y cláusula para revisión humana.
 4. Validar offline con inventarios y fixtures locales. Comparar cobertura,
    causas de descarte y créditos por caso resuelto frente al primer smoke.
-   La corrida nueva queda pendiente de autorización.
+   La siguiente corrida requiere autorización.
 
 Límites propuestos, iguales al primer smoke: 5 procesos, 30 días, hasta 4 páginas
 de 30 filas, 5 intentos de descarga (máximo 2 por proceso y 10 MiB por PDF), 12
