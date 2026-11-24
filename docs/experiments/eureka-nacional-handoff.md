@@ -99,6 +99,21 @@ documenta el criterio y la comparación. El resultado por documento queda en
 offline. Se usó exclusivamente el material local, con cero OCR, consultas
 CDP, descargas o llamadas de IA. La próxima corrida real requiere autorización.
 
+## Corrida exploratoria EN-01.4 preparada
+
+El [plan de ejecución](eureka-nacional-experience-spike.md#en-014--plan-de-corrida-exploratoria-nacional)
+incluye comando, selección y métricas. El modo `--exploratory` queda a la espera
+de autorización. Propone hasta 15 procesos, 30 días, ocho páginas de 30 filas,
+24 intentos de descarga y tres por proceso, 10 MiB por PDF, OCR selectivo de
+hasta dos páginas por PDF, 200 créditos, 720 s y cero llamadas de IA. La
+extracción nativa sigue sin tope por cantidad de páginas.
+
+Registrar por separado clasificación formal, prioridad comercial, motivos de
+parada y cobertura pendiente. Reservar hasta cuatro intentos para corroborar
+ausencias explícitas y conservar hasta tres casos despriorizados para revisión
+humana. La evaluación usa el perfil comercial, la cobertura geográfica y el
+clasificador ya aceptados. La corrida real no se ha iniciado.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

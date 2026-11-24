@@ -89,6 +89,8 @@ def load_payload(path: Path, term: str, limit: int):
 
 
 class PageClient:
+    request_limit = 60
+
     """Use the app's existing axios instance; never copy authentication state."""
 
     def __init__(self, page, profile_id, event):
@@ -98,8 +100,8 @@ class PageClient:
         self.last_get_info_diagnostic = None
 
     def reserve(self, count=1):
-        if self.requests + count > 60:
-            raise SpikeError("Presupuesto experimental de 60 requests agotado.")
+        if self.requests + count > self.request_limit:
+            raise SpikeError(f"Presupuesto experimental de {self.request_limit} requests agotado.")
         if self.last is not None:
             # Pump CDP while throttling; do not freeze browser event delivery.
             self.page.wait_for_timeout(max(0, 2100 - (time.monotonic() - self.last) * 1000))

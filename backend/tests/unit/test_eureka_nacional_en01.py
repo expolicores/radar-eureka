@@ -1028,3 +1028,115 @@ def test_conflicting_waiver_blocks_early_commercial_deprioritization():
     assert result["status"] == "experience_ambiguous"
     assert result["review_category"] == "limited_or_ambiguous"
     assert {e["assertion_type"] for e in result["review_evidence"]} == {rules.NEG, rules.REQ}
+
+
+def test_exploratory_credit_guard_is_opt_in():
+    page = Mock()
+    deadline = time.monotonic() + 360
+    regular = en01.SmokeClient(page, EXAMPLE_PROFILE, deadline)
+    regular.requests = 60
+    with pytest.raises(en01.BudgetReached, match="request_budget"):
+        regular.reserve()
+    exploratory = en01.SmokeClient(
+        page, EXAMPLE_PROFILE, deadline, request_limit=en01.EXPLORATORY_REQUEST_CREDITS
+    )
+    exploratory.requests = 194
+    exploratory.reserve(6)
+    assert exploratory.requests == 200
+    with pytest.raises(en01.BudgetReached, match="request_budget"):
+        exploratory.reserve()
+
+
+def test_exploratory_cli_uses_bounded_preset_without_cdp(monkeypatch, tmp_path):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", EXAMPLE_PROFILE)
+    monkeypatch.setitem(
+        sys.modules, "playwright.sync_api", SimpleNamespace(sync_playwright=nullcontext)
+    )
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path / "runs")
+    monkeypatch.setattr(en01, "settings_for_run", Mock())
+    monkeypatch.setattr(en01, "connect_browser", Mock())
+    monkeypatch.setattr(en01, "find_page", Mock())
+    run = Mock(return_value=0)
+    monkeypatch.setattr(en01, "run", run)
+    assert en01.main(["--exploratory"]) == 0
+    client, args, *_ = run.call_args.args
+    assert (args.processes, args.discovery_pages, args.documents) == (15, 8, 24)
+    assert client.request_limit == 200
+    assert 710 < client.deadline - time.monotonic() <= 720
+    with pytest.raises(SystemExit):
+        en01.main(["--exploratory", "--processes", "16"])
+    assert run.call_count == 1
+
+
+def test_exploratory_progression_records_requirement_waiver_and_silence(monkeypatch, tmp_path):
+    def doc(name, identifier):
+        return SpikeDocument(name, "pdf", SECOP + identifier, identifier)
+
+    histories = {
+        1: [
+            doc("Invitación.pdf", "1"),
+            doc("Anexo habilitante.pdf", "11"),
+            doc("Estudio de mercado.pdf", "12"),
+        ],
+        2: [
+            doc("Invitación.pdf", "2"),
+            doc("Formato de experiencia.pdf", "23"),
+            doc("Anexo habilitante.pdf", "22"),
+        ],
+        3: [doc("Invitación.pdf", "3"), doc("Anexo habilitante.pdf", "31")],
+    }
+    texts = {
+        "1": "2.1 EXPERIENCIA GENERAL\n" + REQUIRED,
+        "2": WAIVED,
+        "22": WAIVED,
+        "3": "El suministro se entrega en la bodega municipal.",
+    }
+    downloaded = []
+
+    def download(_client, document, _storage, _settings):
+        downloaded.append(document.document_id)
+        return SimpleNamespace(sha256=document.document_id.zfill(64), observed_size=25)
+
+    def extract(document, *args, **kwargs):
+        return {"status": "completed", "page_count": 1, "elapsed_seconds": 0.02}, [
+            fragment(texts[document.document_id])
+        ]
+
+    rows = [row(1, "Boyacá"), row(2, "Bogotá"), row(3, "Nariño")]
+    monkeypatch.setattr(en01, "check_session", Mock())
+    monkeypatch.setattr(
+        en01, "fetch_inventory", lambda _client, keys: histories[keys["idContrato"]]
+    )
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    monkeypatch.setattr(en01.spike, "run_existing_extractor", extract)
+    client = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE,
+        deadline=time.monotonic() + 720,
+        requests=2,
+        post=Mock(return_value={"count": len(rows), "data": rows}),
+    )
+    args = SimpleNamespace(
+        processes=3, documents=6, discovery_pages=8, recent_days=30, ocr_pages=2, exploratory=True
+    )
+    assert en01.run(client, args, None, tmp_path, now=CUTOFF) == 0
+    assert downloaded == ["1", "2", "22", "3"]
+    results = report(tmp_path, "experience_requirements.json")
+    assert [r["document_stop_reason"] for r in results] == [
+        "applicable_requirement_in_governing_pdf",
+        "no_pertinent_corroborating_pdf",
+        "silence_secondary_review",
+    ]
+    assert [r["review_category"] for r in results] == [
+        "explicit_requirement",
+        "explicit_favorable",
+        "documentary_silence",
+    ]
+    assert results[0]["status"] == results[1]["status"] == "not_resolved"
+    assert results[0]["review_evidence"][0]["page"] == 1
+    assert report(tmp_path, "deprioritized_review_sample.json") == [results[0]]
+    metrics = report(tmp_path, "metrics.json")
+    assert metrics["governing_downloads"] == 3
+    assert metrics["processes_with_explicit_absence"] == 1
+    assert metrics["processes_with_explicit_requirement"] == 1
+    assert metrics["corroboration_attempts"] == 1
+    assert metrics["documentary_silence"] == 1

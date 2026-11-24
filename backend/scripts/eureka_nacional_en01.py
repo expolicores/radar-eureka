@@ -23,6 +23,8 @@ from eureka_nacional_commercial import (
 )
 from eureka_nacional_experience import (
     ASSERTION_TYPES,
+    NEG,
+    REQ,
     STATUSES,
     classify_experience,
     document_cover_metadata,
@@ -60,6 +62,14 @@ DEFAULT_GEOGRAPHY = Path(__file__).with_name(
 OCR_PER_DOCUMENT = 2
 REQUEST_CREDITS = 60
 DURATION_SECONDS = 360
+EXPLORATORY_PROCESSES = 15
+EXPLORATORY_DISCOVERY_PAGES = 8
+EXPLORATORY_DOCUMENTS = 24
+EXPLORATORY_PER_PROCESS = 3
+EXPLORATORY_REQUEST_CREDITS = 200
+EXPLORATORY_DURATION_SECONDS = 720
+DEPRIORITIZED_SAMPLE_SIZE = 3
+FAVORABLE_RESERVE = 4
 START_EXTRACTION_MARGIN = 50
 DOCUMENT_BYTES = 10 * 1024 * 1024
 OUTPUT_ROOT = spike.ROOT.parent / ".local" / "eureka-nacional-spike"
@@ -70,14 +80,15 @@ class BudgetReached(spike.SpikeError):
 
 
 class SmokeClient(PageClient):
-    def __init__(self, page, profile_id, deadline):
+    def __init__(self, page, profile_id, deadline, *, request_limit=REQUEST_CREDITS):
         super().__init__(page, profile_id, lambda _event: None)
         self.deadline = deadline
+        self.request_limit = request_limit
 
     def reserve(self, count=1):
         if time.monotonic() + 25 > self.deadline:
             raise BudgetReached("duration_budget")
-        if self.requests + count > REQUEST_CREDITS:
+        if self.requests + count > self.request_limit:
             raise BudgetReached("request_budget")
         super().reserve(count)
 
@@ -239,6 +250,12 @@ def select_processes(candidates, args, now, discovery, profile):
             reason = "outside_publication_window"
         elif not reason and (process["source"] != "secop2" or not process["inventory_capable"]):
             reason = "inventory_unavailable_for_source"
+        if (
+            not reason
+            and getattr(args, "exploratory", False)
+            and process["validity_status"] == "closed"
+        ):
+            reason = "closed_process"
         process["excluded_reason"] = reason
         process["sampled"] = False
         if reason:
@@ -350,6 +367,29 @@ def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OC
     )
 
 
+def progressive_stop(classification, governing_pdf_pending):
+    if classification["status"] in {"experience_required", "no_experience_required"}:
+        return "formal_conclusion"
+    if classification["review_category"] == "explicit_requirement":
+        return "applicable_requirement_in_governing_pdf"
+    if classification["review_category"] == "documentary_silence" and not governing_pdf_pending:
+        return "silence_secondary_review"
+    return None
+
+
+def corroboration_rank(entry):
+    if entry["role"] in {"primary", "amendment"}:
+        return 0
+    title = plain(entry["name"])
+    if (
+        entry["role"] == "support"
+        and not re.search(r"\b(?:formatos?|formularios?)\b", title)
+        and re.search(r"\b(?:habilitantes?|experiencia|estudios? previos?|requisitos?)\b", title)
+    ):
+        return 1
+    return 2
+
+
 def analyze_documents(
     client,
     process,
@@ -361,10 +401,12 @@ def analyze_documents(
     errors,
     *,
     ocr_pages=OCR_PER_DOCUMENT,
+    exploratory=False,
+    ordinary_allowance=None,
 ):
     inventory = fetch_inventory(client, process["inventory_keys"])
     if not inventory:
-        return
+        return "empty_inventory"
     metrics["with_inventory"] += 1
     all_documents = {}
     for document in inventory:
@@ -399,29 +441,64 @@ def analyze_documents(
             else "document_limit"
         )
     prior_limit = False
-    for index, document in enumerate(eligible[:allowance]):
-        if index and classify_experience(documents)["status"] in {
-            "experience_required",
-            "no_experience_required",
-        }:
-            break
+    attempted = 0
+    while eligible and attempted < allowance:
+        corroborating = False
+        if attempted:
+            classification = classify_experience(documents)
+            if exploratory:
+                stop = progressive_stop(
+                    classification,
+                    any(
+                        all_documents[doc.document_id]["role"] in {"primary", "amendment"}
+                        for doc in eligible
+                    ),
+                )
+                if stop:
+                    return stop
+                if classification["review_category"] == "explicit_favorable":
+                    eligible.sort(
+                        key=lambda doc: corroboration_rank(all_documents[doc.document_id])
+                    )
+                    if corroboration_rank(all_documents[eligible[0].document_id]) == 2:
+                        return "no_pertinent_corroborating_pdf"
+                    corroborating = True
+                elif ordinary_allowance is not None and attempted >= ordinary_allowance:
+                    return "ordinary_download_allowance"
+            elif classification["status"] in {"experience_required", "no_experience_required"}:
+                return "formal_conclusion"
+        document = eligible.pop(0)
+        attempted += 1
         if time.monotonic() + START_EXTRACTION_MARGIN + 12 > client.deadline:
             raise BudgetReached("duration_budget")
         entry = all_documents[document.document_id]
         entry["selection"] = "selected"
-        entry["selection_reason"] = "alternative_after_limit" if prior_limit else "priority"
+        entry["selection_reason"] = (
+            "corroborate_explicit_absence"
+            if corroborating
+            else "alternative_after_limit"
+            if prior_limit
+            else "priority"
+        )
         stage = "download"
         try:
             metrics["documents_attempted"] += 1
             stored = spike.download_document(client, document, storage, settings)
             metrics["documents_downloaded"] += 1
+            metrics["governing_downloads"] += entry["role"] == "primary"
             metrics["bytes_downloaded"] += stored.observed_size
             entry["sha256"] = stored.sha256
             stage = "extraction"
             if time.monotonic() + START_EXTRACTION_MARGIN > client.deadline:
                 entry["status"] = "extraction_not_started"
                 raise BudgetReached("duration_budget")
+            counted_governing = entry["role"] == "primary"
             extract_document(document, stored, storage, settings, entry, ocr_pages=ocr_pages)
+            metrics["governing_downloads"] += int(entry["role"] == "primary") - int(
+                counted_governing
+            )
+            metrics["native_cpu_seconds"] += entry.get("native_cpu_seconds") or 0
+            metrics["extraction_seconds"] += entry["extraction_seconds"]
             code = entry["error_code"] or entry["native_stop_reason"]
             prior_limit = code in {
                 "too_large",
@@ -458,6 +535,21 @@ def analyze_documents(
             entry.update(status=f"{stage}_failed", error_code=code)
             errors.append({"stage": stage, "code": code, "document_id": document.document_id})
             metrics[f"{stage}_failures"] += 1
+        finally:
+            if corroborating and entry["status"] != "download_not_started":
+                metrics["corroboration_attempts"] += 1
+
+    if exploratory and attempted:
+        stop = progressive_stop(
+            classify_experience(documents),
+            any(
+                all_documents[doc.document_id]["role"] in {"primary", "amendment"}
+                for doc in eligible
+            ),
+        )
+        if stop:
+            return stop
+    return "process_download_allowance" if eligible else "eligible_pdfs_exhausted"
 
 
 def metrics_summary(discovery, results, metrics, client, started, profile):
@@ -473,6 +565,17 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
 
     return {
         "assertions": {kind: assertions[kind] for kind in ASSERTION_TYPES},
+        "processes_with_explicit_requirement": sum(
+            any(e["assertion_type"] == REQ for e in r["evidence"]) for r in results
+        ),
+        "processes_with_explicit_absence": sum(
+            any(e["assertion_type"] == NEG for e in r["evidence"]) for r in results
+        ),
+        "documentary_silence": review["documentary_silence"],
+        "deprioritized_cases": review["explicit_requirement"],
+        "contradictions": sum(r["reason"] == "conflicting_clauses" for r in results),
+        "unresolved": analyzed - resolved,
+        "document_stop_reasons": dict(Counter(r["document_stop_reason"] for r in results)),
         "review_categories": dict(review),
         "review_prioritized": sum(r["review_priority"] <= 3 for r in results),
         "human_verified_errors": None,
@@ -488,6 +591,7 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
         "inventory_eligible": eligible,
         "sampled": sum(p["sampled"] for p in discovery["processes"]),
         "analyzed": analyzed,
+        "selected_not_analyzed": sum(p["sampled"] for p in discovery["processes"]) - analyzed,
         "resolved": resolved,
         "classification": {status: counts[status] for status in STATUSES},
         "by_validity": {
@@ -509,7 +613,9 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
 def run(client, args, settings, output, *, now=None, profile=None, locations=None):
     profile = profile or load_commercial_profile()
     locations = load_national_locations() if locations is None else locations
-    started, now = time.monotonic(), now or local_now()
+    started, parent_cpu, now = time.monotonic(), time.process_time(), now or local_now()
+    exploratory = getattr(args, "exploratory", False)
+    per_process = EXPLORATORY_PER_PROCESS if exploratory else 2
     discovery = {
         "scope": "national_explicit_location_filter",
         "commercial_profile": {
@@ -531,6 +637,10 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 "with_inventory",
                 "documents_attempted",
                 "documents_downloaded",
+                "governing_downloads",
+                "corroboration_attempts",
+                "native_cpu_seconds",
+                "extraction_seconds",
                 "download_failures",
                 "extraction_failures",
                 "documents_processed",
@@ -553,18 +663,27 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
         sample = discover(client, args, now, discovery, profile, locations)
         write_json(output / "processes.json", discovery)
         storage = spike.LocalBinaryStorage(output / "binaries")
+        favorable_reserve = min(FAVORABLE_RESERVE, max(0, args.documents - len(sample)))
         for index, process in enumerate(sample):
             reference = process["process_reference"]
             documents, process_errors = [], []
             remaining = args.documents - metrics["documents_attempted"]
-            allowance = min(2, remaining, max(1, remaining - (len(sample) - index - 1)))
+            future_first_attempts = len(sample) - index - 1
+            allowance = min(per_process, remaining, max(1, remaining - future_first_attempts))
+            ordinary_allowance = None
+            if exploratory:
+                reserve_left = max(0, favorable_reserve - metrics["corroboration_attempts"])
+                ordinary_allowance = min(
+                    2, allowance, max(1, remaining - future_first_attempts - reserve_left)
+                )
             stop = None
             request_start = client.requests
             process_start = time.monotonic()
             downloads_before = metrics["documents_downloaded"]
             ocr_before = metrics["ocr_pages_reported"]
+            document_stop = "inventory_failed"
             try:
-                analyze_documents(
+                document_stop = analyze_documents(
                     client,
                     process,
                     storage,
@@ -574,9 +693,12 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                     documents,
                     process_errors,
                     ocr_pages=getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
+                    exploratory=exploratory,
+                    ordinary_allowance=ordinary_allowance,
                 )
             except (BudgetReached, CandidateError) as error:
                 stop = error
+                document_stop = error.code if isinstance(error, CandidateError) else str(error)
                 process_errors.append(
                     {
                         "stage": "pipeline",
@@ -592,6 +714,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             classification = classify_experience(documents, inventory_complete=bool(documents))
             if not documents and not process_errors:
                 classification["reason"] = "empty_inventory"
+                classification["review_reason"] = "empty_inventory"
             for document in documents:
                 document.pop("fragments", None)
                 if document.get("sha256"):
@@ -602,6 +725,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                     "run_id": output.name,
                     "process_reference": reference,
                     "validity_status": process["validity_status"],
+                    "department": process["department"],
+                    "document_stop_reason": document_stop,
                     "commercial_category": process["primary_category"],
                     "commercial_priority": process["commercial_priority"],
                     "operational_cost": {
@@ -638,25 +763,40 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     except (spike.SpikeError, OSError) as error:
         errors.append({"stage": "run", "code": type(error).__name__})
     finally:
+        if exploratory:
+            deprioritized = []
+            covered_departments = set()
+            candidates = [r for r in results if r["review_category"] == "explicit_requirement"]
+            for result in candidates:
+                department = plain(result["department"])
+                if department not in covered_departments:
+                    deprioritized.append(result)
+                    covered_departments.add(department)
+            deprioritized.extend(r for r in candidates if r not in deprioritized)
+            deprioritized = deprioritized[:DEPRIORITIZED_SAMPLE_SIZE]
+            write_json(output / "deprioritized_review_sample.json", deprioritized)
+            metrics["deprioritized_review_sample"] = len(deprioritized)
         metrics["unique_document_hashes"] = len(hashes)
         limits = {
             "processes": args.processes,
             "discovery_pages": args.discovery_pages,
             "documents": args.documents,
-            "documents_per_process": 2,
+            "documents_per_process": per_process,
+            "favorable_reserve_max": FAVORABLE_RESERVE if exploratory else 0,
             "document_max_bytes": DOCUMENT_BYTES,
             "native_pages_per_pdf": None,
             "ocr_pages_per_pdf": getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
             "ocr_pages_per_run_upper_bound": args.documents
             * getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
-            "request_credits": REQUEST_CREDITS,
-            "duration_seconds": DURATION_SECONDS,
+            "request_credits": EXPLORATORY_REQUEST_CREDITS if exploratory else REQUEST_CREDITS,
+            "duration_seconds": EXPLORATORY_DURATION_SECONDS if exploratory else DURATION_SECONDS,
             "ai_calls": 0,
         }
         summary = {
             "run_id": output.name,
             "status": status,
             "limits": limits,
+            "parent_cpu_seconds": round(time.process_time() - parent_cpu, 3),
             **metrics_summary(discovery, results, metrics, client, started, profile),
         }
         for filename, data in (
@@ -709,9 +849,10 @@ def settings_for_run(output, tesseract, tessdata, ocr_pages=OCR_PER_DOCUMENT):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--processes", type=int, choices=range(5, 11), default=5)
-    parser.add_argument("--documents", type=int, choices=range(5, 8), default=5)
-    parser.add_argument("--discovery-pages", type=int, choices=range(1, 7), default=4)
+    parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
+    parser.add_argument("--processes", type=int)
+    parser.add_argument("--documents", type=int)
+    parser.add_argument("--discovery-pages", type=int)
     parser.add_argument("--recent-days", type=int, choices=range(1, 61), default=30)
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
     parser.add_argument("--tesseract", default="tesseract")
@@ -725,6 +866,24 @@ def main(argv=None):
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
+    if args.exploratory:
+        defaults = (EXPLORATORY_PROCESSES, EXPLORATORY_DOCUMENTS, EXPLORATORY_DISCOVERY_PAGES)
+        limits = (range(1, defaults[0] + 1), range(1, defaults[1] + 1), range(1, defaults[2] + 1))
+    else:
+        defaults = (5, 5, 4)
+        limits = (range(5, 11), range(5, 8), range(1, 7))
+    for name, default, allowed in zip(
+        ("processes", "documents", "discovery_pages"), defaults, limits, strict=True
+    ):
+        value = getattr(args, name)
+        value = default if value is None else value
+        if value not in allowed:
+            parser.error(
+                f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
+            )
+        setattr(args, name, value)
+    if args.exploratory and args.documents < args.processes:
+        parser.error("EN-01.4 reserva al menos un intento documental por proceso.")
     try:
         profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
@@ -737,12 +896,14 @@ def main(argv=None):
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
         output = Path(tempfile.mkdtemp(prefix="en01-", dir=OUTPUT_ROOT))
         print(json.dumps({"output": str(output)}), flush=True)
-        deadline = time.monotonic() + DURATION_SECONDS
+        duration = EXPLORATORY_DURATION_SECONDS if args.exploratory else DURATION_SECONDS
+        credits = EXPLORATORY_REQUEST_CREDITS if args.exploratory else REQUEST_CREDITS
+        deadline = time.monotonic() + duration
         settings = settings_for_run(output, args.tesseract, args.tessdata, args.ocr_pages)
         with sync_playwright() as playwright:
             browser = connect_browser(playwright, args.cdp_url)
             return run(
-                SmokeClient(find_page(browser), profile_id, deadline),
+                SmokeClient(find_page(browser), profile_id, deadline, request_limit=credits),
                 args,
                 settings,
                 output,

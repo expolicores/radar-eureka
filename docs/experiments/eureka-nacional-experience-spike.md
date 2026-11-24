@@ -416,3 +416,105 @@ positivos de ausencia. La muestra carece de un caso favorable confirmado con
 el que medir sensibilidad de esa clase. Siguen pendientes las variantes de
 redacción y los encabezados rotos o alejados de la cláusula. La evidencia por
 página queda bajo `.local/`. Una tercera corrida real requiere autorización.
+
+
+## EN-01.4 · Plan de corrida exploratoria nacional
+
+**Preparada. Requiere autorización antes de ejecutar.** El modo optativo
+`--exploratory` usa la misma fuente, los 1.130 identificadores, las 21
+categorías del perfil comercial, la sesión manual de Edge CDP y el resolver
+de perfiles compartido. Conserva EN-01.3, la extracción nativa completa
+sujeta a sus guardas técnicas y el OCR selectivo.
+
+| Presupuesto | Límite |
+|---|---:|
+| Ventana de publicación | 30 días, hora de Bogotá |
+| Feed de descubrimiento | 8 páginas de 30 filas, hasta 240 filas antes de deduplicar |
+| Candidatos seleccionados | Hasta 15, sin selección manual ni relleno |
+| Inventario | Hasta 10 páginas por proceso con el mecanismo existente, sujeto al presupuesto global |
+| Descargas SECOP | 24 intentos, hasta 3 por proceso, máximo 10 MiB por PDF |
+| Extracción nativa | Sin tope por número de páginas. Se mantienen 12 s por lector, 512 MiB de memoria, 2 millones de caracteres y 10.000 fragmentos por PDF |
+| OCR | Hasta 2 páginas por PDF y 48 por corrida, sujeto a indicios y presupuesto. Hasta 6 s por página y 14 s de procesamiento OCR por PDF |
+| Red | 200 créditos, incluidos validación de sesión, feed, inventarios y reservas para descargar |
+| Tiempo de ejecución | 720 s de presupuesto operativo. El runner deja margen antes de iniciar solicitudes o descargas |
+| IA generativa | 0 llamadas |
+
+Los dos smoke usaron 46 créditos cada uno y duraron 45,125 s y 44,609 s.
+Cada uno consultó cuatro páginas de feed e inventarió cinco procesos. Para
+dimensionar la ampliación, 2 créditos de preflight + 8 de feed + 30 de
+inventarios a dos páginas por proceso + 144 para 24 intentos de descarga a
+seis créditos por intento suman 184. Los 16 restantes dan margen para
+inventarios más largos. Los 720 s cubren el trabajo serial adicional, la
+pausa entre operaciones y la lectura completa y OCR eventual. Los valores
+son topes operativos y no una previsión de consumo. El tope de 10 MiB deja
+hasta 240 MiB de PDF en disco si los 24 intentos producen archivos del tamaño
+máximo, más los artefactos y el espacio temporal del extractor.
+
+### Muestreo y progresión documental
+
+1. Usar la paginación y deduplicación actuales. Aplicar la pertinencia
+   comercial y la ventana temporal ya configuradas. Seleccionar procesos SECOP
+   II con inventario disponible, primero abiertos y después de vigencia
+   indeterminada, con su estado explícito. Excluir cerrados. Dentro del mismo
+   rango, alternar departamentos y seguir la prioridad comercial existente.
+2. Reservar un primer intento por cada proceso pendiente, mientras alcance el
+   presupuesto. Ordenar los PDF por rol y versión visible, con invitaciones o
+   pliegos rectores primero y adendas antes de anexos. El segundo intento
+   ordinario puede usar un rector o una alternativa si hace falta. Reservar
+   hasta cuatro intentos adicionales del total para corroborar ausencias
+   explícitas.
+3. Si EN-01.3 encuentra una exigencia general aplicable, guardar su evidencia,
+   el motivo de parada y la cobertura pendiente. Despriorizar comercialmente
+   incluso si la conclusión formal requiere corroboración. Una contradicción,
+   una remisión relevante o una adenda o rector identificado pendiente bloquean
+   la parada comercial por exigencia según EN-01.3.
+4. Si se detecta ausencia explícita, subir el caso en la cola y buscar los PDF
+   pertinentes que queden dentro de los límites, priorizando rectores, adendas
+   y anexos habilitantes, de experiencia o estudios previos. Un formato auxiliar
+   por sí solo no basta. Si hay silencio y no quedan rectores elegibles, dejar
+   el caso como secundario. Una conclusión formal de ausencia requiere
+   corroboración suficiente.
+5. Conservar localmente hasta tres casos despriorizados para revisión humana,
+   favoreciendo departamentos distintos. Guardar referencia, documento, página,
+   fragmento, razón de parada y cobertura pendiente.
+
+### Comando tras autorización
+
+Desde la raíz del worktree experimental, con la pestaña de contratos abierta en
+el Edge CDP dedicado y con el perfil configurado por el mecanismo compartido:
+
+```powershell
+$spikePython = if (Test-Path '.\backend\.venv\Scripts\python.exe') {
+    (Resolve-Path '.\backend\.venv\Scripts\python.exe').Path
+} else {
+    (Resolve-Path '..\COMPRAS PUBLICAS\backend\.venv\Scripts\python.exe').Path
+}
+$env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython '.\backend\scripts\eureka_nacional_en01.py' --exploratory `
+  --processes 15 --recent-days 30 --discovery-pages 8 --documents 24 --ocr-pages 2 `
+  --cdp-url 'http://127.0.0.1:9232' --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
+
+Usar la precedencia `--profile-id`, `LICITACIONES_PROFILE_ID` del entorno o
+`backend/.env`, y error si falta. Los valores por defecto del modo smoke y su
+presupuesto de 60 créditos se conservan.
+
+### Resultados y límites de interpretación
+
+Registrar filas, únicos, candidatos comerciales, elegibles, seleccionados y
+analizados, intentos y rectores descargados, bytes, páginas nativas, OCR y
+páginas pendientes. Informar requisitos y ausencias explícitas por proceso,
+silencio, contradicciones, no resueltos, clasificación formal, prioridad
+comercial y sus motivos de parada, tiempo total, tiempo de extracción, CPU del
+coordinador y de lectores nativos, y créditos consumidos. Estos datos quedan
+en `.local/eureka-nacional-spike/`. Publicar solo agregados.
+
+El feed puede repetir páginas, entregar menos candidatos elegibles o
+agotarse antes de las ocho páginas. Los valores `count` no determinan el
+tamaño del universo. Los inventarios paginados, PDF fuera de límites o adendas
+sin cubrir pueden consumir presupuesto o dejar casos pendientes. La
+corroboración depende de los nombres y del formato de los anexos disponibles.
+El uso de complementos sigue el orden de procesos y la reserva de intentos.
+Ni el número de ausencias ni la cobertura geográfica observada se asumirán por
+adelantado. La muestra será exploratoria y no representativa de Colombia.
