@@ -802,3 +802,89 @@ identificados. Para escaneados, usar un índice, un encabezado vecino o
 la página siguiente a una portada útil para escoger el segundo cupo OCR.
 Estas son propuestas para un incremento posterior. Las guardas siguen
 vigentes.
+
+
+## EN-01 · Incremento de cobertura documental
+
+Se contrastaron los siete inventarios sin rector descargado y los dos
+rectores parciales del segundo lote. Los metadatos permiten colocar dos
+archivos adicionales al frente de sus inventarios. Uno es una invitación
+DOCX que antes quedaba fuera por formato. El otro exhibe un título
+truncado de invitación. El título truncado da prioridad de selección y el
+rol queda pendiente hasta validarlo en portada. Una portada que identifica
+un proyecto, aviso, formato, estudio o solicitud de información conserva
+su función documental. En particular, la solicitud de información a
+proveedores quedó identificada en una portada cuyo título ocupaba dos
+líneas. Cada archivo conserva el origen del rol y su unidad de cobertura.
+
+| Comprobación sobre los siete casos sin rector | Antes | Después |
+|---|---:|---:|
+| Nuevos candidatos a rector que encabezan el inventario | 0 | 2 |
+| Rectores adicionales confirmados en PDF o DOCX local | 0 | 0 |
+| Archivo de rol ambiguo identificado como solicitud de información | 0 | 1 |
+
+Los dos candidatos nuevos siguen pendientes de descarga. Entre los
+otros cinco casos, dos archivos excedieron la guarda de 10 MiB y dos
+inventarios solo tenían proyectos de pliego con sus soportes. El quinto
+era la solicitud de información a proveedores. Para el DOCX rector se
+reutiliza el lector aislado existente. Una prueba con un DOCX generado
+verificó la extracción de párrafos y celdas y sus localizadores sin
+asignar páginas ficticias. Los archivos DOCX se limitan a candidatos
+rectores. El alcance validado comprende texto de párrafos y tablas.
+
+El OCR prioriza referencias explícitas a páginas y entradas de índice
+de experiencia o requisitos habilitantes, seguidas de vecinos de
+encabezados pertinentes. Solo se eligen páginas cuyo texto nativo es
+insuficiente. En un rector completamente ilegible se limita la alternativa
+a portada y continuación. El índice sirve como pista para seleccionar
+páginas. La evidencia conserva la página física extraída.
+
+| Cobertura sobre los mismos 17 PDF | Antes | Después |
+|---|---:|---:|
+| Páginas con texto nativo | 401 | 401 |
+| Páginas OCR recuperadas | 3 | 4 |
+| Páginas útiles | 401 | 402 |
+| Páginas pendientes | 137 | 136 |
+| PDF con cobertura completa | 11 | 11 |
+
+En el rector completamente escaneado se recuperaron las páginas 1 y 2,
+frente a solo la 1. En el rector mixto, la página de índice con referencias
+de experiencia (2) sustituyó la página 1 en el cupo de OCR y se conservó
+la 3. Sigue faltando una página del rector mixto. Los 15 casos conservaron
+su clasificación y prioridad. El límite permanece en dos páginas de OCR
+por PDF y 48 por corrida. Los resultados locales no implican que el
+resto de las páginas pendientes deba procesarse indiscriminadamente.
+
+### Siguiente muestra nacional, pendiente de autorización
+
+El runner y el filtro histórico están listos para una nueva muestra
+acotada. Se verifican 35 avisos históricos y se mantienen el resolver
+compartido, las 1.130 ubicaciones, las 21 categorías, el clasificador y sus
+cuatro estados. Las dos novedades de inventario requieren validación
+operativa cuando se disponga de sus archivos.
+
+Mantener hasta 15 procesos en 30 días, ocho páginas de 30 filas, 24
+intentos de descarga y tres por proceso, 10 MiB por archivo, extracción
+nativa completa con guardas, OCR selectivo de dos páginas por PDF y
+48 en total, 200 créditos, 720 s y cero llamadas de IA. La opción
+`--conditional-extra-feed-pages 2` permite una novena y una décima
+página solo al seguir por debajo de los 15 elegibles después de excluir el
+historial. Se evalúa de nuevo el cupo tras la novena. Se respetan los
+finales de paginación de la fuente y los mismos topes de red y tiempo.
+La opción está desactivada por defecto.
+
+Comando preparado para después de la autorización, desde la raíz del worktree
+con el intérprete y `PYTHONPATH` del plan anterior:
+
+```powershell
+& $spikePython '.\backend\scripts\eureka_nacional_en01.py' --exploratory `
+  --processes 15 --recent-days 30 --discovery-pages 8 --conditional-extra-feed-pages 2 `
+  --documents 24 --ocr-pages 2 `
+  --exclude-analyzed-from en01-ms7c7hyc --exclude-analyzed-from en01-ifqy1v2y `
+  --exclude-analyzed-from en01-le73ddhz --exclude-analyzed-from en01-hb4_beb5 `
+  --cdp-url 'http://127.0.0.1:9232' --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
+
+Pasaron 217 pruebas offline, con artefactos locales y feed simulado.
+El replay detallado está en `.local/eureka-nacional-spike/pdf-replay-1hupshc1/`.
+No hubo consultas CDP, descargas SECOP, IA ni una nueva corrida nacional.

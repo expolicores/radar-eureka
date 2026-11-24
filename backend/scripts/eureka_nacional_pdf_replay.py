@@ -1,4 +1,4 @@
-"""Replay of EN-01 inventories and verified local PDFs, without browser or downloader."""
+"""Replay verified local EN-01 PDFs and governing DOCX without network access."""
 
 import argparse
 import json
@@ -13,8 +13,10 @@ from eureka_nacional_en01 import (
     OUTPUT_ROOT,
     classify_experience,
     document_role,
+    document_role_hint,
     extract_document,
     settings_for_run,
+    supports_document,
     write_json,
 )
 from spike_licitaciones_info import SpikeDocument
@@ -34,20 +36,27 @@ def replay(source, output, settings, ocr_pages):
     results = []
     inventory = json.loads((source / "documents.json").read_text(encoding="utf-8"))
     storage = LocalBinaryStorage(source / "binaries")
+    statistics_prefix = {"pdf": "pdfs", "docx": "docx"}
     for process in inventory:
         documents = []
         for prior in process["documents"]:
+            role = document_role(prior["name"])
             entry = {
                 "document_id": prior["document_id"],
                 "name": prior["name"],
-                "role": document_role(prior["name"]),
+                "role": role,
+                "role_hint": document_role_hint(prior["name"], role),
+                "extension": prior["extension"],
                 "role_source": "filename",
                 "complete": False,
                 "status": "not_replayed",
             }
             documents.append(entry)
-            if not prior.get("sha256") or prior["extension"] != "pdf":
+            if not prior.get("sha256") or (
+                prior["extension"] != "pdf" and not supports_document(entry)
+            ):
                 continue
+            prefix = statistics_prefix[prior["extension"]]
             digest = prior["sha256"]
             if not re.fullmatch("[a-f0-9]{64}", digest):
                 raise ValueError("Hash documental inválido en el manifiesto.")
@@ -55,13 +64,13 @@ def replay(source, output, settings, ocr_pages):
             path = (storage.root / relative).resolve()
             if not path.is_relative_to(storage.root):
                 raise ValueError("PDF fuera del almacenamiento local.")
-            metrics["pdfs_manifested"] += 1
+            metrics[f"{prefix}_manifested"] += 1
             try:
                 size = path.stat().st_size
-                metrics["pdfs_available"] += 1
+                metrics[f"{prefix}_available"] += 1
                 metrics["input_bytes"] += size
-                stored = StoredBinary(digest, relative, size, "application/pdf")
-                doc = SpikeDocument(entry["name"], "pdf", "", entry["document_id"])
+                stored = StoredBinary(digest, relative, size, "application/octet-stream")
+                doc = SpikeDocument(entry["name"], entry["extension"], "", entry["document_id"])
                 extract_document(doc, stored, storage, settings, entry, ocr_pages=ocr_pages)
             except (AcquisitionError, OSError) as exc:
                 code = getattr(exc, "code", type(exc).__name__)
@@ -82,7 +91,8 @@ def replay(source, output, settings, ocr_pages):
                 "ocr_success_pages": len(entry["ocr_success_pages"]),
                 "pending_pages": len(entry["pending_pages"]),
                 "characters": sum(len(f.text) for f in entry["fragments"]),
-                "pdfs_complete": int(entry["complete"]),
+                f"{prefix}_complete": int(entry["complete"]),
+                "docx_fragments": entry["docx_fragments"],
                 "extraction_seconds": entry["extraction_seconds"],
                 "native_cpu_seconds": entry["native_cpu_seconds"] or 0,
             }.items():

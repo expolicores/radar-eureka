@@ -30,6 +30,7 @@ from eureka_nacional_experience import (
     document_cover_metadata,
     document_priority,
     document_role,
+    document_role_hint,
 )
 from licitaciones_candidate_contracts import CandidateProcess
 from licitaciones_cdp_runtime import (
@@ -169,6 +170,7 @@ def discover(client, args, now, discovery, profile, locations):
     }
     candidates = {}
     signatures = set()
+    extra_pages = getattr(args, "conditional_extra_feed_pages", 0)
     provider_fields = {
         "unspsc_shapes": Counter(),
         "unspsc_rows_parsed": 0,
@@ -177,7 +179,13 @@ def discover(client, args, now, discovery, profile, locations):
     }
     discovery["provider_fields"] = provider_fields
     try:
-        for page in range(1, args.discovery_pages + 1):
+        for page in range(1, args.discovery_pages + extra_pages + 1):
+            if (
+                page > args.discovery_pages
+                and len(select_processes(candidates, args, now, {}, profile)) >= args.processes
+            ):
+                discovery["stop_reason"] = "eligible_target_reached"
+                break
             body = client.post(
                 f"/cliente/contratos/get-info/MP?perfiles={client.profile_id}",
                 {**payload, "page": page},
@@ -321,23 +329,45 @@ def select_processes(candidates, args, now, discovery, profile):
     return sample
 
 
+OCR_TOPIC = re.compile(r"\b(?:experiencia|requisitos? habilitantes?|acreditacion)\b")
+OCR_PAGE_REFERENCE = re.compile(r"\b(?:paginas?|pags?\.?)\s+(\d+)\b")
+OCR_INDEX_ENTRY = re.compile(r"(?:\.\s*){3,}(\d+)\s*$")
+OCR_INDEX_MARKER = re.compile(r"(?:\.\s*){3,}|\b(?:indice|tabla de contenido)\b")
+
+
 def select_ocr_pages(native, low_text, budget):
     if not budget or native.error_code:
         return []
     visited = native.diagnostics.get("native_pages_visited", 0)
     candidates = set(low_text).intersection(range(1, visited + 1))
-    likely = set()
+    scores = {}
+
+    def prefer(page, rank):
+        if page in candidates and rank < scores.get(page, 10):
+            scores[page] = rank
+
     for fragment in native.fragments:
         number = fragment.page_number
-        for line in fragment.text.splitlines():
-            heading = plain(line).strip()
-            if len(heading) <= 110 and re.search(
-                r"\b(?:experiencia|requisitos? habilitantes?|acreditacion)\b", heading
-            ):
-                likely.update({number - 1, number + 1})
-    # For a named rector, an unreadable cover can identify scope and document type.
-    cover = {1} if document_role(native.document.original_name) == "primary" else set()
-    return (sorted(candidates & likely) + sorted((candidates & cover) - likely))[:budget]
+        for raw in fragment.text.splitlines():
+            line = spike.normalized(raw).strip()
+            if not OCR_TOPIC.search(line):
+                continue
+            if target := OCR_PAGE_REFERENCE.search(line) or OCR_INDEX_ENTRY.search(line):
+                prefer(int(target[1]), 0)
+            if OCR_INDEX_MARKER.search(line):
+                prefer(number, 1)
+            elif len(line) <= 110:
+                prefer(number, 1)
+                prefer(number + 1, 2)
+                prefer(number - 1, 3)
+    name = native.document.original_name
+    role = document_role(name)
+    if role == "primary" or document_role_hint(name, role) == "primary":
+        prefer(1, 4)
+        if len(candidates) == visited:
+            # For a fully unreadable rector, reserve at most the cover continuation.
+            prefer(2, 5)
+    return sorted(scores, key=lambda page: (scores[page], page))[:budget]
 
 
 def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OCR_PER_DOCUMENT):
@@ -349,6 +379,7 @@ def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OC
         select_ocr_pages=lambda native, low_text: select_ocr_pages(native, low_text, ocr_pages),
     )
     diagnostics = detail.get("diagnostics", {})
+    is_docx = document.extension == "docx"
     total = detail["page_count"]
     quality = diagnostics.get("native_quality", [])
     native_useful = {page["page_number"] for page in quality if not page["ocr_required"]}
@@ -367,13 +398,36 @@ def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OC
         pending.update(range(incomplete_from, total + 1))
     visited = diagnostics.get("native_pages_visited", total)
     selected = set(diagnostics.get("required_pages", []))
-    first_page = "".join(f.text for f in fragments if f.source_locator.get("page_number") == 1)
-    cover_role, cover_metadata = document_cover_metadata(first_page)
-    if cover_role == "excluded" or (cover_role and entry["role"] == "unknown"):
-        entry.update(role=cover_role, role_source="cover")
+    if is_docx:
+        cover = "\n".join(
+            f.text
+            for f in fragments
+            if f.source_locator.get("kind") == "docx_paragraph"
+            and f.source_locator.get("block_index", 0) <= 10
+        )
+    else:
+        cover = "\n".join(f.text for f in fragments if f.source_locator.get("page_number") == 1)
+    cover_role, cover_metadata = document_cover_metadata(cover)
+    if (
+        cover_role == "excluded"
+        or (cover_role and entry["role"] == "unknown")
+        or (cover_role == "support" and entry["role"] == "primary")
+    ):
+        entry.update(role=cover_role, role_source="cover", role_hint=None)
+    if is_docx:
+        docx_fragments = sum(
+            f.source_locator.get("kind") in {"docx_paragraph", "docx_table_cell"} for f in fragments
+        )
+        content_complete = detail["status"] == "completed" and bool(docx_fragments)
+    else:
+        docx_fragments = 0
+        content_complete = bool(total and not pending and not detail.get("error_code"))
     entry.update(
         cover_metadata=cover_metadata,
-        complete=bool(total and not pending and not detail.get("error_code")),
+        coverage_unit="docx_fragment" if is_docx else "pdf_page",
+        docx_fragments=docx_fragments,
+        content_complete=content_complete,
+        complete=content_complete and not entry.get("role_hint"),
         status=diagnostics.get("status", detail["status"]),
         pages_seen=sorted(processed),
         total_pages=total,
@@ -414,7 +468,7 @@ def progressive_stop(classification, governing_pdf_pending):
 
 
 def corroboration_rank(entry):
-    if entry["role"] in {"primary", "amendment"}:
+    if entry["role"] in {"primary", "amendment"} or entry.get("role_hint") == "primary":
         return 0
     title = plain(entry["name"])
     if (
@@ -424,6 +478,16 @@ def corroboration_rank(entry):
     ):
         return 1
     return 2
+
+
+def supports_document(entry):
+    return entry["role"] != "excluded" and (
+        entry["extension"] == "pdf"
+        or (
+            entry["extension"] == "docx"
+            and (entry["role"] == "primary" or entry.get("role_hint") == "primary")
+        )
+    )
 
 
 def analyze_documents(
@@ -446,12 +510,14 @@ def analyze_documents(
     metrics["with_inventory"] += 1
     all_documents = {}
     for document in inventory:
+        role = document_role(document.original_name)
         all_documents[document.document_id] = {
             "document_id": document.document_id,
             "name": document.original_name,
             "url": safe_public_url(document.source_url, "DocumentId"),
             "extension": document.extension,
-            "role": document_role(document.original_name),
+            "role": role,
+            "role_hint": document_role_hint(document.original_name, role),
             "role_source": "filename",
             "status": "not_selected",
             "complete": False,
@@ -461,11 +527,12 @@ def analyze_documents(
         (
             document
             for document in inventory
-            if document.extension == "pdf"
-            and all_documents[document.document_id]["role"] != "excluded"
+            if supports_document(all_documents[document.document_id])
         ),
         key=lambda document: document_priority(
-            document.original_name, all_documents[document.document_id]["role"]
+            document.original_name,
+            all_documents[document.document_id]["role"],
+            all_documents[document.document_id]["role_hint"],
         ),
     )
     for entry in documents:
@@ -473,7 +540,7 @@ def analyze_documents(
             "irrelevant_document"
             if entry["role"] == "excluded"
             else "unsupported_format"
-            if entry["extension"] != "pdf"
+            if not supports_document(entry)
             else "document_limit"
         )
     prior_limit = False
@@ -486,8 +553,7 @@ def analyze_documents(
                 stop = progressive_stop(
                     classification,
                     any(
-                        all_documents[doc.document_id]["role"] in {"primary", "amendment"}
-                        for doc in eligible
+                        corroboration_rank(all_documents[doc.document_id]) == 0 for doc in eligible
                     ),
                 )
                 if stop:
@@ -546,6 +612,7 @@ def analyze_documents(
                 "reader_failed",
             }
             metrics["documents_processed"] += bool(entry["fragments"])
+            metrics["docx_fragments"] += entry["docx_fragments"]
             metrics["pages_reported"] += entry["total_pages"]
             metrics["pages_with_text"] += len(entry["pages_seen"])
             metrics["ocr_pages_reported"] += len(entry["ocr_pages"])
@@ -578,10 +645,7 @@ def analyze_documents(
     if exploratory and attempted:
         stop = progressive_stop(
             classify_experience(documents),
-            any(
-                all_documents[doc.document_id]["role"] in {"primary", "amendment"}
-                for doc in eligible
-            ),
+            any(corroboration_rank(all_documents[doc.document_id]) == 0 for doc in eligible),
         )
         if stop:
             return stop
@@ -684,6 +748,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 "download_failures",
                 "extraction_failures",
                 "documents_processed",
+                "docx_fragments",
                 "bytes_downloaded",
                 "pages_reported",
                 "native_pages_with_text",
@@ -820,6 +885,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
         limits = {
             "processes": args.processes,
             "discovery_pages": args.discovery_pages,
+            "conditional_extra_feed_pages": getattr(args, "conditional_extra_feed_pages", 0),
             "documents": args.documents,
             "documents_per_process": per_process,
             "favorable_reserve_max": FAVORABLE_RESERVE if exploratory else 0,
@@ -900,6 +966,13 @@ def main(argv=None):
     parser.add_argument("--processes", type=int)
     parser.add_argument("--documents", type=int)
     parser.add_argument("--discovery-pages", type=int)
+    parser.add_argument(
+        "--conditional-extra-feed-pages",
+        type=int,
+        choices=range(3),
+        default=0,
+        help="Páginas adicionales solo si faltan candidatos inéditos tras las ocho iniciales.",
+    )
     parser.add_argument("--recent-days", type=int, choices=range(1, 61), default=30)
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
     parser.add_argument("--tesseract", default="tesseract")
@@ -931,6 +1004,13 @@ def main(argv=None):
         setattr(args, name, value)
     if args.exploratory and args.documents < args.processes:
         parser.error("EN-01.4 reserva al menos un intento documental por proceso.")
+    if args.conditional_extra_feed_pages and (
+        not args.exploratory
+        or args.discovery_pages != EXPLORATORY_DISCOVERY_PAGES
+        or args.processes != EXPLORATORY_PROCESSES
+        or not args.exclude_analyzed_from
+    ):
+        parser.error("Las páginas adicionales requieren 8 páginas, 15 procesos e historial local.")
     try:
         args.excluded_secop_ids = load_analyzed_secop_ids(OUTPUT_ROOT, args.exclude_analyzed_from)
         profile_id = resolve_profile_id(args.profile_id)

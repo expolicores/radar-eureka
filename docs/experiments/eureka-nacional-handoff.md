@@ -183,6 +183,23 @@ mixto. La evidencia detallada queda en
 `.local/eureka-nacional-spike/coverage-audit-pe6hrnob/`.
 Cualquier otra corrida real requiere autorización.
 
+## Incremento de cobertura documental
+
+El [informe](eureka-nacional-experience-spike.md#en-01--incremento-de-cobertura-documental)
+documenta dos candidatos adicionales a rector por metadatos: una invitación
+DOCX y otra con título truncado. Sus binarios siguen pendientes. El lector
+DOCX aislado se reutiliza y la portada define si un título ambiguo
+corresponde a un rector. Los dos rectores parciales se reprocesaron offline
+con el mismo cupo por PDF; el total OCR pasó de tres a cuatro páginas
+recuperadas y las pendientes bajaron de 137 a 136. Se conservaron las
+clasificaciones formales y las prioridades.
+
+La siguiente muestra queda preparada con la exclusión de 35 avisos
+históricos y los mismos topes documentales, 200 créditos y 720 s. Después
+de las ocho páginas base podrá pedirse una novena y hasta una décima con
+`--conditional-extra-feed-pages 2` solo si faltan candidatos elegibles.
+La ejecución real requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

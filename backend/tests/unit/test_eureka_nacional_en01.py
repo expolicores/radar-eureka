@@ -1345,3 +1345,146 @@ def test_minimum_heading_rule_does_not_infer_a_waiver_or_obligation_without_its_
     decision = rules.classify_experience([evidence_document(clause)])
     assert decision["status"] == "not_resolved"
     assert not any(e["assertion_type"] in {rules.NEG, rules.REQ} for e in decision["evidence"])
+
+
+@pytest.mark.parametrize(
+    ("cover", "role", "complete"),
+    [
+        ("INVITACIÓN PÚBLICA\nObjeto del proceso", "primary", True),
+        ("FORMATOS DE INVITACIÓN\nNombre del proponente", "support", True),
+        ("Objeto del proceso", "unknown", False),
+        ("PROYECTO DE PLIEGO DE CONDICIONES", "excluded", True),
+        ("SOLICITUD DE INFORMACIÓN A\nPROVEEDORES", "excluded", True),
+    ],
+)
+def test_truncated_title_beats_support_but_needs_cover(monkeypatch, cover, role, complete):
+    candidate = SpikeDocument("04-INVITACIO 025-2026", "pdf", SECOP + "1", "1")
+    study = SpikeDocument("Estudios previos", "pdf", SECOP + "2", "2")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[study, candidate]))
+    download = Mock(return_value=SimpleNamespace(sha256="a" * 64, observed_size=25))
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    monkeypatch.setattr(
+        en01.spike,
+        "run_existing_extractor",
+        Mock(
+            return_value=(
+                {"status": "completed", "page_count": 1, "elapsed_seconds": 0.01},
+                [fragment(cover)],
+            )
+        ),
+    )
+    inv = []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        None,
+        None,
+        1,
+        Counter(),
+        inv,
+        [],
+    )
+    assert download.call_args.args[1] == candidate
+    assert inv[1]["role"] == role
+    assert inv[1]["complete"] == complete
+    assert inv[1]["content_complete"]
+
+
+def test_shared_docx_reader_preserves_paragraph_and_table_without_pages(tmp_path, monkeypatch):
+    from docx import Document
+
+    path = tmp_path / "invitation.docx"
+    docx = Document()
+    docx.add_paragraph("INVITACIÓN PÚBLICA")
+    docx.add_paragraph(REQUIRED)
+    docx.add_table(rows=1, cols=1).cell(0, 0).text = REQUIRED
+    docx.save(path)
+    pdf_alternative = SpikeDocument("Estudios previos.pdf", "pdf", SECOP + "2", "2")
+    rector = SpikeDocument("Invitación Pública", "docx", SECOP + "1", "1")
+    settings = en01.settings_for_run(tmp_path, "not-available", None)
+    storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
+    payload = path.read_bytes()
+    stored = storage.store(
+        [payload],
+        original_name=path.name,
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        expected_size=len(payload),
+        max_bytes=en01.DOCUMENT_BYTES,
+    )
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[pdf_alternative, rector]))
+    download = Mock(return_value=stored)
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    inv = []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        storage,
+        settings,
+        1,
+        Counter(),
+        inv,
+        [],
+    )
+    assert download.call_args.args[1] == rector
+    entry = inv[1]
+    assert entry["complete"]
+    assert entry["coverage_unit"] == "docx_fragment"
+    assert entry["docx_fragments"] == 3
+    assert entry["total_pages"] == 0
+    assert entry["ocr_pages"] == []
+    evidence = rules.classify_experience(inv)["evidence"]
+    assert [(e["method"], e["page"]) for e in evidence] == [("native_docx_text", None)] * 2
+    assert evidence[0]["locator"]["paragraph_number"] == 2
+    assert evidence[1]["locator"]["column_number"] == 1
+
+
+def test_ocr_prioritizes_index_destination_before_neighbours_and_keeps_scan_bounded():
+    native = SimpleNamespace(
+        document=SimpleNamespace(original_name="Invitación pública.pdf"),
+        error_code=None,
+        diagnostics={"native_pages_visited": 12},
+        fragments=[
+            SimpleNamespace(
+                page_number=2,
+                text="1.2. EXPERIENCIA ......................... 8",
+            ),
+            SimpleNamespace(
+                page_number=4,
+                text="Para requisitos habilitantes véase página 19.",
+            ),
+        ],
+    )
+    assert en01.select_ocr_pages(native, [1, 2, 5, 8, 19], 2) == [8, 2]
+    native.fragments = []
+    assert en01.select_ocr_pages(native, list(range(1, 13)), 2) == [1, 2]
+    native.document.original_name = "Estudios previos.pdf"
+    assert en01.select_ocr_pages(native, list(range(1, 13)), 2) == []
+
+
+@pytest.mark.parametrize(("known", "expected_pages"), [(1, 8), (2, 9), (20, 10)])
+def test_extra_feed_pages_only_cover_shortfall_after_exclusion(known, expected_pages):
+    def response(_, payload):
+        i = payload["page"]
+        return {"count": 310, "data": [row(2 * i - 1, "Boyacá"), row(2 * i, "Nariño")]}
+
+    client = SimpleNamespace(profile_id=EXAMPLE_PROFILE, post=Mock(side_effect=response))
+    args = SimpleNamespace(
+        processes=15,
+        discovery_pages=8,
+        recent_days=30,
+        exploratory=True,
+        conditional_extra_feed_pages=2,
+        excluded_secop_ids=frozenset(f"CO1.NTC.{i}" for i in range(1, known + 1)),
+    )
+    discovery = {"pages": [], "duplicates": 0}
+    selected = en01.discover(
+        client,
+        args,
+        CUTOFF,
+        discovery,
+        commercial.load_commercial_profile(),
+        en01.load_national_locations(),
+    )
+    assert client.post.call_count == expected_pages
+    assert len(selected) == (0 if known == 20 else 15)
+    assert all(p["source_identity"] not in args.excluded_secop_ids for p in selected)

@@ -1,6 +1,7 @@
 """Contextual, deterministic experience assertions and conservative process decisions."""
 
 import re
+from itertools import pairwise
 
 from spike_licitaciones_info import normalized
 
@@ -111,8 +112,12 @@ ASSERTION_TYPES = (NEG, REQ, CONDITIONAL, OTHER)
 STATUSES = ("experience_required", "no_experience_required", "experience_ambiguous", "not_resolved")
 
 
+def document_title(name):
+    return NUMBER_PREFIX.sub("", normalized(name).strip()).replace("_", " ").replace("-", " ")
+
+
 def document_role(name):
-    text = NUMBER_PREFIX.sub("", normalized(name).strip()).replace("_", " ").replace("-", " ")
+    text = document_title(name)
     if EXCLUDED.search(text):
         return "excluded"
     if re.match(r"^(?:formatos?|formularios?)\b", text):
@@ -126,12 +131,23 @@ def document_role(name):
     return "unknown"
 
 
-def document_priority(name, role):
+def document_role_hint(name, role):
+    # The portal can truncate the title while retaining the reference/filename.
+    if role == "unknown" and re.match(
+        r"^(?:invitacio|invitac|inv\.? public[ao]?)\b", document_title(name)
+    ):
+        return "primary"
+    return None
+
+
+def document_priority(name, role, role_hint=None):
     text = normalized(name)
     if role == "primary":
         return (0, not bool(re.search(r"\b(?:definitiv[oa]|final|vigente)\b", text)))
+    if role_hint == "primary":
+        return (1, True)
     return (
-        {"amendment": 1, "support": 2, "unknown": 3, "excluded": 4}[role],
+        {"amendment": 2, "support": 3, "unknown": 4, "excluded": 5}[role],
         "habilitante" not in text,
     )
 
@@ -149,13 +165,23 @@ def document_cover_metadata(first_page):
         heading,
     )
     role = next((document_role(line) for line in lines if document_role(line) == "excluded"), None)
+    titles = list(map(document_title, lines))
+    cover_titles = [*titles, *(f"{a} {b}" for a, b in pairwise(titles))]
     if role is None and any(
         re.match(
-            r"^(?:invitacion|pliego(?: de condiciones)?)\b", NUMBER_PREFIX.sub("", normalized(line))
+            r"^(?:solicitud de informacion a proveedores|aviso de (?:la )?convocatoria)\b", title
         )
-        for line in lines
+        for title in cover_titles
     ):
-        role = "primary"
+        role = "excluded"
+    if role is None:
+        for line in titles:
+            if re.match(r"^(?:estudios? previos?|formatos?|formularios?)\b", line):
+                role = "support"
+                break
+            if re.match(r"^(?:invitacion|pliego(?: de condiciones)?)\b", line):
+                role = "primary"
+                break
     return role, {
         "version_marker": marker.group() if marker else None,
         "labeled_date": date[1] if date else None,
@@ -348,6 +374,8 @@ def document_assertions(document):
     for fragment in document.get("fragments", ()):
         locator = fragment.source_locator
         method = locator.get("extraction_method")
+        if str(locator.get("kind", "")).startswith("docx_"):
+            method = "native_docx_text"
         page = locator.get("page_number")
         # Carry an explicit numbered/experience section only into the adjacent native page.
         inherited = (
@@ -428,7 +456,9 @@ def classify_experience(documents, *, inventory_complete=True):
         for doc in documents
     )
     known_governing_pending = any(
-        doc["role"] in {"primary", "amendment"} and not doc["complete"] for doc in documents
+        (doc["role"] in {"primary", "amendment"} or doc.get("role_hint") == "primary")
+        and not doc["complete"]
+        for doc in documents
     )
     applicable = [
         item
