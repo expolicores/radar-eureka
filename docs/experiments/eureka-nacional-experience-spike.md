@@ -1065,3 +1065,79 @@ la entidad, el tipo de contrato y las categorías no cambian el
 descubrimiento ni la prioridad de selección. No hay un puntaje
 predictivo, entrenamiento ni integración de IA. La comparación se hará
 cuando haya suficientes casos positivos y negativos con evidencia.
+
+
+## EN-01 · Corrida con piloto de 16 MiB para PDF rectores
+
+Se ejecutó una vez el 24 de noviembre de 2026 con el runner de `938f038`,
+el resolver compartido de perfil y la exclusión de 49 avisos históricos.
+La sesión CDP permitió consultar el feed y los inventarios con el filtro
+de 1.130 ubicaciones y el perfil de 21 categorías. Se usaron las dos
+páginas adicionales porque faltaban candidatos elegibles. El runner
+cerró la selección con 12 procesos nuevos.
+
+| Embudo | Resultado |
+|---|---:|
+| Feed y filas | 8 páginas iniciales + 2 condicionales, 300 filas |
+| Avisos únicos / duplicados | 300 / 0 |
+| Departamentos del feed / en la muestra | 31 / 7 |
+| Candidatos comerciales / elegibles antes del historial | 42 / 28 |
+| Coincidencias históricas excluidas / elegibles nuevos | 16 / 12 |
+| Seleccionados / con inventario | 12 / 12 |
+| Abiertos / vigencia indeterminada | 11 / 1 |
+| Categorías representadas | 7 |
+| Documentos inventariados | 73 |
+
+Los valores `count` fueron de 31 a 301 en incrementos de 30. La
+paginación se detuvo por el presupuesto de diez páginas. Se excluyeron
+258 avisos antes de la elegibilidad documental por perfil, servicio
+principal u objeto poco claro. Entre los 42 candidatos comerciales,
+14 quedaron fuera por capacidad de inventario y 16 por coincidencia
+histórica. Los 12 seleccionados no se solaparon con el historial.
+
+### Adquisición, piloto y decisión comercial
+
+| Intentos | Límite | Resultado |
+|---|---:|---|
+| 10 PDF rectores por título | 16 MiB | 10 `http_error`, 0 descargas |
+| 10 PDF restantes | 10 MiB | 10 `http_error`, 0 descargas |
+
+El artefacto conserva el código genérico `http_error` y carece del
+estado HTTP específico. No se registraron rechazos por tamaño. Sin
+archivos recibidos no se pudo medir cuántos rectores habría recuperado
+el piloto, el tamaño real de los documentos ni su cobertura. Hubo
+cero páginas abiertas, cero OCR, cero paradas de extracción por
+tiempo y cero DOCX rectores procesados. Los DOCX del inventario eran
+auxiliares. La corrida terminó parcial por el tamaño de la muestra y
+los 20 errores de descarga.
+
+Los 12 procesos quedaron `not_resolved` formalmente y con prioridad
+comercial de evidencia insuficiente. La cobertura pendiente comprende
+los documentos del inventario. Hubo cero casos clasificados como silencio,
+cero detecciones de exigencia o ausencia explícita, y cero candidatos
+favorables. Estas cifras reflejan falta de acceso al texto contractual
+en esta corrida. No se alteraron topes ni se repitieron consultas o
+descargas fuera del runner.
+
+### Registro exploratorio y costo
+
+Se guardó un registro MPNE local para los 12 procesos. Presupuesto,
+modalidad y publicación se conservaron como observaciones de la fuente.
+Se conservaron las categorías como etiquetas derivadas del perfil. Se
+registraron nueve tipos de entidad y siete tipos de contrato como
+inferencias, con tres y cinco faltantes. El plazo de ejecución, el pago
+y el lugar de entrega quedaron faltantes en los 12 procesos, dado que
+no se obtuvo texto contractual. Cinco presupuestos informados estaban
+por debajo de COP 20 millones. Las modalidades fueron ocho de mínima
+cuantía, tres de régimen especial y una de selección abreviada por
+subasta inversa. Estas cifras describen la muestra y no informan
+propensión, porque sus 12 resultados carecen de evidencia contractual.
+El registro se generó después de la selección, sin filtros ni puntuación.
+
+Se consumieron 156 créditos en 117,516 s, con 6,938 s de CPU del
+coordinador y cero CPU de extracción. Se reservaron 120 créditos para
+20 intentos de descarga según el mecanismo vigente. El promedio fue
+13 créditos y 9,79 s transcurridos por proceso inventariado. Hubo cero
+llamadas de IA. El costo unitario por candidato favorable queda
+indefinido. Los inventarios, errores, decisiones y observaciones MPNE
+quedan en `.local/eureka-nacional-spike/en01-hsxjhqpg/`.

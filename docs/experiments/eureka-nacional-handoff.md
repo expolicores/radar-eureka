@@ -236,6 +236,28 @@ procesos exigidos, favorables y pendientes. Se preservan los criterios
 de descubrimiento y el historial de 49 avisos. No se ejecutó una nueva
 corrida nacional. Cualquier corrida real posterior requiere autorización.
 
+## Corrida con piloto de 16 MiB para PDF rectores
+
+El [informe agregado](eureka-nacional-experience-spike.md#en-01--corrida-con-piloto-de-16-mib-para-pdf-rectores)
+registra la única corrida autorizada con `938f038`. Se aplicaron los
+49 avisos históricos y se usaron las dos páginas condicionales. De 300
+avisos únicos se obtuvieron 42 candidatos comerciales, 28 elegibles
+antes del historial y 12 nuevos con inventario. Se excluyeron 16
+coincidencias históricas.
+
+Los 20 intentos de descarga terminaron con `http_error`, incluidos
+10 PDF rectores con el tope de 16 MiB y 10 intentos con el tope ordinario.
+El estado HTTP específico no quedó en los artefactos. No se recibió
+texto contractual. Los 12 procesos quedaron sin resolver y con
+insuficiencia documental. El piloto queda sin evaluación y se mantiene
+el registro de evidencia pendiente por proceso. El costo fue de 156
+créditos y 117,516 s, sin OCR ni IA.
+
+Las observaciones MPNE se guardaron junto a los resultados en
+`.local/eureka-nacional-spike/en01-hsxjhqpg/`, diferenciando fuente,
+inferencia y faltante. No se hizo otra corrida. Cualquier ejecución
+real posterior requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
