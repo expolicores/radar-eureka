@@ -60,19 +60,16 @@ def probe(document, output, attempts):
         if attempt > 1:
             time.sleep(2.1)
         diagnostics = {}
-        data = {"attempt": attempt, "download_diagnostics": diagnostics}
-        started = time.monotonic()
         try:
             stored = downloader.download(document, storage, diagnostics=diagnostics)
-            data.update(status="downloaded", bytes=stored.observed_size, sha256=stored.sha256)
+            diagnostics["bytes"] = stored.observed_size
         except AcquisitionError as error:
-            data.update(status="rejected", code=error.code)
+            diagnostics["rejection_reason"] = error.code
         except OSError:
-            data.update(status="rejected", code="os_error")
-        data["elapsed_seconds"] = round(time.monotonic() - started, 3)
-        results.append(data)
+            diagnostics["rejection_reason"] = "os_error"
+        results.append(diagnostics)
         write_json(output / "download_probe.json", results)
-        if data["status"] == "downloaded":
+        if "bytes" in diagnostics:
             break
     return results
 
@@ -96,7 +93,7 @@ def main(argv=None):
         print("No se pudo preparar o guardar la prueba local de descarga.")
         return 1
     print(json.dumps(results))
-    return 0 if results[-1]["status"] == "downloaded" else 2
+    return 0 if "bytes" in results[-1] else 2
 
 
 if __name__ == "__main__":

@@ -1196,7 +1196,7 @@ modificaron los límites, el resolvedor de perfil ni las reglas de
 selección. Pasaron 248 pruebas offline, con respuestas HTTP, transporte,
 redirecciones, contenido y sonda simulados.
 
-### Sonda de un PDF archivado, pendiente de autorización
+### Procedimiento de la sonda de un PDF archivado
 
 La selección offline verificó un único PDF rector fallido para la
 referencia de Moniquirá `CM-MC-004-2026` en el inventario local. Una
@@ -1219,7 +1219,7 @@ sobre el mismo documento. Se recomienda empezar con uno y reservar
 el segundo para un dato que siga faltando. La sonda guarda su salida
 y el archivo, si se recibe, bajo `.local/`. Si el enlace original
 dependía de parámetros descartados al archivar, la prueba solo describe
-el enlace público conservado. La sonda no se ejecutó contra SECOP.
+el enlace público conservado. El resultado se registra en el apartado siguiente.
 
 Para recuperar los documentos de los 12 procesos, conservar sus
 avisos y claves de inventario originales. Tras aclarar el estado
@@ -1228,3 +1228,33 @@ enlaces siguen siendo válidos. Si es necesario refrescarlos,
 consultar únicamente esos 12 inventarios con autorización,
 priorizar rectores pendientes y reanudar su análisis con las
 guardas vigentes. No se necesita repetir el descubrimiento nacional.
+
+
+### Resultado de la sonda autorizada en Moniquirá
+
+Se ejecutó un único intento del procedimiento sobre el PDF rector ya
+inventariado. Se conservaron los topes de 10 MiB y 12 s. El GET directo
+recibió **HTTP 403**, excepción `HTTPError`, en `response_headers`, con
+tipo normalizado `text/html` y motivo `http_error`. No hubo redirecciones.
+El archivo no se descargó. La traza local guarda exclusivamente los campos
+autorizados. Se retiraron de la salida de la sonda el hash y el tiempo
+por intento, junto con los campos redundantes. El cambio de registro se
+verificó con siete pruebas focalizadas offline.
+
+El hecho confirmado es que el GET directo al enlace archivado fue
+denegado al recibir las cabeceras. El enlace no fue utilizable para
+descargar el PDF por ese mecanismo en esta prueba. El 403 no identifica
+qué política, credencial, estado del enlace o intermediario motivó la
+denegación. Tampoco establece que los 20 errores históricos fueran 403.
+Un segundo GET idéntico no distinguiría esas explicaciones y no se hizo.
+
+No se justifica actualizar en bloque los enlaces de los 12 inventarios
+basándose en este único 403. Para retomarlos con autorización, comprobar
+primero el enlace vigente de Moniquirá en su inventario existente y
+validar una descarga por el mecanismo de acceso autorizado. Si el
+enlace cambió, refrescar solo los inventarios que lo necesiten. Si se
+mantiene el 403 también con el enlace vigente, aclarar el acceso antes de
+consumir más intentos. Una vez recuperada la descarga, usar los avisos
+y las claves ya guardadas y procesar primero los rectores pendientes con
+las guardas existentes. No se consultaron el feed ni inventarios, y no
+se ejecutó la recuperación de los 12 procesos.

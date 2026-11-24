@@ -1670,7 +1670,7 @@ def test_archived_probe_is_bounded_and_skips_discovery(monkeypatch, tmp_path):
     result = probe.probe(document, output, 2)
     factory.assert_called_once_with(12, en01.DOCUMENT_BYTES)
     assert downloader.download.call_count == 2
-    assert [row["status"] for row in result] == ["rejected", "downloaded"]
+    assert result == [{"rejection_reason": "http_error"}, {"bytes": 250}]
     assert result == report(output, "download_probe.json")
     entry["url"] += "&token=private"
     en01.write_json(run / "documents.json", [{"process_reference": "proc", "documents": [entry]}])

@@ -267,12 +267,17 @@ mismo host y ruta archivados. Los artefactos del piloto no conservan el
 estado HTTP ni la cadena de redirecciones. El código del adaptador no
 cambió al habilitar el piloto de 16 MiB.
 
-El runner ya conserva diagnóstico HTTP seguro en los artefactos locales.
-Pasaron 248 pruebas offline. Quedó preparada una sonda GET directo de
-un único PDF rector del inventario local, sin CDP y con hasta dos
-intentos, 10 MiB y 12 s por intento. La sonda requiere autorización
-adicional y no se ejecutó contra SECOP. Para reanudar, usar solo los
-inventarios de los 12 procesos ya descubiertos.
+El runner conserva diagnóstico HTTP seguro en los artefactos locales.
+La [sonda autorizada](eureka-nacional-experience-spike.md#resultado-de-la-sonda-autorizada-en-moniquirá)
+hizo un solo GET directo al PDF rector archivado de Moniquirá. Recibió HTTP
+403 en las cabeceras, con `HTTPError`, `text/html` y sin redirecciones.
+No se descargó un archivo ni se repitió el intento. La causa detrás de
+la denegación sigue indeterminada y el resultado no se extrapola al lote.
+
+Antes de refrescar los 12 inventarios, validar con autorización el enlace
+vigente del mismo documento y el acceso permitido. Después, recuperar los
+rectores de los procesos ya descubiertos sin repetir la búsqueda. No hubo
+consulta de feed, inventario ni recuperación adicional.
 
 ## Plan aplicado para el segundo smoke
 
