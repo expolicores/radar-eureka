@@ -96,6 +96,11 @@ DIFFERENTIAL_ROW = re.compile(
     r"el proponente debe anexar con su propuesta\b.{0,100}"
     r"\b(?:certificaci(?:on|ones)|copias?)\b.{0,65}\bcontratos?\b"
 )
+MINIMUM_PARTICIPATION_HEADING = "experiencia minima requerida para participar"
+MINIMUM_HEADING_CONTRACTS = re.compile(
+    rf"^{MINIMUM_PARTICIPATION_HEADING} \(minimo (?:un|dos|tres|\d+)"
+    r"(?: \(\d+\))? contratos? cuyo objeto\b"
+)
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
 CONDITIONAL = "NORMATIVA_CONDICIONAL"
@@ -218,6 +223,12 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
         and (EXPERIENCE_IMPERATIVE.search(text) or ENTITY_EXPERIENCE_REQUIREMENT.search(text))
     ):
         return REQ, "explicit_bidder_requirement"
+    if (
+        heading == "minimum_participation_experience"
+        and MINIMUM_HEADING_CONTRACTS.search(text)
+        and not re.search(r"\bno\b", text)
+    ):
+        return REQ, "minimum_experience_in_heading"
     if scoped_waiver:
         return NEG, "heading_scoped_waiver"
     if DOUBLE_NEGATIVE.search(text):
@@ -280,6 +291,19 @@ def page_clauses(text, method=None, *, page=None, inherited_section=None):
             lines = [line]
             continue
         stripped = NUMBER_PREFIX.sub("", line)
+        title, parenthesis, _ = stripped.partition("(")
+        if (
+            parenthesis
+            and NUMBERED_SECTION.match(line)
+            and normalized_for_matching(title, method) == MINIMUM_PARTICIPATION_HEADING
+            and not (section and LIMITED_SECTION.search(normalized(section[0])))
+        ):
+            flush()
+            section = (title.strip(), page)
+            heading = "minimum_participation_experience"
+            heading_text = section[0]
+            lines = [stripped]
+            continue
         label, separator, body = stripped.partition(":")
         clean_label = normalized_for_matching(label, method).rstrip(".")
         # Some native/OCR outputs retain the title and response on the same line.
@@ -369,7 +393,10 @@ def document_assertions(document):
                     if basis in {"limited_applicability", "differential_experience_requirement"}
                     else "general_bidder"
                     if kind == REQ
-                    and GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
+                    and (
+                        basis == "minimum_experience_in_heading"
+                        or GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
+                    )
                     and not LIMITED_SECTION.search(section_text)
                     else "unspecified"
                 ),

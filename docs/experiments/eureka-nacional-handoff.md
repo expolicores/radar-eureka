@@ -164,6 +164,25 @@ excluir este lote en una selección futura, añadir su nombre local a los
 historiales con `--exclude-analyzed-from`. Cualquier corrida real adicional
 requiere autorización.
 
+## Ajuste focalizado tras el segundo lote
+
+Se recuperó el requisito de experiencia incluido entre paréntesis en
+un encabezado numerado. Pasó de silencio a exigencia aplicable para
+revisión comercial y mantuvo `not_resolved` por cobertura pendiente.
+El replay de 17 PDF verificó que los otros 14 casos conservaron evidencia,
+estado formal y prioridad. El total formal sigue en seis ambiguos y
+nueve sin resolver. Pasaron 207 pruebas y los cinco controles históricos
+conservaron sus resultados.
+
+El [diagnóstico agregado](eureka-nacional-experience-spike.md#en-01--cotejo-focalizado-del-segundo-lote)
+registra siete procesos sin rector descargado, tres descargas sobre
+10 MiB y 137 páginas pendientes por selección OCR. Una prueba focalizada
+recuperó cuatro páginas de cuatro, incluida la que faltaba en un rector
+mixto. La evidencia detallada queda en
+`.local/eureka-nacional-spike/pdf-replay-gp4u608c/` y
+`.local/eureka-nacional-spike/coverage-audit-pe6hrnob/`.
+Cualquier otra corrida real requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

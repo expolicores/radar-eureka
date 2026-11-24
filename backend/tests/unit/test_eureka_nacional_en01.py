@@ -1300,3 +1300,48 @@ def test_notice_exclusion_precedes_inventory_and_ignores_aggregator_profile(monk
         "previously_analyzed_secop": 1,
         "secop_notice_identity_unverified": 1,
     }
+
+
+def test_betulia_recovers_contract_minimum_inside_numbered_heading():
+    text = (
+        "14 Compromiso Anticorrupción 14 Compromiso Anticorrupción\n"
+        "5.5 EXPERIENCIA MINIMA REQUERIDA PARA PARTICIPAR (Mínimo dos (2) contratos cuyo objeto\n"
+        "sea igual o similar al presente contrato y cada uno por una cuantía igual o superior al "
+        "100% del valor del\n"
+        "presupuesto oficial expresado en SMMLV)\n"
+        "CONTENIDO MINIMO DE LA\n"
+        "CERTIFICACION PARA QUE SEA\n"
+        "VALIDA:"
+    )
+    doc = evidence_document("")
+    doc["fragments"] = [fragment(text, page=12)]
+    pending = evidence_document("", role="unknown", complete=False, identifier="2")
+    decision = rules.classify_experience([doc, pending])
+    assert decision["status"] == "not_resolved"
+    assert decision["review_category"] == "explicit_requirement"
+    (evidence,) = decision["review_evidence"]
+    assert evidence["basis"] == "minimum_experience_in_heading"
+    assert (evidence["scope"], evidence["page"], evidence["section_page"]) == (
+        "general_bidder",
+        12,
+        12,
+    )
+    assert "100%" in evidence["excerpt"]
+    assert "Compromiso Anticorrupción" not in evidence["excerpt"]
+    assert "CONTENIDO MINIMO" not in evidence["excerpt"]
+
+
+@pytest.mark.parametrize(
+    "clause",
+    [
+        "5.5 EXPERIENCIA MINIMA REQUERIDA PARA PARTICIPAR (No aplica experiencia)",
+        "5.5 EXPERIENCIA MINIMA REQUERIDA PARA PARTICIPAR "
+        "(Podrá acreditar como mínimo dos (2) contratos cuyo objeto sea similar)",
+        "EXPERIENCIA MINIMA REQUERIDA PARA PARTICIPAR "
+        "(Mínimo dos contratos cuyo objeto sea similar)",
+    ],
+)
+def test_minimum_heading_rule_does_not_infer_a_waiver_or_obligation_without_its_cues(clause):
+    decision = rules.classify_experience([evidence_document(clause)])
+    assert decision["status"] == "not_resolved"
+    assert not any(e["assertion_type"] in {rules.NEG, rules.REQ} for e in decision["evidence"])

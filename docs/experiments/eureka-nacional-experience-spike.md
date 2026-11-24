@@ -727,3 +727,78 @@ se comprobó con cinco pruebas focalizadas que la opción también acepta
 los nombres con guion bajo generados por el runner. Incluir el historial
 de este lote en una futura selección excluiría 35 avisos únicos. Una
 nueva corrida real requiere autorización.
+
+
+## EN-01 · Cotejo focalizado del segundo lote
+
+El único silencio automático correspondía a un requisito habilitante
+incluido entre paréntesis en un encabezado numerado. El segmentador unía
+ese encabezado, que se extendía por varias líneas, a la tabla anterior.
+Además, la obligación se expresaba como un mínimo de contratos, sin
+uno de los verbos reconocidos. La corrección separa el encabezado
+explícito de experiencia mínima para participar y reconoce el mínimo
+de contratos cuyo objeto se especifica allí. Conserva página y sección.
+No generaliza la regla a una mención de experiencia, a un ejemplo o
+a una modalidad opcional.
+
+El replay sobre los 17 PDF locales conservó la clasificación y la
+prioridad de los otros 14 procesos. El caso corregido pasó de silencio
+a exigencia aplicable en prioridad comercial y conservó `not_resolved`
+por cobertura documental pendiente. Las detecciones brutas de exigencia
+pasaron de ocho en cinco procesos a nueve en seis. La clasificación
+formal se mantuvo en seis ambiguos y nueve sin resolver, con cero
+ausencias explícitas o confirmadas. El replay empleó 84,875 s, con el
+mismo OCR selectivo, cero créditos de red y cero IA.
+
+### Cotejo de las cinco detecciones originales
+
+| Evidencia observada | Motivo de la prioridad que se conservó |
+|---|---|
+| Dos contratos de confección o suministro en un rector completo | La sección genérica no identificó alcance general en la regla vigente. Una nota remite a otro numeral de la misma invitación y activa la comprobación de dependencia. |
+| Dos contratos generales y dos distintos para experiencia específica | El rector tenía alcance general reconocido, pero le faltaba una página. Además, el estudio previo superó 10 MiB. |
+| Hasta tres certificaciones para equipo de protección personal | Es una obligación de acreditación. El encabezado registrado no establece el alcance general en la regla y el expediente distingue reglas según el tipo de empresa. |
+| El oferente deberá acreditar experiencia y podrá hacerlo con un máximo de dos contratos | «Podrá» indica el medio previsto para acreditar. El encabezado no tipificó el alcance general y el documento contiene otras condiciones de aplicación limitada. |
+| Inscripción en el RUP de los contratos relacionados en un formulario | Es una condición específica de acreditación. El rector remite a estudios previos pendientes y no se amplió esta señal a una obligación general confirmada. |
+
+### Cobertura documental y comprobación OCR
+
+Siete de los 15 procesos quedaron sin rector descargado. De los ocho
+rectores guardados, seis tuvieron cobertura completa y dos parcial.
+En cinco inventarios no se identificó un rector por título, aunque uno
+contenía una posible invitación con nombre truncado. Un rector identificado
+era DOCX y quedó fuera de la selección PDF. Otro rector identificado
+superó 10 MiB. Los otros dos archivos que superaron el umbral fueron
+un estudio previo y un paquete precontractual de rol indeterminado.
+
+Las 137 páginas pendientes pertenecen a seis PDF. Todas tenían texto
+nativo insuficiente y quedaron fuera de la selección OCR. Se concentraron
+en un estudio previo de 55 páginas, otro de 38 y un rector escaneado con
+35 páginas pendientes. Las nueve restantes pertenecían a un CDP, un
+conjunto de cotizaciones con anexos y una página de índice de un rector
+mixto. No hubo interrupciones de extracción que explicaran ese faltante.
+
+La prueba focalizada recuperó texto útil en cuatro de cuatro páginas
+locales, en 30,172 s. Conservar conjuntamente esa evidencia reduciría
+las pendientes a 133 y completaría las páginas del rector mixto. Su
+página recuperada era un índice. La muestra de páginas no acredita una
+tasa extrapolable al resto ni modifica las clasificaciones del replay.
+Se conservaron las guardas de tiempo, tamaño y calidad y el OCR se
+ejecutó sobre una página objetivo por PDF en la prueba.
+
+Pasaron 207 pruebas offline. Los cinco PDF de control conservaron
+sus afirmaciones, páginas y prioridades. Las tres señales favorables
+siguen pendientes de confirmación formal y los controles de silencio
+condicionado conservan sus remisiones. Los resultados y la prueba OCR
+quedan en `.local/`. No hubo CDP, descargas SECOP ni otra corrida real.
+
+Para la siguiente exploración, mantener ocho páginas de feed por defecto
+y considerar hasta dos adicionales, previa autorización, solo si la
+exclusión histórica deja menos de 15 candidatos elegibles. Agregarían
+hasta dos créditos de feed dentro de los mismos 200 y 720 s, con los
+mismos límites documentales. Priorizar la cobertura antes de aumentar
+la muestra. Probar el ranking de títulos truncados con validación por
+portada y la reutilización del lector DOCX aislado para rectores
+identificados. Para escaneados, usar un índice, un encabezado vecino o
+la página siguiente a una portada útil para escoger el segundo cupo OCR.
+Estas son propuestas para un incremento posterior. Las guardas siguen
+vigentes.
