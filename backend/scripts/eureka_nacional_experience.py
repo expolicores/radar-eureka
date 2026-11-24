@@ -80,6 +80,8 @@ def document_role(name):
     text = NUMBER_PREFIX.sub("", normalized(name).strip()).replace("_", " ").replace("-", " ")
     if EXCLUDED.search(text):
         return "excluded"
+    if re.match(r"^(?:formatos?|formularios?)\b", text):
+        return "support"
     if AMENDMENT.search(text):
         return "amendment"
     if PRIMARY.search(text):

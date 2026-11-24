@@ -29,7 +29,7 @@ class ExtractionLimits:
     timeout_seconds: float = 60
     max_chars: int = 2_000_000
     max_fragments: int = 10_000
-    max_pages: int = 300
+    max_pages: int | None = 300
     fragment_chars: int = 20_000
     max_archive_bytes: int = 100 * 1024 * 1024
     max_archive_entries: int = 5000

@@ -35,7 +35,6 @@ from licitaciones_cdp_runtime import (
     PageClient,
     check_session,
     connect_browser,
-    coverage,
     fetch_inventory,
     find_page,
     validate_cdp_url,
@@ -47,7 +46,6 @@ from licitaciones_sources import document_capable, process_identity, source_kind
 from licitaciones_validity import apply_validity
 
 from public_procurement.documents.domain.document import AcquisitionError
-from public_procurement.extraction.adapters.ocr import probe_engine
 from public_procurement.licitaciones_cdp.configuration import (
     ProfileConfigurationError,
     resolve_profile_id,
@@ -59,7 +57,6 @@ NATIONAL_LOCATION_COUNT = 1130
 DEFAULT_GEOGRAPHY = Path(__file__).with_name(
     "eureka_nacional_geography(from_licitaciones_info).v1.json"
 )
-PAGES_PER_DOCUMENT = 12
 OCR_PER_DOCUMENT = 2
 REQUEST_CREDITS = 60
 DURATION_SECONDS = 360
@@ -271,7 +268,100 @@ def select_processes(candidates, args, now, discovery, profile):
     return sample
 
 
-def analyze_documents(client, process, storage, settings, allowance, metrics, documents, errors):
+def select_ocr_pages(native, low_text, budget):
+    if not budget or native.error_code:
+        return []
+    visited = native.diagnostics.get("native_pages_visited", 0)
+    candidates = set(low_text).intersection(range(1, visited + 1))
+    likely = set()
+    for fragment in native.fragments:
+        number = fragment.page_number
+        for line in fragment.text.splitlines():
+            heading = plain(line).strip()
+            if len(heading) <= 110 and re.search(
+                r"\b(?:experiencia|requisitos? habilitantes?|acreditacion)\b", heading
+            ):
+                likely.update({number - 1, number + 1})
+    # For a named rector, an unreadable cover can identify scope and document type.
+    cover = {1} if document_role(native.document.original_name) == "primary" else set()
+    return (sorted(candidates & likely) + sorted((candidates & cover) - likely))[:budget]
+
+
+def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OCR_PER_DOCUMENT):
+    detail, fragments = spike.run_existing_extractor(
+        document,
+        stored,
+        storage,
+        settings,
+        select_ocr_pages=lambda native, low_text: select_ocr_pages(native, low_text, ocr_pages),
+    )
+    diagnostics = detail.get("diagnostics", {})
+    total = detail["page_count"]
+    quality = diagnostics.get("native_quality", [])
+    native_useful = {page["page_number"] for page in quality if not page["ocr_required"]}
+    native_text = {
+        f.source_locator["page_number"]
+        for f in fragments
+        if f.source_locator.get("extraction_method") == "native_pdf_text"
+    }
+    if not quality:
+        native_useful = native_text
+    ocr_success = set(diagnostics.get("successful_pages", []))
+    processed = native_useful | ocr_success
+    pending = set(range(1, total + 1)) - processed
+    incomplete_from = diagnostics.get("native_incomplete_from")
+    if incomplete_from is not None:
+        pending.update(range(incomplete_from, total + 1))
+    visited = diagnostics.get("native_pages_visited", total)
+    selected = set(diagnostics.get("required_pages", []))
+    first_page = "".join(f.text for f in fragments if f.source_locator.get("page_number") == 1)
+    cover_role, cover_metadata = document_cover_metadata(first_page)
+    if cover_role == "excluded" or (cover_role and entry["role"] == "unknown"):
+        entry.update(role=cover_role, role_source="cover")
+    entry.update(
+        cover_metadata=cover_metadata,
+        complete=bool(total and not pending and not detail.get("error_code")),
+        status=diagnostics.get("status", detail["status"]),
+        pages_seen=sorted(processed),
+        total_pages=total,
+        native_pages=sorted(native_text),
+        native_pages_visited=visited,
+        ocr_required_pages=[
+            p["page_number"] for p in quality if p["ocr_required"] and p["page_number"] <= visited
+        ],
+        ocr_pages=detail.get("ocr_pages", []),
+        ocr_success_pages=sorted(ocr_success),
+        ocr_omitted_pages=diagnostics.get("omitted_pages", []),
+        ocr_unselected_pages=[
+            p["page_number"]
+            for p in quality
+            if p["ocr_required"]
+            and p["page_number"] <= visited
+            and p["page_number"] not in selected
+        ],
+        ocr_diagnostics=diagnostics.get("pages", []),
+        pending_pages=sorted(pending),
+        error_code=detail.get("error_code"),
+        native_stop_reason=diagnostics.get("native_stop_reason"),
+        native_page_errors=diagnostics.get("native_page_errors", []),
+        native_cpu_seconds=diagnostics.get("native_cpu_seconds"),
+        extraction_seconds=detail["elapsed_seconds"],
+        fragments=fragments,
+    )
+
+
+def analyze_documents(
+    client,
+    process,
+    storage,
+    settings,
+    allowance,
+    metrics,
+    documents,
+    errors,
+    *,
+    ocr_pages=OCR_PER_DOCUMENT,
+):
     inventory = fetch_inventory(client, process["inventory_keys"])
     if not inventory:
         return
@@ -331,42 +421,29 @@ def analyze_documents(client, process, storage, settings, allowance, metrics, do
             if time.monotonic() + START_EXTRACTION_MARGIN > client.deadline:
                 entry["status"] = "extraction_not_started"
                 raise BudgetReached("duration_budget")
-            detail, fragments = spike.run_existing_extractor(document, stored, storage, settings)
-            result = coverage(detail)
-            prior_limit = detail.get("error_code") in {"page_limit", "too_large"}
-            first_page = next(
-                (f.text for f in fragments if f.source_locator.get("page_number") == 1), ""
-            )
-            cover_role, cover_metadata = document_cover_metadata(first_page)
-            entry["cover_metadata"] = cover_metadata
-            if cover_role == "excluded" or (cover_role and entry["role"] == "unknown"):
-                entry["role"] = cover_role
-                entry["role_source"] = "cover"
-            processed = {fragment.source_locator.get("page_number") for fragment in fragments}
-            processed.discard(None)
-            entry.update(
-                complete=bool(result["coverage_complete"])
-                and set(range(1, result["total_pages"] + 1)) <= processed
-                and bool(processed),
-                status=result["extraction_status"],
-                pages_seen=sorted(processed),
-                total_pages=result["total_pages"],
-                ocr_pages=result["ocr_processed_pages"],
-                ocr_omitted_pages=result["ocr_omitted_pages"],
-                error_code=detail.get("error_code"),
-                extraction_seconds=detail["elapsed_seconds"],
-                fragments=fragments,
-            )
-            metrics["documents_processed"] += bool(processed)
-            metrics["pages_reported"] += result["total_pages"]
-            metrics["pages_with_text"] += len(processed)
-            metrics["ocr_pages_reported"] += len(result["ocr_processed_pages"])
-            if detail.get("error_code"):
+            extract_document(document, stored, storage, settings, entry, ocr_pages=ocr_pages)
+            code = entry["error_code"] or entry["native_stop_reason"]
+            prior_limit = code in {
+                "too_large",
+                "text_limit",
+                "fragment_limit",
+                "memory_limit",
+                "native_time_limit",
+                "timeout",
+                "reader_failed",
+            }
+            metrics["documents_processed"] += bool(entry["fragments"])
+            metrics["pages_reported"] += entry["total_pages"]
+            metrics["pages_with_text"] += len(entry["pages_seen"])
+            metrics["ocr_pages_reported"] += len(entry["ocr_pages"])
+            metrics["native_pages_with_text"] += len(entry["native_pages"])
+            metrics["pending_pages"] += len(entry["pending_pages"])
+            if code:
                 metrics["extraction_failures"] += 1
                 errors.append(
                     {
                         "stage": stage,
-                        "code": detail["error_code"],
+                        "code": code,
                         "document_id": document.document_id,
                     }
                 )
@@ -459,6 +536,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 "documents_processed",
                 "bytes_downloaded",
                 "pages_reported",
+                "native_pages_with_text",
+                "pending_pages",
                 "pages_with_text",
                 "ocr_pages_reported",
                 "unique_document_hashes",
@@ -494,6 +573,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                     metrics,
                     documents,
                     process_errors,
+                    ocr_pages=getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
                 )
             except (BudgetReached, CandidateError) as error:
                 stop = error
@@ -565,10 +645,10 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "documents": args.documents,
             "documents_per_process": 2,
             "document_max_bytes": DOCUMENT_BYTES,
-            "pages_per_pdf": PAGES_PER_DOCUMENT,
-            "pages_per_run_upper_bound": args.documents * PAGES_PER_DOCUMENT,
-            "ocr_pages_per_pdf": OCR_PER_DOCUMENT,
-            "ocr_pages_per_run_upper_bound": args.documents * OCR_PER_DOCUMENT,
+            "native_pages_per_pdf": None,
+            "ocr_pages_per_pdf": getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
+            "ocr_pages_per_run_upper_bound": args.documents
+            * getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
             "request_credits": REQUEST_CREDITS,
             "duration_seconds": DURATION_SECONDS,
             "ai_calls": 0,
@@ -600,20 +680,17 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     return exit_code
 
 
-def settings_for_run(output, tesseract, tessdata):
+def settings_for_run(output, tesseract, tessdata, ocr_pages=OCR_PER_DOCUMENT):
     policy = spike.load_ocr_policy(spike.ROOT / "config" / "extraction_ocr.v1.json")
     policy = policy.model_copy(
         update={
             "fallback_language": "spa",
-            "max_ocr_pages": OCR_PER_DOCUMENT,
+            "max_ocr_pages": max(1, ocr_pages),
             "page_timeout_seconds": 6,
             "document_timeout_seconds": 14,
             "max_retry_attempts": 0,
         }
     )
-    engine = probe_engine(tesseract, tessdata, policy)
-    if not engine.get("available") or engine.get("language") != "spa":
-        raise spike.SpikeError("Tesseract spa no disponible.")
     policy_path = output / "ocr_policy.json"
     write_json(policy_path, policy.model_dump())
     return spike.Settings(
@@ -622,7 +699,6 @@ def settings_for_run(output, tesseract, tessdata):
         document_timeout_seconds=12,
         document_max_bytes=DOCUMENT_BYTES,
         extraction_max_bytes=DOCUMENT_BYTES,
-        extraction_max_pages=PAGES_PER_DOCUMENT,
         extraction_timeout_seconds=12,
         extraction_ocr_enabled=True,
         extraction_ocr_config_path=policy_path,
@@ -640,6 +716,9 @@ def main(argv=None):
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
+    parser.add_argument(
+        "--ocr-pages", type=int, choices=range(OCR_PER_DOCUMENT + 1), default=OCR_PER_DOCUMENT
+    )
     parser.add_argument(
         "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
     )
@@ -659,7 +738,7 @@ def main(argv=None):
         output = Path(tempfile.mkdtemp(prefix="en01-", dir=OUTPUT_ROOT))
         print(json.dumps({"output": str(output)}), flush=True)
         deadline = time.monotonic() + DURATION_SECONDS
-        settings = settings_for_run(output, args.tesseract, args.tessdata)
+        settings = settings_for_run(output, args.tesseract, args.tessdata, args.ocr_pages)
         with sync_playwright() as playwright:
             browser = connect_browser(playwright, args.cdp_url)
             return run(

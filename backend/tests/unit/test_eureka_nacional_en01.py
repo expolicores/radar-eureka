@@ -188,7 +188,7 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
             max_bytes=en01.DOCUMENT_BYTES,
         )
 
-    def extract(document, _stored, _storage, _settings):
+    def extract(document, _stored, _storage, _settings, *, select_ocr_pages):
         text = WAIVED if document.document_id == "2" else REQUIRED
         return {
             "status": "completed",
@@ -235,7 +235,7 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
         "closed": {},
         "unknown": {},
     }
-    assert metrics["limits"]["pages_per_run_upper_bound"] == 60
+    assert metrics["limits"]["native_pages_per_pdf"] is None
     assert metrics["ai_calls"] == 0
     assert "11" not in downloaded
     assert "21" not in downloaded
@@ -305,7 +305,7 @@ def test_shared_native_extractor_reads_existing_fixture_without_db(tmp_path):
         _env_file=None,
         database_url="disabled://no-db",
         extraction_ocr_enabled=False,
-        extraction_max_pages=en01.PAGES_PER_DOCUMENT,
+        extraction_max_pages=12,
     )
     document = SpikeDocument(fixture.name, "pdf", SECOP + "1", "1")
     detail, fragments = en01.spike.run_existing_extractor(document, stored, storage, settings)
@@ -334,23 +334,39 @@ def test_discovery_preserves_completed_pages_on_provider_failure(tmp_path, monke
 @pytest.mark.ocr_real
 @pytest.mark.skipif(os.getenv("RUN_REAL_OCR") != "1", reason="requires local Tesseract spa")
 def test_shared_ocr_extractor_uses_en01_policy(tmp_path):
-    fixture = Path(__file__).resolve().parents[1] / "fixtures/extraction/scanned_refrigerios.pdf"
+    from pypdf import PdfReader, PdfWriter
+
+    fixtures = Path(__file__).resolve().parents[1] / "fixtures/extraction"
+    scanned = PdfReader(fixtures / "scanned_refrigerios.pdf").pages[0]
+    native = PdfReader(fixtures / "native_refrigerios.pdf").pages[0]
+    path = tmp_path / "long_mixed.pdf"
+    writer = PdfWriter()
+    writer.add_page(scanned)
+    for _ in range(13):
+        writer.add_page(native)
+    writer.add_page(scanned)
+    writer.write(path)
     storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
     stored = storage.store(
-        [fixture.read_bytes()],
-        original_name=fixture.name,
+        [path.read_bytes()],
+        original_name=path.name,
         content_type="application/pdf",
-        expected_size=fixture.stat().st_size,
+        expected_size=path.stat().st_size,
         max_bytes=en01.DOCUMENT_BYTES,
     )
     settings = en01.settings_for_run(
-        tmp_path, os.getenv("EXTRACTION_TESSERACT_CMD", "tesseract"), None
+        tmp_path, os.getenv("EXTRACTION_TESSERACT_CMD", "tesseract"), None, ocr_pages=1
     )
-    document = SpikeDocument(fixture.name, "pdf", SECOP + "1", "1")
-    detail, fragments = en01.spike.run_existing_extractor(document, stored, storage, settings)
-    assert detail["status"] == "completed"
-    assert detail["ocr_pages"] == [1]
-    assert fragments[0].source_locator["extraction_method"] == "ocr_text"
+    document = SpikeDocument("Invitación pública.pdf", "pdf", SECOP + "1", "1")
+    entry = {"role": "primary"}
+    en01.extract_document(document, stored, storage, settings, entry, ocr_pages=1)
+    assert entry["total_pages"] == 15
+    assert entry["native_pages"] == list(range(2, 15))
+    assert entry["ocr_required_pages"] == [1, 15]
+    assert entry["ocr_pages"] == entry["ocr_success_pages"] == [1]
+    assert entry["pending_pages"] == [15]
+    assert not entry["complete"]
+    assert entry["fragments"][0].source_locator["extraction_method"] == "ocr_text"
 
 
 @pytest.mark.parametrize(
@@ -756,3 +772,138 @@ def test_cover_metadata_records_explicit_date_and_role():
     )
     assert role == "primary"
     assert version == {"version_marker": "definitivo", "labeled_date": "23/11/2026"}
+
+
+def test_formats_do_not_take_the_invitation_slot(monkeypatch):
+    forms = SpikeDocument("01. Formatos INVITACIÓN PÚBLICA.pdf", "pdf", SECOP + "1", "1")
+    invitation = SpikeDocument("02. Invitación Pública.pdf", "pdf", SECOP + "2", "2")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[forms, invitation]))
+    download = Mock(side_effect=en01.AcquisitionError("too_large", "fixture"))
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    documents = []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        None,
+        None,
+        1,
+        Counter(),
+        documents,
+        [],
+    )
+    assert [entry["role"] for entry in documents] == ["support", "primary"]
+    assert download.call_args.args[1] == invitation
+
+
+def test_ocr_only_selects_low_text_pages_near_relevant_sections_or_cover():
+    native = SimpleNamespace(
+        document=SimpleNamespace(original_name="Invitación pública.pdf"),
+        error_code=None,
+        diagnostics={"native_pages_visited": 8},
+        fragments=[
+            SimpleNamespace(page_number=4, text="7. REQUISITOS HABILITANTES"),
+            SimpleNamespace(page_number=7, text="Descripción general del contrato"),
+        ],
+    )
+    assert en01.select_ocr_pages(native, [1, 2, 5, 8, 9], 2) == [5, 1]
+    assert en01.select_ocr_pages(native, [1, 2, 5], 0) == []
+
+
+def test_native_pdf_over_twelve_pages_keeps_page_provenance(tmp_path):
+    from pypdf import PdfReader, PdfWriter
+
+    from public_procurement.documents.adapters.local_storage import LocalBinaryStorage
+
+    fixture = Path(__file__).resolve().parents[1] / "fixtures/extraction/native_refrigerios.pdf"
+    path = tmp_path / "long.pdf"
+    writer = PdfWriter()
+    page = PdfReader(fixture).pages[0]
+    for _ in range(15):
+        writer.add_page(page)
+    writer.write(path)
+    pdf = path.read_bytes()
+    storage = LocalBinaryStorage(tmp_path / "binaries")
+    stored = storage.store(
+        [pdf],
+        original_name=path.name,
+        content_type="application/pdf",
+        expected_size=len(pdf),
+        max_bytes=en01.DOCUMENT_BYTES,
+    )
+    settings = en01.settings_for_run(tmp_path, "unavailable", None, ocr_pages=0)
+    document = SpikeDocument("Invitación Pública.pdf", "pdf", SECOP + "1", "1")
+    entry = {"role": "primary"}
+    en01.extract_document(document, stored, storage, settings, entry, ocr_pages=0)
+    assert entry["total_pages"] == 15
+    assert entry["native_pages"] == list(range(1, 16))
+    assert entry["pending_pages"] == entry["ocr_pages"] == []
+    assert entry["complete"]
+    assert entry["fragments"][-1].source_locator["page_number"] == 15
+
+    bounded = settings.model_copy(update={"extraction_max_chars": 25})
+    en01.extract_document(document, stored, storage, bounded, entry, ocr_pages=0)
+    assert entry["native_stop_reason"] == "text_limit"
+    assert entry["native_pages"] == [1]
+    assert entry["fragments"][0].source_locator["char_end"] == 25
+    assert entry["pending_pages"] == list(range(1, 16))
+    assert not entry["complete"]
+
+
+def test_native_checkpoint_recovers_pages_when_worker_times_out(tmp_path, monkeypatch):
+    import hashlib
+    import json
+    import subprocess
+    import uuid
+    from contextlib import contextmanager
+
+    from public_procurement.extraction.adapters.isolated import IsolatedExtractor
+    from public_procurement.extraction.domain.content import DocumentInput, ExtractionLimits
+
+    snapshot = tmp_path / "fixture.pdf"
+    data = b"%PDF-1.7"
+    snapshot.write_bytes(data)
+
+    @contextmanager
+    def open_version(*_args):
+        with snapshot.open("rb") as stream:
+            yield stream
+
+    def timeout(request):
+        checkpoint = Path(request["checkpoint"])
+        records = [
+            {"page_count": 20},
+            {
+                "page_number": 1,
+                "boundary": None,
+                "empty": False,
+                "fragments": [
+                    {
+                        "ordinal": 1,
+                        "text": "Texto de la primera página",
+                        "page_number": 1,
+                        "source_locator": {"page_number": 1},
+                    }
+                ],
+            },
+        ]
+        checkpoint.write_text(
+            "".join(json.dumps(record) + "\n" for record in records) + '{"unfinished":',
+            encoding="utf-8",
+        )
+        raise subprocess.TimeoutExpired("reader", 12)
+
+    source = SimpleNamespace(open_version=open_version)
+    extractor = IsolatedExtractor(source, ExtractionLimits(max_pages=None))
+    monkeypatch.setattr(extractor, "run_worker", timeout)
+    document = DocumentInput(
+        uuid.uuid4(),
+        uuid.uuid4(),
+        "fixture.pdf",
+        hashlib.sha256(data).hexdigest(),
+        len(data),
+    )
+    result = extractor.extract(document)
+    assert result.page_count == 20
+    assert result.fragments[0].page_number == 1
+    assert result.diagnostics["native_stop_reason"] == "timeout"
+    assert result.diagnostics["native_incomplete_from"] == 2

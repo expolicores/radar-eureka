@@ -387,7 +387,7 @@ def download_document(client, document, storage, settings):
     ).download(document, storage)
 
 
-def run_existing_extractor(document, stored, storage, settings):
+def run_existing_extractor(document, stored, storage, settings, *, select_ocr_pages=None):
     name = document.original_name
     if Path(name).suffix.lower() != f".{document.extension}":
         name += f".{document.extension}"
@@ -400,7 +400,7 @@ def run_existing_extractor(document, stored, storage, settings):
         timeout_seconds=settings.extraction_timeout_seconds,
         max_chars=settings.extraction_max_chars,
         max_fragments=settings.extraction_max_fragments,
-        max_pages=settings.extraction_max_pages,
+        max_pages=None if select_ocr_pages is not None else settings.extraction_max_pages,
     )
     fallback = (
         LocalOcrFallback(
@@ -409,6 +409,7 @@ def run_existing_extractor(document, stored, storage, settings):
             load_ocr_policy(settings.extraction_ocr_config_path),
             settings.extraction_tesseract_cmd,
             settings.extraction_tessdata_path,
+            select_pages=select_ocr_pages,
         )
         if settings.extraction_ocr_enabled
         else None

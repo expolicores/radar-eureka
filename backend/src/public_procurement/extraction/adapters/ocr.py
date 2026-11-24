@@ -130,7 +130,7 @@ def extract_ocr(
     document = pdfium.PdfDocument(str(path))
     try:
         count = len(document)
-        if count > limits.max_pages:
+        if limits.max_pages is not None and count > limits.max_pages:
             raise ExtractionError("page_limit", "El PDF excede el límite de páginas.")
         required = sorted(
             set(requested_pages if requested_pages is not None else range(1, count + 1))

@@ -5,6 +5,8 @@ import json
 import os
 import signal
 import subprocess
+from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
@@ -27,11 +29,15 @@ from .ocr import probe_engine
 
 def native_quality(native: ExtractionResult, policy: OcrPolicy) -> list[dict[str, Any]]:
     count = native.page_count or max((f.page_number or 0 for f in native.fragments), default=0)
+    count = native.diagnostics.get("native_pages_visited", count)
+    text_by_page = defaultdict(list)
+    for fragment in native.fragments:
+        text_by_page[fragment.page_number].append(fragment.text)
     return [
         {
             "page_number": number,
             **assess_text(
-                "\n".join(f.text for f in native.fragments if f.page_number == number),
+                "\n".join(text_by_page[number]),
                 policy.min_alphanumeric_chars,
                 policy.min_alphanumeric_ratio,
                 policy.max_damaged_ratio,
@@ -204,6 +210,19 @@ class HybridExtractor:
             "attempt": self.attempt,
             "required_pages_known": self.pages is not None or recovered.page_count > 0,
         }
+        if self.limits.max_pages is None:
+            unselected = {
+                page["page_number"] for page in diagnostic["native_quality"] if page["ocr_required"]
+            } - set(required)
+            diagnostic.update(
+                **self.native.diagnostics,
+                ocr_unselected_pages=sorted(unselected),
+            )
+            diagnostic["coverage_complete"] = (
+                bool(diagnostic["coverage_complete"])
+                and not unselected
+                and not diagnostic.get("native_stop_reason")
+            )
         if omitted:
             diagnostic.update(
                 status="ocr_truncated",
@@ -213,7 +232,10 @@ class HybridExtractor:
             )
         complete = bool(diagnostic.get("coverage_complete"))
         unresolved = sorted(
-            set(diagnostic.get("required_pages", required))
+            (
+                set(diagnostic.get("required_pages", required))
+                | set(diagnostic.get("ocr_unselected_pages", []))
+            )
             - set(diagnostic.get("successful_pages", []))
             | set(omitted)
         )
@@ -258,9 +280,12 @@ class LocalOcrFallback:
         policy: OcrPolicy,
         command: str,
         tessdata: Path | None,
+        *,
+        select_pages: Callable[[ExtractionResult, list[int]], list[int]] | None = None,
     ) -> None:
         self.documents, self.limits, self.policy = documents, limits, policy
         self.command, self.tessdata = command, tessdata
+        self.select_pages = select_pages
 
     def prepare(self, native: ExtractionResult, force: bool = False) -> HybridExtractor | None:
         if native.status is ExtractionStatus.RUNNING:
@@ -275,6 +300,10 @@ class LocalOcrFallback:
             return None
         quality = native_quality(native, self.policy)
         pages = [p["page_number"] for p in quality if force or p["ocr_required"]]
+        if self.select_pages is not None and not force:
+            pages = self.select_pages(native, pages)
+            if not pages:
+                return None
         if not pages and not native.error_code:
             return None
         engine = probe_engine(self.command, self.tessdata, self.policy)

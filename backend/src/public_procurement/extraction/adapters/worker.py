@@ -115,7 +115,16 @@ def main() -> None:
         elif suffix == ".pdf":
             from .pdf import extract_pdf
 
-            parsed = extract_pdf(path, limits)
+            if "checkpoint" in request:
+                with Path(request["checkpoint"]).open("w", encoding="utf-8") as stream:
+
+                    def checkpoint(page):
+                        stream.write(json.dumps(page) + "\n")
+                        stream.flush()
+
+                    parsed = extract_pdf(path, limits, checkpoint)
+            else:
+                parsed = extract_pdf(path, limits)
         elif suffix == ".docx":
             from .docx import extract_docx
 

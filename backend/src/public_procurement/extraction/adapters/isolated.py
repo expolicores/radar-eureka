@@ -102,13 +102,22 @@ class IsolatedExtractor:
                 limits=asdict(self.limits),
             )
             request.update(self.worker_options())
+            checkpoint = None
+            if suffix == ".pdf" and self.limits.max_pages is None and request.get("mode") != "ocr":
+                checkpoint = Path(temporary) / "native.jsonl"
+                request["checkpoint"] = str(checkpoint)
+                from .pdf import recover_pdf_checkpoint
             try:
                 result = self.run_worker(request)
             except subprocess.TimeoutExpired as exc:
+                if checkpoint and (partial := recover_pdf_checkpoint(checkpoint, "timeout")):
+                    return partial
                 raise ExtractionError(
                     "timeout", "El lector excedió el tiempo configurado."
                 ) from exc
             if result.returncode != 0:
+                if checkpoint and (partial := recover_pdf_checkpoint(checkpoint, "reader_failed")):
+                    return partial
                 raise ExtractionError(
                     "reader_failed",
                     "El lector terminó sin resultado; revisar corrupción o memoria.",
@@ -116,6 +125,10 @@ class IsolatedExtractor:
             try:
                 payload = json.loads(result.stdout)
                 if "error_code" in payload:
+                    if checkpoint and (
+                        partial := recover_pdf_checkpoint(checkpoint, payload["error_code"])
+                    ):
+                        return partial
                     raise ExtractionError(payload["error_code"], payload["error_message"])
                 return ParsedContent(
                     ExtractionStatus(payload["status"]),
