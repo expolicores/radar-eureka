@@ -1218,3 +1218,85 @@ def test_san_francisco_table_requires_experience_only_within_each_company_size()
     doc["fragments"] = [fragment(table.split("\n", 1)[1], page=34)]
     no_heading = rules.classify_experience([doc])
     assert not any(e["assertion_type"] in {rules.REQ, rules.NEG} for e in no_heading["evidence"])
+
+
+def test_analyzed_history_uses_only_result_rows_and_deduplicates_notices(tmp_path):
+    for run_name, profile in (("en01-first", "2222222"), ("en01-second", "3333333")):
+        root = tmp_path / run_name
+        root.mkdir()
+        ref = f"licitaciones_info:{profile}:10"
+        rows = [
+            {"process_reference": ref, "source": "secop2", "source_identity": "CO1.NTC.12345"},
+            {
+                "process_reference": "selected-only",
+                "source": "secop2",
+                "source_identity": "CO1.NTC.99999",
+                "sampled": True,
+            },
+        ]
+        en01.write_json(root / "processes.json", {"processes": rows})
+        en01.write_json(root / "experience_requirements.json", [{"process_reference": ref}])
+    assert en01.load_analyzed_secop_ids(tmp_path, ["en01-first", "en01-second"]) == {
+        "CO1.NTC.12345"
+    }
+
+
+@pytest.mark.parametrize("bad_notice", ["CO1.REQ.12345", None, "licitaciones_info:2222222:10"])
+def test_incomparable_history_fails_before_browser(tmp_path, monkeypatch, bad_notice, capsys):
+    root = tmp_path / "en01-old"
+    root.mkdir()
+    en01.write_json(
+        root / "processes.json",
+        {
+            "processes": [
+                {"process_reference": "row", "source": "secop2", "source_identity": bad_notice}
+            ]
+        },
+    )
+    en01.write_json(root / "experience_requirements.json", [{"process_reference": "row"}])
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    connect = Mock()
+    monkeypatch.setattr(en01, "connect_browser", connect)
+    assert en01.main(["--exploratory", "--exclude-analyzed-from", root.name]) == 1
+    assert "referencia comparable SECOP II" in capsys.readouterr().out
+    connect.assert_not_called()
+
+
+def test_notice_exclusion_precedes_inventory_and_ignores_aggregator_profile(monkeypatch, tmp_path):
+    known = row(91, "Boyacá")
+    known.update(
+        Link="https://community.secop.gov.co/Public/?noticeUID=CO1.NTC.12345",
+        idUltimaFase="CO1.NTC.12345",
+    )
+    uncertain = row(92, "Bogotá")
+    uncertain.update(
+        Link="https://community.secop.gov.co/Public/?noticeUID=CO1.REQ.12345",
+        idUltimaFase="CO1.REQ.12345",
+    )
+    valid = row(93, "Nariño")
+    monkeypatch.setattr(en01, "check_session", Mock())
+    inventory = Mock(return_value=[])
+    monkeypatch.setattr(en01, "fetch_inventory", inventory)
+    client = SimpleNamespace(
+        profile_id=EXAMPLE_PROFILE,
+        deadline=time.monotonic() + 720,
+        requests=2,
+        post=Mock(return_value={"count": 3, "data": [known, uncertain, valid]}),
+    )
+    args = SimpleNamespace(
+        processes=1,
+        documents=1,
+        discovery_pages=8,
+        recent_days=30,
+        exploratory=True,
+        excluded_secop_ids=frozenset({"CO1.NTC.12345"}),
+    )
+    assert en01.run(client, args, None, tmp_path, now=CUTOFF) == 0
+    assert [call.args[1]["idContrato"] for call in inventory.call_args_list] == [93]
+    metrics = report(tmp_path, "metrics.json")
+    assert metrics["eligible_before_history"] == 3
+    assert metrics["inventory_eligible"] == metrics["sampled"] == 1
+    assert metrics["excluded_by_reason"] == {
+        "previously_analyzed_secop": 1,
+        "secop_notice_identity_unverified": 1,
+    }

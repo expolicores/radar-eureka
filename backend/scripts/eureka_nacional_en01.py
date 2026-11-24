@@ -130,6 +130,35 @@ def load_national_locations(path=DEFAULT_GEOGRAPHY):
     return tuple(ids)
 
 
+def load_analyzed_secop_ids(root, run_names):
+    ids = set()
+    for name in run_names:
+        if not re.fullmatch(r"en01-[a-z0-9]+", name):
+            raise spike.SpikeError("Se requiere el nombre local de una corrida EN-01.")
+        run_path = root / name
+        if run_path.resolve() != run_path:
+            raise spike.SpikeError("Historial fuera del almacenamiento local de EN-01.")
+        try:
+            rows = json.loads((run_path / "processes.json").read_text(encoding="utf-8"))
+            results = json.loads(
+                (run_path / "experience_requirements.json").read_text(encoding="utf-8")
+            )
+            discovered = {row["process_reference"]: row for row in rows["processes"]}
+            if not results:
+                raise ValueError
+            for result in results:
+                row = discovered[result["process_reference"]]
+                identity = row.get("source_identity")
+                if row["source"] != "secop2" or not re.fullmatch(r"CO1\.NTC\.\d+", identity or ""):
+                    raise ValueError
+                ids.add(identity)
+        except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+            raise spike.SpikeError(
+                f"Historial {name} incompleto o sin referencia comparable SECOP II."
+            ) from error
+    return frozenset(ids)
+
+
 def discover(client, args, now, discovery, profile, locations):
     location_filter = ",".join(locations)
     payload = spike.build_process_payload(location_filter, None, DISCOVERY_PAGE_SIZE)
@@ -230,6 +259,7 @@ def select_processes(candidates, args, now, discovery, profile):
     terminal = {plain(value) for value in profile.terminal_states}
     buckets = {}
     excluded_samples = {}
+    analyzed_ids = getattr(args, "excluded_secop_ids", frozenset())
     for process in processes:
         process.pop("raw_source_reference")
         process.update(
@@ -256,6 +286,12 @@ def select_processes(candidates, args, now, discovery, profile):
             and process["validity_status"] == "closed"
         ):
             reason = "closed_process"
+        if not reason and analyzed_ids:
+            identity = process["source_identity"] or ""
+            if not re.fullmatch(r"CO1\.NTC\.\d+", identity):
+                reason = "secop_notice_identity_unverified"
+            elif identity in analyzed_ids:
+                reason = "previously_analyzed_secop"
         process["excluded_reason"] = reason
         process["sampled"] = False
         if reason:
@@ -562,6 +598,7 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
         item["assertion_type"] for result in results for item in result["evidence"]
     )
     review = Counter(result["review_category"] for result in results)
+    exclusions = Counter(p["excluded_reason"] for p in discovery["processes"])
 
     return {
         "assertions": {kind: assertions[kind] for kind in ASSERTION_TYPES},
@@ -584,11 +621,13 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
         "discovered_rows": sum(page["received"] for page in discovery["pages"]),
         "duplicates": discovery["duplicates"],
         "unique_processes": len(discovery["processes"]),
-        "excluded_by_reason": dict(
-            Counter(p["excluded_reason"] for p in discovery["processes"] if p["excluded_reason"])
-        ),
+        "excluded_by_reason": {key: value for key, value in exclusions.items() if key},
         "supply_candidates": supply,
         "inventory_eligible": eligible,
+        "eligible_before_history": eligible
+        + exclusions["previously_analyzed_secop"]
+        + exclusions["secop_notice_identity_unverified"],
+        "history_secop_id_count": discovery.get("history_secop_id_count", 0),
         "sampled": sum(p["sampled"] for p in discovery["processes"]),
         "analyzed": analyzed,
         "selected_not_analyzed": sum(p["sampled"] for p in discovery["processes"]) - analyzed,
@@ -618,6 +657,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     per_process = EXPLORATORY_PER_PROCESS if exploratory else 2
     discovery = {
         "scope": "national_explicit_location_filter",
+        "history_secop_id_count": len(getattr(args, "excluded_secop_ids", ())),
         "commercial_profile": {
             "version": profile.version,
             "sha256": profile.fingerprint,
@@ -850,6 +890,13 @@ def settings_for_run(output, tesseract, tessdata, ocr_pages=OCR_PER_DOCUMENT):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
+    parser.add_argument(
+        "--exclude-analyzed-from",
+        action="append",
+        default=[],
+        metavar="CORRIDA",
+        help="Excluir avisos SECOP II analizados en una corrida local EN-01. Repetible.",
+    )
     parser.add_argument("--processes", type=int)
     parser.add_argument("--documents", type=int)
     parser.add_argument("--discovery-pages", type=int)
@@ -885,6 +932,7 @@ def main(argv=None):
     if args.exploratory and args.documents < args.processes:
         parser.error("EN-01.4 reserva al menos un intento documental por proceso.")
     try:
+        args.excluded_secop_ids = load_analyzed_secop_ids(OUTPUT_ROOT, args.exclude_analyzed_from)
         profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
         profile = load_commercial_profile(args.commercial_profile)
