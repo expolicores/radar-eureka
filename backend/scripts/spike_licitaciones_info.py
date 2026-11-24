@@ -377,14 +377,14 @@ class LocalSource:
             yield stream
 
 
-def download_document(client, document, storage, settings):
+def download_document(client, document, storage, settings, *, diagnostics=None):
     client.reserve(6)
     if Path(document.original_name).suffix.lower() != f".{document.extension}":
         document = replace(document, original_name=f"{document.original_name}.{document.extension}")
     return SecopDownloader(
         min(settings.document_timeout_seconds, 60),
         min(settings.document_max_bytes, 20 * 1024 * 1024),
-    ).download(document, storage)
+    ).download(document, storage, diagnostics=diagnostics)
 
 
 def run_existing_extractor(document, stored, storage, settings, *, select_ocr_pages=None):

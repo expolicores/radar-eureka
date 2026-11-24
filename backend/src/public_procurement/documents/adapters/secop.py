@@ -12,6 +12,27 @@ from ..domain.document import AcquisitionError, SourceDocument, StoredBinary
 from ..ports import BinaryStorage
 
 ALLOWED_HOST = "community.secop.gov.co"
+RETRIEVE_PATH = "/Public/Archive/RetrieveFile/Index"
+REDIRECT_STATUSES = {301, 302, 303, 307, 308}
+REPORTED_MEDIA_TYPES = {
+    "application/pdf",
+    "application/octet-stream",
+    "application/json",
+    "application/problem+json",
+    "application/xml",
+    "text/xml",
+    "text/html",
+    "text/plain",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+
+
+def diagnostic_media_type(headers) -> str | None:
+    value = (headers.get("Content-Type") or "").partition(";")[0].strip().lower() if headers else ""
+    if not value:
+        return None
+    return value if value in REPORTED_MEDIA_TYPES else "other"
 
 
 def validate_url(url: str) -> None:
@@ -45,14 +66,35 @@ class SecopDownloader:
         self.max_bytes = max_bytes
         self._opener = build_opener(_NoRedirect())
 
-    def download(self, source: SourceDocument, storage: BinaryStorage) -> StoredBinary:
+    def download(
+        self,
+        source: SourceDocument,
+        storage: BinaryStorage,
+        *,
+        diagnostics: dict[str, Any] | None = None,
+    ) -> StoredBinary:
+        trace: dict[str, Any] = {
+            "stage": "validate_url",
+            "http_status": None,
+            "exception_type": None,
+            "content_type": None,
+            "rejection_reason": None,
+            "redirects": [],
+        }
         url = source.source_url
-        if not url:
-            raise AcquisitionError("missing_url", "La fuente no publica URL de descarga.")
-        started = time.monotonic()
         try:
+            if not url:
+                raise AcquisitionError("missing_url", "La fuente no publica URL de descarga.")
+            started = time.monotonic()
             for _ in range(6):
+                trace["stage"] = "validate_url"
                 validate_url(url)
+                trace.update(
+                    stage="open_response",
+                    http_status=None,
+                    exception_type=None,
+                    content_type=None,
+                )
                 remaining = self.timeout_seconds - (time.monotonic() - started)
                 if remaining <= 0:
                     raise AcquisitionError("timeout", "Se agotó el tiempo de descarga.")
@@ -66,19 +108,43 @@ class SecopDownloader:
                 try:
                     response = self._opener.open(request, timeout=remaining)
                 except HTTPError as exc:
-                    if exc.code in (301, 302, 303, 307, 308):
-                        location = exc.headers.get("Location")
-                        exc.close()
+                    trace.update(
+                        stage="response_headers",
+                        http_status=exc.code,
+                        exception_type=type(exc).__name__,
+                        content_type=diagnostic_media_type(exc.headers),
+                    )
+                    location = exc.headers.get("Location") if exc.headers else None
+                    exc.close()
+                    if exc.code in REDIRECT_STATUSES:
+                        trace["stage"] = "validate_redirect"
+                        hop = {
+                            "http_status": exc.code,
+                            "content_type": trace["content_type"],
+                            "destination": "missing" if not location else "blocked",
+                        }
+                        trace["redirects"].append(hop)
                         if not location:
                             raise AcquisitionError(
                                 "invalid_redirect", "Redirección sin destino."
                             ) from None
                         url = urljoin(url, location)
+                        validate_url(url)
+                        hop["destination"] = (
+                            "secop_retrieve_file"
+                            if urlsplit(url).path == RETRIEVE_PATH
+                            else "secop_other_path"
+                        )
                         continue
-                    code = exc.code
-                    exc.close()
-                    raise AcquisitionError("http_error", f"SECOP respondió HTTP {code}.") from None
+                    raise AcquisitionError(
+                        "http_error", f"SECOP respondió HTTP {exc.code}."
+                    ) from None
                 with response:
+                    trace.update(
+                        stage="response_headers",
+                        http_status=response.status,
+                        content_type=diagnostic_media_type(response.headers),
+                    )
                     validate_url(response.geturl())
                     if response.status != 200:
                         raise AcquisitionError(
@@ -103,6 +169,7 @@ class SecopDownloader:
 
                     def chunks(stream: Any = response) -> Iterator[bytes]:
                         while True:
+                            trace["stage"] = "read_body"
                             if time.monotonic() - started >= self.timeout_seconds:
                                 raise AcquisitionError("timeout", "Se agotó el tiempo de descarga.")
                             # read1 devuelve los bytes recibidos sin esperar a llenar el bloque:
@@ -110,19 +177,37 @@ class SecopDownloader:
                             chunk = stream.read1(65536)
                             if time.monotonic() - started >= self.timeout_seconds:
                                 raise AcquisitionError("timeout", "Se agotó el tiempo de descarga.")
+                            trace["stage"] = "storage"
                             if not chunk:
                                 return
                             yield chunk
 
-                    return storage.store(
+                    trace["stage"] = "storage"
+                    stored = storage.store(
                         chunks(),
                         original_name=source.original_name,
                         content_type=content_type,
                         expected_size=expected_size,
                         max_bytes=self.max_bytes,
                     )
+                    trace["stage"] = "completed"
+                    return stored
             raise AcquisitionError("redirect_limit", "Demasiadas redirecciones de descarga.")
+        except AcquisitionError as exc:
+            trace["rejection_reason"] = exc.code
+            trace["exception_type"] = trace["exception_type"] or type(exc).__name__
+            raise
         except (URLError, TimeoutError, ConnectionError, HTTPException) as exc:
+            trace.update(rejection_reason="network_error", exception_type=type(exc).__name__)
+            if isinstance(exc, URLError) and isinstance(exc.reason, BaseException):
+                trace["underlying_exception_type"] = type(exc.reason).__name__
             raise AcquisitionError(
                 "network_error", "La descarga fue interrumpida por un error de red."
             ) from exc
+        except OSError as exc:
+            trace.update(rejection_reason="os_error", exception_type=type(exc).__name__)
+            raise
+        finally:
+            if diagnostics is not None:
+                diagnostics.clear()
+                diagnostics.update(trace)

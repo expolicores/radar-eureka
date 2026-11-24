@@ -178,7 +178,7 @@ def test_pipeline_uses_national_pages_and_real_inventory_parser(tmp_path, monkey
     fixture = Path(__file__).resolve().parents[1] / "fixtures/extraction/native_refrigerios.pdf"
     pdf = fixture.read_bytes()
 
-    def download(_client, document, storage, _settings):
+    def download(_client, document, storage, _settings, *, diagnostics):
         downloaded.append(document.document_id)
         return storage.store(
             [pdf],
@@ -1093,7 +1093,7 @@ def test_exploratory_progression_records_requirement_waiver_and_silence(monkeypa
     }
     downloaded = []
 
-    def download(_client, document, _storage, _settings):
+    def download(_client, document, _storage, _settings, *, diagnostics):
         downloaded.append(document.document_id)
         return SimpleNamespace(sha256=document.document_id.zfill(64), observed_size=25)
 
@@ -1601,3 +1601,78 @@ def test_opt_in_governing_pdf_cap_reads_an_oversize_local_fixture(tmp_path):
     assert entry["complete"]
     assert entry["pages_seen"] == [1]
     assert entry["ocr_pages"] == []
+
+
+def test_download_failure_keeps_safe_diagnostics_in_inventory_and_errors(monkeypatch):
+    rector = SpikeDocument("Invitación Pública.pdf", "pdf", SECOP + "1", "1")
+    monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[rector]))
+    recorded = {
+        "stage": "response_headers",
+        "http_status": 503,
+        "exception_type": "HTTPError",
+        "content_type": "text/html",
+        "rejection_reason": "http_error",
+        "redirects": [],
+    }
+
+    def download(*args, diagnostics):
+        diagnostics.update(recorded)
+        raise en01.AcquisitionError("http_error", "private response")
+
+    monkeypatch.setattr(en01.spike, "download_document", download)
+    inv, errors = [], []
+    en01.analyze_documents(
+        SimpleNamespace(deadline=time.monotonic() + 360),
+        {"inventory_keys": {}},
+        None,
+        None,
+        1,
+        Counter(),
+        inv,
+        errors,
+    )
+    assert inv[0]["download_diagnostics"] == recorded
+    assert errors[0]["download_diagnostics"] == recorded
+    assert "private response" not in json.dumps(errors)
+
+
+def test_archived_probe_is_bounded_and_skips_discovery(monkeypatch, tmp_path):
+    import eureka_nacional_download_probe as probe
+
+    run = tmp_path / "en01-history"
+    run.mkdir()
+    en01.write_json(
+        run / "processes.json",
+        {"processes": [{"codigo_proceso": "SIMULADO", "process_reference": "proc"}]},
+    )
+    entry = {
+        "role": "primary",
+        "extension": "pdf",
+        "selection": "selected",
+        "status": "download_failed",
+        "url": SECOP + "1",
+        "name": "Invitación",
+        "document_id": "1",
+    }
+    en01.write_json(run / "documents.json", [{"process_reference": "proc", "documents": [entry]}])
+    document = probe.archived_document(run, "SIMULADO")
+    assert document.original_name == "Invitación.pdf"
+    output = tmp_path / "probe"
+    output.mkdir()
+    downloader = Mock()
+    downloader.download.side_effect = [
+        en01.AcquisitionError("http_error", "private"),
+        SimpleNamespace(observed_size=250, sha256="a" * 64),
+    ]
+    factory = Mock(return_value=downloader)
+    monkeypatch.setattr(probe, "SecopDownloader", factory)
+    monkeypatch.setattr(probe.time, "sleep", Mock())
+    result = probe.probe(document, output, 2)
+    factory.assert_called_once_with(12, en01.DOCUMENT_BYTES)
+    assert downloader.download.call_count == 2
+    assert [row["status"] for row in result] == ["rejected", "downloaded"]
+    assert result == report(output, "download_probe.json")
+    entry["url"] += "&token=private"
+    en01.write_json(run / "documents.json", [{"process_reference": "proc", "documents": [entry]}])
+    with pytest.raises(ValueError, match="enlace archivado"):
+        probe.archived_document(run, "SIMULADO")

@@ -1141,3 +1141,90 @@ coordinador y cero CPU de extracción. Se reservaron 120 créditos para
 llamadas de IA. El costo unitario por candidato favorable queda
 indefinido. Los inventarios, errores, decisiones y observaciones MPNE
 quedan en `.local/eureka-nacional-spike/en01-hsxjhqpg/`.
+
+
+## EN-01 · Diagnóstico offline de adquisición SECOP
+
+En la corrida del piloto de tamaño se obtuvieron 12 inventarios y los
+20 intentos de descarga produjeron `http_error`. Diez fueron PDF rectores
+con tope de 16 MiB y diez usaron el tope ordinario de 10 MiB. Se verificaron
+cero bytes guardados, cero páginas abiertas y cero errores de extracción.
+El archivo de errores solo conserva etapa, código de aplicación e
+identificadores internos de proceso y documento. No se encontraron
+estados HTTP, excepciones subyacentes, cuerpos ni trazas de redirección
+en los artefactos de esa corrida.
+
+El inventario obtiene los documentos mediante
+`POST /cliente/contratos/obtener-documentos-proceso` en Licitaciones.info.
+Para descargar el binario, el runner llama al `SecopDownloader`, que hace
+un GET HTTPS directo con `urllib` a la URL recibida del inventario.
+La sesión CDP se usa para el inventario. El GET directo no transfiere
+credenciales ni cookies del navegador. En los 20 enlaces archivados se
+conservó el host `community.secop.gov.co` y la ruta
+`/Public/Archive/RetrieveFile/Index`, con una referencia `DocumentId`.
+
+El adaptador emitía `http_error` cuando `urllib` levantaba un
+`HTTPError` distinto de una redirección manejada o cuando la respuesta
+obtenida tenía estado distinto de 200. Ambas ramas ocurren antes de
+leer el cuerpo del archivo. El tamaño, el transporte, el contenido
+HTML recibido con 200 y las redirecciones bloqueadas tienen códigos
+distintos. La evidencia apunta a una respuesta HTTP que el GET directo
+no pudo aceptar. El estado exacto, la causa de esa respuesta y la
+existencia de redirecciones previas siguen indeterminados.
+
+En las cinco corridas previas se guardaron 59 archivos de 69 intentos.
+Los diez intentos fallidos de descarga se registraron como `too_large`.
+El host, la ruta y la clave de referencia archivados coinciden con los
+de la corrida fallida. El adaptador y el mecanismo de inventario no
+cambiaron al introducir el piloto. Como el inventario archiva una URL
+depurada, los artefactos no permiten comprobar parámetros adicionales
+del enlace original si los hubo. No hay evidencia de una regresión del
+tope de tamaño o del código de descarga.
+
+### Diagnóstico seguro
+
+El adaptador entrega al runner una traza por intento con etapa, estado
+HTTP si existe, tipo de excepción, tipo subyacente de transporte si
+existe, medio de contenido y motivo de rechazo. Cada redirección
+conserva su estado y clasifica el destino como otra ruta SECOP,
+recuperación de archivo, bloqueado o faltante. El medio se normaliza
+mediante una lista de tipos conocidos y el resto se marca como
+`other`. Se conserva la traza en el inventario y, cuando corresponde,
+en el error local. No se incluyen URLs, cuerpos, valores de cabeceras,
+cookies, tokens, autorizaciones ni texto de excepciones. No se
+modificaron los límites, el resolvedor de perfil ni las reglas de
+selección. Pasaron 248 pruebas offline, con respuestas HTTP, transporte,
+redirecciones, contenido y sonda simulados.
+
+### Sonda de un PDF archivado, pendiente de autorización
+
+La selección offline verificó un único PDF rector fallido para la
+referencia de Moniquirá `CM-MC-004-2026` en el inventario local. Una
+vez autorizada la prueba, ejecutar desde la raíz del worktree con
+el intérprete del plan de EN-01:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython '.\backend\scripts\eureka_nacional_download_probe.py' `
+  en01-hsxjhqpg --process-code 'CM-MC-004-2026' --attempts 1
+```
+
+El comando usa el enlace depurado ya guardado para esa referencia y
+no abre CDP, feed ni inventarios. El tope de la sonda es 10 MiB y 12 s
+por intento, con las mismas validaciones de destino y un máximo de
+seis solicitudes del adaptador por intento, incluidas redirecciones.
+El presupuesto de la prueba es de hasta dos intentos de adquisición
+sobre el mismo documento. Se recomienda empezar con uno y reservar
+el segundo para un dato que siga faltando. La sonda guarda su salida
+y el archivo, si se recibe, bajo `.local/`. Si el enlace original
+dependía de parámetros descartados al archivar, la prueba solo describe
+el enlace público conservado. La sonda no se ejecutó contra SECOP.
+
+Para recuperar los documentos de los 12 procesos, conservar sus
+avisos y claves de inventario originales. Tras aclarar el estado
+HTTP con la sonda, reutilizar los inventarios guardados si los
+enlaces siguen siendo válidos. Si es necesario refrescarlos,
+consultar únicamente esos 12 inventarios con autorización,
+priorizar rectores pendientes y reanudar su análisis con las
+guardas vigentes. No se necesita repetir el descubrimiento nacional.

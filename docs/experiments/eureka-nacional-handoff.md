@@ -258,6 +258,22 @@ Las observaciones MPNE se guardaron junto a los resultados en
 inferencia y faltante. No se hizo otra corrida. Cualquier ejecución
 real posterior requiere autorización.
 
+## Diagnóstico de descargas SECOP
+
+El [diagnóstico](eureka-nacional-experience-spike.md#en-01--diagnóstico-offline-de-adquisición-secop)
+verificó que los 20 `http_error` ocurrieron antes de leer el archivo.
+Hubo 59 descargas exitosas de 69 intentos en cinco corridas previas con el
+mismo host y ruta archivados. Los artefactos del piloto no conservan el
+estado HTTP ni la cadena de redirecciones. El código del adaptador no
+cambió al habilitar el piloto de 16 MiB.
+
+El runner ya conserva diagnóstico HTTP seguro en los artefactos locales.
+Pasaron 248 pruebas offline. Quedó preparada una sonda GET directo de
+un único PDF rector del inventario local, sin CDP y con hasta dos
+intentos, 10 MiB y 12 s por intento. La sonda requiere autorización
+adicional y no se ejecutó contra SECOP. Para reanudar, usar solo los
+inventarios de los 12 procesos ya descubiertos.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

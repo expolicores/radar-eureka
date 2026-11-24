@@ -605,9 +605,12 @@ def analyze_documents(
             scoped_settings.document_max_bytes if scoped_settings is not None else DOCUMENT_BYTES
         )
         stage = "download"
+        diagnostics = {}
         try:
             metrics["documents_attempted"] += 1
-            stored = spike.download_document(client, document, storage, scoped_settings)
+            stored = spike.download_document(
+                client, document, storage, scoped_settings, diagnostics=diagnostics
+            )
             metrics["documents_downloaded"] += 1
             metrics["governing_downloads"] += entry["role"] == "primary"
             metrics["bytes_downloaded"] += stored.observed_size
@@ -658,9 +661,14 @@ def analyze_documents(
             code = getattr(error, "code", type(error).__name__)
             prior_limit = code in {"page_limit", "too_large"}
             entry.update(status=f"{stage}_failed", error_code=code)
-            errors.append({"stage": stage, "code": code, "document_id": document.document_id})
+            failure = {"stage": stage, "code": code, "document_id": document.document_id}
+            if stage == "download" and diagnostics:
+                failure["download_diagnostics"] = diagnostics
+            errors.append(failure)
             metrics[f"{stage}_failures"] += 1
         finally:
+            if diagnostics:
+                entry["download_diagnostics"] = diagnostics
             if corroborating and entry["status"] != "download_not_started":
                 metrics["corroboration_attempts"] += 1
 

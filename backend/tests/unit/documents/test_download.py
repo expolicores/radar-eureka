@@ -1,7 +1,8 @@
 import io
+import json
 from http.client import IncompleteRead
 from unittest.mock import Mock
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 import pytest
 
@@ -119,3 +120,100 @@ def test_deadline_is_checked_during_stream(monkeypatch, tmp_path) -> None:
     with pytest.raises(AcquisitionError) as error:
         downloader.download(source(), LocalBinaryStorage(tmp_path))
     assert error.value.code == "timeout"
+
+
+@pytest.mark.parametrize("status", [403, 429, 503])
+def test_http_diagnostics_do_not_persist_headers_or_url(tmp_path, status):
+    diagnostics = {}
+    downloader = SecopDownloader(10, 1000)
+    downloader._opener = Mock()
+    downloader._opener.open.side_effect = HTTPError(
+        URL + "&token=private",
+        status,
+        "secret-error-body",
+        {"Content-Type": "text/html; charset=utf-8", "Set-Cookie": "session=secret"},
+        None,
+    )
+    with pytest.raises(AcquisitionError) as error:
+        downloader.download(source(), LocalBinaryStorage(tmp_path), diagnostics=diagnostics)
+    assert error.value.code == "http_error"
+    assert diagnostics == {
+        "stage": "response_headers",
+        "http_status": status,
+        "exception_type": "HTTPError",
+        "content_type": "text/html",
+        "rejection_reason": "http_error",
+        "redirects": [],
+    }
+    assert not (tmp_path / "sha256").exists()
+
+
+def test_non_200_response_and_blocked_redirect_are_distinguishable(tmp_path):
+    downloader = SecopDownloader(10, 1000)
+    downloader._opener = Mock()
+    response = Response()
+    response.status = 206
+    downloader._opener.open.return_value = response
+    diagnostics = {}
+    with pytest.raises(AcquisitionError, match="descarga completa"):
+        downloader.download(source(), LocalBinaryStorage(tmp_path), diagnostics=diagnostics)
+    assert diagnostics["http_status"] == 206
+    assert diagnostics["rejection_reason"] == "http_error"
+    downloader._opener.open.reset_mock()
+    downloader._opener.open.side_effect = HTTPError(
+        URL,
+        302,
+        "redirect",
+        {"Location": "https://user:secret@example.test/?token=private"},
+        None,
+    )
+    with pytest.raises(AcquisitionError) as error:
+        downloader.download(source(), LocalBinaryStorage(tmp_path), diagnostics=diagnostics)
+    assert error.value.code == "unsafe_url"
+    assert diagnostics["stage"] == "validate_redirect"
+    assert diagnostics["redirects"] == [
+        {"http_status": 302, "content_type": None, "destination": "blocked"}
+    ]
+    rendered = json.dumps(diagnostics)
+    assert all(marker not in rendered for marker in ("secret", "private", "example.test"))
+    downloader._opener.open.assert_called_once()
+
+
+def test_successful_redirect_records_only_safe_origin_class_and_media_type(tmp_path):
+    downloader = SecopDownloader(10, 1000)
+    downloader._opener = Mock()
+    downloader._opener.open.side_effect = [
+        HTTPError(
+            URL,
+            302,
+            "redirect",
+            {"Location": "/download?token=private", "Content-Type": "bad/path/private"},
+            None,
+        ),
+        Response(),
+    ]
+    diagnostics = {}
+    downloader.download(source(), LocalBinaryStorage(tmp_path), diagnostics=diagnostics)
+    assert diagnostics["stage"] == "completed"
+    assert diagnostics["http_status"] == 200
+    assert diagnostics["content_type"] == "application/pdf"
+    assert diagnostics["rejection_reason"] is None
+    assert diagnostics["redirects"] == [
+        {"http_status": 302, "content_type": "other", "destination": "secop_other_path"}
+    ]
+    assert "private" not in json.dumps(diagnostics)
+
+
+def test_transport_diagnostics_keep_exception_type_without_reason_text(tmp_path):
+    downloader = SecopDownloader(10, 1000)
+    downloader._opener = Mock()
+    downloader._opener.open.side_effect = URLError(TimeoutError("private network detail"))
+    diagnostics = {}
+    with pytest.raises(AcquisitionError) as error:
+        downloader.download(source(), LocalBinaryStorage(tmp_path), diagnostics=diagnostics)
+    assert error.value.code == "network_error"
+    assert diagnostics["stage"] == "open_response"
+    assert diagnostics["exception_type"] == "URLError"
+    assert diagnostics["underlying_exception_type"] == "TimeoutError"
+    assert diagnostics["http_status"] is None
+    assert "private" not in json.dumps(diagnostics)
