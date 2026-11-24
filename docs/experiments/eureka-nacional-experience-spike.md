@@ -95,7 +95,7 @@ URL de base deshabilitada y su extractor llama al servicio compartido en dry-run
 | Discovery | 4 páginas de hasta 30 filas y 30 días de publicación en hora de Bogotá. Cada página recibe el filtro completo de 1.130 ubicaciones. |
 | Inventario | Hasta 10 páginas por proceso, con detección de página repetida. |
 | Descargas | 5 totales, máximo 2 por proceso y 10 MiB por PDF. |
-| Extracción nativa | Hasta 12 páginas por PDF y 60 páginas de documento por corrida. |
+| Extracción nativa | Lectura por página de todo el PDF mientras alcance el presupuesto técnico. |
 | OCR | Hasta 2 páginas por PDF y 10 por corrida, con Tesseract local en español. |
 | Red | 60 créditos compartidos. Cada descarga reserva 6 por posibles redirecciones. |
 | Tiempo | Presupuesto operativo de 360 s con margen antes de cada operación. CDP tiene timeout de 20 s por solicitud, descarga de 12 s, extracción nativa de 12 s y OCR de 14 s por PDF con 6 s por página. |
@@ -292,3 +292,71 @@ alternativas dentro del presupuesto. Conservar la evidencia de la versión y
 la causa de cada límite. El detalle permanece en
 `.local/eureka-nacional-spike/en01-ifqy1v2y/`. La tercera corrida requiere
 autorización.
+
+
+## EN-01.2 · Replay offline del segundo smoke
+
+El lector anterior contaba las páginas y devolvía `page_limit` antes de intentar
+leer la primera. Los cinco PDF ya descargados tenían entre 14 y 73 páginas.
+EN-01.2 activa en el runner nacional la lectura nativa por página sin tope por
+cantidad. El lector conserva los fragmentos y sus localizadores. Si se interrumpe,
+recupera las páginas guardadas en el directorio temporal del lector y marca la
+cobertura parcial con el motivo específico.
+
+| Tipo de presupuesto | Política |
+|---|---|
+| Seguridad de extracción | 10 MiB por PDF, hasta 512 MiB por proceso lector, 12 s de límite externo del lector nativo y parada cooperativa antes del límite cuando el lector puede devolver lo recuperado. Se conservan los límites de 2 millones de caracteres y 10.000 fragmentos por PDF. Si una página falla, se conserva el texto de las demás. |
+| OCR | Presupuesto independiente de 0 a 2 páginas por PDF, 2 por defecto. Solo se consideran páginas cuyo texto nativo es insuficiente. Se priorizan las adyacentes a indicios de secciones habilitantes y la portada de un rector identificado por nombre. Se conservan 6 s por página y 14 s de presupuesto OCR por PDF, más margen del supervisor. Las páginas sin indicios, fuera de presupuesto o cuyo OCR falla quedan pendientes. |
+| Análisis lingüístico | EN-01.1 analiza los fragmentos por página con su segmentación por encabezados y cláusulas. El contexto no se arrastra entre fragmentos ni páginas. Cada evidencia retiene un fragmento de hasta 620 caracteres. Los cuatro estados y la prioridad humana mantienen las mismas reglas. |
+
+El replay reutilizó los cinco PDF verificados por hash y los inventarios
+guardados del segundo smoke. Se volvió a aplicar el rol por nombre para
+clasificar los formatos auxiliares como soporte. La invitación rectora de ese
+proceso seguía en el inventario y no estaba entre los PDF descargados. Una prueba
+de regresión confirma que una invitación auténtica recibe el cupo antes que
+`Formatos INVITACIÓN PÚBLICA`, incluso con prefijos numéricos.
+
+| Métrica | Segundo smoke, extracción original | Replay offline |
+|---|---:|---:|
+| PDF disponibles | 5 | 5 |
+| Páginas leídas con texto nativo | 0 | 218 de 218 |
+| Páginas procesadas | 0 | 218 |
+| Páginas que requieren OCR según el umbral de calidad | Sin evaluar | 0 |
+| Páginas OCR intentadas / con texto recuperado | 0 / 0 | 0 / 0 |
+| Páginas pendientes en los PDF disponibles | 218 | 0 |
+| PDF con cobertura completa | 0 | 5 |
+| Afirmaciones / referencias clasificadas | 0 | 63 |
+| Ausencias explícitas / exigencias explícitas | 0 / 0 | 0 / 3 |
+| Casos priorizados por evidencia favorable | 0 | 0 |
+| Procesos resueltos / pendientes de resolución | 0 / 5 | 0 / 5 |
+
+Las 63 detecciones se distribuyeron en 51 normativas o condicionales, 9 referencias
+a otros criterios y 3 exigencias explícitas en dos procesos. Dos detecciones de
+exigencia correspondían a texto repetido en páginas distintas de una misma
+invitación. El clasificador devolvió dos `experience_ambiguous` por cláusulas de
+aplicabilidad limitada y tres `not_resolved`. La cola dio prioridad de silencio
+documental a un caso y señaló una exigencia pendiente de corroboración en otro.
+Hubo tres casos con prioridad de evidencia insuficiente. No aparecieron
+contradicciones entre exigencia y ausencia explícita. La cobertura de los cinco
+archivos no resolvió las dependencias del inventario completo.
+
+El replay procesó 7.061.340 bytes y recuperó 555.399 caracteres. Duró 24,531 s,
+con 23,656 s acumulados de extracción y 0,859 s de clasificación. Los lectores
+nativos registraron 20,016 s de CPU y el proceso coordinador registró 2,125 s.
+El límite de memoria es un tope configurado. El replay no midió el pico real de
+memoria. Hubo 0 errores de extracción, 0 descargas, 0 consultas CDP,
+0 créditos de red y 0 llamadas de IA.
+
+Desde la raíz del worktree experimental, con el intérprete de las pruebas y
+`PYTHONPATH` apuntando al `backend/src` de este worktree:
+
+```powershell
+& $spikePython '.\backend\scripts\eureka_nacional_pdf_replay.py' `
+  '.\.local\eureka-nacional-spike\en01-ifqy1v2y' --ocr-pages 2 `
+  --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
+
+El comando crea un directorio `pdf-replay-*` ignorado por Git con
+`metrics.json` y `replay.json`. El segundo archivo conserva el documento,
+la página, el fragmento y las dependencias para revisión humana. El próximo
+smoke real requiere autorización.

@@ -58,6 +58,29 @@ Ver la [comparación agregada](eureka-nacional-experience-spike.md#segundo-smoke
 Próxima revisión offline: distinguir formatos auxiliares y prever un cupo de
 alternativa dentro del presupuesto. Una tercera corrida requiere autorización.
 
+## Replay offline de EN-01.2
+
+Se reutilizaron los cinco PDF del segundo smoke y su inventario. El runner de
+EN-01 extrae por página sin rechazar el PDF por extensión en páginas. Mantiene
+topes técnicos de tamaño, memoria y tiempo, preserva texto ya recuperado y
+registra cualquier cobertura pendiente. El OCR sigue siendo selectivo e
+independiente, con hasta dos páginas por PDF. Los títulos que comienzan por
+formatos o formularios auxiliares se tratan como soporte, por debajo de una
+invitación rectora.
+
+Se recuperaron 218 de 218 páginas con texto nativo, sin OCR ni páginas pendientes
+en esos cinco archivos. Hubo 63 detecciones, incluidas tres exigencias explícitas
+en dos procesos, y ninguna ausencia explícita. Dos casos quedaron ambiguos y
+tres sin resolución. Ninguno se resolvió con la cobertura del inventario
+disponible. El replay duró 24,531 s y consumió cero créditos de red y cero
+llamadas de IA. El detalle local está en
+`.local/eureka-nacional-spike/pdf-replay-4mc754as/`.
+
+El [informe agregado](eureka-nacional-experience-spike.md#en-012--replay-offline-del-segundo-smoke)
+incluye el comando de replay y sus límites. La invitación rectora que figuraba
+en el inventario del caso de formatos queda pendiente de revisión. Este trabajo
+usó los archivos ya descargados. La siguiente corrida real requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
