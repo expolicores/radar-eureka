@@ -1,4 +1,4 @@
-"""Replay verified local EN-01 PDFs and governing DOCX without network access."""
+"""Replay verified local EN-01 PDFs and eligible DOCX without network access."""
 
 import argparse
 import json
@@ -9,11 +9,13 @@ from collections import Counter
 from pathlib import Path
 
 from eureka_nacional_en01 import (
+    DOCUMENT_BYTES,
     OCR_PER_DOCUMENT,
     OUTPUT_ROOT,
     classify_experience,
     document_role,
     document_role_hint,
+    document_settings,
     extract_document,
     settings_for_run,
     supports_document,
@@ -71,7 +73,10 @@ def replay(source, output, settings, ocr_pages):
                 metrics["input_bytes"] += size
                 stored = StoredBinary(digest, relative, size, "application/octet-stream")
                 doc = SpikeDocument(entry["name"], entry["extension"], "", entry["document_id"])
-                extract_document(doc, stored, storage, settings, entry, ocr_pages=ocr_pages)
+                scoped_settings = document_settings(
+                    settings, entry, prior.get("document_max_bytes") or DOCUMENT_BYTES
+                )
+                extract_document(doc, stored, storage, scoped_settings, entry, ocr_pages=ocr_pages)
             except (AcquisitionError, OSError) as exc:
                 code = getattr(exc, "code", type(exc).__name__)
                 errors[code] += 1

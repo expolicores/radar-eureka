@@ -102,6 +102,21 @@ MINIMUM_HEADING_CONTRACTS = re.compile(
     rf"^{MINIMUM_PARTICIPATION_HEADING} \(minimo (?:un|dos|tres|\d+)"
     r"(?: \(\d+\))? contratos? cuyo objeto\b"
 )
+BIDDER_EXPERIENCE_FORM = re.compile(
+    r"^experiencia del (?:proponente|oferente)\s*[-–]\s*formulario (?:no\.?|nro\.?)\s*\d+$"
+)
+CONTRACT_SUBMISSION = re.compile(
+    r"^para acreditar la experiencia,? el (?:proponente|oferente) "
+    r"debe(?:ra)? aportar.{0,80} contratos? ejecutados?\b"
+)
+CERTIFY_EXECUTED_CONTRACTS = re.compile(
+    r"^certificar experiencia en maximo .{0,75} certificaciones de contratos ejecutados\b"
+)
+EVIDENCE_FROM_TABLE = re.compile(
+    r"^el (?:proponente|oferente) debe(?:ra)? aportar evidencias de experiencia\b"
+    r".{0,160}\btabla anterior\b"
+)
+DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
 CONDITIONAL = "NORMATIVA_CONDICIONAL"
@@ -134,7 +149,7 @@ def document_role(name):
 def document_role_hint(name, role):
     # The portal can truncate the title while retaining the reference/filename.
     if role == "unknown" and re.match(
-        r"^(?:invitacio|invitac|inv\.? public[ao]?)\b", document_title(name)
+        r"^(?:invitacionpublica|invitacio|invitac|inv\.? public[ao]?)\b", document_title(name)
     ):
         return "primary"
     return None
@@ -176,10 +191,15 @@ def document_cover_metadata(first_page):
         role = "excluded"
     if role is None:
         for line in titles:
-            if re.match(r"^(?:estudios? previos?|formatos?|formularios?)\b", line):
+            compact = re.sub(r"\s+", "", line)
+            if re.match(
+                r"^(?:estudios? previos?|formatos?|formularios?)\b", line
+            ) or compact.startswith("estudiosprevios"):
                 role = "support"
                 break
-            if re.match(r"^(?:invitacion|pliego(?: de condiciones)?)\b", line):
+            if re.match(
+                r"^(?:invitacion|pliego(?: de condiciones)?)\b", line
+            ) or compact.startswith("invitacionpublica"):
                 role = "primary"
                 break
     return role, {
@@ -255,6 +275,13 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
         and not re.search(r"\bno\b", text)
     ):
         return REQ, "minimum_experience_in_heading"
+    if not re.search(r"\bno\b", text):
+        if section_text == "condiciones de experiencia" and CONTRACT_SUBMISSION.search(text):
+            return REQ, "explicit_bidder_requirement"
+        if heading == "lettered_experience" and CERTIFY_EXECUTED_CONTRACTS.search(text):
+            return REQ, "explicit_bidder_requirement"
+        if heading == "experience" and EVIDENCE_FROM_TABLE.search(text):
+            return REQ, "requirement_with_document_dependency"
     if scoped_waiver:
         return NEG, "heading_scoped_waiver"
     if DOUBLE_NEGATIVE.search(text):
@@ -317,6 +344,22 @@ def page_clauses(text, method=None, *, page=None, inherited_section=None):
             lines = [line]
             continue
         stripped = NUMBER_PREFIX.sub("", line)
+        if re.fullmatch(r"[a-z]\. experiencia\.?", line_text):
+            flush()
+            section = (line, page)
+            heading = "lettered_experience"
+            heading_text = line
+            lines = []
+            continue
+        if NUMBERED_SECTION.match(line) and BIDDER_EXPERIENCE_FORM.fullmatch(
+            normalized_for_matching(stripped, method)
+        ):
+            flush()
+            section = (stripped, page)
+            heading = "experience"
+            heading_text = stripped
+            lines = []
+            continue
         title, parenthesis, _ = stripped.partition("(")
         if (
             parenthesis
@@ -424,6 +467,9 @@ def document_assertions(document):
                     and (
                         basis == "minimum_experience_in_heading"
                         or GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
+                        or BIDDER_EXPERIENCE_FORM.fullmatch(section_text)
+                        or section_text == "condiciones de experiencia"
+                        or heading == "lettered_experience"
                     )
                     and not LIMITED_SECTION.search(section_text)
                     else "unspecified"
@@ -449,7 +495,7 @@ def classify_experience(documents, *, inventory_complete=True):
         and item["document_id"] in credible
         and item["scope"] != "limited"
     }
-    dependencies = [item for item in relevant if item["basis"] == "document_dependency"]
+    dependencies = [item for item in relevant if item["basis"] in DEPENDENCY_BASES]
     restricted = any(item["scope"] == "limited" for item in relevant)
     governing_pending = any(
         doc["role"] in {"primary", "amendment", "unknown"} and not doc["complete"]
@@ -505,7 +551,7 @@ def classify_experience(documents, *, inventory_complete=True):
         review_evidence = [
             item
             for item in relevant
-            if item["scope"] == "limited" or item["basis"] == "document_dependency"
+            if item["scope"] == "limited" or item["basis"] in DEPENDENCY_BASES
         ]
     elif primary_complete and REQ not in observed:
         review, review_reason = "documentary_silence", reason

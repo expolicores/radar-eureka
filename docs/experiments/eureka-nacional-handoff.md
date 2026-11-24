@@ -218,6 +218,24 @@ runner y conservó la clasificación automática original. El costo fue
 cotejo se conservan en `.local/eureka-nacional-spike/en01-jocj50yr/`.
 Cualquier otra corrida real requiere autorización.
 
+## Continuidad técnica y registro de MPNE
+
+El [cotejo técnico](eureka-nacional-experience-spike.md#en-01--cuatro-omisiones-y-manejo-documental-acotado)
+recuperó las cuatro exigencias omitidas. Tres quedaron con prioridad
+de exigencia aplicable y una mantuvo revisión por remisión a una tabla.
+Se validó por portada un título concatenado, se reutilizó el lector
+DOCX para adendas y se probó un tope optativo de 16 MiB para PDF rectores.
+El valor predeterminado permanece en 10 MiB. Pasaron 224 pruebas offline.
+Un rector de 121 páginas quedó parcial por tiempo en el replay local,
+con 113 páginas recuperadas y la decisión conservada.
+
+El [registro MPNE](eureka-nacional-experience-spike.md#hipótesis-exploratoria-futura--modelo-de-propensión-a-no-exigir-experiencia-mpne)
+queda como hipótesis futura basada en cinco observaciones manuales de
+cuatro entidades. El registro reutiliza los artefactos actuales para
+procesos exigidos, favorables y pendientes. Se preservan los criterios
+de descubrimiento y el historial de 49 avisos. No se ejecutó una nueva
+corrida nacional. Cualquier corrida real posterior requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

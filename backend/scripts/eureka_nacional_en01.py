@@ -72,7 +72,9 @@ EXPLORATORY_DURATION_SECONDS = 720
 DEPRIORITIZED_SAMPLE_SIZE = 3
 FAVORABLE_RESERVE = 4
 START_EXTRACTION_MARGIN = 50
-DOCUMENT_BYTES = 10 * 1024 * 1024
+MIB = 1024 * 1024
+DOCUMENT_BYTES = 10 * MIB
+MAX_GOVERNING_PDF_MIB = 16
 OUTPUT_ROOT = spike.ROOT.parent / ".local" / "eureka-nacional-spike"
 
 
@@ -485,9 +487,24 @@ def supports_document(entry):
         entry["extension"] == "pdf"
         or (
             entry["extension"] == "docx"
-            and (entry["role"] == "primary" or entry.get("role_hint") == "primary")
+            and (entry["role"] in {"primary", "amendment"} or entry.get("role_hint") == "primary")
         )
     )
+
+
+def document_settings(settings, entry, governing_pdf_max_bytes):
+    if (
+        entry["extension"] == "pdf"
+        and (entry["role"] == "primary" or entry.get("role_hint") == "primary")
+        and DOCUMENT_BYTES < governing_pdf_max_bytes <= MAX_GOVERNING_PDF_MIB * MIB
+    ):
+        return settings.model_copy(
+            update={
+                "document_max_bytes": governing_pdf_max_bytes,
+                "extraction_max_bytes": governing_pdf_max_bytes,
+            }
+        )
+    return settings
 
 
 def analyze_documents(
@@ -503,6 +520,7 @@ def analyze_documents(
     ocr_pages=OCR_PER_DOCUMENT,
     exploratory=False,
     ordinary_allowance=None,
+    governing_pdf_max_bytes=DOCUMENT_BYTES,
 ):
     inventory = fetch_inventory(client, process["inventory_keys"])
     if not inventory:
@@ -582,10 +600,14 @@ def analyze_documents(
             if prior_limit
             else "priority"
         )
+        scoped_settings = document_settings(settings, entry, governing_pdf_max_bytes)
+        entry["document_max_bytes"] = (
+            scoped_settings.document_max_bytes if scoped_settings is not None else DOCUMENT_BYTES
+        )
         stage = "download"
         try:
             metrics["documents_attempted"] += 1
-            stored = spike.download_document(client, document, storage, settings)
+            stored = spike.download_document(client, document, storage, scoped_settings)
             metrics["documents_downloaded"] += 1
             metrics["governing_downloads"] += entry["role"] == "primary"
             metrics["bytes_downloaded"] += stored.observed_size
@@ -595,7 +617,7 @@ def analyze_documents(
                 entry["status"] = "extraction_not_started"
                 raise BudgetReached("duration_budget")
             counted_governing = entry["role"] == "primary"
-            extract_document(document, stored, storage, settings, entry, ocr_pages=ocr_pages)
+            extract_document(document, stored, storage, scoped_settings, entry, ocr_pages=ocr_pages)
             metrics["governing_downloads"] += int(entry["role"] == "primary") - int(
                 counted_governing
             )
@@ -718,6 +740,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     locations = load_national_locations() if locations is None else locations
     started, parent_cpu, now = time.monotonic(), time.process_time(), now or local_now()
     exploratory = getattr(args, "exploratory", False)
+    governing_pdf_max_bytes = getattr(args, "governing_pdf_max_mib", 10) * MIB
     per_process = EXPLORATORY_PER_PROCESS if exploratory else 2
     discovery = {
         "scope": "national_explicit_location_filter",
@@ -800,6 +823,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                     ocr_pages=getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
                     exploratory=exploratory,
                     ordinary_allowance=ordinary_allowance,
+                    governing_pdf_max_bytes=governing_pdf_max_bytes,
                 )
             except (BudgetReached, CandidateError) as error:
                 stop = error
@@ -890,6 +914,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "documents_per_process": per_process,
             "favorable_reserve_max": FAVORABLE_RESERVE if exploratory else 0,
             "document_max_bytes": DOCUMENT_BYTES,
+            "governing_pdf_max_bytes": governing_pdf_max_bytes,
             "native_pages_per_pdf": None,
             "ocr_pages_per_pdf": getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
             "ocr_pages_per_run_upper_bound": args.documents
@@ -975,6 +1000,13 @@ def main(argv=None):
     )
     parser.add_argument("--recent-days", type=int, choices=range(1, 61), default=30)
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9232")
+    parser.add_argument(
+        "--governing-pdf-max-mib",
+        type=int,
+        choices=range(10, MAX_GOVERNING_PDF_MIB + 1),
+        default=10,
+        help="Tope optativo, solo para PDF de rector o candidato a rector.",
+    )
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
     parser.add_argument(
@@ -1002,6 +1034,8 @@ def main(argv=None):
                 f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
             )
         setattr(args, name, value)
+    if not args.exploratory and args.governing_pdf_max_mib > 10:
+        parser.error("El tope opcional de PDF rectores requiere --exploratory.")
     if args.exploratory and args.documents < args.processes:
         parser.error("EN-01.4 reserva al menos un intento documental por proceso.")
     if args.conditional_extra_feed_pages and (

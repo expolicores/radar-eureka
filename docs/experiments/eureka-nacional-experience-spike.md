@@ -967,3 +967,101 @@ el número de candidatos. No se repitió la corrida.
 
 El detalle de los procesos, la evidencia y el cotejo de silencios
 permanecen en `.local/eureka-nacional-spike/en01-jocj50yr/`.
+
+
+## EN-01 · Cuatro omisiones y manejo documental acotado
+
+Se cotejaron los cuatro silencios del lote anterior con los mismos
+PDF, páginas e inventarios. La regla ahora reconoce el mandato de
+aportar contratos en una sección de condiciones de experiencia,
+el encabezado de experiencia del oferente que cita un formulario
+numerado, el imperativo de certificar contratos bajo un apartado
+rotulado por letra y el mandato de aportar evidencia remitida a la
+tabla anterior. Esta última referencia sigue registrada como dependencia
+y mantiene el caso en revisión ambigua.
+
+Las detecciones de exigencia pasaron de **13 en tres procesos a 17 en
+siete**. Tres silencios pasaron a prioridad comercial de exigencia
+aplicable y conservaron `not_resolved`. El cuarto pasó a
+`experience_ambiguous` por la remisión a la tabla. El total formal
+quedó en tres ambiguos, once sin resolver y cero resueltos, con cero
+ausencias explícitas. El replay de los 16 PDF conservó 113 de 121
+páginas de un rector antes de alcanzar la guarda de tiempo. Esa
+extracción parcial dejó ocho páginas adicionales pendientes frente
+a la corrida original. La guarda y el texto recuperado se conservaron.
+
+Se agregó una pista de selección para un título concatenado de
+invitación. La portada con palabras partidas permitió confirmar el
+rector y distinguir el estudio previo asociado. El nuevo rector
+mantiene un silencio automático pendiente de revisión. Su texto
+combina una facultad de solicitar certificaciones y otra mención de
+acreditar un contrato. El reconocimiento de portada acredita el rol,
+mientras la ambigüedad de las cláusulas sigue abierta.
+
+EN-01 reutiliza el lector aislado de DOCX tanto para rectores como
+para adendas identificadas. Se conservan los localizadores de párrafo
+y celda. Los 16 archivos del lote eran PDF, por lo que la validación
+DOCX sigue siendo offline. El tope predeterminado continúa en **10 MiB**.
+El modo exploratorio admite `--governing-pdf-max-mib 16` únicamente
+para un PDF rector o candidato a rector. Se aplica al intento
+original y a su extracción, con los mismos créditos, tiempos, memoria,
+OCR y cantidad de intentos. El máximo teórico para 24 archivos de ese
+tamaño es 384 MiB de PDF. El resto conserva el tope de 10 MiB. Un PDF
+local de prueba de más de 11 MiB fue rechazado con la configuración
+base y leído con el tope optativo. Los archivos reales rechazados
+por tamaño no están en el almacenamiento local y su recuperabilidad
+sigue sin medir.
+
+Pasaron 224 pruebas offline. Pore, El Plato, La Capilla (ventiladores)
+y las dos invitaciones de Chivatá conservaron sus estados, prioridades
+y fragmentos de control. El replay parcial se guarda en
+`.local/eureka-nacional-spike/pdf-replay-tfk59178/`. No hubo CDP,
+descargas, IA ni otra corrida nacional.
+
+Para la siguiente exploración autorizada, mantener hasta 15 procesos
+nuevos y los presupuestos vigentes, con los 49 avisos de los cinco
+historiales en la exclusión. Conservar el perfil comercial, la
+geografía y el descubrimiento actuales. Si se autoriza probar el tope
+optativo, medir rectores adicionales recuperados, bytes y paradas de
+extracción. Mantener la salida formal, el criterio comercial y la
+evidencia de cobertura para comparar lotes.
+
+## Hipótesis exploratoria futura · Modelo de Propensión a No Exigir Experiencia (MPNE)
+
+La hipótesis plantea explorar si algunos atributos documentados aparecen
+con distinta frecuencia en procesos con y sin exigencia de experiencia.
+El punto de partida son cinco observaciones favorables de una búsqueda
+manual previamente filtrada: El Plato, La Capilla (ventiladores),
+Chivatá 21, Chivatá 22 y Pore. Corresponden a cuatro entidades independientes.
+Los cinco presupuestos reportados están por debajo de COP 20 millones;
+las observaciones corresponden a mínima cuantía o régimen especial, con
+suministro o compraventa de bienes, y entidades de tipo alcaldía,
+institución educativa o personería. La selección manual está sesgada,
+carece de denominador representativo y no permite inferir probabilidades.
+Los dos casos de Chivatá conservan el silencio condicionado y la remisión
+al reglamento en el resultado documental. La observación manual y la
+conclusión formal se registran por separado.
+
+| Variable exploratoria | Registro con los artefactos existentes |
+|---|---|
+| Presupuesto, modalidad y fecha de publicación | Conservar el valor de la fuente en `processes.json` y su procedencia. Si la fuente no informa un valor interpretable, registrar el faltante. |
+| Tipo de contrato y tipo de entidad | Usar la declaración explícita si existe. Si se deducen del objeto o del nombre de la entidad, rotularlos como inferencia y conservar el texto que la sustenta. |
+| Categoría comercial del bien | Conservar la categoría y el método del perfil comercial actual. La etiqueta del prefiltro es una clasificación derivada. |
+| Plazo de ejecución | Registrar plazo y unidad cuando el documento los indique. La fecha límite de oferta no es el plazo de ejecución. |
+| Pago y lugar de entrega | Registrar únicamente lo que conste en el texto extraído, con documento y localizador. Mantener faltantes en los demás casos. |
+
+Aplicar el mismo registro a los procesos con experiencia exigida, a los
+favorables y a los pendientes. Distinguir observaciones de fuente,
+inferencias y faltantes. Mantener el aviso SECOP único, el vínculo a la
+corrida y las afirmaciones con su documento, página o localizador.
+Para una evaluación futura, usar etiquetas formales corroboradas y
+conservar aparte los casos ambiguos, provisionales y sin resolver.
+Agrupar por entidad al evaluar para tener en cuenta casos de una misma
+institución. La recolección reutiliza las salidas actuales, sin
+infraestructura adicional.
+
+MPNE queda como hipótesis registrada. El presupuesto, la modalidad,
+la entidad, el tipo de contrato y las categorías no cambian el
+descubrimiento ni la prioridad de selección. No hay un puntaje
+predictivo, entrenamiento ni integración de IA. La comparación se hará
+cuando haya suficientes casos positivos y negativos con evidencia.

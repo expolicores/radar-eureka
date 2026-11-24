@@ -1488,3 +1488,116 @@ def test_extra_feed_pages_only_cover_shortfall_after_exclusion(known, expected_p
     assert client.post.call_count == expected_pages
     assert len(selected) == (0 if known == 20 else 15)
     assert all(p["source_identity"] not in args.excluded_secop_ids for p in selected)
+
+
+@pytest.mark.parametrize(
+    ("text", "page", "scope", "dependency"),
+    [
+        (
+            "1.7.2. CONDICIONES DE EXPERIENCIA:\n"
+            "Para acreditar la EXPERIENCIA, el proponente debe aportar máximo dos (2) "
+            "contratos ejecutados y terminados cuyo objeto sea igual o similar.",
+            7,
+            "general_bidder",
+            False,
+        ),
+        (
+            "7.2.2. EXPERIENCIA DEL PROPONENTE - FORMULARIO No. 4\n"
+            "El proponente deberá acreditar la experiencia requerida en este proceso de "
+            "selección con el lleno de los requisitos que se encuentran a continuación.",
+            12,
+            "general_bidder",
+            False,
+        ),
+        (
+            "B. Experiencia.\nCertificar experiencia en máximo tres (3) certificaciones "
+            "de contratos ejecutados y terminados dentro de los últimos dos años.",
+            7,
+            "general_bidder",
+            False,
+        ),
+        (
+            "Experiencia requerida\nEl proponente deberá aportar evidencias de experiencia "
+            "acorde a la necesidad expuesta como se indicó en los documentos solicitados "
+            "en la tabla anterior.",
+            5,
+            "unspecified",
+            True,
+        ),
+    ],
+)
+def test_latest_silences_are_requirements_with_their_original_scope(text, page, scope, dependency):
+    doc = evidence_document("")
+    doc["fragments"] = [fragment(text, page=page)]
+    decision = rules.classify_experience([doc], inventory_complete=False)
+    (evidence,) = decision["evidence"]
+    assert (evidence["assertion_type"], evidence["page"], evidence["scope"]) == (
+        rules.REQ,
+        page,
+        scope,
+    )
+    assert bool(decision["dependencies"]) is dependency
+    assert decision["status"] == ("experience_ambiguous" if dependency else "not_resolved")
+
+
+def test_concatenated_invitation_gets_hint_and_fragmented_cover_validates_title():
+    name = "InvitacionPublica_"
+    assert rules.document_role(name) == "unknown"
+    assert rules.document_role_hint(name, "unknown") == "primary"
+    role, _ = rules.document_cover_metadata(
+        "INSTITU CIO N EDUC ATIVA\nINVITA CI O N P UBLI CA PROC E S O CONT RA C TU A L"
+    )
+    assert role == "primary"
+    assert rules.document_cover_metadata("ESTU DIO S PREV IOS PROC ESO CONTRAC TU AL")[0] == (
+        "support"
+    )
+
+
+def test_docx_amendment_reuses_the_eligible_office_path():
+    assert en01.supports_document({"extension": "docx", "role": "amendment"})
+    assert not en01.supports_document({"extension": "docx", "role": "support"})
+
+
+def test_opt_in_governing_pdf_cap_reads_an_oversize_local_fixture(tmp_path):
+    from pypdf import PdfReader, PdfWriter
+
+    fixture = Path(__file__).resolve().parents[1] / "fixtures/extraction/native_refrigerios.pdf"
+    writer = PdfWriter()
+    writer.add_page(PdfReader(fixture).pages[0])
+    writer.add_attachment("anexo.bin", b"X" * (11 * en01.MIB))
+    path = tmp_path / "governing.pdf"
+    writer.write(path)
+    payload = path.read_bytes()
+    settings = en01.settings_for_run(tmp_path, "not-available", None)
+    cap = 16 * en01.MIB
+    assert en01.DOCUMENT_BYTES < len(payload) < cap
+    entry = {"extension": "pdf", "role": "primary"}
+    assert en01.document_settings(settings, entry, en01.DOCUMENT_BYTES) is settings
+    assert en01.document_settings(settings, {"extension": "pdf", "role": "support"}, cap) is (
+        settings
+    )
+    storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
+    with pytest.raises(en01.AcquisitionError) as rejected:
+        storage.store(
+            [payload],
+            original_name=path.name,
+            content_type="application/pdf",
+            expected_size=len(payload),
+            max_bytes=settings.document_max_bytes,
+        )
+    assert rejected.value.code == "too_large"
+    scoped = en01.document_settings(settings, entry, cap)
+    stored = storage.store(
+        [payload],
+        original_name=path.name,
+        content_type="application/pdf",
+        expected_size=len(payload),
+        max_bytes=scoped.document_max_bytes,
+    )
+    document = SpikeDocument("Invitación pública", "pdf", SECOP + "1", "1")
+    en01.extract_document(document, stored, storage, scoped, entry, ocr_pages=0)
+    assert scoped.extraction_max_bytes == cap
+    assert scoped.extraction_timeout_seconds == settings.extraction_timeout_seconds
+    assert entry["complete"]
+    assert entry["pages_seen"] == [1]
+    assert entry["ocr_pages"] == []
