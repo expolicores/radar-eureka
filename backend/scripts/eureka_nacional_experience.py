@@ -82,6 +82,21 @@ LIMITED_SUBJECT = re.compile(
     r"\b(?:solo|unicamente|exclusivamente) (?:para|a) (?:las? |los? )?"
     r"(?:mipymes?|consorcios|uniones temporales|proponentes? plurales?)\b"
 )
+EXPERIENCE_IMPERATIVE = re.compile(
+    r"^aportar como (experiencia (?:general|especifica))\s+"
+    r"(?:un|una|dos|tres|\d+)(?: \(\d+\))? contratos?\b"
+)
+ENTITY_EXPERIENCE_REQUIREMENT = re.compile(
+    r"\bla entidad (?:ha|a) determinado exigir al (?:proponente|oferente) "
+    r"la acreditacion de (?:la )?experiencia\b"
+)
+DIFFERENTIAL_TABLE = "tamano acreditacion de experiencia"
+DIFFERENTIAL_ROW = re.compile(
+    r"^(?:micro,? pequenas y medianas empresas|grandes empresas) "
+    r"el proponente debe anexar con su propuesta\b.{0,100}"
+    r"\b(?:certificaci(?:on|ones)|copias?)\b.{0,65}\bcontratos?\b"
+)
+CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
 CONDITIONAL = "NORMATIVA_CONDICIONAL"
 NEG = "NEG_CONCLUSIVA"
@@ -157,6 +172,12 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
     text = normalized_for_matching(clause, method)
     experience = bool(EXPERIENCE.search(text))
     section_text = normalized_for_matching(section or "", method)
+    if (
+        heading == "differential_experience_table"
+        and DIFFERENTIAL_ROW.search(text)
+        and not re.search(r"\bno\b", text)
+    ):
+        return REQ, "differential_experience_requirement"
     if experience and (
         LIMITED_SUBJECT.search(text)
         or (
@@ -188,6 +209,13 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
         and GENERAL_EXPERIENCE_SECTION.search(section_text)
         and ADMISSIBILITY.search(text)
         and not re.search(r"\bno\b", text[: text.find("contrato")])
+    ):
+        return REQ, "explicit_bidder_requirement"
+    if (
+        GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
+        and not re.search(r"\bno\b", text)
+        and CONTRACT_EVIDENCE.search(text)
+        and (EXPERIENCE_IMPERATIVE.search(text) or ENTITY_EXPERIENCE_REQUIREMENT.search(text))
     ):
         return REQ, "explicit_bidder_requirement"
     if scoped_waiver:
@@ -234,6 +262,22 @@ def page_clauses(text, method=None, *, page=None, inherited_section=None):
     for raw in text.splitlines():
         line = " ".join(raw.split())
         if not line:
+            continue
+        line_text = normalized_for_matching(line, method)
+        if line_text == DIFFERENTIAL_TABLE:
+            flush()
+            section = (line, page)
+            heading = "differential_experience_table"
+            heading_text = line
+            lines = []
+            continue
+        if (imperative := EXPERIENCE_IMPERATIVE.match(line_text)) and not (
+            section and LIMITED_SECTION.search(normalized(section[0]))
+        ):
+            flush()
+            section = (imperative[1], page)
+            heading = heading_text = None
+            lines = [line]
             continue
         stripped = NUMBER_PREFIX.sub("", line)
         label, separator, body = stripped.partition(":")
@@ -322,7 +366,7 @@ def document_assertions(document):
                 "section_page": section_page,
                 "scope": (
                     "limited"
-                    if basis == "limited_applicability"
+                    if basis in {"limited_applicability", "differential_experience_requirement"}
                     else "general_bidder"
                     if kind == REQ
                     and GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
@@ -342,14 +386,16 @@ def classify_experience(documents, *, inventory_complete=True):
     primary_complete = any(doc["role"] == "primary" and doc["complete"] for doc in documents)
     credible = {doc["document_id"] for doc in documents if doc["complete"]}
     relevant = [item for item in evidence if item["role"] in {"primary", "amendment", "support"}]
-    observed = {item["assertion_type"] for item in relevant}
+    observed = {item["assertion_type"] for item in relevant if item["scope"] != "limited"}
     decisive = {
         item["assertion_type"]
         for item in relevant
-        if item["role"] in {"primary", "amendment"} and item["document_id"] in credible
+        if item["role"] in {"primary", "amendment"}
+        and item["document_id"] in credible
+        and item["scope"] != "limited"
     }
     dependencies = [item for item in relevant if item["basis"] == "document_dependency"]
-    restricted = any(item["basis"] == "limited_applicability" for item in relevant)
+    restricted = any(item["scope"] == "limited" for item in relevant)
     governing_pending = any(
         doc["role"] in {"primary", "amendment", "unknown"} and not doc["complete"]
         for doc in documents
@@ -402,7 +448,7 @@ def classify_experience(documents, *, inventory_complete=True):
         review_evidence = [
             item
             for item in relevant
-            if item["basis"] in {"limited_applicability", "document_dependency"}
+            if item["scope"] == "limited" or item["basis"] == "document_dependency"
         ]
     elif primary_complete and REQ not in observed:
         review, review_reason = "documentary_silence", reason

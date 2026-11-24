@@ -128,6 +128,22 @@ del siguiente incremento. El detalle y la muestra de tres despriorizados
 están en `.local/eureka-nacional-spike/en01-le73ddhz/`. Una nueva corrida
 requiere autorización.
 
+## Corrección offline de EN-01.4
+
+Los tres silencios de la corrida exploratoria se recuperaron con reglas
+acotadas para un imperativo, una exigencia indirecta y una tabla con
+requisitos por tamaño empresarial. La prioridad de exigencia aplicable
+pasó de siete a nueve casos. El caso de la tabla pasó a revisión de alcance
+limitado. Se mantuvieron una resolución formal, 14 casos pendientes y cero
+ausencias explícitas o confirmadas en la muestra. Los restantes 12 casos
+conservaron su salida. Los cinco PDF de control mantuvieron su evidencia
+y prioridad. Pasaron 198 pruebas offline.
+
+El [informe](eureka-nacional-experience-spike.md#en-014--corrección-offline-de-los-silencios-documentales)
+describe las reglas y la comparación. Se recomienda mantener el presupuesto
+de la exploratoria ya ejecutada, con 15 procesos, 24 intentos, 200 créditos y
+720 s de tope. La siguiente corrida requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

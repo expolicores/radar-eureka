@@ -1140,3 +1140,81 @@ def test_exploratory_progression_records_requirement_waiver_and_silence(monkeypa
     assert metrics["processes_with_explicit_requirement"] == 1
     assert metrics["corroboration_attempts"] == 1
     assert metrics["documentary_silence"] == 1
+
+
+def test_leticia_imperatives_survive_page_header_without_inventing_a_waiver():
+    doc = evidence_document("")
+    doc["fragments"] = [
+        fragment(
+            "www.contraloria.gov.co\n"
+            "Aportar como experiencia general dos (2) contratos de compraventa celebrado con\n"
+            "entidades públicas o privadas durante la última vigencia fiscal "
+            "y cuyo valor sea igual\n"
+            "o superior al presupuesto oficial.\n"
+            "Experiencia especifica\n"
+            "Aportar como experiencia especifica un (1) contrato de suministro de papelería,\n"
+            "útiles de oficina, tóner y tintas cuyo valor sea igual "
+            "o superior a cinco (5) veces el\n"
+            "valor del presupuesto oficial.",
+            page=14,
+        )
+    ]
+    result = rules.classify_experience([doc], inventory_complete=False)
+    assert result["status"] == "not_resolved"
+    assert [e["section"].lower() for e in result["evidence"]] == [
+        "experiencia general",
+        "experiencia especifica",
+    ]
+    assert all(
+        e["scope"] == "general_bidder" and e["assertion_type"] == rules.REQ and e["page"] == 14
+        for e in result["evidence"]
+    )
+
+
+def test_la_capilla_indirect_requirement_under_explicit_experience_section():
+    doc = evidence_document("")
+    doc["fragments"] = [
+        fragment(
+            "11.2.1 EXPERIENCIA ESPECÍFICA\n"
+            "de un contratista idóneo que ejecute el contrato con las mejores calidades, "
+            "garantizando experiencia,\n"
+            "suficiencia técnica administrativa y operacional, la entidad a determinado "
+            "exigir al proponente la\n"
+            "acreditación de experiencia especifica así: a través de DOS (2) contratos "
+            "o certificaciones de suministro\n"
+            "o compraventa, cuyo objeto describa el suministro de bienes relacionado ",
+            page=10,
+        )
+    ]
+    result = rules.classify_experience([doc], inventory_complete=False)
+    assert result["status"] == "not_resolved"
+    assert result["evidence"][0]["page"] == 10
+    assert result["evidence"][0]["assertion_type"] == rules.REQ
+    assert result["evidence"][0]["scope"] == "general_bidder"
+
+
+def test_san_francisco_table_requires_experience_only_within_each_company_size():
+    table = (
+        "TAMAÑO ACREDITACIÓN DE EXPERIENCIA\n"
+        "Micro, Pequeñas y\nMedianas\nEmpresas\n"
+        "El proponente debe anexar con su propuesta dos (2) certificaciones o copias de\n"
+        "contratos con su respectiva acta de liquidación de contratos celebrados, ejecutados.\n"
+        "Grandes empresas El proponente debe anexar con su propuesta MAXIMO UNA (1) "
+        "certificación o copia\n"
+        "de contratos con su respectiva acta de liquidación de contrato celebrado, ejecutado."
+    )
+    continuation = (
+        "NOTA 3: En caso de Consorcio o Unión temporal, para efectos de la verificación "
+        "de la Experiencia del Proponente, se procederá a sumar los valores de los contratos."
+    )
+    doc = evidence_document("")
+    doc["fragments"] = [fragment(table, page=34), fragment(continuation, page=35)]
+    result = rules.classify_experience([doc])
+    table_evidence = [e for e in result["evidence"] if e["assertion_type"] == rules.REQ]
+    assert [(e["scope"], e["page"]) for e in table_evidence] == [("limited", 34)] * 2
+    assert result["status"] == "experience_ambiguous"
+    assert result["review_category"] == "limited_or_ambiguous"
+    assert all(e in result["review_evidence"] for e in table_evidence)
+    doc["fragments"] = [fragment(table.split("\n", 1)[1], page=34)]
+    no_heading = rules.classify_experience([doc])
+    assert not any(e["assertion_type"] in {rules.REQ, rules.NEG} for e in no_heading["evidence"])

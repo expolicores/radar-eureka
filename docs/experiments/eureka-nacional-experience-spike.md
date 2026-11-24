@@ -606,3 +606,54 @@ hacer inferencias estadísticas sobre Colombia.
 Los PDF, los fragmentos por página, la cola y la muestra de auditoría quedan
 en `.local/eureka-nacional-spike/en01-le73ddhz/`. Una nueva corrida real
 requiere autorización.
+
+
+## EN-01.4 · Corrección offline de los silencios documentales
+
+Se revisaron las páginas objetivo y los PDF guardados de la corrida
+exploratoria. La salida original se conserva como línea base. Se agregaron
+tres regresiones con fragmentos reales y se conservaron los cuatro estados
+formales y la prioridad comercial independiente.
+
+| Patrón observado | Causa de la omisión | Regla aplicada y efecto |
+|---|---|---|
+| Imperativo en dos apartados de experiencia | El encabezado repetido de página quedó unido al primer imperativo. La regla no reconocía «aportar» como obligación. | Separar la línea de obligación y reconocer el imperativo cuando identifica experiencia general o específica y una cantidad de contratos. Dos exigencias generales del oferente. |
+| Exigencia indirecta dentro de una sección de experiencia | El verbo «exigir» aparecía en una construcción indirecta con una omisión ortográfica. | Reconocer esa construcción bajo un encabezado explícito de experiencia cuando exige al oferente acreditar contratos. Una exigencia general del oferente. |
+| Tabla de acreditación por tamaño empresarial | El encabezado contenía «experiencia» y las filas solo especificaban qué comprobantes anexar. | Mantener el contexto del encabezado para las filas, conservar la página y registrar ambas obligaciones como alcance limitado. Las notas de la página siguiente mantienen sus condiciones propias. |
+
+Los tres casos partían de `not_resolved` y silencio para revisión. En el
+replay, dos quedan con exigencia aplicable y estado formal `not_resolved`
+por cobertura documental pendiente. El tercero queda
+`experience_ambiguous` por alcance diferenciado y pasa a revisión de
+condición limitada. Sus dos filas cuentan como detecciones de exigencia
+de alcance limitado y no sustentan por sí solas una obligación general.
+La clasificación y la prioridad de los otros 12 procesos no cambiaron.
+
+| Métrica | Salida original | Replay offline |
+|---|---:|---:|
+| Silencios documentales | 3 | 0 |
+| Detecciones brutas de exigencia | 13 | 18 |
+| Prioridad de exigencia aplicable | 7 | 9 |
+| Prioridad limitada o ambigua | 3 | 4 |
+| Prioridad de insuficiencia | 2 | 2 |
+| Formalmente resueltos / pendientes | 1 / 14 | 1 / 14 |
+| Formalmente ambiguos / sin resolver | 3 / 11 | 4 / 10 |
+| Ausencias explícitas / confirmadas en esta muestra | 0 / 0 | 0 / 0 |
+
+Los cuatro controles históricos abarcaron cinco PDF y 82 páginas. Las tres
+señales favorables conservaron evidencia y prioridad sin confirmación formal.
+Ambas invitaciones del cuarto control mantuvieron silencio y remisiones
+al reglamento. La revisión página por página no encontró detecciones nuevas
+ni evidencia modificada en los controles. Pasaron 198 pruebas offline.
+El replay procesó 17 PDF con 641 páginas de texto nativo y cero consultas
+CDP, descargas, OCR o llamadas de IA.
+
+Para la siguiente exploración se recomienda mantener hasta 15 procesos en
+30 días, ocho páginas de 30 filas, 24 intentos y tres por proceso, 10 MiB
+por PDF, OCR selectivo de dos páginas por PDF y 48 en total, 200 créditos,
+720 s y cero llamadas de IA. Mantener la extracción nativa sin tope de
+páginas por cantidad. La última ejecución usó 20 intentos, 160 créditos
+y 179,141 s. Hay margen operativo para comprobar el ajuste en otra muestra
+sin elevar los topes. La regla de tabla cubre el encabezado y las filas
+observados. Otros diseños requieren validación aparte. La exploración
+ampliada queda pendiente de autorización.
