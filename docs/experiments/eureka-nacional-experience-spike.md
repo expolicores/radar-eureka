@@ -657,3 +657,73 @@ y 179,141 s. Hay margen operativo para comprobar el ajuste en otra muestra
 sin elevar los topes. La regla de tabla cubre el encabezado y las filas
 observados. Otros diseños requieren validación aparte. La exploración
 ampliada queda pendiente de autorización.
+
+
+## EN-01 · Lote exploratorio de procesos nuevos
+
+Se ejecutó una única corrida el 24 de noviembre de 2026 con el clasificador
+aceptado en `731e0ac` y el filtro histórico de `29d4afc`. El runner
+carga las filas con resultado de cada historial local antes de conectar
+CDP y las cruza con el feed por aviso SECOP II `CO1.NTC`. Una referencia
+del agregador o una referencia de fase sin aviso comparable no garantiza
+la novedad. Esta ejecución cargó 25 resultados históricos correspondientes
+a 20 avisos únicos. Se verificó que ninguno reapareció en el feed y que los
+15 avisos analizados eran distintos entre sí y del historial. Se mantuvieron
+los límites de EN-01.4 y los 1.130 identificadores geográficos.
+
+| Embudo | Resultado |
+|---|---:|
+| Páginas / registros / únicos / duplicados | 8 / 240 / 240 / 0 |
+| Departamentos en el feed / en la muestra | 25 / 8 |
+| Candidatos comerciales / elegibles para inventario | 29 / 20 |
+| Coincidencias con el historial / identidades no comparables entre elegibles | 0 / 0 |
+| Seleccionados / analizados | 15 / 15 |
+| Categorías en la muestra | 7 de 21 |
+| Inventarios / documentos registrados | 15 / 117 |
+| Intentos de descarga / PDF guardados / rectores | 20 / 17 / 8 |
+| PDF con algún texto / cobertura completa | 13 / 11 |
+| Páginas informadas / con texto nativo / pendientes | 538 / 401 / 137 |
+| Páginas OCR intentadas / con recuperación | 3 / 3 |
+
+Los 15 seleccionados figuraban abiertos. Quedaron cinco elegibles fuera
+del cupo. De los 29 candidatos comerciales, nueve fueron excluidos por
+capacidad de inventario de su fuente. El feed llegó al tope de ocho
+páginas; los valores `count` subieron de 31 a 241 y siguen sin determinar
+el tamaño del universo. El runner salió con código `2` por tres intentos
+de descarga que superaron 10 MiB. No hubo fallos técnicos de extracción.
+
+| Resultado automático | Casos |
+|---|---:|
+| Experiencia exigida / ausencia confirmada | 0 / 0 |
+| Formalmente ambiguos / sin resolver | 6 / 9 |
+| Detecciones brutas de exigencia / procesos con detecciones | 8 / 5 |
+| Casos despriorizados por exigencia aplicable | 0 |
+| Ausencia explícita / contradicciones | 0 / 0 |
+| Prioridad de condición limitada / insuficiencia / silencio | 6 / 8 / 1 |
+
+El cotejo offline de las 20 páginas del rector del único silencio encontró
+en la pág. 12, numeral 5.5, una exigencia de mínimo dos contratos de objeto
+igual o similar, cada uno por al menos el 100 % del presupuesto oficial.
+La obligación está entre paréntesis en un encabezado numerado. Se conserva
+la salida automática y se registra el hallazgo aparte. Hubo cero silencios
+corroborados y cero candidatos favorables. Las detecciones de exigencia
+quedaron como evidencia trazable de casos con condiciones, remisiones o
+cobertura pendiente. No se reejecutó el runner ni se ajustó el clasificador
+en este lote.
+
+La corrida usó **160 créditos, 185,250 s, tres páginas OCR y cero llamadas
+de IA**. Los 17 PDF sumaron 21.258.244 bytes. La extracción acumuló 67,359 s;
+la CPU fue 49,484 s en lectores nativos y 12,297 s en el coordinador. El
+promedio global fue 10,67 créditos y 12,35 s transcurridos por proceso.
+El costo unitario por candidato favorable queda indefinido. Se verificaron
+los topes y el solapamiento con los historiales en los artefactos locales.
+El resultado por proceso, la cobertura y la evidencia quedan en
+`.local/eureka-nacional-spike/en01-hb4_beb5/`. Se publican cifras agregadas.
+
+`--exclude-analyzed-from CORRIDA` puede repetirse con cada nombre local.
+Se probó offline con los historiales de los dos smoke y la primera
+exploratoria. Pasaron 203 pruebas antes de la ejecución. Tras la corrida,
+se comprobó con cinco pruebas focalizadas que la opción también acepta
+los nombres con guion bajo generados por el runner. Incluir el historial
+de este lote en una futura selección excluiría 35 avisos únicos. Una
+nueva corrida real requiere autorización.

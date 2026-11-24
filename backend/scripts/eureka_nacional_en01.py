@@ -133,7 +133,7 @@ def load_national_locations(path=DEFAULT_GEOGRAPHY):
 def load_analyzed_secop_ids(root, run_names):
     ids = set()
     for name in run_names:
-        if not re.fullmatch(r"en01-[a-z0-9]+", name):
+        if not re.fullmatch(r"en01-[a-z0-9_]+", name):
             raise spike.SpikeError("Se requiere el nombre local de una corrida EN-01.")
         run_path = root / name
         if run_path.resolve() != run_path:

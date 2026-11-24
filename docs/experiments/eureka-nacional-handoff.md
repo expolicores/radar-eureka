@@ -144,6 +144,26 @@ describe las reglas y la comparación. Se recomienda mantener el presupuesto
 de la exploratoria ya ejecutada, con 15 procesos, 24 intentos, 200 créditos y
 720 s de tope. La siguiente corrida requiere autorización.
 
+## Lote exploratorio de procesos nuevos
+
+La corrida única del 24 de noviembre cargó 20 avisos históricos de los dos smoke
+y la primera exploratoria. El [resultado agregado](eureka-nacional-experience-spike.md#en-01--lote-exploratorio-de-procesos-nuevos)
+registra 240 avisos únicos, 29 candidatos comerciales, 20 elegibles y 15
+analizados sin solapamiento. Los 17 PDF aportaron 401 páginas nativas; hubo
+tres recuperaciones OCR y 137 páginas pendientes. El costo fue 160 créditos
+y 185,250 s, sin IA.
+
+La salida automática dejó seis casos ambiguos y nueve sin resolver.
+Detectó exigencias en cinco procesos, cero ausencias explícitas y un
+silencio cuyo rector contenía una exigencia en la pág. 12. El cotejo
+offline se registró sin alterar la decisión automática. La corrida terminó
+parcial por tres descargas que excedieron 10 MiB.
+
+El detalle queda en `.local/eureka-nacional-spike/en01-hb4_beb5/`. Para
+excluir este lote en una selección futura, añadir su nombre local a los
+historiales con `--exclude-analyzed-from`. Cualquier corrida real adicional
+requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

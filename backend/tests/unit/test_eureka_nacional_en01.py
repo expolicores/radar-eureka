@@ -1221,7 +1221,7 @@ def test_san_francisco_table_requires_experience_only_within_each_company_size()
 
 
 def test_analyzed_history_uses_only_result_rows_and_deduplicates_notices(tmp_path):
-    for run_name, profile in (("en01-first", "2222222"), ("en01-second", "3333333")):
+    for run_name, profile in (("en01-first_run", "2222222"), ("en01-second", "3333333")):
         root = tmp_path / run_name
         root.mkdir()
         ref = f"licitaciones_info:{profile}:10"
@@ -1236,7 +1236,7 @@ def test_analyzed_history_uses_only_result_rows_and_deduplicates_notices(tmp_pat
         ]
         en01.write_json(root / "processes.json", {"processes": rows})
         en01.write_json(root / "experience_requirements.json", [{"process_reference": ref}])
-    assert en01.load_analyzed_secop_ids(tmp_path, ["en01-first", "en01-second"]) == {
+    assert en01.load_analyzed_secop_ids(tmp_path, ["en01-first_run", "en01-second"]) == {
         "CO1.NTC.12345"
     }
 
