@@ -907,3 +907,124 @@ def test_native_checkpoint_recovers_pages_when_worker_times_out(tmp_path, monkey
     assert result.fragments[0].page_number == 1
     assert result.diagnostics["native_stop_reason"] == "timeout"
     assert result.diagnostics["native_incomplete_from"] == 2
+
+
+@pytest.mark.parametrize(
+    ("text", "section"),
+    [
+        (
+            "12.3.1. EXPERIENCIA GENERAL\nEl proponente debe acredita r experiencia, "
+            "median te la presentación de dos contratos.",
+            "EXPERIENCIA GENERAL",
+        ),
+        (
+            "8.6.) EXPERIENCIA:\nEXPERIENCIA GENERAL (Admisible/No Admisible):\n"
+            "Acreditar experiencia mediante la presentación de mínimo dos contratos ejecutados.",
+            "EXPERIENCIA GENERAL (Admisible/No Admisible)",
+        ),
+        (
+            "2.5.1 EXPERIENCIA ESPECÍFICA DEL PROPONENTE\n"
+            "El proponente deberá acreditar experiencia específica con contratos.",
+            "EXPERIENCIA ESPECÍFICA DEL PROPONENTE",
+        ),
+    ],
+)
+def test_contextual_general_requirements_allow_early_commercial_deprioritization(text, section):
+    doc = evidence_document("")
+    doc["fragments"] = [fragment(text, page=27)]
+    unknown = {
+        "document_id": "other",
+        "name": "Otro documento",
+        "role": "unknown",
+        "complete": False,
+    }
+    result = rules.classify_experience([doc, unknown])
+    assert result["status"] == "not_resolved"
+    assert result["reason"] == "requirement_requires_corroboration"
+    assert result["review_category"] == "explicit_requirement"
+    assert result["review_reason"] == "general_bidder_clause_in_complete_primary"
+    assert result["review_evidence"][0]["section"] == section
+    assert result["review_evidence"][0]["page"] == 27
+    assert result["document_coverage"]["pending"] == [
+        {"document_id": "other", "document": "Otro documento", "role": "unknown"}
+    ]
+    unknown["role"] = "amendment"
+    pending_amendment = rules.classify_experience([doc, unknown])
+    assert pending_amendment["review_category"] == "insufficient_evidence"
+
+
+def test_mipyme_heading_applies_to_following_page_with_same_document():
+    doc = evidence_document("")
+    clause = (
+        "El proponente deberá acreditar experiencia específica con certificaciones de contratos."
+    )
+    doc["fragments"] = [
+        fragment("5.1.2.2. EXPERIENCIA ESPECÍFICA: " + clause, page=19),
+        fragment("5.1.2.3. EXPERIENCIA MIPYME:", page=21),
+        fragment("INVITACIÓN PÚBLICA\n" + clause, page=22),
+    ]
+    result = rules.classify_experience([doc])
+    scopes = [
+        (e["scope"], e["assertion_type"], e["page"], e["section_page"]) for e in result["evidence"]
+    ]
+    assert scopes == [("general_bidder", rules.REQ, 19, 19), ("limited", rules.CONDITIONAL, 22, 21)]
+    assert result["status"] == "experience_required"
+    assert [e["page"] for e in result["review_evidence"]] == [19]
+
+
+def test_plural_rule_alone_stays_limited():
+    doc = evidence_document("")
+    doc["fragments"] = [
+        fragment(
+            "En el caso de los consorcios, la experiencia habilitante será la suma "
+            "de la experiencia de los integrantes.",
+            page=11,
+        )
+    ]
+    result = rules.classify_experience([doc])
+    assert result["status"] == "experience_ambiguous"
+    assert result["review_category"] == "limited_or_ambiguous"
+    assert result["review_evidence"][0]["scope"] == "limited"
+
+
+def test_experience_form_records_missing_primary_without_treating_form_as_requirement():
+    form = evidence_document("Anexo 6\nFormato experiencia del proponente", role="support")
+    rector = {
+        "document_id": "rector",
+        "name": "Invitación pública",
+        "role": "primary",
+        "complete": False,
+    }
+    result = rules.classify_experience([form, rector])
+    assert result["status"] == "not_resolved"
+    assert result["review_category"] == "insufficient_evidence"
+    assert result["document_coverage"]["pending"][0]["document_id"] == "rector"
+
+
+def test_waiver_and_silence_keep_distinct_commercial_and_formal_results():
+    support = {"document_id": "annex", "name": "Anexo", "role": "support", "complete": False}
+    waiver = evidence_document("EXPERIENCIA: No aplica.")
+    result = rules.classify_experience([waiver, support])
+    assert result["status"] == "not_resolved"
+    assert result["review_category"] == "explicit_favorable"
+    assert result["review_evidence"][0]["assertion_type"] == rules.NEG
+    silence = rules.classify_experience([evidence_document("Presentar el anexo técnico.")])
+    assert silence["status"] == "not_resolved"
+    assert silence["review_category"] == "documentary_silence"
+    assert silence["review_evidence"] == []
+
+
+def test_conflicting_waiver_blocks_early_commercial_deprioritization():
+    doc = evidence_document("")
+    doc["fragments"] = [
+        fragment(
+            "2.5.1 EXPERIENCIA ESPECÍFICA DEL PROPONENTE\n"
+            "El proponente deberá acreditar experiencia con contratos.",
+            page=3,
+        ),
+        fragment(WAIVED, page=6),
+    ]
+    result = rules.classify_experience([doc])
+    assert result["status"] == "experience_ambiguous"
+    assert result["review_category"] == "limited_or_ambiguous"
+    assert {e["assertion_type"] for e in result["review_evidence"]} == {rules.NEG, rules.REQ}

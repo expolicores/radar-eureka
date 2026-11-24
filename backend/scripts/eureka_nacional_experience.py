@@ -68,6 +68,21 @@ DEPENDENCY = re.compile(
     r"(?:segun|conforme al|vease|consultar|remite a|se detallan en|establecidos en)"
     r".{0,40}\b(?:anexo|archivo|documento|numeral)\b)"
 )
+NUMBERED_SECTION = re.compile(r"^\d+(?:[.-]\d+)*[.\s_):–-]+")
+GENERAL_EXPERIENCE_SECTION = re.compile(
+    r"^experiencia (?:general|especifica|habilitante)(?: del (?:proponente|oferente))?"
+    r"(?: \(admisible/no admisible\))?$"
+)
+LIMITED_SECTION = re.compile(
+    r"\b(?:mipymes?|proponentes? plurales?|desempates?|lotes?|subsanacion)\b"
+)
+LIMITED_SUBJECT = re.compile(
+    r"\b(?:en el caso de los|tratandose de|si (?:la oferta|el proponente) .{0,50})"
+    r"\s+(?:consorcios|uniones temporales|proponentes? plurales?)\b|"
+    r"\b(?:solo|unicamente|exclusivamente) (?:para|a) (?:las? |los? )?"
+    r"(?:mipymes?|consorcios|uniones temporales|proponentes? plurales?)\b"
+)
+ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
 CONDITIONAL = "NORMATIVA_CONDICIONAL"
 NEG = "NEG_CONCLUSIVA"
 REQ = "EXIGENCIA"
@@ -130,6 +145,7 @@ def document_cover_metadata(first_page):
 def normalized_for_matching(clause, method=None):
     text = " ".join(normalized(clause).split())
     text = re.sub(r"\bap ort", "aport", text)
+    text = re.sub(r"\bacredita r(?=\s+(?:(?:la|su)\s+)?experiencia\b)", "acreditar", text)
     if method == "ocr_text":
         # Repair narrow OCR confusions without changing the polarity token.
         text = re.sub(r"\bexperienc[1l]a\b", "experiencia", text)
@@ -137,9 +153,19 @@ def normalized_for_matching(clause, method=None):
     return text
 
 
-def assertion(clause, *, heading=None, immediate=False, method=None):
+def assertion(clause, *, heading=None, section=None, immediate=False, method=None):
     text = normalized_for_matching(clause, method)
     experience = bool(EXPERIENCE.search(text))
+    section_text = normalized_for_matching(section or "", method)
+    if experience and (
+        LIMITED_SUBJECT.search(text)
+        or (
+            GENERAL_EXPERIENCE_SECTION.search(section_text) is None
+            and "experiencia" in section_text
+            and LIMITED_SECTION.search(section_text)
+        )
+    ):
+        return CONDITIONAL, "limited_applicability"
     if OTHER_CONTEXT.search(text) or PREFERENCE_SHARE.search(text) or heading == "other":
         return (OTHER, "other_subject_or_criterion") if experience else None
     dependency = DEPENDENCY.search(text)
@@ -157,6 +183,13 @@ def assertion(clause, *, heading=None, immediate=False, method=None):
         return CONDITIONAL, "limited_applicability"
     if GENERAL_OR_HYPOTHETICAL.search(text):
         return CONDITIONAL, "general_or_hypothetical"
+    if (
+        "admisible/no admisible" in section_text
+        and GENERAL_EXPERIENCE_SECTION.search(section_text)
+        and ADMISSIBILITY.search(text)
+        and not re.search(r"\bno\b", text[: text.find("contrato")])
+    ):
+        return REQ, "explicit_bidder_requirement"
     if scoped_waiver:
         return NEG, "heading_scoped_waiver"
     if DOUBLE_NEGATIVE.search(text):
@@ -185,16 +218,18 @@ def clause_rule(clause):
     return result[0] if result else None
 
 
-def page_clauses(text, method=None):
+def page_clauses(text, method=None, *, page=None, inherited_section=None):
     heading = None
     heading_text = None
     lines = []
+    clauses_found = []
+    section = inherited_section
 
     def flush():
         clauses = re.split(r"(?<=[.;!?])\s+(?=[A-ZÁÉÍÓÚÑ])", " ".join(lines))
         for i, clause in enumerate(clauses):
             if clause:
-                yield clause, heading, heading_text, i == 0
+                clauses_found.append((clause, heading, heading_text, i == 0, section))
 
     for raw in text.splitlines():
         line = " ".join(raw.split())
@@ -218,8 +253,11 @@ def page_clauses(text, method=None):
             and bool(re.search(r"[A-ZÁÉÍÓÚÑ]", label))
             and (stripped != line or separator or len(label.split()) <= 5)
         )
-        if experience_header or section_header:
-            yield from flush()
+        general_section = GENERAL_EXPERIENCE_SECTION.fullmatch(clean_label)
+        if experience_header or section_header or general_section:
+            flush()
+            if NUMBERED_SECTION.match(line) or general_section:
+                section = (label, page)
             lines = [body.strip()] if body.strip() else []
             heading = (
                 "experience"
@@ -231,17 +269,38 @@ def page_clauses(text, method=None):
             heading_text = (inline[1] if not separator and inline else label) if heading else None
         else:
             lines.append(line)
-    yield from flush()
+    flush()
+    return clauses_found, section
 
 
 def document_assertions(document):
     if document["role"] == "excluded":
         return
+    previous_section = None
     for fragment in document.get("fragments", ()):
         locator = fragment.source_locator
         method = locator.get("extraction_method")
-        for clause, heading, heading_text, immediate in page_clauses(fragment.text, method):
-            result = assertion(clause, heading=heading, immediate=immediate, method=method)
+        page = locator.get("page_number")
+        # Carry an explicit numbered/experience section only into the adjacent native page.
+        inherited = (
+            previous_section
+            if method == "native_pdf_text"
+            and page
+            and previous_section
+            and previous_section[1] in {page - 1, page}
+            else None
+        )
+        clauses, section = page_clauses(
+            fragment.text, method, page=page, inherited_section=inherited
+        )
+        if method == "native_pdf_text":
+            previous_section = section
+        for clause, heading, heading_text, immediate, context in clauses:
+            section_label, section_page = context or (None, None)
+            section_text = normalized_for_matching(section_label or "", method)
+            result = assertion(
+                clause, heading=heading, section=section_label, immediate=immediate, method=method
+            )
             if not result:
                 continue
             kind, basis = result
@@ -259,6 +318,17 @@ def document_assertions(document):
                 "locator": locator,
                 "method": method,
                 "heading": heading_text,
+                "section": section_label,
+                "section_page": section_page,
+                "scope": (
+                    "limited"
+                    if basis == "limited_applicability"
+                    else "general_bidder"
+                    if kind == REQ
+                    and GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
+                    and not LIMITED_SECTION.search(section_text)
+                    else "unspecified"
+                ),
                 "excerpt": clause[start : start + 620],
             }
 
@@ -268,6 +338,7 @@ def classify_experience(documents, *, inventory_complete=True):
     pending = [
         doc["document_id"] for doc in documents if doc["role"] != "excluded" and not doc["complete"]
     ]
+    pending_ids = set(pending)
     primary_complete = any(doc["role"] == "primary" and doc["complete"] for doc in documents)
     credible = {doc["document_id"] for doc in documents if doc["complete"]}
     relevant = [item for item in evidence if item["role"] in {"primary", "amendment", "support"}]
@@ -283,58 +354,94 @@ def classify_experience(documents, *, inventory_complete=True):
         doc["role"] in {"primary", "amendment", "unknown"} and not doc["complete"]
         for doc in documents
     )
-    if {NEG, REQ} <= observed:
-        status, reason, review = (
-            "experience_ambiguous",
-            "conflicting_clauses",
-            "contradictory_evidence",
-        )
-    elif restricted:
+    known_governing_pending = any(
+        doc["role"] in {"primary", "amendment"} and not doc["complete"] for doc in documents
+    )
+    applicable = [
+        item
+        for item in relevant
+        if item["assertion_type"] == REQ
+        and item["scope"] == "general_bidder"
+        and item["role"] == "primary"
+        and item["document_id"] in credible
+    ]
+    conflict = {NEG, REQ} <= observed
+    if conflict:
+        status, reason = "experience_ambiguous", "conflicting_clauses"
+    elif restricted and not applicable:
         status, reason = "experience_ambiguous", "limited_applicability"
-        review = "explicit_favorable" if NEG in observed else "insufficient_evidence"
     elif dependencies and observed.intersection({NEG, REQ}):
         status, reason = "experience_ambiguous", "unverified_document_dependency"
-        review = "explicit_favorable" if NEG in observed else "explicit_requirement"
     elif REQ in decisive and primary_complete and inventory_complete and not governing_pending:
-        status, reason, review = (
-            "experience_required",
-            "explicit_bidder_requirement",
-            "explicit_requirement",
-        )
+        status, reason = "experience_required", "explicit_bidder_requirement"
     elif NEG in decisive and primary_complete and inventory_complete and not pending:
-        status, reason, review = (
-            "no_experience_required",
-            "explicit_waiver_with_document_coverage",
-            "explicit_favorable",
-        )
+        status, reason = "no_experience_required", "explicit_waiver_with_document_coverage"
     else:
         status = "not_resolved"
         if NEG in observed:
-            reason, review = "favorable_requires_corroboration", "explicit_favorable"
+            reason = "favorable_requires_corroboration"
         elif REQ in observed:
-            reason, review = "requirement_requires_corroboration", "explicit_requirement"
+            reason = "requirement_requires_corroboration"
         elif primary_complete:
-            reason, review = (
-                "document_dependency" if dependencies else "no_decisive_clause",
-                "documentary_silence",
-            )
+            reason = "document_dependency" if dependencies else "no_decisive_clause"
         else:
-            reason, review = "governing_documents_incomplete", "insufficient_evidence"
+            reason = "governing_documents_incomplete"
+
+    if conflict:
+        review, review_reason = "limited_or_ambiguous", "conflicting_clauses"
+        review_evidence = [item for item in relevant if item["assertion_type"] in {NEG, REQ}]
+    elif NEG in observed:
+        review, review_reason = "explicit_favorable", reason
+        review_evidence = [item for item in relevant if item["assertion_type"] == NEG]
+    elif applicable and inventory_complete and not known_governing_pending and not dependencies:
+        review = "explicit_requirement"
+        review_reason = "general_bidder_clause_in_complete_primary"
+        review_evidence = applicable
+    elif restricted or (dependencies and REQ in observed):
+        review, review_reason = "limited_or_ambiguous", reason
+        review_evidence = [
+            item
+            for item in relevant
+            if item["basis"] in {"limited_applicability", "document_dependency"}
+        ]
+    elif primary_complete and REQ not in observed:
+        review, review_reason = "documentary_silence", reason
+        review_evidence = relevant
+    else:
+        review = "insufficient_evidence"
+        review_reason = (
+            "governing_coverage_pending"
+            if applicable and (known_governing_pending or not inventory_complete)
+            else "general_bidder_scope_unconfirmed"
+            if REQ in observed
+            else reason
+        )
+        review_evidence = relevant
     return {
         "status": status,
         "reason": reason,
         "review_category": review,
+        "review_reason": review_reason,
+        "review_evidence": review_evidence,
         "review_priority": {
             "explicit_favorable": 1,
-            "contradictory_evidence": 2,
-            "documentary_silence": 3,
+            "documentary_silence": 2,
+            "limited_or_ambiguous": 3,
             "insufficient_evidence": 4,
             "explicit_requirement": 5,
         }[review],
-        "classification_method": "en01-contextual-v2",
+        "classification_method": "en01-contextual-v3",
         "inventory_complete": inventory_complete,
         "evidence": evidence,
         "pending_document_ids": pending,
+        "document_coverage": {
+            "complete_primary": primary_complete,
+            "pending": [
+                {"document_id": doc["document_id"], "document": doc["name"], "role": doc["role"]}
+                for doc in documents
+                if doc["document_id"] in pending_ids
+            ],
+        },
         "dependencies": [
             {"document_id": item["document_id"], "page": item["page"], "excerpt": item["excerpt"]}
             for item in dependencies

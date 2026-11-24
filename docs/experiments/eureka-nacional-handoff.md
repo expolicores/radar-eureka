@@ -81,6 +81,24 @@ incluye el comando de replay y sus límites. La invitación rectora que figuraba
 en el inventario del caso de formatos queda pendiente de revisión. Este trabajo
 usó los archivos ya descargados. La siguiente corrida real requiere autorización.
 
+## Evaluación contextual offline de EN-01.3
+
+Sobre los mismos cinco PDF se identificaron cuatro exigencias generales en
+cuatro rectores. La prioridad comercial bajó en esos casos y la clasificación
+formal quedó `not_resolved` por cobertura pendiente del inventario. Se
+recuperó una exigencia omitida por una palabra dividida y se separaron las
+cláusulas de Mipyme, proponentes plurales y desempate de las obligaciones
+generales. En el quinto caso subsiste la insuficiencia documental porque
+solo se leyó un formato auxiliar.
+
+Se conservaron los cuatro estados formales. No hubo ausencias explícitas ni
+procesos resueltos en esta muestra. El
+[informe agregado](eureka-nacional-experience-spike.md#en-013--aplicabilidad-y-prioridad-comercial)
+documenta el criterio y la comparación. El resultado por documento queda en
+`.local/eureka-nacional-spike/pdf-replay-xbkkmdul/`. Pasaron 192 pruebas
+offline. Se usó exclusivamente el material local, con cero OCR, consultas
+CDP, descargas o llamadas de IA. La próxima corrida real requiere autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

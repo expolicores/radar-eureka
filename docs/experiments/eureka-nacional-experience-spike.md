@@ -360,3 +360,59 @@ El comando crea un directorio `pdf-replay-*` ignorado por Git con
 `metrics.json` y `replay.json`. El segundo archivo conserva el documento,
 la página, el fragmento y las dependencias para revisión humana. El próximo
 smoke real requiere autorización.
+
+
+## EN-01.3 · Aplicabilidad y prioridad comercial
+
+Se evaluaron las mismas 218 páginas y los mismos inventarios del segundo smoke.
+Las reglas guardan por separado el tipo de afirmación, el alcance observado, la
+sección y su página, la conclusión formal y la razón de prioridad comercial.
+El contexto de un encabezado explícito se puede arrastrar una página nativa
+adyacente del mismo documento. Se agregó una reparación puntual del texto
+`acredita r experiencia` y una regla para el imperativo `Acreditar experiencia`
+bajo un encabezado explícito de experiencia general y admisibilidad.
+
+La prioridad comercial de exigencia requiere una cláusula general en un
+documento rector leído completo y un inventario disponible. Una contradicción,
+una remisión documental detectada o un rector o adenda identificados y
+pendientes impiden esa despriorización. Los documentos de rol aún desconocido
+quedan enumerados en la cobertura y todavía pueden impedir la resolución formal.
+La señal comercial no descarta procesos automáticamente ni cambia el presupuesto
+de adquisición. El replay evaluó las cláusulas de la versión de cada PDF
+guardada en el segundo smoke. La vigencia actual y las modificaciones
+posteriores quedan sin verificar.
+
+| Prioridad comercial | Criterio |
+|---|---|
+| Favorable explícita | Cláusula expresa de ausencia, con su página y motivo de corroboración si hay cobertura pendiente. |
+| Silencio para revisión | Rector leído con cobertura completa, sin afirmación decisiva detectada. |
+| Condición limitada o ambigua | Aplicabilidad restringida sin una obligación general independiente, evidencia contradictoria o una dependencia documental relevante. |
+| Insuficiencia documental | Falta el rector, la vigencia documental no se puede corroborar o el alcance general de la exigencia sigue sin establecerse. |
+| Exigencia aplicable identificada | Obligación general acreditada en el rector leído. Se baja su prioridad comercial aunque la conclusión formal siga pendiente por el inventario. |
+
+| Resultado en la misma muestra | EN-01.2 | EN-01.3 |
+|---|---:|---:|
+| Detecciones totales | 63 | 63 |
+| Exigencias explícitas detectadas | 3 en 2 procesos | 4 en 4 procesos |
+| Ausencias explícitas / declaradas | 0 / 0 | 0 / 0 |
+| Prioridad de exigencia / silencio / insuficiencia | 1 / 1 / 3 | 4 / 0 / 1 |
+| Estado formal ambiguo / sin resolver | 2 / 3 | 0 / 5 |
+| Procesos formalmente resueltos | 0 | 0 |
+
+La revisión contextual separó un apartado diferencial de Mipyme de la
+obligación general y distinguió reglas de proponentes plurales y desempate de
+otra obligación general independiente. También recuperó una exigencia que se
+había clasificado como silencio por una palabra dividida en el texto nativo.
+El caso restante tiene un formato auxiliar leído y una invitación rectora
+pendiente. Los cuatro casos con exigencia general mantienen `not_resolved` por
+documentos de rol desconocido pendientes en sus inventarios.
+
+El replay duró 20,953 s, con 0,688 s de clasificación, sin OCR, descargas,
+consultas CDP ni llamadas de IA. Pasaron 192 pruebas offline, incluidas ocho
+regresiones nuevas. Cubren el alcance de esas obligaciones, una adenda
+pendiente, el formato auxiliar, el silencio, la ausencia explícita sin
+corroboración y la contradicción. En esta muestra no se introdujeron falsos
+positivos de ausencia. La muestra carece de un caso favorable confirmado con
+el que medir sensibilidad de esa clase. Siguen pendientes las variantes de
+redacción y los encabezados rotos o alejados de la cláusula. La evidencia por
+página queda bajo `.local/`. Una tercera corrida real requiere autorización.
