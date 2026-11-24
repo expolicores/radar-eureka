@@ -855,9 +855,9 @@ su clasificación y prioridad. El límite permanece en dos páginas de OCR
 por PDF y 48 por corrida. Los resultados locales no implican que el
 resto de las páginas pendientes deba procesarse indiscriminadamente.
 
-### Siguiente muestra nacional, pendiente de autorización
+### Parámetros preparados para la corrida nacional
 
-El runner y el filtro histórico están listos para una nueva muestra
+El runner y el filtro histórico se prepararon para una muestra
 acotada. Se verifican 35 avisos históricos y se mantienen el resolver
 compartido, las 1.130 ubicaciones, las 21 categorías, el clasificador y sus
 cuatro estados. Las dos novedades de inventario requieren validación
@@ -888,3 +888,82 @@ con el intérprete y `PYTHONPATH` del plan anterior:
 Pasaron 217 pruebas offline, con artefactos locales y feed simulado.
 El replay detallado está en `.local/eureka-nacional-spike/pdf-replay-1hupshc1/`.
 No hubo consultas CDP, descargas SECOP, IA ni una nueva corrida nacional.
+
+
+## EN-01 · Corrida nacional con extensión condicional del feed
+
+Se ejecutó una vez el 24 de noviembre de 2026 con el runner de `84eae31`
+y cuatro historiales locales. Pasó el preflight CDP con el resolver
+compartido y se aplicó el filtro de 1.130 ubicaciones y 21 categorías. Al
+faltar candidatos elegibles después de aplicar los historiales, el runner
+utilizó la novena y la décima página. Quedaron 14 procesos elegibles y
+se analizaron todos. Las referencias SECOP examinadas eran nuevas
+respecto de los 35 avisos históricos.
+
+| Embudo y cobertura | Resultado |
+|---|---:|
+| Feed y registros | 8 páginas base + 2 condicionales, 300 filas |
+| Únicos / duplicados | 299 / 1 |
+| Departamentos observados / en la muestra | 28 / 7 |
+| Candidatos comerciales / elegibles antes del historial | 37 / 26 |
+| Coincidencias históricas excluidas / elegibles nuevos | 12 / 14 |
+| Seleccionados / analizados | 14 / 14 |
+| Abiertos / vigencia indeterminada según la fuente | 9 / 5 |
+| Categorías en la muestra | 9 de 21 |
+| Inventarios / documentos registrados | 14 / 87 |
+| Intentos / descargas exitosas / rectores reconocidos | 19 / 16 / 8 |
+| Archivos con cobertura completa / con texto | 14 / 15 |
+| Páginas informadas / con texto nativo / útiles / pendientes | 414 / 372 / 373 / 41 |
+| Páginas OCR intentadas / recuperadas | 1 / 1 |
+
+De los 299 registros únicos, 262 quedaron fuera del perfil comercial:
+177 fuera del perfil, 71 con servicio principal, 13 con objeto de bien
+poco claro y uno de obra civil. De los 37 candidatos, 11 quedaron fuera
+por capacidad de inventario y 12 por coincidencia histórica. Los
+valores del campo `count` avanzaron de 31 a 301 en incrementos de 30;
+la paginación terminó por presupuesto de feed. Esta muestra no permite
+estimar el universo nacional.
+
+Los 16 archivos guardados fueron PDF. Los DOCX inventariados eran
+auxiliares y no se seleccionaron como rectores. La prueba operativa con
+un DOCX rector sigue pendiente. Un archivo con título concatenado
+permaneció de rol desconocido. La portada permitió descartar otro
+archivo como cotización. Seis procesos quedaron sin rector reconocido
+descargado y otro tuvo un rector parcial. Las 41 páginas pendientes se
+concentraron en un análisis de sector escaneado (33) y un rector (8).
+El estado de ejecución fue parcial por el tamaño de la muestra y tres
+intentos superiores a 10 MiB. Hubo cero errores técnicos de extracción.
+
+### Resultado formal y prioridad comercial
+
+| Resultado | Casos |
+|---|---:|
+| Experiencia exigida formalmente / ausencia confirmada | 0 / 0 |
+| Formalmente ambiguos / sin resolver | 2 / 12 |
+| Detecciones brutas de exigencia / procesos con detecciones | 13 / 3 |
+| Exigencia aplicable despriorizada / contradicciones detectadas | 0 / 0 |
+| Prioridad limitada o ambigua / insuficiencia / silencio automático | 2 / 8 / 4 |
+| Ausencia explícita / candidatos favorables | 0 / 0 |
+
+El cotejo posterior encontró obligaciones de acreditar experiencia en
+los cuatro rectores clasificados como silencio automático. Se observaron
+instrucciones con «debe aportar», un imperativo de certificación y
+cláusulas vinculadas a un formulario o tabla. Los fragmentos y páginas
+quedaron en un registro offline separado. Se preservó la salida
+automática y hubo cero silencios corroborados entre los cuatro
+candidatos así marcados. Hubo exigencias en los PDF leídos, faltantes
+de cobertura y omisiones de reconocimiento. Los 14 casos permanecen
+pendientes de decisión formal. La reserva para corroborar ausencias
+explícitas no se utilizó.
+
+### Costo y evidencia local
+
+Se consumieron 154 créditos y 216,094 s, con cero llamadas de IA.
+El promedio fue 11,00 créditos y 15,44 s transcurridos por proceso.
+Las descargas sumaron 18.713.649 bytes. El extractor acumuló 50,530 s,
+con 41,266 s de CPU de lectores nativos y 14,156 s de CPU del coordinador.
+El costo unitario por candidato favorable queda indefinido al ser cero
+el número de candidatos. No se repitió la corrida.
+
+El detalle de los procesos, la evidencia y el cotejo de silencios
+permanecen en `.local/eureka-nacional-spike/en01-jocj50yr/`.

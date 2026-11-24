@@ -194,11 +194,29 @@ con el mismo cupo por PDF; el total OCR pasó de tres a cuatro páginas
 recuperadas y las pendientes bajaron de 137 a 136. Se conservaron las
 clasificaciones formales y las prioridades.
 
-La siguiente muestra queda preparada con la exclusión de 35 avisos
+La muestra se preparó con la exclusión de 35 avisos
 históricos y los mismos topes documentales, 200 créditos y 720 s. Después
 de las ocho páginas base podrá pedirse una novena y hasta una décima con
 `--conditional-extra-feed-pages 2` solo si faltan candidatos elegibles.
-La ejecución real requiere autorización.
+Esa ejecución real se registró en el apartado siguiente.
+
+## Corrida nacional con extensión condicional del feed
+
+El [resultado agregado](eureka-nacional-experience-spike.md#en-01--corrida-nacional-con-extensión-condicional-del-feed)
+registra la única ejecución autorizada de `84eae31`. Se usaron las dos
+páginas adicionales. Hubo 300 filas, 299 avisos únicos, 37 candidatos
+comerciales, 26 elegibles antes de aplicar el historial y 14 analizados
+tras excluir 12 avisos de los 35 históricos. Los 14 avisos analizados
+eran nuevos. Hubo 16 PDF, ocho rectores y una página recuperada con OCR.
+Tres descargas superaron 10 MiB. No hubo un DOCX rector elegible.
+
+Los 14 casos quedaron pendientes formalmente, con dos ambiguos y 12 sin
+resolver. No hubo ausencias explícitas ni candidatos favorables. El cotejo
+offline encontró cláusulas de experiencia en los cuatro silencios del
+runner y conservó la clasificación automática original. El costo fue
+154 créditos y 216,094 s, sin IA. Los resultados y los fragmentos del
+cotejo se conservan en `.local/eureka-nacional-spike/en01-jocj50yr/`.
+Cualquier otra corrida real requiere autorización.
 
 ## Plan aplicado para el segundo smoke
 
