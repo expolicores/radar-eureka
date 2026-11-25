@@ -381,6 +381,21 @@ carecen de copia recuperada del rector. No hubo reintentos, consultas
 al feed, refresco de inventarios ni cambios en el runner. La
 recuperación progresiva necesita una autorización adicional.
 
+## Correcciones offline y recuperación preparada
+
+El [replay y comando](eureka-nacional-experience-spike.md#correcciones-offline-de-caicedonia-y-la-registraduría)
+confirman exigencia aplicable en Caicedonia (pág. 8) y la Registraduría
+(pág. 11). El estado de ambos sigue not_resolved. Maicao conserva su
+prioridad. El corpus de cinco casos conocidos conservó los resultados
+de control. Pasaron 177 pruebas y una quedó omitida.
+
+El plan de en01-hsxjhqpg detectó cuatro recibos verificados y seis
+rectores PDF elegibles. Pacho y La Estrella siguen pendientes de rector
+verificable. Se recomienda autorizar primero un lote de hasta tres
+procesos. urllib va primero y CDP Streaming se habilita sólo ante un 403
+directo, con HTTP 200 PDF, tamaño declarado y cierre verificable.
+No se ejecutaron recuperaciones ni consultas nuevas.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

@@ -116,6 +116,16 @@ EVIDENCE_FROM_TABLE = re.compile(
     r"^el (?:proponente|oferente) debe(?:ra)? aportar evidencias de experiencia\b"
     r".{0,160}\btabla anterior\b"
 )
+OFFER_EXPERIENCE_CERTIFICATES = re.compile(
+    r"^(?:el (?:proponente|oferente) )?debe(?:ra|ran)? (?:anexar|presentar) "
+    r".{0,60}\b(?:en su oferta|con su propuesta) (?:minimo|maximo) "
+    r"(?:un[oa]?|dos|tres|\d+)(?: \(\d+\))? certificaciones? de experiencia"
+    r"(?: o acta de liquidacion,?)? (?:sobre|de) contratos? ejecutados?"
+    r".{0,40}\b(?:cuyo objeto|cuy[oa]s? actividades)\b"
+)
+NUMBERED_INVITATION = re.compile(
+    r"^invitacion publica n(?:o\.?|[\u00b0\u00ba])?\s*\d+.{0,24}\b20\d{2}\b"
+)
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
@@ -169,7 +179,8 @@ def document_priority(name, role, role_hint=None):
 
 def document_cover_metadata(first_page):
     # Cover cues are auditable and never imply that an amendment supersedes another version.
-    lines = [line.strip() for line in first_page.splitlines() if line.strip()][:8]
+    cover_lines = [line.strip() for line in first_page.splitlines() if line.strip()][:12]
+    lines = cover_lines[:8]
     heading = " ".join(normalized(" ".join(lines)).split())
     marker = re.search(
         r"\b(?:definitiv[oa]|version final|vigente|borrador|proyecto (?:de )?pliego)\b", heading
@@ -196,6 +207,15 @@ def document_cover_metadata(first_page):
                 r"^(?:estudios? previos?|formatos?|formularios?)\b", line
             ) or compact.startswith("estudiosprevios"):
                 role = "support"
+                if (
+                    re.match(r"^formato invitacion publica\b", line)
+                    and any(NUMBERED_INVITATION.match(title) for title in titles)
+                    and any(
+                        document_title(cover_line).startswith("objeto:")
+                        for cover_line in cover_lines
+                    )
+                ):
+                    role = "primary"
                 break
             if re.match(
                 r"^(?:invitacion|pliego(?: de condiciones)?)\b", line
@@ -276,6 +296,8 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
     ):
         return REQ, "minimum_experience_in_heading"
     if not re.search(r"\bno\b", text):
+        if OFFER_EXPERIENCE_CERTIFICATES.search(text):
+            return REQ, "mandatory_offer_certificates"
         if section_text == "condiciones de experiencia" and CONTRACT_SUBMISSION.search(text):
             return REQ, "explicit_bidder_requirement"
         if heading == "lettered_experience" and CERTIFY_EXECUTED_CONTRACTS.search(text):
@@ -465,7 +487,7 @@ def document_assertions(document):
                     else "general_bidder"
                     if kind == REQ
                     and (
-                        basis == "minimum_experience_in_heading"
+                        basis in {"minimum_experience_in_heading", "mandatory_offer_certificates"}
                         or GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
                         or BIDDER_EXPERIENCE_FORM.fullmatch(section_text)
                         or section_text == "condiciones de experiencia"

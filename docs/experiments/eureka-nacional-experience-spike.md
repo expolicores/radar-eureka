@@ -1703,3 +1703,88 @@ condiciones. Las discrepancias de clasificación requieren revisión
 separada. Los tres procesos mantienen corroboración pendiente y
 otros ocho siguen sin una copia recuperada de su rector. Un lote
 posterior requiere autorización nueva. No se cambió el runner.
+
+
+### Correcciones offline de Caicedonia y la Registraduría
+
+La regla nueva exige un mandato de anexar o presentar en la oferta un
+número de certificaciones de experiencia sobre contratos ejecutados.
+Conserva las guardas para negaciones, sujetos limitados y referencias
+condicionales. La portada con encabezado de plantilla Formato Invitación
+Pública confirma el rector cuando también identifica una invitación
+numerada y contiene la sección Objeto. Una plantilla auxiliar o portada
+de estudios previos conserva su tratamiento.
+
+| Proceso | Evidencia del PDF local | Prioridad antes | Prioridad después | Estado formal |
+| --- | --- | --- | --- | --- |
+| Caicedonia 2026-351 | Pág. 8. Al menos tres certificaciones en la oferta por contratos similares ejecutados. | Silencio documental | Exigencia aplicable | not_resolved, corroboración pendiente |
+| Registraduría MC-IP-04-2026-FRR | Pág. 1. Invitación numerada con objeto propio. Pág. 11. Hasta dos certificaciones o acta de liquidación de contratos similares ejecutados por una suma al menos igual al presupuesto oficial. | Evidencia insuficiente | Exigencia aplicable | not_resolved, corroboración pendiente |
+
+Se releyeron los 78 folios nativos del piloto, con cero OCR. Maicao
+conservó estado y prioridad. El corpus local de Pore, El Plato, La Capilla
+y las dos invitaciones de Chivatá coincidió en los 5 casos, con cero falsos
+positivos y cero falsos negativos de evidencia favorable. Pasaron 177
+pruebas offline, una quedó omitida y Ruff pasó. El replay y los fragmentos
+quedaron localmente en en01-reclassification_zcywlw4q.
+
+### Recuperación acotada preparada, pendiente de autorización
+
+eureka_nacional_stream_recovery.py planifica a partir de en01-hsxjhqpg
+y valida los recibos con el almacenamiento por SHA-256. El plan actual
+excluye del tráfico Moniquirá, Caicedonia, Maicao y la Registraduría.
+De los ocho pendientes, seis tienen un rector PDF único y enlace
+archivado con identidad verificable. Pacho MC-039-2026 y La Estrella
+SI 026 2026 quedan pendientes de identificar un PDF rector. El modo de
+planificación no abre Edge ni consulta el portal.
+
+La ejecución requiere seleccionar hasta tres referencias por lote. Primero
+usa SecopDownloader, con un proceso supervisado y 12 s de plazo.
+Sólo un 403 directo sin redirección habilita el streaming. El GET de
+Edge se limita al enlace archivado exacto y al documento esperado.
+Streaming acepta respuesta directa HTTP 200 de PDF, sin compresión,
+con tamaño declarado positivo hasta 10 MiB. Rechaza DOCX, redirecciones,
+respuestas de longitud desconocida y otros tipos. El plazo de
+adquisición es de 12 s más una fase separada de confirmación de cierre.
+El tope de bytes se aplica a EN-01. Los búferes de Edge y del sistema
+operativo quedan fuera de esa medición.
+
+El runner conserva un recibo por DocumentId, un registro de intentos
+durable y las clasificaciones y cobertura localmente. Un intento previo
+no se repite automáticamente. El lote se detiene ante cierre incierto o
+tres fallos consecutivos repartidos en al menos dos procesos. La guarda
+de cierre queda registrada en disco para la siguiente invocación.
+
+**Lote inicial recomendado.** RE-006-2026 (El Espinal), CFDM-27-2026
+(Bogotá) y MC-SEAM-102-2026 (Puerto Gaitán), un rector por proceso.
+Por lote, hasta tres vías directas y tres alternativas, 21 créditos
+como máximo (6 por llamada directa y 1 por GET de Edge), hasta 30 MiB
+de archivos aceptados, 72 s acumulados de adquisición y 6 páginas OCR.
+El límite operativo del runner es 720 s y 0 llamadas de IA.
+Para los seis actualmente elegibles, en dos lotes separados, los
+máximos agregados serían 12 vías, 42 créditos, 60 MiB aceptados,
+144 s de adquisición y 12 páginas OCR. Los otros dos quedan fuera de
+esos presupuestos hasta identificar sus rectores.
+
+Plan offline ya verificado:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path './backend/src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython './backend/scripts/eureka_nacional_stream_recovery.py' `
+  --resume-inventory-from en01-hsxjhqpg
+```
+
+Comando pendiente de autorización para el primer lote:
+
+```powershell
+& $spikePython './backend/scripts/eureka_nacional_stream_recovery.py' `
+  --resume-inventory-from en01-hsxjhqpg `
+  --process 'RE-006-2026' --process 'CFDM-27-2026' --process 'MC-SEAM-102-2026' `
+  --tesseract 'C:/Program Files/Tesseract-OCR/tesseract.exe' --execute
+```
+
+El comando de ejecución y su combinación de vías se verificaron con
+pruebas offline de enrutamiento, idempotencia y cierre. La ruta
+contra SECOP conserva la evidencia de las sondas anteriores.
+Esta fase terminó con el plan y las regresiones, sin consultas CDP,
+inventarios, feed ni descargas reales.
