@@ -1788,3 +1788,46 @@ pruebas offline de enrutamiento, idempotencia y cierre. La ruta
 contra SECOP conserva la evidencia de las sondas anteriores.
 Esta fase terminó con el plan y las regresiones, sin consultas CDP,
 inventarios, feed ni descargas reales.
+
+
+### Resultado de la recuperación acotada de El Espinal, Bogotá y Puerto Gaitán
+
+Se ejecutó una sola vez el comando autorizado de 4152844 el 24 de
+noviembre de 2026. El inventario provino de en01-hsxjhqpg. Los
+tres GET directos con urllib recibieron HTTP 403 en cabeceras,
+sin redirecciones. Cada 403 activó un único GET en Edge CDP Streaming.
+Las tres respuestas fueron HTTP 200 y se leyeron hasta EOF.
+En todos los casos coincidieron los tamaños declarados y observados,
+se verificaron firma PDF y SHA-256 al reabrir el archivo, y se
+confirmaron el cierre del flujo y el cierre de la pestaña.
+
+| Proceso | DocumentId | Bytes verificados | urllib / CDP | Cobertura del rector |
+| --- | --- | ---: | ---: | --- |
+| El Espinal RE-006-2026 | 896145404 | 489.274 | 3,672 s / 1,266 s | 48 de 48 páginas nativas |
+| Bogotá CFDM-27-2026 | 896092556 | 540.269 | 3,390 s / 0,844 s | 10 de 10 páginas nativas |
+| Puerto Gaitán MC-SEAM-102-2026 | 896045300 | 2.630.258 | 3,500 s / 1,234 s | 2 de 41 páginas por OCR. Quedaron 39 pendientes. |
+
+| Proceso | Estado formal | Prioridad comercial | Evidencia y límites de cobertura |
+| --- | --- | --- | --- |
+| El Espinal | not_resolved | explicit_requirement | Págs. 7 y 14. Exige un contrato o certificación de objeto o actividades relacionados. La pág. 7 indica al menos el 100 % del presupuesto oficial. Quedaron 16 elementos no excluidos del inventario sin revisar. |
+| Bogotá | experience_ambiguous | limited_or_ambiguous | Pág. 6, numeral 19. La tabla menciona hasta tres certificaciones o contratos similares, ejecutados en los tres años anteriores, por una suma de al menos el 100 % del presupuesto oficial. La pág. 8 menciona requisitos de experiencia entre las causales de rechazo. El clasificador mantuvo alcance limitado y la lectura de la tabla requiere corroboración. Quedaron 3 elementos del inventario sin revisar. |
+| Puerto Gaitán | not_resolved | insufficient_evidence | Las págs. 1 y 2 produjeron texto OCR sin una afirmación decisiva. Quedaron 39 páginas del rector escaneado y tres documentos complementarios sin analizar. |
+
+El lote consumió 21 créditos presupuestarios por seis GET efectivos y
+aceptó 3.659.801 bytes. La suma de adquisición fue de 13,906 s
+(10,562 s de la vía directa supervisada y 3,344 s de streaming).
+La extracción sumó 14,688 s y 5,938 s de CPU nativa.
+De 99 páginas totales, se recuperaron 58 nativas y 2 por OCR.
+Hubo tres rechazos HTTP en la vía directa, cero fallos finales de
+recuperación o extracción, cero reintentos, cero IA y cero solicitudes
+al feed o a inventarios. Quedaron cero ausencias explícitas o
+confirmadas. El caso con cobertura parcial quedó como evidencia
+insuficiente.
+
+La relectura del plan offline marcó los tres rectores como
+already_verified. Los recibos, hashes, trazas depuradas y evidencia
+detallada quedaron excluidos de Git en
+.local/eureka-nacional-spike/en01-stream_hsxjhqpg. No quedó un cierre
+incierto. Permanecen tres candidatos con rector PDF elegible y otros
+dos pendientes de identificar un rector PDF verificable. Una
+recuperación posterior requiere autorización nueva.

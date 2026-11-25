@@ -396,6 +396,23 @@ procesos. urllib va primero y CDP Streaming se habilita sólo ante un 403
 directo, con HTTP 200 PDF, tamaño declarado y cierre verificable.
 No se ejecutaron recuperaciones ni consultas nuevas.
 
+## Recuperación acotada ejecutada en tres procesos
+
+El [lote autorizado](eureka-nacional-experience-spike.md#resultado-de-la-recuperación-acotada-de-el-espinal-bogotá-y-puerto-gaitán)
+recuperó los PDF de El Espinal, Bogotá y Puerto Gaitán. Los tres
+403 directos de urllib activaron CDP Streaming. Hubo tres HTTP 200,
+tres archivos verificados, 21 créditos y tres cierres confirmados.
+Se leyeron 58 páginas nativas y 2 por OCR. Puerto Gaitán mantiene
+39 páginas pendientes. No hubo feed, inventarios, reintentos ni IA.
+
+El Espinal tiene prioridad de exigencia aplicable y sigue
+not_resolved. Bogotá quedó experience_ambiguous, con alcance pendiente
+de corroborar. Puerto Gaitán quedó not_resolved por evidencia
+insuficiente. Ningún caso presenta ausencia confirmada. Los tres
+recibos se reconocieron al releer el plan local. Quedan tres
+rectores PDF elegibles y dos procesos pendientes de identificar
+rector. No se ejecutó otro lote.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
