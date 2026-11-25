@@ -320,6 +320,21 @@ incorporó. Se ejecutaron cinco casos de laboratorio en loopback y 134
 regresiones pasaron, con una omitida. No hubo solicitudes a SECOP,
 consultas al feed ni reanudación de los 12 procesos.
 
+## Importación asistida y reanudación offline
+
+El [procedimiento del importador](eureka-nacional-experience-spike.md#importación-asistida-y-reanudación-offline)
+recibe un manifiesto local por referencia y DocumentId. Valida contra el
+inventario y conserva recibos, cobertura y extracciones reutilizables.
+Los 12 inventarios están disponibles en el lote en01-hsxjhqpg.
+
+Se importó sólo el rector 896148933 de Moniquirá. Se leyeron las 22
+páginas nativas, sin OCR. La página 11 exige dos contratos relacionados.
+El caso queda explicit_requirement en prioridad comercial y not_resolved
+como conclusión formal, con tres documentos pendientes. La repetición
+reutilizó el binario y la extracción. Los otros 11 siguen sin importar.
+Pasaron 164 pruebas, con una omitida y cero solicitudes de red. El estado
+de importación se conserva localmente en en01-manual_hsxjhqpg.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

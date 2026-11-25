@@ -1453,3 +1453,79 @@ propone otra sonda real de descarga nativa: repetir el clic con el PDF de
 Moniquirá no resolvería los límites demostrados en laboratorio. Los 12
 procesos siguen pendientes. Esta evaluación usó solo archivos locales y
 loopback, sin tráfico al feed ni a SECOP.
+
+
+### Importación asistida y reanudación offline
+
+El importador lee la selección y los inventarios archivados. El manifiesto
+asocia la referencia SECOP y el DocumentId con una copia de disco que el
+operador identificó en el portal. Se verifica ese par contra el inventario,
+aunque el nombre local sea distinto. El almacenamiento existente comprueba
+firma y estructura básica y permite reabrir el archivo con verificación de
+tamaño, SHA-256 y tipo.
+
+El flujo registra procedencia manual, cobertura y evidencia con locadores.
+Reutiliza el extractor, OCR selectivo y los cuatro estados formales de EN-01.
+Los archivos faltantes quedan pendientes y pueden impedir una conclusión
+formal. Se mantienen 10 MiB por archivo, 24 documentos acumulados por lote
+y 3 por proceso. Cada ejecución mantiene 2 páginas OCR por PDF, hasta 48
+derivadas del tope documental, y el plazo de 720 s, con el margen existente
+para iniciar extracción. Usa cero créditos de red y cero llamadas de IA.
+
+#### Validación con Moniquirá
+
+Se importó exclusivamente el rector 896148933 de CM-MC-004-2026.
+El archivo de 595.065 bytes produjo texto nativo en sus 22 páginas,
+sin OCR ni páginas pendientes dentro del PDF. La página 11, sección
+Experiencia general, exige al menos dos contratos ejecutados
+satisfactoriamente cuyo objeto o alcance esté relacionado con el objeto
+a contratar. La prioridad comercial es explicit_requirement. El estado
+formal sigue not_resolved con requirement_requires_corroboration
+porque el inventario conserva tres documentos sin importar.
+
+La ejecución tomó 3,969 s, con 3,703 s de extracción. La repetición
+verificó el archivo y reutilizó el recibo y la extracción en 0,171 s.
+Quedó un solo binario por hash, con cero errores. El lote conserva
+los 12 inventarios y los otros 11 procesos siguen sin copias importadas.
+Pasaron 164 pruebas offline, una quedó omitida y Ruff pasó.
+
+#### Incorporación de las siguientes copias
+
+1. Consultar processes.json y documents.json en
+   .local/eureka-nacional-spike/en01-hsxjhqpg. Para cada copia manual,
+   tomar el process_reference de la fila y el document_id de su inventario.
+2. Agregar una fila al manifiesto local. Ambos identificadores son cadenas.
+   La ruta file puede ser absoluta o relativa al directorio del manifiesto.
+   Se pueden presentar sólo las copias nuevas. El recibo anterior permite
+   incorporar al resultado las copias ya importadas.
+
+```json
+[
+  {
+    "process_reference": "referencia-exacta-del-archivo-processes.json",
+    "document_id": "12345",
+    "file": "copias/Invitacion.pdf"
+  }
+]
+```
+
+3. Ejecutar desde el worktree experimental con spikePython apuntando al
+   Python del entorno existente.
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path './backend/src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython './backend/scripts/eureka_nacional_manual_import.py' `
+  --resume-inventory-from en01-hsxjhqpg `
+  --manifest './.local/eureka-nacional-spike/manual-en01-hsxjhqpg.json' `
+  --tesseract 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+```
+
+La salida persistente está en .local/eureka-nacional-spike/en01-manual_hsxjhqpg.
+Revisar review_queue.json, experience_requirements.json, documents.json y
+errors.json. El manifiesto, los binarios y los resultados detallados
+quedan fuera de Git. Si se ofrece un archivo distinto para un DocumentId
+ya registrado, se conserva la copia verificada anterior y se registra el
+conflicto. Tras una interrupción del sistema, si queda .import.lock,
+comprobar que no hay otro importador activo antes de quitarlo. No se
+consultó SECOP, CDP ni el feed durante la validación.
