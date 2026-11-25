@@ -1370,3 +1370,86 @@ Edge Fetch volvió a registrar MissingAllowOriginHeader en 0,579 s,
 con limpieza confirmada. Se conservó la traza depurada localmente.
 Se completaron los dos intentos en 5,734 s totales y 8 créditos,
 sin PDF guardado ni consultas al feed.
+
+
+### Evaluación offline de descarga nativa con Edge CDP
+
+La descarga por clic se puede automatizar y observar. Los eventos de CDP
+permiten controlar qué archivo se conserva y solicitar la cancelación, con
+un margen entre la transferencia y su notificación. Bajo el límite actual
+de 10 MiB de transferencia y 12 s por intento, el control resulta
+insuficiente para habilitar la vía automática.
+
+#### Secuencia observada
+
+En el laboratorio, el clic sobre un enlace produjo una descarga nativa
+entre dos orígenes locales sin leer el cuerpo desde JavaScript. Para una
+adquisición autorizada, se usaría el control visible o un enlace de
+inventario validado por HTTPS, host, ruta, DocumentId exacto y referencia
+del proceso. Los parámetros de la URL se conservarían en memoria. El evento
+Browser.downloadWillBegin se correlaciona con el marco esperado y el enlace
+validado. Si hay un destino final distinto o no se puede establecer esa
+correspondencia, se descarta el archivo. Esa verificación de identidad no
+impide por sí sola que una redirección ya haya iniciado tráfico.
+
+Browser.setDownloadBehavior con allowAndName y eventsEnabled habilita
+un directorio temporal por intento y usa el GUID como nombre. El ajuste
+abarca el contexto de navegador, incluidas sus otras pestañas, y requiere
+uso exclusivo del Edge dedicado y restaurar el comportamiento anterior
+al terminar. Un contexto nuevo de laboratorio no comparte la sesión
+autorizada. Browser.downloadProgress informa bytes y estado por GUID.
+Usar sólo el archivo regular esperado dentro del directorio temporal al
+recibir completed. La ruta opcional del evento puede faltar, y el archivo
+debe comprobarse en disco. Browser.cancelDownload requiere el GUID y
+debe confirmarse con el estado canceled. La orden por sí sola no confirma
+que se haya retirado el archivo parcial.
+
+[Protocolo Browser de CDP](https://chromedevtools.github.io/devtools-protocol/tot/Browser/)
+
+#### Pruebas offline y límites observados
+
+Edge 158.0.4370.33 ejecutó un laboratorio temporal con perfil aislado,
+dos servidores de loopback y archivos sintéticos. Los plazos reducidos
+del laboratorio forzaron los casos de error. El presupuesto de EN-01
+sigue siendo de 10 MiB y 12 s.
+
+| Caso | Resultado |
+| --- | --- |
+| PDF válido de 431 bytes | Inicio asociado con el enlace y marco correctos, archivo GUID, estado completed, una página y SHA-256 idéntico al de la prueba |
+| 12 MiB declarados | CDP permitió cancelar al ver el total antes de contabilizar bytes de cuerpo |
+| 12 MiB rápidos sin tamaño declarado | El primer progreso que mostró bytes ya registraba 12 MiB. Una ejecución incluso dejó un archivo de ese tamaño en staging tras canceled |
+| Pausa en el cuerpo después del inicio | El plazo disparó la cancelación por GUID y el caso terminó sin archivo final |
+| Respuesta sin cabeceras al vencer el plazo | No hubo evento de inicio ni GUID sobre el cual ordenar la cancelación |
+
+CDP carece de un tope de bytes de transporte y un plazo estricto para la
+descarga nativa. Un sondeo de disco tampoco adelanta los eventos ni vacía
+los buffers del navegador. El plazo local permite detectar y descartar un
+resultado tardío. La confirmación de cancelación puede llegar después del
+plazo y, antes del GUID o si se pierde CDP, no puede garantizarse. Tras un
+fallo sin cancelación confirmada, se detiene la adquisición, se aísla el
+staging y se comprueba su limpieza antes de continuar. Pasaron 134
+regresiones de EN-01 y Edge y una quedó omitida.
+
+#### Continuidad con archivos locales
+
+La alternativa simple es incorporar copias que el operador ya haya
+descargado por el portal. La copia disponible de Moniquirá, CM-MC-004-2026 y
+DocumentId 896148933, se verificó en solo lectura. Tiene firma PDF,
+595.065 bytes y 22 páginas. No se incorporó al estado de reanudación.
+
+Antes de conservar una copia, asociarla explícitamente con la referencia y
+DocumentId del inventario y documentar el origen de esa asociación. El nombre
+del archivo y su hash no acreditan por sí solos la identidad contractual.
+Comprobar tamaño real, firma y lectura estructural del PDF o DOCX esperado.
+Almacenar mediante LocalBinaryStorage y verificar el SHA-256 y tamaño al
+abrirlo. Reutilizar el recibo de DownloadState por DocumentId y extensión
+antes de solicitar otra copia. Serializar la reanudación de en01-hsxjhqpg y
+conservar las razones de rechazo por documento, sin volver al feed.
+
+En una adquisición posterior, tres fallos consecutivos repartidos entre al
+menos dos procesos activarían el corte existente. La pérdida de sesión,
+de correlación o de control de cancelación exigiría parar antes. No se
+propone otra sonda real de descarga nativa: repetir el clic con el PDF de
+Moniquirá no resolvería los límites demostrados en laboratorio. Los 12
+procesos siguen pendientes. Esta evaluación usó solo archivos locales y
+loopback, sin tráfico al feed ni a SECOP.

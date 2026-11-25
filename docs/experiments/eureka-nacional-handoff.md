@@ -304,6 +304,22 @@ sus claves y su estado local. Fetch sigue desactivado por defecto. La
 recuperación está pendiente y requiere autorización adicional. El piloto
 terminó en los dos intentos concedidos.
 
+## Evaluación offline de descarga nativa con Edge CDP
+
+El [laboratorio de Edge](eureka-nacional-experience-spike.md#evaluación-offline-de-descarga-nativa-con-edge-cdp)
+validó el clic, los eventos por GUID, el staging aislado y la cancelación
+cuando ya existe un GUID. Una respuesta rápida sin tamaño declarado
+transfirió 12 MiB antes de poder cancelar. Una respuesta que demoró las
+cabeceras agotó el plazo sin proporcionar GUID. El mecanismo nativo no
+se recomienda para adquisición automática con los topes vigentes.
+
+La alternativa es verificar e incorporar copias autorizadas ya disponibles,
+con el inventario y los recibos de EN-01 por DocumentId. La copia local
+de Moniquirá tiene firma PDF, 595.065 bytes y 22 páginas. Todavía no se
+incorporó. Se ejecutaron cinco casos de laboratorio en loopback y 134
+regresiones pasaron, con una omitida. No hubo solicitudes a SECOP,
+consultas al feed ni reanudación de los 12 procesos.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
