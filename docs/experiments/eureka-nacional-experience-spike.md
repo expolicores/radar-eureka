@@ -1317,29 +1317,47 @@ y las resoluciones en un directorio local de reanudación ligado a
 la corrida original. Las reanudaciones de un mismo lote deben
 ejecutarse de forma serial para compartir correctamente ese avance.
 
-Después de una autorización específica, iniciar con una reanudación
-de un proceso y dos intentos máximos para comprobar el diagnóstico
-de `urllib`, el comportamiento Fetch/CORS y la cancelación. Si la
-validación lo permite, una autorización siguiente puede aplicar el
-mismo flujo al resto del lote. El comando preparado para ese lote
-desde el worktree experimental es:
-
-```powershell
-$env:PYTHONPATH = (Resolve-Path '.\backend\src').Path
-$env:PYTHONDONTWRITEBYTECODE = '1'
-& $spikePython '.\backend\scripts\eureka_nacional_en01.py' --exploratory `
-  --resume-inventory-from en01-hsxjhqpg --processes 12 --documents 24 --ocr-pages 2 `
-  --edge-download-fallback --cdp-url 'http://127.0.0.1:9232' `
-  --tesseract 'C:\Program Files\Tesseract-OCR\tesseract.exe'
-```
-
-Para el piloto de un proceso, sustituir `--processes 12 --documents 24`
-por `--processes 1 --documents 2`. Mantener 200 créditos, 720 s, el
-tope ordinario de 10 MiB y 2 páginas OCR por PDF y 48 en total para
-el lote. No se ejecutó el piloto ni se reanudaron los 12 procesos.
+La prueba prevista quedó sustituida por la validación puntual siguiente. El
+runner genérico de reanudacion seleccióna los pendientes por orden. Limitarlo
+a un proceso no fija la selección en Moniquirá.
 
 Pasaron 262 pruebas offline. Las regresiones cubren éxito, fallos de
 ambas vías, activación solo ante HTTP 403, presupuesto de intento,
 cancelación, tamaño, plazo, tipo, reutilización y reanudación sin
 feed. Una simulación offline ejecutó el JavaScript de control y
 verificó la señal de aborto por tamaño declarado, sobrelectura y plazo.
+
+
+### Validación real de Fetch en Moniquirá
+
+El 24 de noviembre de 2026 se validó el PDF rector de CM-MC-004-2026,
+DocumentId 896148933, contra el inventario vigente del mismo proceso. El
+enlace coincidió con el archivado y no tenía parámetros adicionales.
+Hubo dos consultas a la primera página de ese inventario, ambas HTTP 200.
+La primera se detuvo localmente antes de descargar porque el título vigente
+omitía el sufijo .pdf. El segundo paso verificó ruta, identificador único y
+formato, y confirmó que los títulos coincidían al ignorar dicho sufijo.
+
+| Intento | Vía | Observación | Tiempo |
+| --- | --- | --- | ---: |
+| 1 | urllib | HTTP 403 en cabeceras, HTTPError, text/html, sin redirecciones | 2,422 s |
+| 2 | Edge CDP Fetch | edge_fetch_rejected antes de leer el cuerpo. CDP registró MissingAllowOriginHeader | 0,625 s |
+
+Sólo el 403 activó el fallback. Fetch no expuso código HTTP a la página y la
+limpieza del lector quedó confirmada. CDP identificó una respuesta sin la
+cabecera CORS requerida para leer el recurso desde Licitaciones.info. La
+descarga anterior por clic había devuelto un PDF de 595.065 bytes. Esa
+navegación y Fetch tienen distintos requisitos de acceso al cuerpo. La causa
+del 403 de urllib sigue indeterminada.
+
+Ambos intentos finalizaron dentro de los 12 s por intento y no se almacenaron
+bytes de PDF. En esta prueba no se pudo verificar la integridad del archivo
+ni ejercitar la guarda de 10 MiB durante una transferencia. La fase que
+incluyó los dos intentos y la consulta de inventario tardó 5,687 s y consumió
+8 créditos del runner. El prechequeo anterior sumó una consulta y un crédito.
+Las trazas depuradas quedaron en el almacenamiento local excluido de Git.
+
+El resultado deja Fetch desactivado por defecto y la recuperación de los
+12 procesos pendiente. No se consultó el feed nacional ni se procesaron
+otros documentos. Cualquier siguiente prueba o recuperación requiere
+autorización adicional.

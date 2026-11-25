@@ -288,12 +288,17 @@ cancela al superar la guarda o el plazo. La vía permanece desactivada
 por defecto hasta comprobar Fetch/CORS con una prueba real autorizada.
 Pasaron 262 pruebas offline.
 
-La reanudación conserva los procesos pendientes de `en01-hsxjhqpg`
-y sus claves, refresca únicamente sus inventarios y reutiliza
-binarios verificados y resultados ya resueltos. Quedó preparado
-el comando para un piloto de un proceso y dos intentos, seguido
-del lote de 12 solo con autorización adicional. No se hizo una
-nueva descarga ni una corrida nacional.
+La [validación real de Moniquirá](eureka-nacional-experience-spike.md#validación-real-de-fetch-en-moniquirá)
+confirmó el enlace vigente del rector 896148933. El GET directo devolvió
+HTTP 403. Edge Fetch se activó y CDP registró MissingAllowOriginHeader,
+sin lectura del cuerpo y con limpieza confirmada. Ninguna vía guardó
+el PDF. Los dos intentos respetaron el plazo observado de 12 s por
+intento. No hubo nuevas consultas al feed ni descargas de otros procesos.
+
+La reanudación mantiene los 12 procesos pendientes de en01-hsxjhqpg,
+sus claves y su estado local. Fetch sigue desactivado por defecto. La
+recuperación está pendiente y requiere autorización adicional. El piloto
+terminó en los dos intentos concedidos.
 
 ## Plan aplicado para el segundo smoke
 
