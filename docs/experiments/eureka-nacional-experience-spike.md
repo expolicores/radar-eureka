@@ -1596,3 +1596,51 @@ plazo y estado de cierre sin guardar URL completa, cabeceras ni datos
 de sesión. El éxito requiere identidad verificable, el mismo contenido
 y cierre confirmado. El laboratorio no realizó esa sonda, solicitudes
 a SECOP ni recuperaciones de los otros 11 procesos.
+
+
+#### Resultado de la sonda real de streaming en Moniquirá
+
+La sonda autorizada del 24 de noviembre de 2026 usó el enlace archivado
+validado de CM-MC-004-2026, DocumentId 896148933. Se abrió una pestaña
+desechable desde el origen autorizado del Edge dedicado. La pausa CDP
+en la etapa de solicitud permitió continuar un único GET exacto y
+exigir la pausa de su respuesta. Se observó una solicitud al destino.
+No hubo reintentos, consultas al inventario ni consultas al feed.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Respuesta interceptada | HTTP 200, application/pdf, longitud declarada de 595.065 bytes |
+| Cuerpo | Lectura hasta EOF, 595.065 bytes en 1,203 s |
+| Comparación local | Mismo tamaño, firma PDF y SHA-256 que la copia manual verificada |
+| Cierre | Acuses de IO.close y aborto de la navegación interceptada. Cierre de la pestaña confirmado en 0,063 s |
+| Límites | 10 MiB aceptados por EN-01 y 12 s de adquisición |
+
+Se reutilizó la lectura por bloques y el cierre independiente del laboratorio.
+La sonda dejó una traza depurada en el almacenamiento local excluido de Git.
+La copia de referencia se conservó como único binario para el análisis.
+La sesión original de Edge siguió disponible. La adquisición está validada
+para este PDF y enlace. Quedan por validar otros formatos, encaminamientos
+y respuestas de SECOP. Los límites se aplican a los bytes aceptados y a
+la espera de EN-01. El cierre de la pestaña no mide el tráfico que ya
+entró en los búferes del navegador o el sistema operativo.
+
+#### Continuidad propuesta para los 11 procesos pendientes
+
+Con autorización separada, empezar con un lote de hasta tres procesos
+distintos de en01-hsxjhqpg, un rector por proceso y tres intentos totales.
+Reutilizar la selección archivada, los recibos por DocumentId y el
+almacenamiento por hash. Dejar Moniquirá fuera de futuras descargas
+por su recibo existente. Usar enlaces cuya identidad y completitud
+puedan verificarse. Si un enlace está incompleto, dejar constancia y
+omitirlo hasta autorizar, si se requiere, el refresco de ese inventario.
+No se necesita repetir el discovery.
+
+Habilitar el candidato a streaming sólo en EN-01 y de forma optativa.
+Mantener un documento por vez, 10 MiB aceptados y 12 s de adquisición
+por intento. Reutilizar las guardas de extracción y OCR selectivo de
+hasta dos páginas por PDF y cero IA. Marcar el documento pendiente
+si falla la validación. Bloquear tras un cierre incierto y detener el
+piloto ante tres fallos consecutivos repartidos en al menos dos procesos
+o al agotar el cupo. Publicar sólo métricas agregadas. Cualquier
+continuación hacia los otros pendientes requerirá evaluar el piloto y
+obtener autorización. El runner y los 11 procesos siguen sin cambios.

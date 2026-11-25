@@ -351,6 +351,20 @@ Moniquirá 896148933 queda propuesta y requiere autorización posterior.
 No se llamó a SECOP, inventarios ni feed. Los otros 11 procesos siguen
 pendientes. Pasaron 164 regresiones y una quedó omitida.
 
+## Sonda real de streaming con Edge CDP
+
+La [sonda de Moniquirá](eureka-nacional-experience-spike.md#resultado-de-la-sonda-real-de-streaming-en-moniquirá)
+interceptó HTTP 200 para el rector 896148933 en un único GET. Leyó
+595.065 bytes hasta EOF en 1,203 s. Tamaño, firma PDF y SHA-256 coincidieron
+con la copia manual. Se confirmaron el cierre del flujo, el aborto de
+la navegación interceptada y el cierre de la pestaña desechable. No
+hubo reintentos ni consultas al feed o inventarios.
+
+El mecanismo queda validado para ese documento. El runner sigue sin
+cambios. Los 11 procesos restantes siguen pendientes. El informe
+propone hasta tres rectores de tres procesos archivados como siguiente
+lote, con autorización separada, sin repetir discovery.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
