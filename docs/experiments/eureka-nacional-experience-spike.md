@@ -1644,3 +1644,62 @@ piloto ante tres fallos consecutivos repartidos en al menos dos procesos
 o al agotar el cupo. Publicar sólo métricas agregadas. Cualquier
 continuación hacia los otros pendientes requerirá evaluar el piloto y
 obtener autorización. El runner y los 11 procesos siguen sin cambios.
+
+
+### Piloto de recuperación CDP Streaming en tres procesos archivados
+
+El piloto seleccionó tres PDF identificados como rectores por el inventario
+de en01-hsxjhqpg, con un candidato de título explícito por proceso y sin
+recibo o hash persistido en las corridas anteriores. Los enlaces se
+validaron localmente por HTTPS, ruta e identificador. La identidad del
+destino se comprobó de nuevo al interceptar la respuesta. Moniquirá
+quedó excluido por su recibo de importación.
+
+| Proceso | DocumentId | HTTP | Bytes | Adquisición | Cobertura del PDF | Clasificación formal y prioridad automática |
+| --- | --- | --- | ---: | ---: | --- | --- |
+| Caicedonia 2026-351 | 896141381 | 200 | 393.913 | 1,141 s | 20/20 páginas nativas | not_resolved, documentary_silence |
+| Maicao MC-MM-038-2026 | 896113617 | 200 | 426.892 | 0,703 s | 37/37 páginas nativas | not_resolved, explicit_requirement |
+| Fondo Rotatorio de la Registraduría MC-IP-04-2026- FRR | 896145730 | 200 | 506.071 | 1,234 s | 21/21 páginas nativas | not_resolved, insufficient_evidence |
+
+Se leyó cada respuesta hasta EOF. Coincidieron los tamaños declarados y
+observados. Los tres binarios pasaron firma PDF, estructura básica y
+relectura por SHA-256. En los tres se confirmaron cierre del flujo,
+aborto de la navegación interceptada y cierre de la pestaña. Los
+SHA-256 completos, recibos, cobertura y trazas depuradas quedaron en
+.local/eureka-nacional-spike/en01-cdp-pilot_cj40v9j7, excluido de Git.
+Los tres GET sumaron 1.326.876 bytes y 3,078 s de adquisición. El
+piloto completo tardó 19,891 s, con 78 páginas nativas, cero OCR y
+cero IA. No hubo reintentos ni nuevas consultas a inventarios o feed.
+
+**Revisión offline de las discrepancias**
+
+- Caicedonia, página 8. El documento sitúa en requisitos mínimos
+  habilitantes la instrucción de anexar al menos tres certificaciones
+  de experiencia en contratos similares ejecutados. El clasificador
+  leyó las frases como condicionales de alcance indeterminado y asignó
+  silencio. La evidencia amerita revisar ese falso silencio. Quedan
+  dos documentos sin analizar y la invitación remite a estudios previos.
+- Maicao, páginas 14 y 15. La invitación expone requisitos de
+  experiencia para el proponente y distingue cómo acreditarla para
+  mipymes, empresas de mujeres y otros oferentes. La prioridad
+  automática es exigencia aplicable. Diez documentos no excluidos
+  quedaron pendientes y el estado formal sigue abierto.
+- Registraduría, páginas 1 y 11. El encabezado de plantilla dice
+  Formato Invitación Pública. Debajo, la portada identifica de forma
+  expresa la Invitación Pública 04 de 2026 FRR y su objeto para Boyacá.
+  La regla de portada rebajó automáticamente el rector a soporte.
+  La página 11 exige acreditar contratos ejecutados de objeto similar
+  por una suma al menos igual al presupuesto oficial. La prioridad
+  automática sigue insuficiente y corresponde revisar esa decisión.
+  Cinco documentos quedaron pendientes.
+
+Tres de tres adquisiciones en un intento, junto con la sonda anterior,
+justifican proponer recuperación progresiva de PDF con la misma ruta,
+esos límites y el mismo corte ante cierre incierto. Los resultados
+cubren archivos menores de 0,5 MiB con longitud declarada. Quedan
+sin validar DOCX, PDF más grandes, redirecciones y respuestas sin
+longitud en SECOP. La muestra verifica adquisición bajo estas
+condiciones. Las discrepancias de clasificación requieren revisión
+separada. Los tres procesos mantienen corroboración pendiente y
+otros ocho siguen sin una copia recuperada de su rector. Un lote
+posterior requiere autorización nueva. No se cambió el runner.

@@ -365,6 +365,22 @@ cambios. Los 11 procesos restantes siguen pendientes. El informe
 propone hasta tres rectores de tres procesos archivados como siguiente
 lote, con autorización separada, sin repetir discovery.
 
+## Piloto de recuperación CDP Streaming en tres procesos archivados
+
+El [piloto](eureka-nacional-experience-spike.md#piloto-de-recuperación-cdp-streaming-en-tres-procesos-archivados)
+recuperó tres PDF de Caicedonia, Maicao y la Registraduría. Tres GET
+HTTP 200, tres cierres confirmados y 1.326.876 bytes verificados. La
+extracción recuperó 78 páginas nativas, con cero OCR y cero IA.
+El estado formal quedó not_resolved en los tres. La revisión
+encontró un falso silencio en Caicedonia y una rebaja de rector a
+soporte por el encabezado de plantilla en la Registraduría. Maicao
+quedó con prioridad de exigencia aplicable.
+
+Los binarios y recibos se conservan localmente. Ocho procesos aún
+carecen de copia recuperada del rector. No hubo reintentos, consultas
+al feed, refresco de inventarios ni cambios en el runner. La
+recuperación progresiva necesita una autorización adicional.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
