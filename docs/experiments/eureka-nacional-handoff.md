@@ -295,6 +295,10 @@ sin lectura del cuerpo y con limpieza confirmada. Ninguna vía guardó
 el PDF. Los dos intentos respetaron el plazo observado de 12 s por
 intento. No hubo nuevas consultas al feed ni descargas de otros procesos.
 
+Tras recargar Edge, el inventario devolvió el mismo enlace y reaparecieron
+HTTP 403 en urllib y MissingAllowOriginHeader en Fetch. La repetición
+terminó tras dos intentos, sin PDF ni consultas al feed.
+
 La reanudación mantiene los 12 procesos pendientes de en01-hsxjhqpg,
 sus claves y su estado local. Fetch sigue desactivado por defecto. La
 recuperación está pendiente y requiere autorización adicional. El piloto

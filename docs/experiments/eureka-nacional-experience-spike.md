@@ -1361,3 +1361,12 @@ El resultado deja Fetch desactivado por defecto y la recuperación de los
 12 procesos pendiente. No se consultó el feed nacional ni se procesaron
 otros documentos. Cualquier siguiente prueba o recuperación requiere
 autorización adicional.
+
+### Repetición tras recargar Edge
+
+Tras la recarga manual, una consulta al inventario respondió HTTP 200 y
+confirmó el mismo enlace. urllib devolvió HTTP 403 en 2,531 s.
+Edge Fetch volvió a registrar MissingAllowOriginHeader en 0,579 s,
+con limpieza confirmada. Se conservó la traza depurada localmente.
+Se completaron los dos intentos en 5,734 s totales y 8 créditos,
+sin PDF guardado ni consultas al feed.
