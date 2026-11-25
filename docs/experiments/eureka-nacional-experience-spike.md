@@ -1529,3 +1529,70 @@ ya registrado, se conserva la copia verificada anterior y se registra el
 conflicto. Tras una interrupción del sistema, si queda .import.lock,
 comprobar que no hay otro importador activo antes de quitarlo. No se
 consultó SECOP, CDP ni el feed durante la validación.
+
+
+### Laboratorio offline de streaming con Edge CDP
+
+El laboratorio independiente eureka_nacional_cdp_stream_lab.py usa Edge
+158.0.4370.33 con un perfil temporal y dos orígenes HTTP de loopback.
+El clic inicia una navegación normal con el gestor de descargas
+deshabilitado en el contexto. La sesión CDP de la pestaña intercepta
+la respuesta del enlace exacto en la etapa de cabeceras y comprueba
+método, URL y marco. Fetch.takeResponseBodyAsStream y las lecturas
+secuenciales IO.read entregan bloques de hasta 64 KiB. El cuerpo
+sintético verificado se guarda con LocalBinaryStorage y se reabre
+por hash y tamaño. El laboratorio no se conecta al Edge autenticado,
+no ejecuta JavaScript fetch() y no se integra al runner.
+
+| Caso | Resultado observado |
+| --- | --- |
+| PDF válido de 431 bytes | HTTP 200, EOF, SHA-256 de la copia sintética, firma PDF y un archivo verificado. IO.close, aborto de la navegación interceptada y cierre de la pestaña confirmados. |
+| 12 MiB con tamaño declarado | Rechazo al recibir cabeceras. 0 bytes leídos por EN-01 y cierre de la pestaña confirmado. |
+| 12 MiB sin tamaño declarado | Parada en 10.485.760 bytes leídos por EN-01. Cierre de la pestaña confirmado y cero archivos. |
+| Cuerpo detenido y cabeceras tardías | Cada caso agotó el plazo de 12 s en la fase correspondiente. Cierre confirmado en ambos y cero archivos. |
+| PDF truncado | Se leyó la respuesta corta y se rechazó por integridad. Cero archivos. |
+| Canal de la pestaña sin respuesta durante el streaming | La orden de desconexión no recibió acuse en la ventana de 0,75 s. El canal independiente del navegador cerró la pestaña y confirmó el cierre. Cero archivos. |
+| Cierre incierto | Se simuló que el canal independiente no podía confirmar el cierre. La siguiente adquisición se rechazó antes de navegar. Tras destruir el contexto temporal, se creó otro y se verificó un PDF sintético. |
+
+En errores durante el cuerpo, el laboratorio cierra la pestaña con un
+canal CDP independiente. El cierre se trata como fase separada con una
+ventana de confirmación de 2 s. Un acuse de cierre de pestaña no mide los
+bytes ya recibidos por Edge o el sistema operativo ni confirma cuándo
+se interrumpió el envío del servidor. El tope de 10 MiB se aplica al
+cuerpo que entrega CDP a EN-01. El reloj de 12 s detiene la espera
+y excluye resultados tardíos. Una respuesta sin longitud que alcanza
+10 MiB sin EOF se rechaza en ese punto. La diferencia entre abortar
+una navegación ya leída y cerrar una pestaña con cuerpo pendiente se
+conserva en la traza. La pérdida simultánea de confirmación se inyectó
+en laboratorio. No se provocó una caída total de Edge.
+
+Para repetir desde el worktree experimental, con spikePython apuntando
+al entorno existente:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path './backend/src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython './backend/scripts/eureka_nacional_cdp_stream_lab.py'
+```
+
+Pasaron los ocho escenarios del laboratorio, la comprobación de bloqueo
+y la de recuperación. Pasaron 164 regresiones de EN-01 y adquisición,
+con una omitida. Ruff y su comprobación de formato pasaron.
+
+#### Sonda real propuesta, pendiente de autorización
+
+La prueba offline sustenta una sonda de un solo intento sobre el rector
+896148933 de CM-MC-004-2026. Usar el enlace archivado ya confirmado,
+conservar su identidad y utilizar una pestaña desechable en el Edge
+dedicado y autorizado. Limitar la intercepción al destino esperado,
+sin reintentos ni redirecciones adicionales. No consultar feed ni
+inventarios. Si no se puede preservar el contexto autorizado y
+aislar el cierre, detenerse antes de navegar.
+
+Mantener 10 MiB de lectura y 12 s de adquisición, con limpieza acotada y
+bloqueo si el cierre queda incierto. Comparar tamaño, firma y SHA-256 con
+la copia local de 595.065 bytes. Registrar estado HTTP, etapa, bytes,
+plazo y estado de cierre sin guardar URL completa, cabeceras ni datos
+de sesión. El éxito requiere identidad verificable, el mismo contenido
+y cierre confirmado. El laboratorio no realizó esa sonda, solicitudes
+a SECOP ni recuperaciones de los otros 11 procesos.

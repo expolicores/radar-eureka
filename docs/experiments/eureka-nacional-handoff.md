@@ -335,6 +335,22 @@ reutilizó el binario y la extracción. Los otros 11 siguen sin importar.
 Pasaron 164 pruebas, con una omitida y cero solicitudes de red. El estado
 de importación se conserva localmente en en01-manual_hsxjhqpg.
 
+## Laboratorio offline de streaming con Edge CDP
+
+El [laboratorio y la sonda propuesta](eureka-nacional-experience-spike.md#laboratorio-offline-de-streaming-con-edge-cdp)
+validaron el clic entre dos orígenes locales, la pausa de cabeceras y la
+lectura por bloques vía CDP. Tras los rechazos de tamaño, tiempo,
+integridad y pérdida de respuesta del canal no se almacenaron archivos.
+Una simulación de cierre incierto bloqueó la siguiente adquisición hasta
+destruir el contexto y crear uno nuevo. La lectura de EN-01 quedó acotada
+a 10 MiB y la espera a 12 s. El tráfico de los búferes de Edge y del
+sistema operativo queda fuera de ese control.
+
+Se mantiene el runner sin cambios. Una sonda de un solo intento sobre
+Moniquirá 896148933 queda propuesta y requiere autorización posterior.
+No se llamó a SECOP, inventarios ni feed. Los otros 11 procesos siguen
+pendientes. Pasaron 164 regresiones y una quedó omitida.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
