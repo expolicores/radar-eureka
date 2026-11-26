@@ -2003,3 +2003,66 @@ lingüístico futuro debe reconocer mandatos equivalentes de
 forma general y conservar las guardas de cobertura formal.
 Un escaneo sin señal suficiente queda para revisión. La siguiente
 exploración nacional queda pendiente de autorización.
+
+
+### Obligaciones contractuales y selección OCR
+
+El clasificador reconoce mandatos explícitos de aportar, acreditar,
+demostrar o certificar experiencia cuando el sujeto es el oferente.
+También reconoce la construcción pasiva que atribuye la experiencia al
+proponente y exige un contrato ejecutado. Las guardas conservan el alcance
+de supuestos, excepciones, sujetos distintos del oferente y medios
+de acreditación. Cuando OCR daña el sujeto, una obligación en el
+encabezado de experiencia de un rector requiere concordancia con una
+lista de experiencia del proponente y sus certificados en otra página.
+Se conserva el fragmento OCR original. Una exigencia general en rector
+parcial puede elevar la prioridad de revisión si no hay conflicto,
+dependencia, condición limitada ni otro rector o adenda pendiente. La
+cobertura incompleta mantiene el estado formal not_resolved.
+
+| Caso | Evidencia reelaborada por OCR | Prioridad anterior y actual | Estado formal |
+| --- | --- | --- | --- |
+| Puerto Gaitán MC-SEAM-102-2026 | Pág. 15. La experiencia del proponente se acreditará por un contrato ejecutado y finalizado, relacionado con el suministro, por al menos el presupuesto oficial. La pág. 16 describe medios de acreditación. | Evidencia insuficiente a exigencia aplicable | not_resolved, 4/41 páginas acumuladas y 37 pendientes |
+| Rionegro 492-2026-OC | Pág. 11. Mandato de aportar experiencia específica verificable relacionada con el objeto. El sujeto dañado en OCR se corroboró con la lista de experiencia del proponente y certificados de la pág. 4. | Evidencia insuficiente a exigencia aplicable | not_resolved, 4/12 páginas acumuladas y 8 pendientes |
+
+El nuevo replay volvió a leer exclusivamente las páginas 15 y 16,
+y 4 y 11, respectivamente. Las cuatro se recuperaron. La extracción
+sumó 17,188 s. No se detectó ausencia de experiencia. La prioridad
+nueva se conserva en el replay, separado de las decisiones históricas.
+Los fragmentos, locadores y resultados quedaron localmente en
+en01-context-ocr_6lacneav.
+
+#### Señales del selector
+
+Se incorporó lectura acotada de destinos de marcadores PDF titulados
+Experiencia o Requisitos habilitantes. El selector conserva su lectura
+de índices impresos y encabezados a partir del texto nativo. Sólo
+prioriza destinos de páginas visitadas que requieren OCR. Una prueba
+con marcadores pertinentes e irrelevantes comprobó que los primeros
+desplazan la portada y que se respeta el máximo de dos páginas.
+
+Los dos PDF locales son escaneos sin texto ni marcadores. El selector
+sin indicaciones eligió 1 y 2 en los dos casos. La prueba experimental
+sin texto comparó vistas de baja resolución y puntuó líneas cortas con
+tinta densa separadas del cuerpo por espacios. Produjo 7 y 5 para
+Puerto Gaitán, y 1 y 3 para Rionegro. Ninguna pareja alcanzó las
+cláusulas principales. La maquetación sólo aporta una señal estructural
+y la heurística no se activó. La selección automática de páginas
+relevantes para escaneos sin señales sigue pendiente. Se mantiene
+el presupuesto de dos páginas OCR por PDF.
+
+Pasaron 195 pruebas offline y una quedó omitida. El replay de los
+cinco casos conocidos (Pore, El Plato, La Capilla y Chivatá 21 y 22)
+no mostró discrepancias ni falsos positivos o negativos de evidencia
+favorable. Los controles nuevos cubren condiciones, alcance diferenciado,
+terceros, instrucciones de acreditación, negaciones, rector parcial
+y adenda pendiente. No hubo CDP, SECOP, consultas al feed, nuevas
+descargas ni IA.
+
+Los dos casos se interpretan correctamente cuando la cláusula está
+disponible y se guarda como prioridad de revisión. Se recomienda
+autorizar una siguiente muestra nacional de hasta 15 procesos nuevos
+con exclusión histórica, universo comercial y presupuestos vigentes.
+Medir por separado adquisición, cobertura habilitante y clasificación.
+Los escaneos con cobertura limitada quedan abiertos. La nueva
+exploración requiere autorización.

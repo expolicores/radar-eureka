@@ -126,6 +126,43 @@ OFFER_EXPERIENCE_CERTIFICATES = re.compile(
 NUMBERED_INVITATION = re.compile(
     r"^invitacion publica n(?:o\.?|[\u00b0\u00ba])?\s*\d+.{0,24}\b20\d{2}\b"
 )
+BIDDER_MANDATE = re.compile(
+    r"\b(?:el|los) (?:proponentes?|oferentes?|licitantes?) "
+    r"debe(?:ra|ran)? (?:aportar|acreditar|demostrar|certificar) "
+    r"(?:(?:su|la|una) )?experiencia\b"
+)
+PASSIVE_BIDDER_MANDATE = re.compile(
+    r"\b(?:la )?experiencia(?: (?:minima|general|especifica|habilitante|contractual))? "
+    r"del (?:proponente|oferente|licitante) se (?:acreditara|demostrara) "
+    r"(?:en |con |mediante |a traves de )(?:[a-z]{1,8} ){0,3}"
+    r"(?:\(\s*\d+\s*\) |\d+ )?contratos? (?:debidamente )?(?:ejecutados?|finalizados?)\b"
+)
+OCR_CONTEXTUAL_MANDATE = re.compile(
+    r"\bdebera aportar su experiencia especifica,? verificable,? "
+    r"relacionada con el objeto (?:a contratar|del contrato)\b"
+)
+BIDDER_CHECKLIST = re.compile(
+    r"^\s*\d+\s*[.)-]\s*experiencia del (?:proponente|oferente)\b[^\n]*\n"
+    r"\s*\d+\s*[.)-]\s*certificad[oa]s? (?:que acrediten experiencia|de experiencia)\b",
+    re.M,
+)
+NON_BIDDER_ACTOR = re.compile(
+    r"\b(?:el|la|los|las) (?:entidad|contratante|contratista|fabricante|supervisor|"
+    r"interventor|personal|profesionales?|tecnicos?|representante legal|subcontratista|"
+    r"equipo humano|proveedor(?:es)?|distribuidor(?:es)?|empleados?)\b[^.!?]{0,45}"
+    r"\bdebe(?:ra|ran)?\b"
+)
+MANDATE_LIMITED = re.compile(
+    r"\b(?:de ser (?:el caso|aplicable)|solo (?:si|cuando|para)|"
+    r"(?:para|respecto de|tratandose de) (?:los? |las? )?"
+    r"(?:mipymes?|proponentes? plurales?|consorcios?|uniones temporales))\b"
+)
+ACCREDITATION_METHOD = re.compile(
+    r"^(?:para (?:efectos de )?acreditar (?:la |su )?experiencia|"
+    r"(?:dicha|la) experiencia se (?:acreditara|demostrara) mediante (?:certificados?|"
+    r"certificaciones?|copias?))\b"
+)
+MANDATE_BASES = {"bidder_experience_mandate", "ocr_corroborated_bidder_mandate"}
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
@@ -239,7 +276,9 @@ def normalized_for_matching(clause, method=None):
     return text
 
 
-def assertion(clause, *, heading=None, section=None, immediate=False, method=None):
+def assertion(
+    clause, *, heading=None, section=None, immediate=False, method=None, bidder_checklist=False
+):
     text = normalized_for_matching(clause, method)
     experience = bool(EXPERIENCE.search(text))
     section_text = normalized_for_matching(section or "", method)
@@ -296,6 +335,21 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
     ):
         return REQ, "minimum_experience_in_heading"
     if not re.search(r"\bno\b", text):
+        mandate = BIDDER_MANDATE.search(text) or PASSIVE_BIDDER_MANDATE.search(text)
+        contextual = (
+            method == "ocr_text"
+            and heading == "experience"
+            and immediate
+            and bidder_checklist
+            and OCR_CONTEXTUAL_MANDATE.search(text)
+        )
+        if mandate or contextual:
+            if MANDATE_LIMITED.search(text):
+                return CONDITIONAL, "limited_applicability"
+            if NON_BIDDER_ACTOR.search(text):
+                return CONDITIONAL, "scope_or_obligation_unclear"
+            basis = "bidder_experience_mandate" if mandate else "ocr_corroborated_bidder_mandate"
+            return REQ, basis
         if OFFER_EXPERIENCE_CERTIFICATES.search(text):
             return REQ, "mandatory_offer_certificates"
         if section_text == "condiciones de experiencia" and CONTRACT_SUBMISSION.search(text):
@@ -318,6 +372,8 @@ def assertion(clause, *, heading=None, section=None, immediate=False, method=Non
             )
         ):
             return NEG, "explicit_waiver"
+    if NON_BIDDER_ACTOR.search(text) or ACCREDITATION_METHOD.search(text):
+        return CONDITIONAL, "scope_or_obligation_unclear"
     if (
         POSITIVE.search(text)
         and not re.search(r"\bno\b", text)
@@ -435,8 +491,15 @@ def page_clauses(text, method=None, *, page=None, inherited_section=None):
 def document_assertions(document):
     if document["role"] == "excluded":
         return
+    fragments = document.get("fragments", ())
+    checklist_pages = {
+        fragment.source_locator.get("page_number")
+        for fragment in fragments
+        if fragment.source_locator.get("page_number")
+        and BIDDER_CHECKLIST.search(normalized(fragment.text))
+    }
     previous_section = None
-    for fragment in document.get("fragments", ()):
+    for fragment in fragments:
         locator = fragment.source_locator
         method = locator.get("extraction_method")
         if str(locator.get("kind", "")).startswith("docx_"):
@@ -460,7 +523,12 @@ def document_assertions(document):
             section_label, section_page = context or (None, None)
             section_text = normalized_for_matching(section_label or "", method)
             result = assertion(
-                clause, heading=heading, section=section_label, immediate=immediate, method=method
+                clause,
+                heading=heading,
+                section=section_label,
+                immediate=immediate,
+                method=method,
+                bidder_checklist=document["role"] == "primary" and bool(checklist_pages - {page}),
             )
             if not result:
                 continue
@@ -487,7 +555,9 @@ def document_assertions(document):
                     else "general_bidder"
                     if kind == REQ
                     and (
-                        basis in {"minimum_experience_in_heading", "mandatory_offer_certificates"}
+                        basis in MANDATE_BASES
+                        or basis
+                        in {"minimum_experience_in_heading", "mandatory_offer_certificates"}
                         or GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
                         or BIDDER_EXPERIENCE_FORM.fullmatch(section_text)
                         or section_text == "condiciones de experiencia"
@@ -536,6 +606,21 @@ def classify_experience(documents, *, inventory_complete=True):
         and item["role"] == "primary"
         and item["document_id"] in credible
     ]
+    provisional = [
+        item
+        for item in relevant
+        if item["assertion_type"] == REQ
+        and item["basis"] in MANDATE_BASES
+        and item["scope"] == "general_bidder"
+        and item["role"] == "primary"
+        and item["document_id"] not in credible
+        and not any(
+            doc["document_id"] != item["document_id"]
+            and not doc["complete"]
+            and (doc["role"] in {"primary", "amendment"} or doc.get("role_hint") == "primary")
+            for doc in documents
+        )
+    ]
     conflict = {NEG, REQ} <= observed
     if conflict:
         status, reason = "experience_ambiguous", "conflicting_clauses"
@@ -568,6 +653,10 @@ def classify_experience(documents, *, inventory_complete=True):
         review = "explicit_requirement"
         review_reason = "general_bidder_clause_in_complete_primary"
         review_evidence = applicable
+    elif provisional and inventory_complete and not dependencies and not restricted:
+        review = "explicit_requirement"
+        review_reason = "general_bidder_mandate_partial_primary"
+        review_evidence = provisional
     elif restricted or (dependencies and REQ in observed):
         review, review_reason = "limited_or_ambiguous", reason
         review_evidence = [

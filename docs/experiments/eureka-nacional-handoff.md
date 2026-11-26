@@ -465,6 +465,23 @@ generales de obligación antes de la siguiente exploración. Los
 artefactos quedan localmente en en01-directed-ocr_lxj95tq1. No
 hubo acceso a CDP, SECOP, feed ni descargas.
 
+## Obligaciones contractuales y selección OCR
+
+El [replay](eureka-nacional-experience-spike.md#obligaciones-contractuales-y-selección-ocr)
+elevó Puerto Gaitán y Rionegro de evidencia insuficiente a exigencia
+aplicable, con not_resolved formal. En Puerto Gaitán se reconoce el
+contrato ejecutado de la página 15. En Rionegro la lista de la
+página 4 corrobora la cláusula de la página 11 con sujeto
+dañado por OCR. El requisito formal de cobertura permanece.
+
+El selector incorpora marcadores pertinentes, además de los
+índices y encabezados nativos. La prueba de maquetación no
+seleccionó las cláusulas principales en estos dos escaneos y no
+quedó activa. Pasaron 195 pruebas y una quedó omitida. Se
+recomienda una nueva muestra acotada con los límites vigentes
+cuando se autorice. No se ejecutó ninguna consulta, descarga
+ni exploración.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

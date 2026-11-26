@@ -7,6 +7,7 @@ import re
 import tempfile
 import time
 from collections import Counter, deque
+from itertools import islice
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -337,7 +338,30 @@ OCR_INDEX_ENTRY = re.compile(r"(?:\.\s*){3,}(\d+)\s*$")
 OCR_INDEX_MARKER = re.compile(r"(?:\.\s*){3,}|\b(?:indice|tabla de contenido)\b")
 
 
-def select_ocr_pages(native, low_text, budget):
+def ocr_bookmark_pages(stream):
+    """Read explicit experience and habilitation destinations without OCR."""
+    try:
+        import pypdfium2 as pdfium
+    except ImportError:
+        return []
+    pages = []
+    try:
+        pdf = pdfium.PdfDocument(stream)
+        try:
+            for bookmark in islice(pdf.get_toc(max_depth=4), 128):
+                title = spike.normalized(bookmark.get_title() or "")
+                if re.search(r"\b(?:experiencia|requisitos? habilitantes?)\b", title) and (
+                    destination := bookmark.get_dest()
+                ):
+                    pages.append(destination.get_index() + 1)
+        finally:
+            pdf.close()
+    except (OSError, ValueError, pdfium.PdfiumError):
+        return []
+    return pages
+
+
+def select_ocr_pages(native, low_text, budget, *, bookmarks=()):
     if not budget or native.error_code:
         return []
     visited = native.diagnostics.get("native_pages_visited", 0)
@@ -347,6 +371,9 @@ def select_ocr_pages(native, low_text, budget):
     def prefer(page, rank):
         if page in candidates and rank < scores.get(page, 10):
             scores[page] = rank
+
+    for page in bookmarks:
+        prefer(page, 0)
 
     for fragment in native.fragments:
         number = fragment.page_number
@@ -373,12 +400,20 @@ def select_ocr_pages(native, low_text, budget):
 
 
 def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OCR_PER_DOCUMENT):
+    def choose_ocr_pages(native, low_text):
+        bookmarks = ()
+        if ocr_pages and low_text and not native.error_code and isinstance(stored, StoredBinary):
+            with storage.open_verified(
+                stored.storage_path,
+                stored.sha256,
+                stored.observed_size,
+                settings.document_max_bytes,
+            ) as stream:
+                bookmarks = ocr_bookmark_pages(stream)
+        return select_ocr_pages(native, low_text, ocr_pages, bookmarks=bookmarks)
+
     detail, fragments = spike.run_existing_extractor(
-        document,
-        stored,
-        storage,
-        settings,
-        select_ocr_pages=lambda native, low_text: select_ocr_pages(native, low_text, ocr_pages),
+        document, stored, storage, settings, select_ocr_pages=choose_ocr_pages
     )
     diagnostics = detail.get("diagnostics", {})
     is_docx = document.extension == "docx"
