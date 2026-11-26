@@ -431,6 +431,23 @@ conserva su estado de evidencia insuficiente con 2 de 41 páginas
 procesadas. No se descargó de nuevo ni se amplió su OCR.
 No hubo feed, inventarios nuevos, reintentos ni IA.
 
+## Cierre offline de cobertura documental
+
+La [revisión de los PDF locales](eureka-nacional-experience-spike.md#cierre-offline-de-cobertura-documental-26-de-noviembre-de-2026)
+encontró la experiencia mínima de Puerto Gaitán en las páginas
+15 y 16 y la experiencia específica de Rionegro en las páginas
+11 y 4. No se ejecutó OCR adicional. La cobertura automática sigue
+2/41 y 2/12 respectivamente. Ambos siguen not_resolved con evidencia
+insuficiente. Las cláusulas identificadas visualmente quedan como
+evidencia para el replay dirigido.
+
+Chitaraque supera 10 MiB. El tamaño exacto no se conservó y su
+compatibilidad con 16 MiB queda por comprobar. El plan marca Yumbo
+como aviso pendiente de corroboración. Pacho conserva el anexo con
+referencia coincidente como pista. La Estrella requiere el pliego
+definitivo. El runner registra el tamaño declarado antes de rechazarlo.
+No hubo solicitudes nuevas ni exploración nacional.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

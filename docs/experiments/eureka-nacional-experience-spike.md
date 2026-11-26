@@ -1881,3 +1881,54 @@ en01-stream_hsxjhqpg, excluido de Git.
 
 Los dos casos del lote quedaron sin conclusión formal sobre experiencia.
 No se amplió OCR, tamaño ni alcance de la recuperación.
+
+
+### Cierre offline de cobertura documental, 26 de noviembre de 2026
+
+Se inspeccionaron visualmente las 53 páginas de los dos PDF locales.
+Ninguno tiene capa de texto, marcadores ni índice navegable. Las primeras
+dos páginas de cada archivo ya se habían procesado por OCR. La revisión
+local ubicó los numerales impresos sin consumir OCR adicional ni cambiar
+las clasificaciones automáticas guardadas.
+
+| Proceso | Cobertura actual | Páginas prioritarias en un replay posterior | Evidencia visible |
+| --- | --- | --- | --- |
+| Puerto Gaitán MC-SEAM-102-2026 | 2/41 por OCR, 39 pendientes | Primero 15 y 16. Para corroboración posterior, 17 y 36. | La página 15, numeral 13.2 Experiencia mínima, exige un contrato ejecutado y finalizado de suministro relacionado por un valor al menos igual al presupuesto oficial. La 16 detalla la acreditación. La 17 remite al Anexo de Experiencia, cuyo formato aparece en la 36. El formulario complementa la cláusula. |
+| Rionegro 492-2026-OC | 2/12 por OCR, 10 pendientes | Primero 11 y 4. Revisar la 3 como contexto de apertura de los requisitos habilitantes. | La página 11, numeral 16.14 Experiencia, exige aportar experiencia específica verificable relacionada con el objeto. La 4 lista la experiencia del proponente, remite al Anexo 3 y solicita certificados. Los umbrales y el alcance quedan por corroborar. |
+
+Las referencias anteriores son observaciones visuales que orientan una
+revisión de exigencia. En los resultados automáticos ambos procesos
+siguen not_resolved con prioridad insufficient_evidence. No se inferió
+silencio ni ausencia de experiencia. La limitación comprobada fue de
+cobertura y selección de páginas. Las dos páginas iniciales dejaron
+fuera las cláusulas. El clasificador todavía no ha recibido el texto de
+las páginas prioritarias. Las vistas quedaron fuera de Git, localmente
+en en01-ocr-map_ghwq8tcx.
+
+#### Acceso y verificación pendiente
+
+| Proceso | Evidencia archivada | Decisión |
+| --- | --- | --- |
+| Chitaraque MC-045-2026 | El rechazo declarado de 10 MiB ocurrió al recibir las cabeceras y antes de leer el cuerpo. El antecedente de 16 MiB en el inventario es un límite configurado del intento que falló por HTTP. | Se sabe que supera 10 MiB. Los artefactos revisados no permiten determinar si cabe en 16 MiB. El piloto ampliado se justifica sólo si se verifica por separado que el tamaño declarado está en ese intervalo y se autoriza expresamente. |
+| Yumbo IP-CMC-IMVY-012-2026 | El título archivado dice Aviso de invitación pública y también hay estudios previos. Su enlace identifica un documento concreto. | Requiere corroborar que el contenido es una invitación con requisitos exigibles. Sigue fuera de selección automática. |
+| Pacho MC-039-2026 | El Anexo complementario coincide con la referencia, pero su título es auxiliar. Los estudios archivados mencionan Semillas 2025. | El anexo es una pista para corroborar. Hace falta identificar el documento que rige el proceso de 2026. |
+| La Estrella SI 026 2026 | Figuran aviso, estudio previo y proyecto de pliegos; el inventario no identifica pliego definitivo. | Mantener pendiente hasta verificar el rector definitivo. |
+
+Se ajustó el plan de reanudación de EN-01 para distinguir avisos
+archivados de invitaciones confirmadas. El plan reasigna Yumbo a
+notice_needs_corroboration. La adquisición ahora conserva el valor
+numérico declarado antes de aplicar el límite, sin registrar las
+cabeceras completas. Las pruebas cubren ambos lados de 16 MiB y
+que un aviso nunca desplace una invitación identificada. El cambio
+mejora la selección y la observabilidad. La clasificación y el tope
+vigente de 10 MiB quedaron intactos.
+
+Para la siguiente exploración, validar primero un replay OCR local
+con dos páginas dirigidas por PDF, conservando y distinguiendo la
+cobertura acumulada. Si el replay confirma la evidencia, proponer
+una muestra nacional de hasta 15 avisos nuevos con la exclusión
+histórica, 1.130 ubicaciones y 21 categorías. Conservar 10 MiB,
+dos páginas OCR por PDF y el resto del presupuesto aprobado. Medir
+cobertura habilitante separadamente de páginas leídas, y mantener
+los escaneos sin sección verificada como evidencia insuficiente.
+No se consultó SECOP, inventarios ni feed durante este incremento.

@@ -16,6 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 import eureka_nacional_cdp_stream_lab as lab
 import eureka_nacional_en01 as en
 import eureka_nacional_manual_import as manual
+from eureka_nacional_experience import document_title
 from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import async_playwright
 from spike_licitaciones_info import SpikeDocument
@@ -201,10 +202,9 @@ async def stream_pdf(url, result):
                         result["response_intercepted"] = True
                         result["http_status"] = event.get("responseStatusCode")
                         result["stage"] = "headers"
-                        length = lab.response_length(event)
+                        length = lab.response_length(event, diagnostics=result)
                         if not length:
                             raise lab.RejectionError("missing_declared_size")
-                        result["declared_bytes"] = length
                         result["stage"] = "body"
                         chunks = await lab.read_stream(cdp, rid, length, result, "live")
                         if time.monotonic() - started >= lab.DEADLINE:
@@ -278,6 +278,17 @@ def saved_or_pending(source, previous, state):
         rows = inventories.get(reference, [])
         entries = [row for row in rows if row["role"] == "primary" and row["extension"] == "pdf"]
         status, candidate = "no_unique_archived_pdf", None
+        rectors = [
+            entry
+            for entry in entries
+            if not re.match(
+                r"^aviso de (?:la )?(?:invitacion|convocatoria)\b",
+                document_title(entry["name"]),
+            )
+        ]
+        if entries and not rectors:
+            status = "notice_needs_corroboration"
+        entries = rectors
         if len(entries) == 1:
             entry = entries[0]
             document = SpikeDocument(

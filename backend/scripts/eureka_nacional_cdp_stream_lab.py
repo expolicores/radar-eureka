@@ -99,7 +99,7 @@ def fixture_server(pdf):
             thread.join()
 
 
-def response_length(event):
+def response_length(event, *, diagnostics=None):
     status = event.get("responseStatusCode")
     headers = {}
     for header in event.get("responseHeaders", []):
@@ -116,6 +116,8 @@ def response_length(event):
     if len(lengths) != 1 or not re.fullmatch(r"[0-9]{1,18}", lengths[0]):
         raise RejectionError("invalid_length")
     length = int(lengths[0])
+    if diagnostics is not None:
+        diagnostics["declared_bytes"] = length
     if length > DOCUMENT_BYTES:
         raise RejectionError("declared_size_limit")
     return length
@@ -197,8 +199,7 @@ async def intercept(page, cdp, target, frame, result, case):
                 raise RejectionError("identity_mismatch")
             result["http_status"] = event.get("responseStatusCode")
             result["stage"] = "headers"
-            length = response_length(event)
-            result["declared_bytes"] = length
+            length = response_length(event, diagnostics=result)
             result["stage"] = "body"
             chunks = await read_stream(cdp, event["requestId"], length, result, case)
             if time.monotonic() - started >= DEADLINE:

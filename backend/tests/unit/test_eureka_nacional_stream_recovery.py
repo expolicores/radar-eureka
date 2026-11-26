@@ -156,3 +156,42 @@ def test_failed_document_is_not_retried_on_resume(tmp_path, monkeypatch):
     case = recovery.manual.read_json(tmp_path / "recovery_results.json")["ref"]
     assert case["status"] == "not_resolved"
     assert case["review_category"] == "insufficient_evidence"
+
+
+@pytest.mark.parametrize("declared_mib", [11, 17])
+def test_rejected_pdf_preserves_declared_length(declared_mib):
+    declared = declared_mib * (1024**2)
+    trace = {}
+    response = {
+        "responseStatusCode": 200,
+        "responseHeaders": [
+            {"name": "Content-Type", "value": "application/pdf"},
+            {"name": "Content-Length", "value": str(declared)},
+        ],
+    }
+    with pytest.raises(recovery.lab.RejectionError, match="declared_size_limit"):
+        recovery.lab.response_length(response, diagnostics=trace)
+    assert trace == {"declared_bytes": declared}
+
+
+@pytest.mark.parametrize("has_invitation", [False, True])
+def test_archived_notice_requires_corroboration(tmp_path, monkeypatch, has_invitation):
+    notice = {"role": "primary", "extension": "pdf", "name": "8. AVISO DE INVITACION PUBLICA"}
+    invitation = {
+        "role": "primary",
+        "extension": "pdf",
+        "name": "Invitaci\u00f3n p\u00fablica",
+        "document_id": "21",
+        "url": PDF_URL,
+    }
+    inventory = [notice, invitation] if has_invitation else [notice]
+    monkeypatch.setattr(
+        recovery.manual,
+        "archived_inventory",
+        lambda _: ({"ref": {"codigo_proceso": "archived-case"}}, {"ref": inventory}, {}),
+    )
+    state = recovery.en.DownloadState(tmp_path, recovery.LocalBinaryStorage(tmp_path / "binaries"))
+    candidates, plan = recovery.saved_or_pending(tmp_path, [], state)
+    assert bool(candidates) is has_invitation
+    expected = "eligible" if has_invitation else "notice_needs_corroboration"
+    assert plan == [{"process": "archived-case", "status": expected}]
