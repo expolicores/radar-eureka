@@ -11,6 +11,7 @@ from itertools import islice
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
+import eureka_nacional_cdp_stream as streaming
 import spike_licitaciones_info as spike
 from eureka_nacional_commercial import (
     DEFAULT_PROFILE,
@@ -74,7 +75,7 @@ DEPRIORITIZED_SAMPLE_SIZE = 3
 FAVORABLE_RESERVE = 4
 START_EXTRACTION_MARGIN = 50
 MIB = 1024 * 1024
-DOCUMENT_BYTES = 10 * MIB
+DOCUMENT_BYTES = streaming.DOCUMENT_BYTES
 MAX_GOVERNING_PDF_MIB = 16
 OUTPUT_ROOT = spike.ROOT.parent / ".local" / "eureka-nacional-spike"
 
@@ -556,10 +557,14 @@ def verify_document_type(storage, stored, document, max_bytes):
 
 
 class DownloadState:
-    def __init__(self, output, storage, *, edge_enabled=False, source=None):
+    def __init__(
+        self, output, storage, *, edge_enabled=False, source=None, cdp_url="http://127.0.0.1:9232"
+    ):
         self.output = output
         self.storage = storage
         self.edge_enabled = edge_enabled
+        self.cdp_url = cdp_url
+        self.stream_marker = output.parent / streaming.MARKER_NAME
         self.failed_processes = []
         self.receipts_path = output / "download_receipts.json"
         self.receipts = (
@@ -628,6 +633,21 @@ class DownloadState:
         return len(self.failed_processes) == 3 and len(set(self.failed_processes)) >= 2
 
 
+def can_stream_fallback(document, role, direct_error, diagnostics):
+    if (
+        role != "primary"
+        or streaming.is_notice(document.original_name)
+        or not streaming.fallback_eligible({"error": direct_error.code, "diagnostics": diagnostics})
+    ):
+        return False
+    try:
+        streaming.validate_target(document)
+    except AcquisitionError:
+        diagnostics["edge_skipped"] = "unverified_target"
+        return False
+    return True
+
+
 def analyze_documents(
     client,
     process,
@@ -644,6 +664,8 @@ def analyze_documents(
     governing_pdf_max_bytes=DOCUMENT_BYTES,
     download_state=None,
 ):
+    if download_state and download_state.stream_marker.exists():
+        raise BudgetReached("download_close_unverified")
     inventory = fetch_inventory(client, process["inventory_keys"])
     if not inventory:
         return "empty_inventory"
@@ -754,33 +776,34 @@ def analyze_documents(
                     if not (
                         download_state
                         and download_state.edge_enabled
-                        and direct_error.code == "http_error"
-                        and diagnostics.get("http_status") == 403
                         and attempted < available
-                        and document.extension in {"pdf", "docx"}
+                        and can_stream_fallback(document, entry["role"], direct_error, diagnostics)
                     ):
+                        raise
+                    if (
+                        time.monotonic() + streaming.OPERATION_MARGIN + START_EXTRACTION_MARGIN
+                        >= client.deadline
+                    ):
+                        diagnostics["edge_skipped"] = "duration_budget"
                         raise
                     try:
                         client.reserve(1)
                     except BudgetReached:
                         diagnostics["edge_skipped"] = "budget"
                         raise direct_error from None
-                    else:
-                        from eureka_nacional_edge_download import download_from_edge
-
-                        attempted += 1
-                        metrics["documents_attempted"] += 1
-                        metrics["edge_attempts"] += 1
-                        edge_diagnostics = {}
-                        diagnostics["edge"] = edge_diagnostics
-                        try:
-                            stored = download_from_edge(
-                                client.page, document, storage, scoped_settings, edge_diagnostics
-                            )
-                        finally:
-                            if not edge_diagnostics.get("cancellation_confirmed"):
-                                download_state.edge_enabled = False
-                        metrics["edge_downloaded"] += 1
+                    attempted += 1
+                    metrics["documents_attempted"] += 1
+                    metrics["edge_attempts"] += 1
+                    edge_diagnostics = diagnostics["edge"] = {}
+                    stored = streaming.download_stream_pdf(
+                        document,
+                        storage,
+                        download_state.stream_marker,
+                        edge_diagnostics,
+                        cdp_url=download_state.cdp_url,
+                    )
+                    diagnostics["mechanism"] = "edge_cdp_stream"
+                    metrics["edge_downloaded"] += 1
                 verify_document_type(storage, stored, document, entry["document_max_bytes"])
                 metrics["documents_downloaded"] += 1
                 metrics["bytes_downloaded"] += stored.observed_size
@@ -840,6 +863,8 @@ def analyze_documents(
                 failure["download_diagnostics"] = diagnostics
             errors.append(failure)
             metrics[f"{stage}_failures"] += 1
+            if stage == "download" and download_state and download_state.stream_marker.exists():
+                raise BudgetReached("download_close_unverified") from None
             if (
                 stage == "download"
                 and download_state
@@ -978,6 +1003,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     status = "failed"
     exit_code = 1
     try:
+        if (output.parent / streaming.MARKER_NAME).exists():
+            raise BudgetReached("download_close_unverified")
         resume = getattr(args, "resume_snapshot", None)
         if resume is None:
             check_session(client, client.profile_id, aggregator=True)
@@ -995,8 +1022,9 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
         download_state = DownloadState(
             output,
             storage,
-            edge_enabled=getattr(args, "edge_download_fallback", False),
+            edge_enabled=getattr(args, "edge_stream_fallback", False),
             source=getattr(args, "resume_source", None),
+            cdp_url=getattr(args, "cdp_url", "http://127.0.0.1:9232"),
         )
         favorable_reserve = min(FAVORABLE_RESERVE, max(0, args.documents - len(sample)))
         for index, process in enumerate(sample):
@@ -1203,13 +1231,37 @@ def settings_for_run(output, tesseract, tessdata, ocr_pages=OCR_PER_DOCUMENT):
     )
 
 
+def load_resume_snapshot(source):
+    rows = json.loads((source / "processes.json").read_text(encoding="utf-8"))["processes"]
+    results = json.loads((source / "experience_requirements.json").read_text(encoding="utf-8"))
+    recorded = {result["process_reference"]: result["status"] for result in results}
+    pending = [
+        row
+        for row in rows
+        if row.get("sampled")
+        and row.get("source") == "secop2"
+        and recorded.get(row["process_reference"], "not_resolved")
+        in {"not_resolved", "experience_ambiguous"}
+        and all(
+            row.get("inventory_keys", {}).get(key)
+            for key in ("idContrato", "id_fuente_contract", "idUltimaFase")
+        )
+    ]
+    result_order = {reference: index for index, reference in enumerate(recorded)}
+    return sorted(
+        pending,
+        key=lambda row: result_order.get(row["process_reference"], len(result_order)),
+    )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
     parser.add_argument(
+        "--edge-stream-fallback",
         "--edge-download-fallback",
         action="store_true",
-        help="Piloto optativo de lectura acotada en Edge tras HTTP 403.",
+        help="Streaming CDP optativo para PDF rectores tras HTTP 403 directo.",
     )
     parser.add_argument(
         "--resume-inventory-from",
@@ -1289,26 +1341,7 @@ def main(argv=None):
             args.resume_source = source
             if source.resolve() != source:
                 raise ValueError("Historial fuera del almacenamiento local.")
-            rows = json.loads((source / "processes.json").read_text(encoding="utf-8"))
-            results = json.loads(
-                (source / "experience_requirements.json").read_text(encoding="utf-8")
-            )
-            pending = {
-                result["process_reference"]
-                for result in results
-                if result["status"] in {"not_resolved", "experience_ambiguous"}
-            }
-            args.resume_snapshot = [
-                row
-                for row in rows["processes"]
-                if row["process_reference"] in pending
-                and row["sampled"]
-                and row.get("source") == "secop2"
-                and all(
-                    row.get("inventory_keys", {}).get(k)
-                    for k in ("idContrato", "id_fuente_contract", "idUltimaFase")
-                )
-            ]
+            args.resume_snapshot = load_resume_snapshot(source)
             if not args.resume_snapshot:
                 raise spike.SpikeError("La corrida no contiene procesos pendientes verificables.")
         profile_id = resolve_profile_id(args.profile_id)

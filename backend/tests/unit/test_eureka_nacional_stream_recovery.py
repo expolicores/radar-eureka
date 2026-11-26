@@ -78,20 +78,22 @@ def test_registraduria_template_requires_numbered_invitation_and_object():
     ],
 )
 def test_only_access_403_without_redirect_allows_stream(diagnostic, expected):
-    assert recovery.fallback_eligible(diagnostic) is expected
+    assert recovery.streaming.fallback_eligible(diagnostic) is expected
 
 
 @pytest.mark.parametrize("bad_url", [PDF_URL + "&x=1", PDF_URL.replace("=21", "=22")])
 def test_archive_target_rejects_ambiguous_or_different_identity(bad_url):
     with pytest.raises(recovery.AcquisitionError, match="alcance"):
-        recovery.validate_target(recovery.SpikeDocument("Invitación", "pdf", bad_url, "21"))
+        recovery.streaming.validate_target(
+            recovery.SpikeDocument("Invitación", "pdf", bad_url, "21")
+        )
 
 
 def test_direct_success_skips_edge(tmp_path, monkeypatch):
     stored = SimpleNamespace(sha256="verified")
     monkeypatch.setattr(recovery, "direct_pdf", lambda *_: (stored, {}))
     edge = Mock(side_effect=AssertionError("Edge must not start for a direct success"))
-    monkeypatch.setattr(recovery, "stream_pdf", edge)
+    monkeypatch.setattr(recovery.streaming, "stream_pdf", edge)
     outcome = recovery.recover_pdf(example_document(), None, tmp_path / "lock", {})
     assert outcome == (stored, "urllib")
     edge.assert_not_called()
@@ -114,7 +116,8 @@ def test_fallback_retains_no_file_when_close_is_uncertain(tmp_path, monkeypatch,
         lambda *_: (None, {"error": "http_error", "diagnostics": {"http_status": 403}}),
     )
 
-    async def edge(_, result):
+    async def edge(_, result, *, cdp_url):
+        assert cdp_url.endswith(":9232")
         assert marker.exists()
         result.update(
             tab_opened=True,
@@ -126,7 +129,7 @@ def test_fallback_retains_no_file_when_close_is_uncertain(tmp_path, monkeypatch,
         )
         return [payload]
 
-    monkeypatch.setattr(recovery, "stream_pdf", edge)
+    monkeypatch.setattr(recovery.streaming, "stream_pdf", edge)
     stored, route = recovery.recover_pdf(example_document(), storage, marker, trace)
     assert bool(stored) is closed
     assert route == ("edge_cdp_stream" if closed else None)
@@ -169,8 +172,8 @@ def test_rejected_pdf_preserves_declared_length(declared_mib):
             {"name": "Content-Length", "value": str(declared)},
         ],
     }
-    with pytest.raises(recovery.lab.RejectionError, match="declared_size_limit"):
-        recovery.lab.response_length(response, diagnostics=trace)
+    with pytest.raises(recovery.streaming.RejectionError, match="declared_size_limit"):
+        recovery.streaming.response_length(response, diagnostics=trace)
     assert trace == {"declared_bytes": declared}
 
 

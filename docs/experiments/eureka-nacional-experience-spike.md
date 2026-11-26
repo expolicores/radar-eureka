@@ -2135,3 +2135,120 @@ Streaming a la adquisición nacional bajo las guardas ya validadas.
 Los otros 13 requieren inventario. Continuar desde la selección
 archivada evita repetir discovery. No se hizo otro lote ni otra
 exploración.
+
+
+### Resiliencia integrada y auditoría offline del descubrimiento
+
+#### Adquisición compartida
+
+El runner nacional conserva urllib y comparte ahora con el recuperador
+el módulo de streaming validado en los pilotos. Se habilita con
+--edge-stream-fallback. El nombre anterior del indicador es un alias de
+streaming. La ruta activa no invoca JavaScript Fetch. Streaming se
+habilita por documento tras HTTP 403 directo sin redirección, con
+cupo de tiempo, crédito e intento, para un PDF rector cuyo enlace
+identifica únicamente el DocumentId en la ruta autorizada de SECOP.
+Los avisos de invitación sin corroborar y los archivos auxiliares
+quedan fuera de esta alternativa.
+
+La respuesta debe ser PDF HTTP 200, con longitud positiva, sin
+compresión y hasta 10 MiB. Se leen bloques de hasta 64 KiB dentro
+de 12 s de adquisición. La limpieza tiene una ventana separada y
+se verifica por el canal de navegador. Se conserva la firma PDF,
+la verificación de tamaño y SHA-256 y el recibo para reutilizar el
+binario. El intento alternativo usa una plaza del presupuesto
+documental y un crédito adicional. El tope del streaming mide
+bytes aceptados por EN-01. Los buffers de navegador y sistema
+operativo quedan fuera de esa medición.
+
+Se mantiene el corte tras tres fallos documentales consecutivos
+repartidos en al menos dos procesos. Un cierre incierto detiene
+de inmediato la adquisición y conserva la marca local compartida
+que impide continuar los dos comandos. Se guarda el mecanismo y
+el diagnóstico depurado junto al documento. DOCX, redirecciones,
+respuestas sin tamaño y el piloto de 16 MiB siguen fuera del
+streaming. El runner conserva sus topes de feed, tiempo y OCR.
+
+Las pruebas usaron transporte simulado. Verificaron el segundo
+cupo tras 403, el rechazo de destinos, formatos y redirecciones
+no habilitados, el recibo reutilizable, el cierre incierto y la
+reanudación sin feed. Pasaron 201 pruebas y una quedó omitida.
+No hubo consultas a CDP, SECOP, inventarios ni feed.
+
+#### Embudo archivado por fuente
+
+| Fuente detectada | Avisos únicos | Fuera del perfil | Servicio principal | Bienes no claros | Pasan prefiltro comercial | Excluidos por inventario de la fuente | Elegibles | Seleccionados |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| SECOP II | 165 | 97 | 47 | 5 | 16 | 0 | 16 | 15 |
+| SECOP I | 83 | 52 | 23 | 3 | 5 | 5 | 0 | 0 |
+| Otros portales | 17 | 10 | 3 | 2 | 2 | 2 | 0 | 0 |
+| Universidades | 4 | 2 | 1 | 0 | 1 | 1 | 0 | 0 |
+| Total | 269 | 161 | 74 | 10 | 24 | 8 | 16 | 15 |
+
+El discovery identifica las cuatro fuentes. La selección exige
+SECOP II con claves documentales verificables. SECOP I y otras
+fuentes quedan excluidas de la recuperación de EN-01 aun cuando el
+objeto pase el perfil comercial. En el código, el filtro explícito por
+fuente se evalúa junto con la capacidad de inventario. El historial
+comparable utiliza identidades CO1.NTC. Es una restricción técnica
+de adquisición e identidad que reduce la cobertura del objetivo
+comercial nacional. Se conservó tal cual.
+
+Régimen Especial es una modalidad. Hubo 23 avisos, 20 en SECOP II
+y tres en SECOP I. Dos SECOP II de régimen especial fueron elegibles
+y uno entró en la muestra. No hay una exclusión por modalidad: la
+mínima cuantía tiene preferencia en el orden. Se ordena primero
+por vigencia (abierto antes que desconocido), luego por modalidad
+preferida y prioridad comercial, con rotación por departamento
+dentro de cada grupo. Los filtros habrían descartado procesos cerrados
+o fuera de 30 días. En esta corrida no se aplicó ninguna de esas
+dos exclusiones ni se encontró coincidencia con las 61 identidades
+históricas. Entre los elegibles hubo 14 abiertos y dos con vigencia
+desconocida. La muestra contiene 10 de mínima cuantía, cuatro de
+selección abreviada y uno de régimen especial.
+
+Las 21 categorías, 1.130 ubicaciones, exclusiones comerciales y MPNE
+conservan su configuración. El contraste con el universo comercial
+acordado es la restricción estructural por fuente y la disponibilidad
+de metadatos. El feed no trajo UNSPSC ni descripciones en las 270
+filas. En esta muestra la clasificación comercial dependió de palabras
+clave del objeto. El perfil tampoco permite deducir del archivo qué
+ofertas nunca devolvió el proveedor.
+
+El feed paró por cupo tras nueve páginas. Se observó un elegible
+sin seleccionar, de régimen especial con vigencia desconocida y
+prioridad B. El count final de 271 superó las 270 filas recibidas y
+el proveedor no indicó fin de paginación. El límite de páginas y
+el cupo pudieron dejar elegibles fuera. El total no es estimable
+con los artefactos. El detalle queda en discovery_audit_offline.json
+dentro del directorio de la corrida, fuera de Git.
+
+#### Reanudación acotada propuesta
+
+El lector de la selección archivada recupera los 15 avisos pendientes.
+Ordena primero los dos que ya tienen resultado de inventario
+y luego los 13 que no alcanzaron esa etapa. Los que ya obtuvieron
+una conclusión formal en la reanudación se excluyen y los recibos se
+verifican por hash antes de descargar. Se consultan sólo inventarios de
+la selección archivada. Se omiten el feed y su preflight.
+
+Propuesta inicial para autorizar: hasta dos procesos, Yumbo y El
+Peñol, con 8 plazas de presupuesto documental que preservan la
+reserva existente de corroboración. El tope por proceso es tres
+intentos y hasta dos OCR por PDF. Mantener 10 MiB, 200 créditos y
+720 s como techos vigentes y dejar los otros 13 para una evaluación
+posterior. El indicador de streaming es explícito.
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path './backend/src').Path
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& $spikePython './backend/scripts/eureka_nacional_en01.py' `
+  --exploratory --resume-inventory-from en01-abu8_p7u `
+  --processes 2 --documents 8 --ocr-pages 2 --edge-stream-fallback `
+  --cdp-url 'http://127.0.0.1:9232' `
+  --tesseract 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+```
+
+El comando queda pendiente de autorización. La integración nacional
+actual se verificó offline. No se recuperó ninguno de los 15 ni se
+repitió el descubrimiento.

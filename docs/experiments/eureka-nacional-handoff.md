@@ -501,6 +501,26 @@ ausencias ni errores del clasificador. Se usaron 33 créditos y
 local se conservan en en01-abu8_p7u. Para retomar esta muestra,
 reutilizar la selección archivada con una nueva autorización.
 
+## Resiliencia integrada y auditoría offline del descubrimiento
+
+El [informe](eureka-nacional-experience-spike.md#resiliencia-integrada-y-auditoría-offline-del-descubrimiento)
+registra el streaming compartido por los dos comandos de EN-01.
+El runner usa urllib primero y activa --edge-stream-fallback sólo
+para PDF rector tras HTTP 403 directo. Mantiene el cupo, cierre
+verificado, recibos y corte preventivo. Pasaron 201 pruebas offline,
+con una omitida.
+
+Entre 269 avisos hubo 165 SECOP II, 83 SECOP I, 17 de otros portales
+y cuatro de universidades. Ocho avisos pasaron el prefiltro comercial
+pero quedaron fuera por fuente documental, incluidos cinco SECOP I.
+Uno de régimen especial SECOP II entró en la muestra y otro quedó fuera
+por cupo. Los filtros comerciales siguen intactos.
+
+El plan offline confirmó 15 procesos reanudables: dos con inventario
+previo y 13 sin inventario. Se propone empezar por los dos primeros
+bajo autorización nueva, sin feed. No se realizaron descargas ni
+consultas durante este incremento.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

@@ -1735,7 +1735,7 @@ def test_resume_keeps_saved_selection_and_never_probes_feed(tmp_path, monkeypatc
 
 @pytest.mark.parametrize("edge_fails", [False, True])
 def test_edge_fallback_uses_second_budget_slot_only_after_403(tmp_path, monkeypatch, edge_fails):
-    import eureka_nacional_edge_download as edge
+    import eureka_nacional_cdp_stream as edge
 
     doc = SpikeDocument("Invitación", "pdf", SECOP + "1", "1")
     monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[doc]))
@@ -1744,14 +1744,15 @@ def test_edge_fallback_uses_second_budget_slot_only_after_403(tmp_path, monkeypa
         diagnostics["http_status"] = 403
         raise en01.AcquisitionError("http_error", "rechazado")
 
-    def browser(*args):
-        args[-1]["cancellation_confirmed"] = True
+    def browser(*args, cdp_url):
+        assert cdp_url.endswith(":9232")
+        args[-1]["target_closed"] = True
         if edge_fails:
-            raise en01.AcquisitionError("edge_fetch_rejected", "rechazado")
+            raise en01.AcquisitionError("unexpected_response", "rechazado")
         return SimpleNamespace(sha256="a" * 64, observed_size=44)
 
     monkeypatch.setattr(en01.spike, "download_document", direct)
-    monkeypatch.setattr(edge, "download_from_edge", Mock(side_effect=browser))
+    monkeypatch.setattr(edge, "download_stream_pdf", Mock(side_effect=browser))
     monkeypatch.setattr(
         en01.spike,
         "run_existing_extractor",
@@ -1782,7 +1783,7 @@ def test_edge_fallback_uses_second_budget_slot_only_after_403(tmp_path, monkeypa
     assert metrics["documents_attempted"] == 2
     assert metrics["edge_downloaded"] == (not edge_fails)
     assert bool(errors) == edge_fails
-    assert errors[0]["code"] == "edge_fetch_rejected" if edge_fails else inv[0]["complete"]
+    assert errors[0]["code"] == "unexpected_response" if edge_fails else inv[0]["complete"]
 
 
 def test_download_circuit_requires_repeated_failures_across_processes(tmp_path):
@@ -1799,7 +1800,7 @@ def test_download_circuit_requires_repeated_failures_across_processes(tmp_path):
 def test_edge_cannot_spend_an_unapproved_fallback_slot(
     tmp_path, monkeypatch, enabled, status, allowance
 ):
-    import eureka_nacional_edge_download as edge
+    import eureka_nacional_cdp_stream as edge
 
     doc = SpikeDocument("Invitación", "pdf", SECOP + "1", "1")
     monkeypatch.setattr(en01, "fetch_inventory", Mock(return_value=[doc]))
@@ -1810,7 +1811,7 @@ def test_edge_cannot_spend_an_unapproved_fallback_slot(
 
     monkeypatch.setattr(en01.spike, "download_document", direct)
     fallback = Mock()
-    monkeypatch.setattr(edge, "download_from_edge", fallback)
+    monkeypatch.setattr(edge, "download_stream_pdf", fallback)
     settings = en01.settings_for_run(tmp_path, "tesseract", None)
     storage = en01.spike.LocalBinaryStorage(tmp_path / "binaries")
     state = en01.DownloadState(tmp_path, storage, edge_enabled=enabled)
@@ -1829,3 +1830,135 @@ def test_edge_cannot_spend_an_unapproved_fallback_slot(
     assert metrics["documents_attempted"] == 1
     assert errors[0]["code"] == "http_error"
     fallback.assert_not_called()
+
+
+def test_resume_snapshot_includes_unreached_selected_processes(tmp_path):
+    rows = [
+        {
+            "process_reference": name,
+            "sampled": sampled,
+            "source": source,
+            "inventory_keys": {"idContrato": name, "id_fuente_contract": "3", "idUltimaFase": name},
+        }
+        for name, sampled, source in [
+            ("unreached", True, "secop2"),
+            ("resolved", True, "secop2"),
+            ("pending", True, "secop2"),
+            ("not_sampled", False, "secop2"),
+            ("unsupported", True, "secop1"),
+        ]
+    ]
+    en01.write_json(tmp_path / "processes.json", {"processes": rows})
+    en01.write_json(
+        tmp_path / "experience_requirements.json",
+        [
+            {"process_reference": "pending", "status": "not_resolved"},
+            {"process_reference": "resolved", "status": "experience_required"},
+        ],
+    )
+    result = en01.load_resume_snapshot(tmp_path)
+    assert [item["process_reference"] for item in result] == ["pending", "unreached"]
+
+
+@pytest.mark.parametrize(
+    ("extension", "title", "redirects"),
+    [
+        ("pdf", "Invitacion", [{"http_status": 302}]),
+        ("pdf", "Aviso de invitacion publica", []),
+        ("pdf", "Estudios previos", []),
+        ("docx", "Invitacion", []),
+    ],
+)
+def test_national_stream_rejects_ineligible_paths(extension, title, redirects):
+    document = SpikeDocument(title, extension, SECOP + "1", "1")
+    err = en01.AcquisitionError("http_error", "rechazado")
+    diag = {"http_status": 403, "redirects": redirects}
+    assert not en01.can_stream_fallback(document, rules.document_role(title), err, diag)
+
+
+def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
+    tmp_path,
+    monkeypatch,
+):
+    from eureka_nacional_cdp_stream import stream_pdf
+
+    output = tmp_path / "run"
+    output.mkdir()
+    document = SpikeDocument("Invitacion", "pdf", SECOP + "1", "1")
+    pdf = b"%PDF-1.4\\ncontenido\\n%%EOF".replace(b"\\n", b"\n")
+    inventory = Mock(return_value=[document])
+    monkeypatch.setattr(en01, "fetch_inventory", inventory)
+
+    def direct(*args, diagnostics):
+        diagnostics.update(http_status=403, redirects=[])
+        raise en01.AcquisitionError("http_error", "rechazado")
+
+    closed = True
+
+    async def browser(url, diagnostic, *, cdp_url):
+        assert url == document.source_url
+        assert cdp_url.endswith(":9232")
+        diagnostic.update(
+            stream_bytes=len(pdf),
+            requests_forwarded=1,
+            tab_opened=True,
+            io_closed=closed,
+            navigation_abort_ack=closed,
+            target_closed=closed,
+        )
+        return [pdf]
+
+    assert stream_pdf is en01.streaming.stream_pdf
+    monkeypatch.setattr(en01.streaming, "stream_pdf", browser)
+    attempt = Mock(side_effect=direct)
+    monkeypatch.setattr(en01.spike, "download_document", attempt)
+    monkeypatch.setattr(
+        en01.spike,
+        "run_existing_extractor",
+        Mock(
+            return_value=(
+                {"status": "completed", "page_count": 1, "elapsed_seconds": 0.01},
+                [fragment(REQUIRED)],
+            )
+        ),
+    )
+    settings = en01.settings_for_run(output, "tesseract", None)
+    storage = en01.spike.LocalBinaryStorage(output / "binaries")
+    state = en01.DownloadState(output, storage, edge_enabled=True)
+    client = SimpleNamespace(deadline=time.monotonic() + 360, reserve=Mock())
+
+    def analyze(metrics, entries):
+        return en01.analyze_documents(
+            client,
+            {"inventory_keys": {}},
+            storage,
+            settings,
+            2,
+            metrics,
+            entries,
+            [],
+            download_state=state,
+            ocr_pages=0,
+        )
+
+    metrics, entries = Counter(), []
+    analyze(metrics, entries)
+    assert metrics["documents_attempted"] == 2
+    assert entries[0]["download_diagnostics"]["mechanism"] == "edge_cdp_stream"
+    reused = Counter()
+    analyze(reused, [])
+    assert reused["documents_reused"] == 1
+    attempt.assert_called_once()
+
+    other = SpikeDocument("Invitacion", "pdf", SECOP + "2", "2")
+    inventory.return_value = [other]
+    document = other
+    closed = False
+    with pytest.raises(en01.BudgetReached, match="download_close_unverified"):
+        analyze(Counter(), [])
+    assert state.stream_marker.exists()
+    assert state.cached(other, en01.DOCUMENT_BYTES) is None
+    inventory.reset_mock()
+    with pytest.raises(en01.BudgetReached, match="download_close_unverified"):
+        analyze(Counter(), [])
+    inventory.assert_not_called()

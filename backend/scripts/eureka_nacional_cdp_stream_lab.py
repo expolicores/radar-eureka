@@ -1,10 +1,8 @@
 """Exercise EN-01 response streaming with synthetic loopback traffic only."""
 
 import asyncio
-import base64
 import hashlib
 import json
-import re
 import tempfile
 import time
 from contextlib import contextmanager, suppress
@@ -13,7 +11,16 @@ from io import BytesIO
 from pathlib import Path
 from threading import Thread
 
-from eureka_nacional_en01 import DOCUMENT_BYTES
+from eureka_nacional_cdp_stream import (
+    CHUNK,
+    CLOSE_TIMEOUT,
+    DEADLINE,
+    DOCUMENT_BYTES,
+    RejectionError,
+    close_target,
+    read_stream,
+    response_length,
+)
 from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import async_playwright
 from pypdf import PdfWriter
@@ -21,9 +28,6 @@ from pypdf import PdfWriter
 from public_procurement.documents.adapters.local_storage import LocalBinaryStorage
 from public_procurement.documents.domain.document import AcquisitionError
 
-DEADLINE = 12
-CHUNK = 64 * 1024
-CLOSE_TIMEOUT = 2
 OVERSIZED_BYTES = 12 * 1024 * 1024
 CASES = {
     "valid": "verified",
@@ -35,10 +39,6 @@ CASES = {
     "lost_page_cdp": "cdp_lost",
     "uncertain_close": "cdp_lost",
 }
-
-
-class RejectionError(Exception):
-    pass
 
 
 def fixture_pdf():
@@ -99,69 +99,29 @@ def fixture_server(pdf):
             thread.join()
 
 
-def response_length(event, *, diagnostics=None):
-    status = event.get("responseStatusCode")
-    headers = {}
-    for header in event.get("responseHeaders", []):
-        headers.setdefault(header["name"].lower(), []).append(header["value"])
-    if (
-        status != 200
-        or headers.get("content-type") != ["application/pdf"]
-        or headers.get("content-encoding", ["identity"]) != ["identity"]
-    ):
-        raise RejectionError("unexpected_response")
-    lengths = headers.get("content-length", [])
-    if not lengths:
-        return None
-    if len(lengths) != 1 or not re.fullmatch(r"[0-9]{1,18}", lengths[0]):
-        raise RejectionError("invalid_length")
-    length = int(lengths[0])
-    if diagnostics is not None:
-        diagnostics["declared_bytes"] = length
-    if length > DOCUMENT_BYTES:
-        raise RejectionError("declared_size_limit")
-    return length
+async def lose_page_channel(cdp, result, stream):
+    cdp.on("close", lambda _session: result.update(page_cdp_closed=True))
+    result["page_cdp_detach_ack"] = False
+    try:
+        async with asyncio.timeout(0.75):
+            await cdp.detach()
+            result["page_cdp_detach_ack"] = True
+            await cdp.send("IO.read", {"handle": stream, "size": 1})
+    except PlaywrightError:
+        result["page_cdp_result"] = "channel_error"
+        raise RejectionError("cdp_lost") from None
+    except TimeoutError:
+        result["page_cdp_result"] = "channel_unresponsive"
+        raise RejectionError("cdp_lost") from None
+    raise RejectionError("fault_not_observed")
 
 
-async def read_stream(cdp, request_id, length, result, case):
-    stream = (await cdp.send("Fetch.takeResponseBodyAsStream", {"requestId": request_id}))["stream"]
-    chunks = []
-    while result["stream_bytes"] < DOCUMENT_BYTES:
-        size = min(CHUNK, DOCUMENT_BYTES - result["stream_bytes"])
-        part = await cdp.send("IO.read", {"handle": stream, "size": size})
-        chunk = (
-            base64.b64decode(part["data"], validate=True)
-            if part.get("base64Encoded")
-            else part["data"].encode()
-        )
-        if len(chunk) > size:
-            raise RejectionError("cdp_chunk_exceeded")
-        chunks.append(chunk)
-        result["stream_bytes"] += len(chunk)
-        if case in {"lost_page_cdp", "uncertain_close"}:
-            cdp.on("close", lambda _session: result.update(page_cdp_closed=True))
-            result["page_cdp_detach_ack"] = False
-            try:
-                async with asyncio.timeout(0.75):
-                    await cdp.detach()
-                    result["page_cdp_detach_ack"] = True
-                    await cdp.send("IO.read", {"handle": stream, "size": 1})
-            except PlaywrightError:
-                result["page_cdp_result"] = "channel_error"
-                raise RejectionError("cdp_lost") from None
-            except TimeoutError:
-                result["page_cdp_result"] = "channel_unresponsive"
-                raise RejectionError("cdp_lost") from None
-            raise RejectionError("fault_not_observed")
-        if part["eof"]:
-            await cdp.send("IO.close", {"handle": stream})
-            result["io_closed"] = True
-            await cdp.send("Fetch.failRequest", {"requestId": request_id, "errorReason": "Aborted"})
-            result["navigation_abort_ack"] = True
-            if length is not None and result["stream_bytes"] != length:
-                raise RejectionError("length_mismatch")
-            return chunks
-    raise RejectionError("stream_size_limit")
+async def read_lab_stream(cdp, request_id, length, result, case):
+    async def inject_fault(stream):
+        await lose_page_channel(cdp, result, stream)
+
+    fault = inject_fault if case in {"lost_page_cdp", "uncertain_close"} else None
+    return await read_stream(cdp, request_id, length, result, after_chunk=fault)
 
 
 async def intercept(page, cdp, target, frame, result, case):
@@ -201,23 +161,12 @@ async def intercept(page, cdp, target, frame, result, case):
             result["stage"] = "headers"
             length = response_length(event, diagnostics=result)
             result["stage"] = "body"
-            chunks = await read_stream(cdp, event["requestId"], length, result, case)
+            chunks = await read_lab_stream(cdp, event["requestId"], length, result, case)
             if time.monotonic() - started >= DEADLINE:
                 raise TimeoutError
             return chunks
     finally:
         result["acquisition_seconds"] = round(time.monotonic() - started, 3)
-
-
-async def close_target(page, browser_cdp, target_id):
-    try:
-        async with asyncio.timeout(CLOSE_TIMEOUT):
-            closed = await browser_cdp.send("Target.closeTarget", {"targetId": target_id})
-            if closed.get("success") and not page.is_closed():
-                await page.wait_for_event("close", timeout=CLOSE_TIMEOUT * 1000)
-    except (TimeoutError, PlaywrightError):
-        return False
-    return page.is_closed()
 
 
 class LabSession:
