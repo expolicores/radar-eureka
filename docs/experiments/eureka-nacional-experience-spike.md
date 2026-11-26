@@ -2686,3 +2686,55 @@ y reutilizar almacenamiento, extracción, OCR, clasificador y
 prioridad comercial. Mantener separada la adquisición SECOP
 II hasta medir el mecanismo de SECOP I. Sin evidencia
 documental el proceso sigue abierto para revisión.
+
+
+### Navegación controlada en Edge a la ficha SECOP I de Casabianca
+
+La prueba del 26 de noviembre de 2026 usó el Edge CDP dedicado
+para el proceso MC-SPM-055-2026 del Municipio de Casabianca,
+Tolima, constancia 26-13-14852794. Playwright agotó la espera
+al conectar antes de navegar. DevTools respondió en loopback
+y se utilizó Page.navigate del mismo CDP para abrir la ficha
+en una pestaña aislada. Se envió un solo GET de detalle.
+La navegación devolvió HTTP 200, Content-Type text/html y
+DOM cargado en 1,219 s. La ficha mostró la referencia
+y la entidad esperadas. Se verificó el cierre de la pestaña
+de la prueba al terminar.
+
+Se observaron cinco documentos en la ficha.
+
+| Tipo mostrado | Documento | Tamaño mostrado |
+| --- | --- | --- |
+| Invitación | INVITACION | 1,80 MB |
+| Documento Adicional | ESTUDIOS PREVIOS | 675 KB |
+| Documento Adicional | ESTUDIO DEL SECTOR | 1,49 MB |
+| Documento Adicional | PLAN DE COMPRAS | 128 KB |
+| Documento Adicional | BANCO DE PROYECTOS | 129 KB |
+
+La invitación fue el único candidato a rector por título.
+El contenido contractual y su formato real siguen pendientes
+de confirmación. Se observó que su control oficial invoca
+reCAPTCHA antes de abrir el archivo y que no expone un
+enlace de descarga directa en el control. Los mecanismos
+validados por EN-01 no cubren ese flujo con las guardas
+acordadas de 10 MiB y 12 s. La prueba se detuvo sin activar
+el control ni usar una ruta alternativa. Hubo cero intentos
+de descarga, cero bytes de PDF, cero páginas, cero OCR y
+cero IA. El estado sigue not_resolved por evidencia
+insuficiente. No se ejecutó el clasificador sobre un archivo.
+
+El 403 del GET directo anterior y el 200 de la navegación
+Edge son observaciones bajo mecanismos distintos. El ensayo
+no aisló qué condición produjo el 403. La validación del
+control documental es un hallazgo separado y no explica
+por sí sola la respuesta de la ficha.
+
+Para ampliar cobertura, el siguiente paso acotado sería
+obtener la invitación por el control oficial con intervención
+humana autorizada y verificar su procedencia e identidad
+antes de reutilizar almacenamiento, extracción, OCR y
+clasificador de EN-01. El acceso a la ficha y al inventario
+queda demostrado para esta constancia. La adquisición
+automática de documentos de SECOP I sigue pendiente de una
+ruta autorizada y verificable dentro de los límites. No se
+amplió la implementación ni se consultaron otros procesos.

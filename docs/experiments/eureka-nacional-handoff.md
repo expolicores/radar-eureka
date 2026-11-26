@@ -736,3 +736,22 @@ constancia antes de intentar un solo rector. Se mantiene el
 pipeline EN-01 para cualquier archivo verificado. El
 [resultado y propuesta mínima](eureka-nacional-experience-spike.md#prueba-real-de-ficha-secop-i-de-casabianca)
 quedan en el informe.
+
+
+### Resultado de la navegación SECOP I en Edge
+
+La única navegación a Casabianca MC-SPM-055-2026, constancia
+26-13-14852794, devolvió HTTP 200 en 1,219 s. Se verificaron
+entidad, referencia y cinco documentos. INVITACION, de
+1,80 MB según la ficha, es el único rector identificado
+por título. El control documental invoca reCAPTCHA. Como
+esa adquisición no está validada con los límites de EN-01,
+se detuvo la prueba sin descarga, OCR ni clasificación
+documental. La pestaña quedó cerrada y la causa del 403
+del GET directo anterior sigue sin determinar.
+
+El caso queda not_resolved. La opción acotada siguiente es
+una importación asistida desde el control oficial con
+autorización separada. El
+[resultado y límites de cobertura](eureka-nacional-experience-spike.md#navegación-controlada-en-edge-a-la-ficha-secop-i-de-casabianca)
+quedan en el informe.
