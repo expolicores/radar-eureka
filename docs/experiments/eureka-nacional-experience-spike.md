@@ -1932,3 +1932,74 @@ dos páginas OCR por PDF y el resto del presupuesto aprobado. Medir
 cobertura habilitante separadamente de páginas leídas, y mantener
 los escaneos sin sección verificada como evidencia insuficiente.
 No se consultó SECOP, inventarios ni feed durante este incremento.
+
+
+### Validación offline de OCR dirigido
+
+Se reabrieron los dos PDF locales por SHA-256 y se usó la extracción de
+EN-01 con Tesseract en español. La selección del replay se fijó a las
+cuatro páginas autorizadas. Se ejecutó OCR en dos páginas por PDF,
+sin reintentos ni OCR sobre otras páginas. No hubo errores de ejecución.
+La evidencia de este replay quedó en un resultado separado. Las cifras
+acumuladas incluyen las dos páginas ya procesadas en cada PDF.
+
+| Proceso | Páginas nuevas | Cobertura acumulada | Estado formal antes y después | Prioridad antes y después |
+| --- | --- | --- | --- | --- |
+| Puerto Gaitán MC-SEAM-102-2026 | 15 y 16 | 2/41 a 4/41, 37 pendientes | not_resolved | Evidencia insuficiente |
+| Rionegro 492-2026-OC | 4 y 11 | 2/12 a 4/12, 8 pendientes | not_resolved | Evidencia insuficiente |
+
+**Puerto Gaitán.** La página 15 conserva en el OCR el numeral de
+experiencia mínima, la acreditación por contrato ejecutado y finalizado
+y el umbral del presupuesto oficial. Hay ruido en el encabezado y
+alrededor de la cantidad. La página 16 conserva el procedimiento de
+acreditación mediante certificación o copia del contrato con el acta.
+El clasificador leyó la primera cláusula como normativa condicional
+de alcance indeterminado.
+
+**Rionegro.** La página 4 conserva las referencias al Anexo 3 y a
+certificados de experiencia. En la página 11, Tesseract transcribió
+el sujeto como El aroma en vez de El proponente, pero conservó
+la obligación de aportar experiencia específica, verificable y
+relacionada con el objeto. El clasificador registró las tres
+menciones como normativas condicionales.
+
+Los controles con transcripción visual corregida también dieron
+normativa condicional. La regla actual no reconoce las formas
+se acreditará en un contrato o deberá aportar su experiencia
+en esos contextos. El OCR de Rionegro introdujo además un error
+en el sujeto. Un control positivo con una formulación ya
+reconocida produjo EXIGENCIA y mantuvo not_resolved y evidencia
+insuficiente al marcar la cobertura como parcial. La selección
+dirigida resolvió qué páginas leer en estos dos PDF. Quedan por
+validar la calidad del sujeto OCR, el reconocimiento de las
+obligaciones y el criterio que separa una exigencia provisional
+de una conclusión formal.
+
+La extracción tomó 14,937 s en total. Las cuatro páginas quedaron
+registradas con locador, método y evidencia. Los resultados y
+controles quedaron en en01-directed-ocr_lxj95tq1, excluido de Git.
+Se usaron cero créditos de red y no se cambió el clasificador,
+el presupuesto OCR ni las clasificaciones persistidas de la
+recuperación original.
+
+#### Mejora mínima propuesta antes de explorar
+
+Extender el selector existente para priorizar destinos de
+marcadores PDF o índices con títulos de experiencia o requisitos
+habilitantes, manteniendo su búsqueda actual en texto nativo.
+En escaneos sin texto ni marcadores, probar que una de las dos
+plazas se asigne al cuerpo en vez de a dos páginas contiguas de
+portada. Usar una vista previa de baja resolución para localizar
+cambios de sección, descartando encabezados repetidos y anexos
+cuando puedan distinguirse por estructura. Las vistas previas
+se usan sólo para señales de maquetación. No se añade una pasada
+de reconocimiento de texto. El límite sigue en dos páginas OCR
+por PDF.
+
+Probar el selector offline sin suministrarle los números de
+página conocidos. Medir si alcanza la cláusula, la tasa de
+exigencias mal tratadas como condicionales y el costo. El ajuste
+lingüístico futuro debe reconocer mandatos equivalentes de
+forma general y conservar las guardas de cobertura formal.
+Un escaneo sin señal suficiente queda para revisión. La siguiente
+exploración nacional queda pendiente de autorización.

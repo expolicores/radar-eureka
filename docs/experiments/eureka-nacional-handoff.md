@@ -448,6 +448,23 @@ referencia coincidente como pista. La Estrella requiere el pliego
 definitivo. El runner registra el tamaño declarado antes de rechazarlo.
 No hubo solicitudes nuevas ni exploración nacional.
 
+## Validación offline de OCR dirigido
+
+El [replay](eureka-nacional-experience-spike.md#validación-offline-de-ocr-dirigido)
+procesó sólo Puerto Gaitán 15 y 16 y Rionegro 4 y 11. La cobertura
+acumulada pasó a 4/41 y 4/12 respectivamente. En ambos siguen
+not_resolved y evidencia insuficiente. Tesseract recuperó las
+cláusulas, pero el clasificador las trató como condicionales,
+también con transcripciones visuales corregidas. El OCR de
+Rionegro deformó el sujeto de la cláusula. Una prueba con mandato
+reconocido y PDF parcial mantuvo el resultado formal abierto.
+
+Se propone incorporar señales de índice y estructura al selector
+existente manteniendo dos páginas OCR por PDF, y validar las reglas
+generales de obligación antes de la siguiente exploración. Los
+artefactos quedan localmente en en01-directed-ocr_lxj95tq1. No
+hubo acceso a CDP, SECOP, feed ni descargas.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
