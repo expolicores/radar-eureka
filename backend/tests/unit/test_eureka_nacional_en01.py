@@ -1880,8 +1880,6 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
     tmp_path,
     monkeypatch,
 ):
-    from eureka_nacional_cdp_stream import stream_pdf
-
     output = tmp_path / "run"
     output.mkdir()
     document = SpikeDocument("Invitacion", "pdf", SECOP + "1", "1")
@@ -1895,21 +1893,27 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
 
     closed = True
 
-    async def browser(url, diagnostic, *, cdp_url):
-        assert url == document.source_url
+    def browser(target, staging, diagnostic, *, cdp_url):
+        assert target == document
         assert cdp_url.endswith(":9232")
         diagnostic.update(
             stream_bytes=len(pdf),
+            worker_closed=True,
             requests_forwarded=1,
             tab_opened=True,
             io_closed=closed,
             navigation_abort_ack=closed,
             target_closed=closed,
         )
-        return [pdf]
+        return staging.store(
+            [pdf],
+            original_name="document.pdf",
+            content_type="application/pdf",
+            expected_size=len(pdf),
+            max_bytes=en01.streaming.DOCUMENT_BYTES,
+        )
 
-    assert stream_pdf is en01.streaming.stream_pdf
-    monkeypatch.setattr(en01.streaming, "stream_pdf", browser)
+    monkeypatch.setattr(en01.streaming, "invoke_worker", browser)
     attempt = Mock(side_effect=direct)
     monkeypatch.setattr(en01.spike, "download_document", attempt)
     monkeypatch.setattr(

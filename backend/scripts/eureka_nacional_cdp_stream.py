@@ -2,22 +2,32 @@
 
 import asyncio
 import base64
+import json
 import re
+import subprocess
+import sys
+import tempfile
 import time
 from contextlib import suppress
+from dataclasses import asdict
+from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import parse_qs, urlsplit
 
 from eureka_nacional_experience import document_title
 from licitaciones_cdp_runtime import validate_cdp_url
 
+from public_procurement.documents.adapters.local_storage import LocalBinaryStorage
 from public_procurement.documents.adapters.secop import RETRIEVE_PATH, validate_url
-from public_procurement.documents.domain.document import AcquisitionError
+from public_procurement.documents.domain.document import AcquisitionError, StoredBinary
 
 DOCUMENT_BYTES = 10 * 1024 * 1024
 DEADLINE = 12
 CHUNK = 64 * 1024
 CLOSE_TIMEOUT = 2
+WORKER_TIMEOUT = 35
 OPERATION_MARGIN = 38
+WORKER_SCRIPT = Path(__file__).resolve()
 MARKER_NAME = "cdp-stream-live-uncertain.lock"
 
 
@@ -243,11 +253,97 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
         return chunks
 
 
-def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url):
+async def acquire_pdf(url, storage, diagnostics, *, cdp_url):
+    chunks = await stream_pdf(url, diagnostics, cdp_url=cdp_url)
+    if diagnostics.get("requests_forwarded") != 1 or not all(
+        diagnostics.get(key) is True
+        for key in ("io_closed", "navigation_abort_ack", "target_closed")
+    ):
+        raise RejectionError("unverified_close")
+    if not next((chunk for chunk in chunks if chunk), b"").startswith(b"%PDF-"):
+        raise RejectionError("invalid_pdf_signature")
+    return storage.store(
+        chunks,
+        original_name="document.pdf",
+        content_type="application/pdf",
+        expected_size=diagnostics["stream_bytes"],
+        max_bytes=DOCUMENT_BYTES,
+    )
+
+
+def worker_main():
     from playwright.async_api import Error as PlaywrightError
 
+    payload = json.load(sys.stdin)
+    document = SimpleNamespace(
+        source_url=payload["source_url"], document_id=payload["document_id"], extension="pdf"
+    )
+    diagnostics = {"stream_bytes": 0, "requests_forwarded": 0, "tab_opened": False}
+    stored = None
+    try:
+        validate_target(document)
+        staged = LocalBinaryStorage(Path(payload["staging"]))
+        stored = asyncio.run(
+            acquire_pdf(document.source_url, staged, diagnostics, cdp_url=payload["cdp_url"])
+        )
+    except TimeoutError:
+        diagnostics["error"] = "deadline"
+    except (PlaywrightError, RejectionError, AcquisitionError, OSError) as error:
+        code = getattr(error, "code", None)
+        if not code:
+            code = str(error) if isinstance(error, RejectionError) else "protocol_error"
+        diagnostics.update(error=code, exception_type=type(error).__name__)
+    print(json.dumps({"stored": asdict(stored) if stored else None, "diagnostics": diagnostics}))
+
+
+def invoke_worker(document, staging, diagnostics, *, cdp_url):
+    payload = {
+        "source_url": document.source_url,
+        "document_id": document.document_id,
+        "staging": str(staging.root),
+        "cdp_url": cdp_url,
+    }
+    try:
+        worker = subprocess.run(  # noqa: S603
+            [sys.executable, str(WORKER_SCRIPT), "--stream-worker"],
+            input=json.dumps(payload),
+            capture_output=True,
+            encoding="utf-8",
+            timeout=WORKER_TIMEOUT,
+            check=True,
+        )
+    except subprocess.TimeoutExpired:
+        diagnostics.update(worker_closed=True, error="worker_timeout")
+        raise AcquisitionError("worker_timeout", "Se agotó el plazo del trabajador Edge.") from None
+    except subprocess.CalledProcessError:
+        diagnostics.update(worker_closed=True, error="worker_failed")
+        raise AcquisitionError("worker_failed", "El trabajador Edge terminó con error.") from None
+    except OSError:
+        diagnostics["error"] = "worker_start_failed"
+        raise AcquisitionError(
+            "worker_start_failed", "No se pudo completar el trabajador Edge."
+        ) from None
+    diagnostics["worker_closed"] = True
+    try:
+        result = json.loads(worker.stdout)
+        metadata = result["stored"]
+        diagnostics.update(result["diagnostics"], worker_closed=True)
+        if metadata is not None:
+            return StoredBinary(**metadata)
+    except (KeyError, TypeError, ValueError):
+        diagnostics["error"] = "worker_protocol"
+        raise AcquisitionError(
+            "worker_protocol", "Respuesta inválida del trabajador Edge."
+        ) from None
+    raise AcquisitionError(
+        diagnostics.get("error", "worker_failed"), "Descarga Edge no verificada."
+    )
+
+
+def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url):
     validate_target(document)
-    diagnostics.update(stream_bytes=0, requests_forwarded=0)
+    validate_cdp_url(cdp_url)
+    diagnostics.update(stream_bytes=0, requests_forwarded=0, worker_closed=False)
     try:
         with marker.open("x", encoding="utf-8") as lock:
             lock.write(document.document_id + "\n")
@@ -256,38 +352,35 @@ def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url):
             "stream_close_unverified", "Hay un cierre pendiente en Edge."
         ) from None
     try:
-        chunks = asyncio.run(stream_pdf(document.source_url, diagnostics, cdp_url=cdp_url))
-        if not all(
-            diagnostics.get(key) for key in ("io_closed", "navigation_abort_ack", "target_closed")
-        ):
-            raise RejectionError("unverified_close")
-        if not next((chunk for chunk in chunks if chunk), b"").startswith(b"%PDF-"):
-            raise RejectionError("invalid_pdf_signature")
-        stored = storage.store(
-            chunks,
-            original_name="document.pdf",
-            content_type="application/pdf",
-            expected_size=diagnostics["stream_bytes"],
-            max_bytes=DOCUMENT_BYTES,
-        )
-        with storage.open_verified(
-            stored.storage_path, stored.sha256, stored.observed_size, DOCUMENT_BYTES
-        ) as stream:
-            if stream.read(5) != b"%PDF-":
-                raise RejectionError("invalid_pdf_signature")
-        return stored
-    except TimeoutError:
-        diagnostics["error"] = "deadline"
-        raise AcquisitionError("deadline", "Se agotó el plazo de Edge.") from None
-    except (PlaywrightError, RejectionError) as error:
-        code = str(error) if isinstance(error, RejectionError) else "protocol_error"
-        diagnostics.update(error=code, exception_type=type(error).__name__)
-        raise AcquisitionError(code, "Descarga de Edge no verificada.") from None
+        with tempfile.TemporaryDirectory(prefix="en01-edge-worker-") as temporary:
+            staging = LocalBinaryStorage(Path(temporary))
+            result = invoke_worker(document, staging, diagnostics, cdp_url=cdp_url)
+            if diagnostics["requests_forwarded"] != 1 or not all(
+                diagnostics.get(key) is True
+                for key in ("worker_closed", "io_closed", "navigation_abort_ack", "target_closed")
+            ):
+                raise AcquisitionError("unverified_close", "Cierre no verificado en Edge.")
+            with staging.open_verified(
+                result.storage_path, result.sha256, result.observed_size, DOCUMENT_BYTES
+            ) as stream:
+                if stream.read(5) != b"%PDF-":
+                    raise AcquisitionError("invalid_pdf_signature", "El archivo no es un PDF.")
+                stream.seek(0)
+                return storage.store(
+                    iter(lambda: stream.read(CHUNK), b""),
+                    original_name="document.pdf",
+                    content_type="application/pdf",
+                    expected_size=result.observed_size,
+                    max_bytes=DOCUMENT_BYTES,
+                )
     finally:
-        # If interrupted before the browser reported whether a target exists, keep the marker.
-        state_known = "tab_opened" in diagnostics
-        diagnostics["session_blocked"] = not (
-            (state_known and not diagnostics["tab_opened"]) or diagnostics.get("target_closed")
+        safe = (diagnostics.get("worker_closed") is True) and (
+            diagnostics.get("tab_opened") is False or diagnostics.get("target_closed") is True
         )
-        if not diagnostics["session_blocked"]:
+        diagnostics["session_blocked"] = not safe
+        if safe:
             marker.unlink()
+
+
+if __name__ == "__main__" and sys.argv[1:] == ["--stream-worker"]:
+    worker_main()

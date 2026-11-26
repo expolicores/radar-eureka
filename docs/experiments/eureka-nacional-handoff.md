@@ -649,3 +649,22 @@ git diff --cached --name-status
 ```
 
 Registrar el commit, pruebas, artefactos y cambios de fase en este archivo.
+
+## Trabajador de Streaming y preparación de SECOP I
+
+El runner nacional y la recuperación comparten el trabajador
+aislado de EN-01. La llamada síncrona puede ejecutarse con el
+bucle de Playwright activo. El trabajador conserva los topes de
+transferencia y el padre verifica su salida, el archivo y el
+cierre de Edge antes de publicar. La marca preventiva sigue
+bloqueando adquisiciones si el cierre de la pestaña es incierto.
+La marca de la corrida anterior se conservó durante esta fase.
+
+Quedan dos planes pendientes de autorización. Para Yumbo y
+El Peñol, comprobar y registrar primero la recuperación segura de
+la sesión local y usar el comando archivado de dos procesos sin
+feed ni preflight del feed. Para SECOP I, usar sólo la constancia
+26-13-14852794 de Casabianca, una ficha oficial y hasta un PDF
+rector verificable con 10 MiB, 12 s y dos páginas OCR. Los
+[procedimientos y criterios de parada](eureka-nacional-experience-spike.md#corrección-del-bucle-y-próximas-pruebas-controladas)
+quedan en el informe. No se ejecutó ninguno de los dos planes.

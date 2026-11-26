@@ -93,7 +93,7 @@ def test_direct_success_skips_edge(tmp_path, monkeypatch):
     stored = SimpleNamespace(sha256="verified")
     monkeypatch.setattr(recovery, "direct_pdf", lambda *_: (stored, {}))
     edge = Mock(side_effect=AssertionError("Edge must not start for a direct success"))
-    monkeypatch.setattr(recovery.streaming, "stream_pdf", edge)
+    monkeypatch.setattr(recovery.streaming, "invoke_worker", edge)
     outcome = recovery.recover_pdf(example_document(), None, tmp_path / "lock", {})
     assert outcome == (stored, "urllib")
     edge.assert_not_called()
@@ -116,10 +116,11 @@ def test_fallback_retains_no_file_when_close_is_uncertain(tmp_path, monkeypatch,
         lambda *_: (None, {"error": "http_error", "diagnostics": {"http_status": 403}}),
     )
 
-    async def edge(_, result, *, cdp_url):
+    def edge(_, staging, result, *, cdp_url):
         assert cdp_url.endswith(":9232")
         assert marker.exists()
         result.update(
+            worker_closed=True,
             tab_opened=True,
             target_closed=closed,
             io_closed=True,
@@ -127,9 +128,15 @@ def test_fallback_retains_no_file_when_close_is_uncertain(tmp_path, monkeypatch,
             requests_forwarded=1,
             stream_bytes=len(payload),
         )
-        return [payload]
+        return staging.store(
+            [payload],
+            original_name="document.pdf",
+            content_type="application/pdf",
+            expected_size=len(payload),
+            max_bytes=recovery.streaming.DOCUMENT_BYTES,
+        )
 
-    monkeypatch.setattr(recovery.streaming, "stream_pdf", edge)
+    monkeypatch.setattr(recovery.streaming, "invoke_worker", edge)
     stored, route = recovery.recover_pdf(example_document(), storage, marker, trace)
     assert bool(stored) is closed
     assert route == ("edge_cdp_stream" if closed else None)

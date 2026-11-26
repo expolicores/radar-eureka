@@ -2373,3 +2373,98 @@ respeta cierre y límites. Antes de reutilizar la marca local
 hay que verificar que el nuevo flujo deja un estado seguro.
 Una nueva ejecución de Yumbo y El Peñol requiere autorización
 adicional.
+
+
+### Corrección del bucle y próximas pruebas controladas
+
+El runner síncrono de Playwright ya tiene un bucle activo en su
+hilo. CDP Streaming ahora se ejecuta en un proceso hijo de EN-01
+con su propio bucle y conexión CDP. El runner nacional y el de
+recuperación conservan la misma función de adquisición. El
+intercambio con el trabajador usa entrada estándar y devuelve
+estados depurados y metadatos del binario. Los recibos siguen
+permitiendo reutilizar archivos verificados sin nuevas solicitudes.
+
+El trabajador conserva un solo GET, el límite de adquisición de
+12 s, el tamaño declarado obligatorio entre 1 byte y 10 MiB y
+lecturas de hasta 64 KiB por bloque. El padre supervisa hasta 35 s
+incluidos arranque y cierre, dentro de la reserva de 38 s del
+runner. Sólo conserva el archivo definitivo si tiene confirmación
+de cierre del flujo y de la pestaña, confirmación de cancelación de
+la navegación interceptada, salida del trabajador y verificación
+local de firma PDF, tamaño y SHA-256. El archivo intermedio se
+limpia al terminar. Si el trabajador sale sin acreditar que cerró
+la pestaña o que no abrió ninguna, la marca preventiva permanece.
+Terminar el proceso hijo verifica su salida como proceso de Python.
+El cierre de Edge y sus búferes internos requiere confirmación
+independiente del navegador.
+
+Las regresiones offline finalizaron con 207 pruebas aprobadas y
+una omitida. El fallback simulado se invocó desde el contexto real
+de Playwright síncrono con bucle activo, usando un proceso hijo
+sintético. Se verificaron aceptación, cancelación, salida del
+trabajador, SHA-256, limpieza temporal, bloqueo tras timeout o
+cierre incierto, reutilización por recibo y contabilidad de
+intentos y créditos en ambos flujos.
+
+El laboratorio de Edge aislado en loopback aprobó diez escenarios.
+Verificó un PDF válido, rechazo de sobrepeso declarado y de
+contenido truncado, corte por demora de cuerpo o cabeceras a
+12,015 y 12,016 s, pérdida de CDP, bloqueo por cierre incierto y
+recuperación controlada. También verificó el tope al leer una
+respuesta sintética sin tamaño declarado. En producción, ese
+tipo de respuesta se rechaza antes de leer el cuerpo.
+
+**Yumbo y El Peñol.** Con autorización nueva, revisar primero en
+loopback el estado de Edge, la ausencia de un trabajador anterior y
+de una pestaña temporal pendiente. Conservar la marca de la
+interrupción anterior hasta verificar el estado y registrar el
+desbloqueo explícito. Si no puede verificarse, detenerse antes de
+enviar solicitudes. Ejecutar una sola vez el comando de
+[reanudación acotada](#reanudación-acotada-propuesta). Debe incluir
+únicamente Yumbo MC-RF-016-2026 y El Peñol MC-039-2026,
+sin feed ni preflight del feed. Verificar los recibos existentes
+antes de adquirir. Mantener los límites del comando y el fallback
+únicamente tras un 403 directo sin redirección en un PDF elegible.
+Las ocho plazas preservan la reserva de corroboración y el tope de
+tres intentos por proceso permite como máximo seis intentos
+documentales en ese lote. Registrar solicitudes y créditos,
+vía documental, bytes, SHA-256, cierres, cobertura y conclusión.
+Detener la adquisición si reaparece un cierre incierto o se activa
+el corte por fallos generalizados.
+
+**SECOP I.** Seleccionar la constancia `26-13-14852794`,
+Casabianca MC-SPM-055-2026, uno de los cinco candidatos archivados
+que pasaron el prefiltro. Su aviso aparecía abierto y registraba
+cierre el 1 de diciembre de 2026 a las 17:30 de Bogotá, el más
+tardío entre los tres abiertos con fecha archivada. La vigencia
+actual y el acceso documental requieren validación.
+
+1. Con autorización separada, consultar una sola ficha oficial
+   usando la URL candidata deducida del patrón probado offline
+   `https://www.contratos.gov.co/consultas/detalleProceso.do?numConstancia=26-13-14852794`.
+   Verificar HTTPS, origen oficial, constancia, referencia, entidad
+   y vigencia. Detenerse ante redirección a otro host, error,
+   expediente distinto o falta de un inventario verificable en esa
+   ficha. No probar catálogos, búsquedas ni otros expedientes.
+2. Elegir una invitación vigente o un rector inequívoco por título,
+   tipo y versión. Dejar estudios previos, anexos habilitantes,
+   avisos o borradores como soporte cuando no acrediten ser el
+   documento rector. Exigir que el enlace pertenezca al inventario
+   y que su destino oficial se pueda verificar antes de adquirir.
+   Si hay identidad o rol ambiguos, detenerse.
+3. Autorizar como máximo un intento de descarga directa del PDF,
+   hasta 10 MiB y 12 s, sin reintentos ni reutilización del
+   fallback específico de SECOP II. Si se recibe, verificar firma,
+   integridad básica, tamaño, SHA-256 y portada cuando corresponda.
+   Asociar el archivo local con la constancia y la identidad
+   documental verificada. Entregar ese binario y sus metadatos a
+   `extract_document` para usar extracción nativa completa y
+   hasta dos páginas de OCR selectivo. Usar el clasificador
+   contextual y guardar procedencia, rol, página, fragmento y
+   cobertura. La prioridad comercial y el estado formal se reportan
+   por separado. Un solo rector puede dejar corroboración pendiente.
+   IA generativa en cero.
+
+Estas pruebas reales requieren permisos independientes. La
+corrección offline no ejecutó la reanudación ni consultó SECOP I.
