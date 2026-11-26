@@ -720,3 +720,19 @@ hasta un rector verificable, con autorización previa. El
 [procedimiento y los criterios de parada](eureka-nacional-experience-spike.md#próxima-capacidad-de-cobertura-secop-i)
 quedan en el informe. No hubo consultas SECOP ni feed en
 este incremento.
+
+
+### Resultado de la primera prueba oficial de SECOP I
+
+La consulta HTTPS única de Casabianca MC-SPM-055-2026,
+constancia 26-13-14852794, recibió HTTP 403 en 0,687 s.
+Se detuvo en cabeceras. No hubo inventario verificable,
+rector identificado, adquisición de PDF, OCR ni clasificación
+nueva. El caso queda not_resolved por evidencia insuficiente.
+
+La autorización del intento se utilizó. Una futura prueba
+separada debe confirmar una ruta oficial accesible para esa
+constancia antes de intentar un solo rector. Se mantiene el
+pipeline EN-01 para cualquier archivo verificado. El
+[resultado y propuesta mínima](eureka-nacional-experience-spike.md#prueba-real-de-ficha-secop-i-de-casabianca)
+quedan en el informe.

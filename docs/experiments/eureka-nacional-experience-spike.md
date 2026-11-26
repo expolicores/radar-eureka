@@ -2639,3 +2639,50 @@ el documento no es rector o si se excede una guarda. Esta
 fase no implementó un adaptador ni usó la vía CDP de SECOP II
 para SECOP I. Yumbo y El Peñol quedan cerrados para este
 incremento y sus descargas no se repitieron.
+
+
+### Prueba real de ficha SECOP I de Casabianca
+
+El 26 de noviembre de 2026 se consultó una sola vez la ficha
+oficial candidata del Municipio de Casabianca, Tolima, proceso
+MC-SPM-055-2026, constancia 26-13-14852794. Se usó un GET
+HTTPS directo al endpoint de detalle documentado en el plan.
+Se mantuvo la validación TLS normal y no se habilitaron
+redirecciones ni reintentos. La respuesta a ese GET fue HTTP
+403 con Content-Type text/html en la etapa de cabeceras.
+La prueba duró 0,687 s. No se leyó el cuerpo de la respuesta.
+
+La identidad del proceso coincide con los datos del archivo
+local de discovery, que registra modalidad de mínima cuantía,
+presupuesto de COP 40.000.000 y cierre previsto para el 1 de
+diciembre de 2026 a las 17:30 de Bogotá. La ficha no pudo
+confirmar esos datos ni su vigencia. El 403 tampoco permite
+determinar el motivo del rechazo ni la disponibilidad de la
+ficha mediante una sesión normalmente autorizada.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Ficha oficial por GET directo | HTTP 403. Cero bytes de cuerpo leídos. |
+| Inventario y rector | Sin inventario oficial verificable. No se identificó rector. |
+| Adquisición documental | Cero intentos de PDF, cero archivos y cero recibos. |
+| Extracción y clasificación | Cero páginas nativas, OCR e IA. Estado de cobertura not_resolved por evidencia insuficiente, sin clasificación nueva del motor ni conclusión sobre experiencia. |
+
+El registro técnico y el marcador del intento único quedan
+locales. No se probaron enlaces alternativos ni otros
+procesos. No se tocó el feed, Yumbo ni El Peñol.
+
+**Incremento mínimo propuesto.** Con autorización separada,
+verificar primero si la ficha o un inventario oficial de esta
+misma constancia es accesible mediante navegación normal.
+Si existe un rector inequívoco y una ruta autorizada, validar
+un solo PDF con 10 MiB, 12 s y hasta dos páginas OCR. Si sólo
+es viable la descarga manual, verificar la procedencia e
+identidad y entregar el archivo local al almacenamiento por
+SHA-256 y al extractor EN-01. Conservar constancia, identidad
+documental, rol, cobertura y evidencia por página. Cuando se
+haya comprobado un enlace o inventario repetible, agregar
+únicamente resolución de identidad e inventario por fuente
+y reutilizar almacenamiento, extracción, OCR, clasificador y
+prioridad comercial. Mantener separada la adquisición SECOP
+II hasta medir el mecanismo de SECOP I. Sin evidencia
+documental el proceso sigue abierto para revisión.
