@@ -1831,3 +1831,53 @@ detallada quedaron excluidos de Git en
 incierto. Permanecen tres candidatos con rector PDF elegible y otros
 dos pendientes de identificar un rector PDF verificable. Una
 recuperación posterior requiere autorización nueva.
+
+
+### Recuperación de Rionegro y Chitaraque, 26 de noviembre de 2026
+
+La revisión del inventario archivado y los recibos dejó dos invitaciones
+PDF con enlace e identidad verificables. El runner marcaba como elegible
+Yumbo, pero el título archivado identifica un aviso de invitación pública.
+El documento quedó fuera del lote por falta de confirmación de su carácter
+rector. Se reabrió el perfil Edge dedicado de EN-01 y se confirmó la
+sesión HTTP 200 en Licitaciones.info con el feed y los inventarios
+bloqueados durante la operación.
+
+| Proceso | DocumentId | urllib / CDP Streaming | Resultado y cobertura | Estado formal y prioridad comercial |
+| --- | --- | --- | --- | --- |
+| Rionegro, 492-2026-OC | 896109474 | HTTP 403 directo sin redirección / HTTP 200 | 595.319 bytes, firma PDF y SHA-256 verificados. 2 de 12 páginas por OCR, 10 pendientes, sin páginas nativas. | not_resolved, evidencia insuficiente. Las páginas 1 y 2 no aportaron afirmaciones decisivas. |
+| Chitaraque, MC-045-2026 | 896089636 | HTTP 403 directo sin redirección / HTTP 200 | Tamaño declarado superior a 10 MiB. Rechazo en cabeceras, sin leer el cuerpo ni guardar el PDF. La traza conserva el motivo y omite la longitud exacta por la forma actual del registro. | not_resolved, evidencia insuficiente. No hubo extracción. |
+
+Se confirmó el cierre del flujo completo y la pestaña de Rionegro.
+En Chitaraque, se cerró la pestaña con la respuesta pausada en
+cabeceras. Las dos transferencias dejaron cierre verificable y
+ninguna requirió reintentos. Hubo dos rechazos de la vía directa y un
+rechazo final por tamaño. El comando cerró con código 2 por el
+resultado parcial.
+
+Se usaron 14 créditos del presupuesto por 4 GET a SECOP, 595.319
+bytes aceptados y 13,452 s acumulados de adquisición (11,125 s
+directos y 2,327 s por CDP). El comando tardó 34,656 s. La
+extracción de Rionegro tardó 8,062 s y usó 2 páginas OCR.
+Hubo cero consultas al feed o inventarios y cero llamadas de IA.
+El recibo, hash y evidencia se conservaron en el directorio local
+en01-stream_hsxjhqpg, excluido de Git.
+
+**Pendientes de adquisición y cobertura**
+
+- Chitaraque conserva un intento registrado y el rector pendiente
+  por exceso de tamaño. El runner no repite el intento automáticamente.
+- Yumbo IP-CMC-IMVY-012-2026 tiene un aviso y estudios previos.
+  Falta identificar el rector con certeza.
+- Pacho MC-039-2026 y La Estrella SI 026 2026 siguen sin rector PDF
+  inequívoco en el inventario archivado. En La Estrella figura un
+  proyecto de pliegos.
+- Rionegro tiene el PDF verificado y 10 páginas pendientes de OCR
+  o revisión. Su cobertura sólo permite evidencia insuficiente.
+- Puerto Gaitán MC-SEAM-102-2026 mantiene 2 de 41 páginas con OCR y
+  39 pendientes. El estado formal sigue not_resolved y la prioridad
+  comercial es evidencia insuficiente. No se reclasifica como silencio
+  ni ausencia de experiencia. No se descargó ni se procesó de nuevo.
+
+Los dos casos del lote quedaron sin conclusión formal sobre experiencia.
+No se amplió OCR, tamaño ni alcance de la recuperación.

@@ -413,6 +413,24 @@ recibos se reconocieron al releer el plan local. Quedan tres
 rectores PDF elegibles y dos procesos pendientes de identificar
 rector. No se ejecutó otro lote.
 
+## Recuperación de Rionegro y Chitaraque
+
+El [lote del 26 de noviembre](eureka-nacional-experience-spike.md#recuperación-de-rionegro-y-chitaraque-26-de-noviembre-de-2026)
+intentó dos rectores. urllib devolvió dos HTTP 403 directos. CDP
+guardó el PDF de Rionegro, 595.319 bytes verificados y 2 de 12
+páginas por OCR. Chitaraque se rechazó en cabeceras por superar
+10 MiB declarados, con cierre confirmado y cero bytes leídos.
+Se usaron 14 créditos y 13,452 s de adquisición. Ambos quedaron
+not_resolved con prioridad de evidencia insuficiente.
+
+Pendientes de adquisición: Chitaraque por tamaño, Yumbo por aviso
+sin rector confirmado y Pacho y La Estrella sin rector PDF
+inequívoco en el inventario archivado. Pendientes de OCR:
+Rionegro con 10 páginas y Puerto Gaitán con 39. Puerto Gaitán
+conserva su estado de evidencia insuficiente con 2 de 41 páginas
+procesadas. No se descargó de nuevo ni se amplió su OCR.
+No hubo feed, inventarios nuevos, reintentos ni IA.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
