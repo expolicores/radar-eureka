@@ -2252,3 +2252,124 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 El comando queda pendiente de autorización. La integración nacional
 actual se verificó offline. No se recuperó ninguno de los 15 ni se
 repitió el descubrimiento.
+
+
+### Auditoría técnica offline de SECOP I
+
+En en01-abu8_p7u, cinco de los 83 avisos SECOP I superaron el
+prefiltro comercial. Los cinco conservan identidad secop1 con
+numConstancia, referencia, entidad, objeto, departamento, fecha,
+presupuesto, modalidad, categoría derivada e identificadores
+internos del agregador. Tres conservan fecha límite y aparecen
+abiertos en el snapshot. En dos la vigencia figura desconocida.
+No hay idUltimaFase, UNSPSC, enlace oficial persistido ni
+inventario para ninguno de los cinco.
+
+| Referencia | Departamento | Modalidad | Categoría derivada | Vigencia archivada |
+| --- | --- | --- | --- | --- |
+| MC-050-2026 | Tolima | Mínima cuantía | Ferretería | Abierto |
+| S.A.S.I-002-2026 | Tolima | Subasta inversa | Informática | Desconocida |
+| SASI-006-2026 | Risaralda | Subasta inversa | Repuestos | Desconocida |
+| MC-SPM-055-2026 | Tolima | Mínima cuantía | Informática | Abierto |
+| MC-049-2026 | Tolima | Mínima cuantía | Papelería | Abierto |
+
+El runner obtiene la constancia de la referencia de origen antes
+de retirar el enlace raw. Su normalizador de URL reutiliza la
+validación de descarga SECOP II y no guarda el enlace de SECOP I.
+El test de identidad del agregador muestra el patrón
+contratos.gov.co/consultas/detalleProceso.do con numConstancia.
+La constancia permite formular una URL candidata para verificación
+posterior. El archivo no acredita vigencia del enlace, HTML
+actual ni URLs de sus documentos.
+
+**Infraestructura reutilizable.** El agregador conserva identidad
+SECOP I y admite revisión con metadatos cuando la estrategia
+documental no está verificada. Su interfaz acepta una capacidad
+explícita. La implementación de inventario CDP requiere tres
+claves, incluida idUltimaFase. El parser documental actual
+requiere la URL permitida y DocumentId. El descargador y el
+streaming de SECOP II están limitados a community.secop.gov.co.
+Ninguna de esas piezas ofrece una ruta probada para adquirir
+los cinco expedientes.
+
+El adaptador Socrata existente modela identidad documental,
+paginación y detección de inconsistencias. Apunta a dmgg-8hin,
+con llave de proceso o contrato correspondiente al esquema de
+SECOP II. La documentación D1 anota f789-7hwg para procesos de
+SECOP I y ps88-5e3v para sus archivos. Los artefactos locales no
+validan la llave de unión ni cobertura de ese inventario documental.
+Se reutilizarían SourceDocument y los patrones de validación
+con una política de solicitudes compatible con los topes de EN-01.
+
+**Propuesta acotada, sin implementación ni consultas a SECOP I.**
+
+1. Con autorización separada, tomar una constancia que apareciera
+   abierta. Verificar identidad y vigencia contra el expediente
+   oficial. Comprobar si su página aporta un inventario por
+   numConstancia o si conviene el catálogo público de archivos.
+   Exigir unión por identidad oficial y enlaces verificables.
+2. Reutilizar el ranking de EN-01 para invitaciones y pliegos
+   definitivos. Validar portada, versión e identidad si el título
+   es ambiguo. Usar estudios previos como soporte y anexos
+   habilitantes y adendas para corroboración. Separar avisos
+   y borradores de los documentos rectores.
+3. Tras validar la adquisición, añadir sólo una estrategia
+   optativa por fuente en EN-01 y una llave documental que
+   incluya la constancia. Reutilizar la interfaz documental,
+   almacenamiento por SHA-256, extractor, OCR selectivo y
+   clasificador contextual. Conservar rol, página o locador
+   y cobertura. El expediente sin rector queda abierto y
+   la prioridad comercial se mantiene separada.
+4. Mantener el camino SECOP II y sus hosts autorizados. Validar
+   host, redirecciones y formato de SECOP I por separado.
+   En el piloto inicial, un inventario por constancia y hasta
+   un PDF rector, con 10 MiB, 12 s y hasta dos páginas OCR.
+
+Pasaron las 21 pruebas offline del agregador, incluidas identidad
+por constancia y rechazo de inventario sin capacidad verificada.
+No se consultó SECOP I ni se implementó un adaptador nuevo.
+
+
+### Reanudación de Yumbo y El Peñol desde d753731
+
+El 26 de noviembre de 2026 se ejecutó una sola vez el comando
+aprobado de reanudación con la selección archivada de en01-abu8_p7u.
+Los arranques de la pestaña que no expusieron el cliente del portal
+se detuvieron antes del comando y no enviaron inventarios. La
+pestaña operativa usó el cliente Axios de la aplicación sin alias.
+Su inicialización normal obtuvo HTTP 200. La guarda no envió
+el feed y el runner no ejecutó su preflight.
+
+| Proceso | Resultado |
+| --- | --- |
+| Yumbo MC-RF-016-2026 | Dos respuestas de inventario HTTP 200. El rechazo directo compatible con 403 sin redirección activó la rama de fallback. La ejecución se interrumpió antes de iniciar el streaming. |
+| El Peñol MC-039-2026 | La ejecución no alcanzó su inventario. |
+
+La integración llamó asyncio.run desde el runner síncrono de
+Playwright, que ya ejecuta un bucle en el mismo hilo. Python
+devolvió RuntimeError y avisó que la corrutina stream_pdf nunca
+fue esperada. El problema se reprodujo offline con un bucle
+activo. El paso por la rama de fallback acredita el criterio que
+lo activó. El error interrumpió la persistencia del caso individual,
+por lo que no quedó un diagnóstico HTTP por documento en esta
+reanudación. El registro marca una plaza de Edge reservada.
+No hubo GET de streaming, bytes, recibos, OCR ni IA. La verificación
+local de Edge encontró cero pestañas al terminar.
+
+El runner consumió 9 créditos presupuestarios y 6,375 s. La
+ejecución supervisada tardó 10,047 s. No se emitió ninguna
+clasificación nueva. Los resultados históricos de ambos
+procesos permanecen not_resolved y evidencia insuficiente.
+La traza local se conserva en en01-resume_abu8_p7u. Se
+mantuvo la marca preventiva que se creó al entrar al fallback.
+No se relanzó el lote ni se consultaron los otros 13 procesos.
+
+El ajuste propuesto es aislar la adquisición asíncrona en un
+trabajador con su propio bucle y conexión CDP. Mantener los
+topes y publicar el diagnóstico antes de salir ante un fallo
+de integración. Una regresión debe iniciar el fallback desde
+un llamador con bucle activo y verificar que el trabajador
+respeta cierre y límites. Antes de reutilizar la marca local
+hay que verificar que el nuevo flujo deja un estado seguro.
+Una nueva ejecución de Yumbo y El Peñol requiere autorización
+adicional.

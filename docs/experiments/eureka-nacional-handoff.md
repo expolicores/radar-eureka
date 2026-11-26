@@ -521,6 +521,26 @@ previo y 13 sin inventario. Se propone empezar por los dos primeros
 bajo autorización nueva, sin feed. No se realizaron descargas ni
 consultas durante este incremento.
 
+## Reanudación controlada y SECOP I
+
+La [reanudación](eureka-nacional-experience-spike.md#reanudación-de-yumbo-y-el-peñol-desde-d753731)
+obtuvo el inventario de Yumbo y se detuvo al activar streaming.
+El runner síncrono de Playwright ya tiene un bucle activo y
+asyncio.run falló antes de iniciar la transferencia. No se
+alcanzó El Peñol. Se usaron nueve créditos, con cero bytes,
+OCR o IA. No hubo feed, preflight del runner ni otro lote.
+Quedó la marca preventiva y se verificó que no quedaran
+pestañas de transferencia. Se propone aislar el bucle de
+streaming y verificarlo offline antes de solicitar otro intento.
+
+La [auditoría SECOP I](eureka-nacional-experience-spike.md#auditoría-técnica-offline-de-secop-i)
+confirmó cinco constancias y metadatos comerciales, sin enlaces
+oficiales persistidos ni inventarios. Se propone validar un
+inventario por constancia y hasta un rector PDF. Después se
+reutilizarían la interfaz documental, el ranking, la extracción
+y el clasificador de EN-01. Pasaron 21 pruebas del agregador.
+No hubo consultas ni cambios de código para SECOP I.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.
