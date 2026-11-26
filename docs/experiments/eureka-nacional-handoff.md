@@ -482,6 +482,25 @@ recomienda una nueva muestra acotada con los límites vigentes
 cuando se autorice. No se ejecutó ninguna consulta, descarga
 ni exploración.
 
+## Muestra nacional del 26 de noviembre
+
+La [muestra](eureka-nacional-experience-spike.md#muestra-nacional-del-26-de-noviembre-de-2026)
+aplicó 61 identidades históricas recalculadas y seleccionó 15 avisos
+SECOP II nuevos. Nueve páginas devolvieron 270 filas, 269 avisos
+distintos, 24 candidatos de suministro y 16 elegibles. Se
+inventariaron dos procesos con 10 documentos y dos rectores por
+título. Tres rechazos HTTP 403 de urllib activaron el corte
+preventivo. El CLI nacional aún carece de integración con la vía
+CDP Streaming validada en recuperación. No se activó Fetch.
+
+Los dos casos con inventario quedaron not_resolved y evidencia
+insuficiente. Quedaron 13 seleccionados sin inventario y los 15
+pendientes de evidencia. No hubo texto para comprobar exigencias,
+ausencias ni errores del clasificador. Se usaron 33 créditos y
+45,468 s, con cero OCR y cero IA. El resultado y el registro MPNE
+local se conservan en en01-abu8_p7u. Para retomar esta muestra,
+reutilizar la selección archivada con una nueva autorización.
+
 ## Plan aplicado para el segundo smoke
 
 1. Normalizar prefijos de orden y separadores en títulos antes de asignar roles.

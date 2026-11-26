@@ -2066,3 +2066,72 @@ con exclusión histórica, universo comercial y presupuestos vigentes.
 Medir por separado adquisición, cobertura habilitante y clasificación.
 Los escaneos con cobertura limitada quedan abiertos. La nueva
 exploración requiere autorización.
+
+
+### Muestra nacional del 26 de noviembre de 2026
+
+Se ejecutó una sola exploración nacional desde 3dfd326, con el perfil
+comercial de 21 categorías y las 1.130 ubicaciones. El resolver compartido
+cargó el perfil desde la configuración local. Los arranques preliminares
+se detuvieron por configuración del perfil, aislamiento del chequeo del
+portal y disponibilidad del cliente de la pestaña. Ninguno envió una
+página de la muestra ni consultó inventarios. Un arranque que llegó al
+chequeo registró 2 créditos del runner. En la ejecución final el
+arranque del portal, el chequeo del perfil, el feed y los inventarios
+respondieron HTTP 200. La guarda de la pestaña dejó pasar únicamente las
+solicitudes de la muestra al feed.
+
+| Embudo | Resultado |
+| --- | ---: |
+| Historial recalculado con seis corridas locales | 61 identidades SECOP II |
+| Feed | 9 páginas de 30 filas, con una condicional |
+| Filas / avisos distintos / departamentos observados | 270 / 269 / 29 |
+| Coincidencias con el historial en la respuesta y en la muestra | 0 / 0 |
+| Prefiltro de suministro / elegibles para inventario | 24 / 16 |
+| Nuevos seleccionados / abiertos reportados / departamentos de la muestra | 15 / 14 / 10 |
+| Procesos con inventario / documentos / rectores identificados por título | 2 / 10 / 2 |
+| Intentos documentales / rectores recuperados / archivos procesados | 3 / 0 / 0 |
+
+El feed se detuvo al alcanzar el cupo tras la novena página. Los count de
+la fuente aumentaron de 31 a 271 al paginar. La muestra no establece el
+tamaño del universo. De los 15 seleccionados, hubo cuatro en ferretería,
+cuatro en mobiliario, tres en informática, dos en papelería, uno en
+deportes y uno en aseo.
+
+| Proceso con inventario | Estado formal | Prioridad comercial | Motivo de parada |
+| --- | --- | --- | --- |
+| Yumbo, MC-RF-016-2026 | not_resolved | Evidencia insuficiente | Cupo ordinario de dos intentos. Fallaron el rector y un soporte. |
+| El Peñol, Antioquia, MC-039-2026 | not_resolved | Evidencia insuficiente | El intento del rector completó tres fallos consecutivos entre dos procesos y abrió el corte preventivo. |
+
+Los tres GET directos con urllib recibieron HTTP 403 en cabeceras,
+sin redirecciones y antes de leer un PDF. No se activó fallback.
+El CLI nacional todavía expone la alternativa JavaScript Fetch
+y el streaming validado vive en el comando de recuperación. Esa
+opción nacional quedó desactivada conforme al alcance autorizado.
+Los otros 13 seleccionados quedaron pendientes de inventario y
+sin clasificación. Los 15 permanecen pendientes de evidencia.
+
+Se verificaron cero secciones de experiencia o requisitos
+habilitantes. No hubo exigencias ni ausencias explícitas detectadas,
+casos de silencio evaluable, contradicciones ni candidatos
+favorables con corroboración pendiente. Sin texto contractual
+no fue posible medir errores de clasificación por cotejo ni
+evaluar la frecuencia de oportunidades sin experiencia.
+La limitación observada fue la adquisición.
+
+La muestra usó 33/200 créditos, 45,468 s del runner y 49,094 s
+de ejecución supervisada. Hubo cero bytes documentales aceptados,
+cero OCR y cero llamadas de IA. El registro MPNE de los 15
+seleccionados guarda presupuesto, modalidad y fecha observados.
+Registra categoría derivada, tipo de entidad inferido en 11 y
+tipo de contrato inferido en 8. Plazo, pago y lugar de entrega
+quedaron faltantes. Estos campos no participaron en el filtrado
+ni en el orden de la muestra. Los resultados detallados y los
+15 avisos seleccionados se conservan localmente en en01-abu8_p7u.
+
+La próxima autorización puede centrarse en recuperar primero los
+dos rectores de inventarios disponibles y en integrar la vía CDP
+Streaming a la adquisición nacional bajo las guardas ya validadas.
+Los otros 13 requieren inventario. Continuar desde la selección
+archivada evita repetir discovery. No se hizo otro lote ni otra
+exploración.
