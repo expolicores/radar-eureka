@@ -4,9 +4,11 @@ import asyncio
 import hashlib
 import sys
 from pathlib import Path
+from threading import Event, get_ident
 from types import SimpleNamespace
 
 import pytest
+from playwright.async_api import TimeoutError as PlaywrightTimeout
 from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -118,3 +120,42 @@ def test_failure_verifies_closure_or_blocks_next_acquisition(
         assert again.value.code == "stream_close_unverified"
     else:
         assert download("100", storage, marker, {}).observed_size == len(PDF)
+
+
+def test_wait_keeps_the_calling_playwright_thread_available(monkeypatch):
+    released = Event()
+    owner = get_ident()
+    diagnostic = {}
+
+    def worker(*args, cdp_url):
+        assert get_ident() != owner
+        assert released.wait(2)
+        return "finished"
+
+    def pump(milliseconds):
+        assert get_ident() == owner
+        assert milliseconds == 50
+        released.set()
+
+    monkeypatch.setattr(streaming, "invoke_worker", worker)
+    result = streaming.wait_for_worker(
+        None, None, diagnostic, cdp_url=CDP, parent_page=SimpleNamespace(wait_for_timeout=pump)
+    )
+    assert result == "finished"
+
+
+def test_connection_timeout_identifies_stage_and_proves_no_tab_opened(monkeypatch):
+    from contextlib import asynccontextmanager
+
+    async def connect(*args, **kwargs):
+        raise PlaywrightTimeout("synthetic connection deadline")
+
+    @asynccontextmanager
+    async def fake_driver():
+        yield SimpleNamespace(chromium=SimpleNamespace(connect_over_cdp=connect))
+
+    monkeypatch.setattr("playwright.async_api.async_playwright", fake_driver)
+    diagnostic = {}
+    with pytest.raises(PlaywrightTimeout):
+        asyncio.run(streaming.stream_pdf("unused", diagnostic, cdp_url=CDP))
+    assert diagnostic == {"stage": "cdp_connect", "tab_opened": False}

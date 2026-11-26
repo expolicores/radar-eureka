@@ -699,3 +699,24 @@ siguen not_resolved con evidencia insuficiente. El siguiente
 diagnóstico es offline y debe localizar el paso exacto del
 timeout al arrancar el trabajador. La autorización de este
 lote se utilizó y SECOP I sigue pendiente.
+
+
+### Diagnóstico offline del trabajador y siguiente cobertura
+
+En Edge aislado se reprodujo el timeout en la conexión CDP
+cuando una navegación interceptada esperaba al runner
+bloqueado. La corrección mantiene activos los eventos de
+Playwright mientras concluye el proceso hijo. El mismo
+trabajador pasó de la conexión CDP a la búsqueda de contexto
+en la prueba sintética. Los registros de la última
+reanudación no permiten atribuirle esa causa con certeza.
+La traza nueva registra el paso exacto de arranque, y el
+corte por cierre incierto y fallo generalizado sigue activo.
+
+Yumbo y El Peñol quedan cerrados por ahora. La próxima
+validación de cobertura propuesta es una sola ficha SECOP I
+de Casabianca MC-SPM-055-2026, constancia 26-13-14852794, y
+hasta un rector verificable, con autorización previa. El
+[procedimiento y los criterios de parada](eureka-nacional-experience-spike.md#próxima-capacidad-de-cobertura-secop-i)
+quedan en el informe. No hubo consultas SECOP ni feed en
+este incremento.

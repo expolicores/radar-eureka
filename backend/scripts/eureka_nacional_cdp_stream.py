@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from dataclasses import asdict
 from pathlib import Path
@@ -131,10 +132,12 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
     from playwright.async_api import Error as PlaywrightError
     from playwright.async_api import async_playwright
 
-    result["tab_opened"] = False
+    result.update(tab_opened=False, stage="driver_start")
     validate_cdp_url(cdp_url)
     async with async_playwright() as pw:
+        result["stage"] = "cdp_connect"
         browser = await pw.chromium.connect_over_cdp(cdp_url, timeout=5000, no_defaults=True)
+        result["stage"] = "context_lookup"
         pages = [
             p
             for ctx in browser.contexts
@@ -147,7 +150,9 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
             raise RejectionError("authorized_tab_unavailable")
         source = pages[0]
         async with asyncio.timeout(8):
+            result["stage"] = "browser_session"
             control = await browser.new_browser_cdp_session()
+            result["stage"] = "popup_open"
             result.pop("tab_opened")
             async with source.context.expect_page(timeout=3500) as popup:
                 opened = await source.evaluate(
@@ -162,7 +167,7 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
         chunks = None
         try:
             async with asyncio.timeout(8):
-                result["stage"] = "preflight"
+                result["stage"] = "popup_validate"
                 if page.url != "about:blank" or await page.opener() != source:
                     raise RejectionError("target_not_isolated")
                 if not await page.evaluate(
@@ -173,6 +178,7 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
                 ):
                     raise RejectionError("authorized_origin_not_preserved")
                 result["authorized_origin_preserved"] = True
+                result["stage"] = "page_session"
                 cdp = await source.context.new_cdp_session(page)
                 target_id = (await cdp.send("Target.getTargetInfo"))["targetInfo"]["targetId"]
                 frame = (await cdp.send("Page.getFrameTree"))["frameTree"]["frame"]["id"]
@@ -180,10 +186,12 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
                 await cdp.send("Network.setCacheDisabled", {"cacheDisabled": True})
                 await cdp.send("Network.setBypassServiceWorker", {"bypass": True})
                 queue = asyncio.Queue()
+                result["stage"] = "interception_setup"
                 cdp.on("Fetch.requestPaused", queue.put_nowait)
                 await cdp.send(
                     "Fetch.enable", {"patterns": [{"urlPattern": "*", "requestStage": "Request"}]}
                 )
+                result["stage"] = "link_prepare"
                 await page.evaluate(
                     """href => {
                     const a=document.createElement('a');
@@ -278,7 +286,12 @@ def worker_main():
     document = SimpleNamespace(
         source_url=payload["source_url"], document_id=payload["document_id"], extension="pdf"
     )
-    diagnostics = {"stream_bytes": 0, "requests_forwarded": 0, "tab_opened": False}
+    diagnostics = {
+        "stream_bytes": 0,
+        "requests_forwarded": 0,
+        "tab_opened": False,
+        "stage": "worker_init",
+    }
     stored = None
     try:
         validate_target(document)
@@ -286,8 +299,8 @@ def worker_main():
         stored = asyncio.run(
             acquire_pdf(document.source_url, staged, diagnostics, cdp_url=payload["cdp_url"])
         )
-    except TimeoutError:
-        diagnostics["error"] = "deadline"
+    except TimeoutError as error:
+        diagnostics.update(error="deadline", exception_type=type(error).__name__)
     except (PlaywrightError, RejectionError, AcquisitionError, OSError) as error:
         code = getattr(error, "code", None)
         if not code:
@@ -340,7 +353,22 @@ def invoke_worker(document, staging, diagnostics, *, cdp_url):
     )
 
 
-def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url):
+def wait_for_worker(document, staging, diagnostics, *, cdp_url, parent_page):
+    from playwright.sync_api import Error as PlaywrightError
+
+    # The parent's Playwright routes may need dispatch before the child can attach.
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(invoke_worker, document, staging, diagnostics, cdp_url=cdp_url)
+        while not future.done():
+            try:
+                parent_page.wait_for_timeout(50)
+            except PlaywrightError:
+                diagnostics["parent_pump_interrupted"] = True
+                break
+        return future.result()
+
+
+def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url, parent_page=None):
     validate_target(document)
     validate_cdp_url(cdp_url)
     diagnostics.update(stream_bytes=0, requests_forwarded=0, worker_closed=False)
@@ -354,7 +382,12 @@ def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url):
     try:
         with tempfile.TemporaryDirectory(prefix="en01-edge-worker-") as temporary:
             staging = LocalBinaryStorage(Path(temporary))
-            result = invoke_worker(document, staging, diagnostics, cdp_url=cdp_url)
+            if parent_page is None:
+                result = invoke_worker(document, staging, diagnostics, cdp_url=cdp_url)
+            else:
+                result = wait_for_worker(
+                    document, staging, diagnostics, cdp_url=cdp_url, parent_page=parent_page
+                )
             if diagnostics["requests_forwarded"] != 1 or not all(
                 diagnostics.get(key) is True
                 for key in ("worker_closed", "io_closed", "navigation_abort_ack", "target_closed")

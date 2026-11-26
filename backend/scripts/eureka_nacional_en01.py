@@ -801,6 +801,7 @@ def analyze_documents(
                         download_state.stream_marker,
                         edge_diagnostics,
                         cdp_url=download_state.cdp_url,
+                        parent_page=getattr(client, "page", None),
                     )
                     diagnostics["mechanism"] = "edge_cdp_stream"
                     metrics["edge_downloaded"] += 1

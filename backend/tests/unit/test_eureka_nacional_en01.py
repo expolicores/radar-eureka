@@ -1744,7 +1744,8 @@ def test_edge_fallback_uses_second_budget_slot_only_after_403(tmp_path, monkeypa
         diagnostics["http_status"] = 403
         raise en01.AcquisitionError("http_error", "rechazado")
 
-    def browser(*args, cdp_url):
+    def browser(*args, cdp_url, parent_page):
+        assert parent_page is client.page
         assert cdp_url.endswith(":9232")
         args[-1]["target_closed"] = True
         if edge_fails:
@@ -1892,10 +1893,14 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
         raise en01.AcquisitionError("http_error", "rechazado")
 
     closed = True
+    startup_failed = True
 
     def browser(target, staging, diagnostic, *, cdp_url):
         assert target == document
         assert cdp_url.endswith(":9232")
+        if startup_failed:
+            diagnostic.update(worker_closed=True, tab_opened=False, stage="cdp_connect")
+            raise en01.AcquisitionError("protocol_error", "timeout")
         diagnostic.update(
             stream_bytes=len(pdf),
             worker_closed=True,
@@ -1931,10 +1936,10 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
     state = en01.DownloadState(output, storage, edge_enabled=True)
     client = SimpleNamespace(deadline=time.monotonic() + 360, reserve=Mock())
 
-    def analyze(metrics, entries):
+    def analyze(metrics, entries, reference="second"):
         return en01.analyze_documents(
             client,
-            {"inventory_keys": {}},
+            {"inventory_keys": {}, "process_reference": reference},
             storage,
             settings,
             2,
@@ -1945,14 +1950,28 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
             ocr_pages=0,
         )
 
+    failed_document = document
+    failed_metrics, failed_entries = Counter(), []
+    analyze(failed_metrics, failed_entries, reference="first")
+    assert failed_metrics["documents_attempted"] == 2
+    assert failed_entries[0]["status"] == "download_failed"
+    assert failed_entries[0]["download_diagnostics"]["edge"]["stage"] == "cdp_connect"
+    assert state.failed_processes == ["first"]
+    assert not state.stream_marker.exists()
+
+    startup_failed = False
+    document = SpikeDocument("Invitacion", "pdf", SECOP + "3", "3")
+    inventory.return_value = [document]
     metrics, entries = Counter(), []
     analyze(metrics, entries)
+    assert not state.failed_processes
+    assert state.cached(failed_document, en01.DOCUMENT_BYTES) is None
     assert metrics["documents_attempted"] == 2
     assert entries[0]["download_diagnostics"]["mechanism"] == "edge_cdp_stream"
     reused = Counter()
     analyze(reused, [])
     assert reused["documents_reused"] == 1
-    attempt.assert_called_once()
+    assert attempt.call_count == 2
 
     other = SpikeDocument("Invitacion", "pdf", SECOP + "2", "2")
     inventory.return_value = [other]

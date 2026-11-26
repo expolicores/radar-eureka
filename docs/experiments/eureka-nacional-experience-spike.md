@@ -2555,3 +2555,87 @@ de dos clientes al mismo Edge aislado en loopback. Distinguir
 arranque del cliente, conexión CDP y creación de sesión del
 navegador usando estados depurados. Cualquier nueva adquisición
 documental requiere autorización. No se consultó SECOP I.
+
+
+### Diagnóstico offline del timeout de arranque
+
+La traza de 43afe55 acredita la salida de ambos trabajadores
+antes de abrir una pestaña de adquisición y con cero GET
+reenviados. En ese momento todavía no se registraba el paso
+exacto de arranque. Las sondas independientes de Moniquirá y
+del piloto de tres procesos sí interceptaron documentos.
+Operaban sin un cliente de Playwright síncrono bloqueado
+mientras conservaba una ruta activa sobre la página inicial.
+
+Se reprodujo esa diferencia en Edge aislado y loopback. El
+segundo cliente CDP se conectó con el primero abierto y en
+reposo, con una ruta inactiva y con una solicitud sintética
+de subrecurso pendiente. Cuando una navegación sintética
+quedó interceptada por la ruta y el hilo padre esperó de
+forma bloqueante, la conexión CDP del hijo agotó el tiempo.
+Al volver a despachar rutas en el padre, el segundo cliente
+pudo conectarse.
+
+| Trabajo controlado con el proceso hijo real | Resultado |
+| --- | --- |
+| Navegación pendiente y espera bloqueante | `TimeoutError` en `cdp_connect`. 9,359 s de pared en el laboratorio, cero rutas atendidas durante la espera y cero GET de adquisición. |
+| Misma navegación, con el despacho de eventos del padre activo | La ruta se atendió y el hijo pasó a `context_lookup` en 3,953 s de pared. Terminó con `authorized_tab_unavailable` al encontrar únicamente el origen sintético. Cero GET de adquisición. |
+
+En ambas pruebas terminó el trabajador, no se abrió la
+pestaña de adquisición y se retiró la marca. Se comprobó una
+causa concreta para el timeout reproducido. Los registros de
+Yumbo y El Peñol no permiten demostrar que esa condición
+estaba presente durante su reanudación.
+
+El runner nacional ahora espera al mismo proceso hijo en un
+hilo auxiliar, mientras el hilo que posee Playwright despacha
+sus eventos. La vía independiente conserva la espera directa.
+La traza identifica el arranque del driver, la conexión CDP,
+la búsqueda del contexto existente, la sesión CDP del
+navegador, apertura y validación de la pestaña, sesión CDP de
+página, configuración de la interceptación y preparación del
+enlace. También conserva la etapa de adquisición y el tipo de
+excepción. Un proceso eliminado por el supervisor sin
+respuesta conserva el bloqueo preventivo y sólo acredita el
+timeout del trabajador.
+
+Se mantienen un GET por fallback, los topes de tiempo, tamaño,
+intentos y créditos, y el criterio HTTP 403 directo sin
+redirección. Un fallo seguro queda registrado en su documento
+y permite seguir con el proceso siguiente. La marca de cierre
+incierto detiene el lote de inmediato. Tres fallos
+consecutivos que cubren al menos dos procesos activan el corte
+existente. La prueba con un fallo de arranque seguido de una
+adquisición simulada verifica la continuación, la reutilización
+por recibo y el bloqueo posterior cuando el cierre es incierto.
+
+Pasaron 231 pruebas offline de EN-01, almacenamiento y
+agregador, incluida la prueba OCR con Tesseract local.
+También pasaron los diez escenarios del laboratorio de
+Streaming, incluidos cancelación, exceso de tamaño, pérdida
+de CDP, rechazo de PDF incompleto y bloqueo por cierre
+incierto. Las pruebas usaron respuestas sintéticas o archivos
+locales.
+
+#### Próxima capacidad de cobertura SECOP I
+
+Se volvió a confirmar offline que cinco candidatos SECOP I
+quedaron excluidos por capacidad documental. Para una primera
+validación separada, mantener sólo Casabianca MC-SPM-055-2026,
+constancia `26-13-14852794`. El archivo registra el cierre
+para el 1 de diciembre de 2026 a las 17:30 de Bogotá. El
+estado vigente debe verificarse en la ficha oficial.
+
+Con autorización, consultar una sola ficha oficial derivada
+del patrón local por constancia, conforme al
+[procedimiento preparado](#corrección-del-bucle-y-próximas-pruebas-controladas).
+Si identidad y rector son verificables, realizar como máximo
+un GET de un PDF rector, 10 MiB y 12 s, y conservar metadatos,
+integridad y cobertura. Aplicar extracción nativa y hasta
+dos páginas de OCR selectivo con el clasificador existente.
+Informar por separado estado formal y prioridad comercial.
+Detenerse si la ficha o el enlace no son verificables, si
+el documento no es rector o si se excede una guarda. Esta
+fase no implementó un adaptador ni usó la vía CDP de SECOP II
+para SECOP I. Yumbo y El Peñol quedan cerrados para este
+incremento y sus descargas no se repitieron.
