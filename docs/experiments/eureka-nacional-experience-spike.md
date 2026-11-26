@@ -2468,3 +2468,40 @@ actual y el acceso documental requieren validación.
 
 Estas pruebas reales requieren permisos independientes. La
 corrección offline no ejecutó la reanudación ni consultó SECOP I.
+
+
+### Verificación previa a la reanudación autorizada desde b41bff8
+
+La selección archivada comienza con Yumbo MC-RF-016-2026 y
+El Peñol MC-039-2026. Antes de retirar la marca preventiva se
+verificó Edge dedicado en loopback. El navegador no tenía
+pestañas ni destinos temporales de adquisición. No se encontró
+ningún trabajador de Streaming. El historial interno de Edge
+mostró un elemento completado y 18 retirados, sin estados
+activos o pendientes entre los elementos registrados. La pestaña
+local utilizada para esa comprobación se cerró. El registro de
+la ejecución interrumpida seguía con cero documentos recuperados
+y cero análisis.
+
+El intento supervisado de preparar la pestaña se detuvo al agotar
+la espera por el cliente Axios de la aplicación. El supervisor
+bloqueó la petición automática al feed y otras tres solicitudes
+POST ajenas al inventario autorizado. No se iniciaron el runner,
+los inventarios ni los intentos documentales de la reanudación.
+La marca original se conservó y el arranque no consumió créditos
+de EN-01. Sigue pendiente la comprobación del trabajador contra
+la sesión autorizada.
+
+| Proceso | Intentos documentales nuevos | Cobertura y clasificación |
+| --- | ---: | --- |
+| Yumbo MC-RF-016-2026 | 0 | Sin extracción nueva. Sigue not_resolved con evidencia insuficiente. |
+| El Peñol MC-039-2026 | 0 | Sin extracción nueva. Sigue not_resolved con evidencia insuficiente. |
+
+El procedimiento operativo requiere que el propietario entre
+manualmente a Contratos y deje una sola pestaña funcional en
+el Edge dedicado. La comprobación de preparación es local y no
+envía inventarios. Una vez lista la pestaña, comprobar otra vez
+que no haya un trabajador ni un destino de adquisición abierto,
+archivar la marca anterior y ejecutar la única reanudación
+autorizada para ambos procesos. La prueba SECOP I sigue
+independiente y pendiente de autorización.

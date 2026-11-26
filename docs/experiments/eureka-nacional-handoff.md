@@ -668,3 +668,16 @@ feed ni preflight del feed. Para SECOP I, usar sólo la constancia
 rector verificable con 10 MiB, 12 s y dos páginas OCR. Los
 [procedimientos y criterios de parada](eureka-nacional-experience-spike.md#corrección-del-bucle-y-próximas-pruebas-controladas)
 quedan en el informe. No se ejecutó ninguno de los dos planes.
+
+
+### Estado de la reanudación autorizada
+
+Los controles locales no encontraron transferencias pendientes
+del intento anterior. El arranque supervisado de Contratos no
+obtuvo el cliente Axios y se detuvo con la marca preventiva
+conservada. Cero inventarios, descargas, OCR y clasificaciones
+nuevas. La ejecución única de Yumbo y El Peñol sigue pendiente
+de que el propietario deje una sola pestaña funcional en
+Contratos desde Edge CDP dedicado. Al abrirla, verificar el
+estado local y aplicar el procedimiento de reanudación con la
+selección archivada y el feed bloqueado.
