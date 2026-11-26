@@ -2505,3 +2505,53 @@ que no haya un trabajador ni un destino de adquisición abierto,
 archivar la marca anterior y ejecutar la única reanudación
 autorizada para ambos procesos. La prueba SECOP I sigue
 independiente y pendiente de autorización.
+
+
+### Resultado de la reanudación real con el trabajador de b41bff8
+
+El 26 de noviembre de 2026, el Edge dedicado expuso una única
+pestaña de Contratos con el cliente de la aplicación disponible.
+La pestaña adicional era la página del portal que abrió
+Contratos. El supervisor local distinguió esa relación de una
+pestaña de adquisición. La vista interna de descargas sólo
+mostró estados terminales. No había trabajadores de Streaming.
+Se preservaron la marca y los artefactos anteriores en un
+directorio local de respaldo antes de ejecutar el lote.
+
+Se ejecutó una sola reanudación con la selección archivada.
+Cuatro solicitudes de inventario correspondieron exclusivamente
+a los dos procesos autorizados. El feed y su preflight se
+omitieron. Cada inventario devolvió cinco documentos. En ambos
+casos se priorizó la invitación pública.
+
+| Proceso | Intentos y mecanismo | Cobertura | Estado formal y prioridad |
+| --- | --- | --- | --- |
+| Yumbo MC-RF-016-2026 | Dos. urllib devolvió HTTP 403 sin redirección. El trabajador CDP terminó con TimeoutError antes de abrir una pestaña de adquisición. | Una invitación priorizada entre cinco documentos. 0 descargados, 0 páginas. | not_resolved, evidencia insuficiente. 9 créditos y 14,843 s. |
+| El Peñol MC-039-2026 | Dos. urllib devolvió HTTP 403 sin redirección. El trabajador CDP terminó con TimeoutError antes de abrir una pestaña de adquisición. | Una invitación priorizada entre cinco documentos. 0 descargados, 0 páginas. | not_resolved, evidencia insuficiente. 9 créditos y 14,719 s. |
+
+El trabajador se invocó desde el runner real con Playwright
+síncrono y salió en ambos casos, superando el error anterior de
+bucle activo. La adquisición mediante Streaming sigue sin
+validarse en este runner. Las trazas registraron protocol_error
+y TimeoutError de Playwright, con tab_opened falso y cero
+solicitudes de Streaming reenviadas. El fallo ocurrió antes
+de la apertura de una pestaña de adquisición. La traza no
+identifica el paso exacto del arranque que agotó el tiempo.
+El navegador seguía mostrando únicamente las dos pestañas
+originales al terminar. Se comprobó que no quedaban
+trabajadores ni una marca de cierre incierto. Al no haber
+archivos, no se generaron recibos ni se verificó un flujo de
+cuerpo. Tampoco hubo extracción u OCR.
+
+Resultado parcial, código 2. En total, dos procesos
+inventariados, cuatro intentos documentales, dos fallbacks,
+18 créditos, 29,578 s de ejecución, 0,281 s de CPU del
+runner padre, 0 bytes, 0 páginas y 0 llamadas de IA. La
+selección se detuvo por el cupo ordinario de documentos.
+
+Como siguiente diagnóstico, instrumentar offline los pasos de
+arranque del trabajador y reproducir la conexión concurrente
+de dos clientes al mismo Edge aislado en loopback. Distinguir
+arranque del cliente, conexión CDP y creación de sesión del
+navegador usando estados depurados. Cualquier nueva adquisición
+documental requiere autorización. No se consultó SECOP I.

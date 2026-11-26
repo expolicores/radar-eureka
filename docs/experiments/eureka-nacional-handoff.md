@@ -681,3 +681,21 @@ de que el propietario deje una sola pestaña funcional en
 Contratos desde Edge CDP dedicado. Al abrirla, verificar el
 estado local y aplicar el procedimiento de reanudación con la
 selección archivada y el feed bloqueado.
+
+
+### Resultado del lote único de Yumbo y El Peñol
+
+La pestaña de Contratos pasó el preflight. Se archivó la marca
+anterior tras verificar el cierre y se ejecutó la única
+reanudación autorizada. Ambos inventarios devolvieron cinco
+documentos. Las invitaciones recibieron HTTP 403 directo sin
+redirección por urllib. Ambos trabajadores arrancaron desde el
+runner real y terminaron con TimeoutError antes de abrir una
+pestaña de adquisición. No quedó un cierre incierto.
+
+El lote consumió cuatro intentos, 18 créditos y 29,578 s.
+Cero descargas, recibos, páginas, OCR e IA. Ambos procesos
+siguen not_resolved con evidencia insuficiente. El siguiente
+diagnóstico es offline y debe localizar el paso exacto del
+timeout al arrancar el trabajador. La autorización de este
+lote se utilizó y SECOP I sigue pendiente.
