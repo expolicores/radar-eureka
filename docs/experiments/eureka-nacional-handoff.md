@@ -1007,3 +1007,12 @@ encolaron 5 invitaciones; lote `a9871484…53b5c614`. La de
 Sutatenza mide 22,68 MB y excede el límite. No hubo descargas ni
 POST.
 [Detalle](eureka-nacional-experience-spike.md#corrección-de-orquestación-y-recuperación-de-inventarios-secop-i).
+
+
+### Lote SECOP I de cuatro documentos listo para validar
+
+La regla `displayed_size_over_limit` excluyó Sutatenza (22,68 MB)
+sin peticiones. Cola: Taraira, Jericó, Fómeque y Montelíbano;
+max_posts 4; hash `2c2ca83d…6284ace69d`. La etapa 2 espera la
+validación del hash y la autorización de los POST.
+[Detalle](eureka-nacional-experience-spike.md#regla-de-tamaño-mostrado-y-lote-secop-i-de-cuatro-documentos).

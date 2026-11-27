@@ -3598,3 +3598,35 @@ que se encolaron 5. Ningún proceso quedó excluido. Hash del lote:
 La invitación de Sutatenza supera ampliamente los 10 MiB, de modo
 que su adquisición se rechazaría por tamaño. Queda pendiente la
 revisión del lote por el titular antes de cualquier descarga.
+
+
+### Regla de tamaño mostrado y lote SECOP I de cuatro documentos
+
+Regla general de admisión a la cola automática: si el tamaño
+mostrado por el proveedor, en unidades binarias y redondeado,
+supera estrictamente 10 MiB, el rector no entra en la cola y se
+registra `displayed_size_over_limit`. Un tamaño desconocido o
+ilegible no se inventa: el documento se admite, se marca con
+`displayed_size_known: false` y sigue sujeto al límite estricto
+sobre los bytes recibidos. Los valores justo en el límite también
+se admiten, y deciden los bytes leídos. El proceso, su inventario
+y su elegibilidad comercial se conservan, y el estado de
+experiencia queda not_resolved. La regla también se aplica en la
+etapa 1.
+
+La regeneración offline (`--rebuild-queue`) vuelve a derivar la
+cola desde los inventarios guardados, sin peticiones. Archiva la
+cola anterior, registra cada decisión y se niega a ejecutarse si
+el lote ya tiene intentos. Pruebas: 66 del módulo, 431 de la suite
+nacional y 30 de laboratorio. SECOP II sigue idéntico al código
+anterior.
+
+Resultado sobre en01-secop1inv_xgcp5mgp, sin ninguna petición: se
+excluyó Sutatenza (26-13-14853244, 22,68 MB) por tamaño mostrado.
+Taraira, Jericó, Fómeque y Montelíbano permanecen en la cola, en el
+mismo orden y sin otro cambio que el nuevo indicador de tamaño
+conocido. max_posts es 4. Hash nuevo:
+`2c2ca83d59997e2e224823894db5f633c8620e93866457f58230df6284ace69d`.
+El anterior, `a9871484…`, quedó archivado. Los archivos de
+procesos e inventarios conservan su hash. Pendiente: validación
+del hash por el titular antes de la etapa 2.
