@@ -3630,3 +3630,42 @@ conocido. max_posts es 4. Hash nuevo:
 El anterior, `a9871484…`, quedó archivado. Los archivos de
 procesos e inventarios conservan su hash. Pendiente: validación
 del hash por el titular antes de la etapa 2.
+
+
+### Etapa 2: adquisición SECOP I por lote (cuatro PDF)
+
+Verificaciones previas:
+
+- Todos los módulos, incluido `public_procurement`, se importaron
+  desde el worktree nacional, con PYTHONPATH en formato Windows.
+- El hash de la cola coincidía con el aprobado.
+- No había intentos, recibos ni marcador previos.
+- El Edge dedicado del puerto 9232 estaba verificado.
+
+El titular inició sesión en el contexto desechable y dejó sólo
+infoexpress. El preflight dio sesión válida, only_configured,
+profile_count 1 y ready_for_acquisition true, con dos get-info/MP
+bloqueados. La confirmación se creó con el hash exacto del lote,
+`2c2ca83d…6284ace69d`.
+
+| Constancia | Entidad | Mostrado | Recibido | SHA-256 | Tiempo |
+| --- | --- | --- | --- | --- | --- |
+| 26-13-14853220 | Concejo de Taraira | 2,10 MB | 2.203.048 B | `8603a0ac…04d658a4` | 2,4 s |
+| 26-13-14853212 | Alcaldía de Jericó | 742 KB | 759.314 B | `bd4c8b02…3dea85888` | 1,1 s |
+| 26-13-14853190 | Alcaldía de Fómeque | 539 KB | 551.665 B | `0807d1d8…8d6dc97a` | 1,0 s |
+| 26-13-14853123 | Alcaldía de Montelíbano | 602 KB | 616.229 B | `58a8ea9d…dc9333a6585` | 1,1 s |
+
+Resultado: cuatro POST, uno por documento y sin reintentos.
+Respuesta HTTP 200 sin Content-Length en los cuatro, con fin de
+flujo verificado, firma `%PDF-1.7` y `%%EOF`. Los cuatro se
+guardaron, con cuatro recibos y cuatro registros de intento
+finalizados con el hash del lote. Una verificación independiente
+posterior confirmó tamaño y SHA-256 contra el almacenamiento. Los
+tamaños recibidos coinciden con los mostrados en el inventario.
+
+No hubo descargas nativas ni temporales. El contexto se cerró y
+quedó verificado, CDP se desconectó, el trabajador salió con 0 y
+el marcador se liberó con evidencia completa. Las pestañas
+habituales no se tocaron. Hubo cero consultas al feed y a
+inventarios, cero OCR y cero clasificación. Sutatenza no se
+incluyó.

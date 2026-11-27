@@ -1016,3 +1016,13 @@ sin peticiones. Cola: Taraira, Jericó, Fómeque y Montelíbano;
 max_posts 4; hash `2c2ca83d…6284ace69d`. La etapa 2 espera la
 validación del hash y la autorización de los POST.
 [Detalle](eureka-nacional-experience-spike.md#regla-de-tamaño-mostrado-y-lote-secop-i-de-cuatro-documentos).
+
+
+### Etapa 2 completada: 4 de 4 PDF SECOP I recuperados
+
+El lote `2c2ca83d…` (Taraira, Jericó, Fómeque y Montelíbano) se
+adquirió con cuatro POST: cuatro PDF de entre 0,5 y 2,1 MB, todos
+sin Content-Length y aceptados por streaming acotado, con recibos
+e intentos registrados y un cierre seguro. La etapa 3, extracción
+y clasificación offline, queda pendiente de autorización.
+[Detalle](eureka-nacional-experience-spike.md#etapa-2-adquisición-secop-i-por-lote-cuatro-pdf).
