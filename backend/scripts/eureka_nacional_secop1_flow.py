@@ -385,6 +385,175 @@ def recover_secop1_inventories(client, source, output, constancias, *, is_fatal)
     return summary
 
 
+# ---------------------------------------------------------------- cross-run receipt reuse
+
+REUSE_FILE = "secop1_reused_receipts.json"
+ATTEMPTS_DIRNAME = "secop1_attempts"
+
+
+def displayed_size_matches(document, observed):
+    """Received bytes are compatible with the provider's rounded display (half a unit)."""
+    text = "".join(_Cell(document.get("displayed_size") or "").text)
+    match = DISPLAYED_SIZE.match(text)
+    if not match:
+        return None  # unknown display: no evidence either way
+    value, unit = match[1].replace(",", "."), match[2].lower()
+    factor = {"b": 1, "kb": 1024, "mb": 1024**2, "gb": 1024**3}[unit]
+    decimals = len(value.split(".")[1]) if "." in value else 0
+    tolerance = 0.5 * factor / (10**decimals)
+    return abs(observed - float(value) * factor) <= tolerance
+
+
+def _queue_files(run):
+    return [run / QUEUE_FILE, *sorted(run.glob("secop1_queue.superseded-*.json"))]
+
+
+def _provenance(run, item):
+    """Same document identity queued and stored by an earlier run."""
+    for path in _queue_files(run):
+        try:
+            queue = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for old in queue.get("items", []):
+            if (
+                old.get("document_id") == item["document_id"]
+                and old.get("relative_path") == item["relative_path"]
+                and old.get("constancia") == item["constancia"]
+                and old.get("extension") == item["extension"]
+            ):
+                return path.name, queue.get("batch_sha256")
+    return None
+
+
+def _stored_attempt(run, document_id, receipt):
+    attempts = run / ATTEMPTS_DIRNAME
+    if not attempts.is_dir():
+        return None
+    for path in attempts.glob("*.json"):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if (
+            record.get("document_id") == document_id
+            and record.get("state") == "finished"
+            and record.get("outcome") == "stored"
+            and record.get("sha256") == receipt.get("sha256")
+            and record.get("received_bytes") == receipt.get("observed_size")
+            and record.get("pdf_eof_marker") is True
+        ):
+            return record
+    return None
+
+
+def check_reusable(source_run, item, storage_factory):
+    """Every check must pass; returns (record, None) or (None, reason). Read-only."""
+    key = f"{item['document_id']}:{item['extension']}"
+    receipt = load_receipts(source_run).get(key)
+    if receipt is None:
+        return None, "no_receipt"
+    provenance = _provenance(source_run, item)
+    if provenance is None:
+        return None, "identity_not_in_source_queue"
+    attempt = _stored_attempt(source_run, item["document_id"], receipt)
+    if attempt is None:
+        return None, "no_matching_stored_attempt"
+    storage = storage_factory(source_run / "binaries")
+    try:
+        with storage.open_verified(
+            receipt["storage_path"], receipt["sha256"], receipt["observed_size"], DOCUMENT_BYTES
+        ) as stream:
+            body = stream.read()
+    except Exception:
+        return None, "binary_unverified"
+    if not body.startswith(b"%PDF-") or b"%%EOF" not in body[-1024:]:
+        return None, "pdf_markers_missing"
+    if displayed_size_matches(item, len(body)) is False:
+        return None, "displayed_size_mismatch"
+    return {
+        "source_run": source_run.name,
+        "source_queue": provenance[0],
+        "source_batch_sha256": provenance[1],
+        "source_attempt_batch_sha256": attempt.get("batch_sha256"),
+        "sha256": receipt["sha256"],
+        "observed_size": receipt["observed_size"],
+        "body": body,
+    }, None
+
+
+def reuse_receipts(run, root, storage_factory):
+    """Copy verified receipts of the same document identity from earlier runs into `run`.
+
+    Sources are never modified. The copy is re-hashed on store and must match."""
+    queue = load_queue(run)
+    receipts = load_receipts(run)
+    storage = storage_factory(run / "binaries")
+    decisions = []
+    candidates = sorted(
+        p for p in root.iterdir() if p.is_dir() and p != run and p.name.startswith("en01-")
+    )
+    for item in queue["items"]:
+        key = f"{item['document_id']}:{item['extension']}"
+        if key in receipts:
+            decisions.append({"document_id": item["document_id"], "decision": "already_present"})
+            continue
+        rejected = []
+        for source in candidates:
+            if not (source / RECEIPTS_FILE).is_file():
+                continue
+            record, reason = check_reusable(source, item, storage_factory)
+            if record is None:
+                if reason != "no_receipt":
+                    rejected.append({"source_run": source.name, "reason": reason})
+                continue
+            body = record.pop("body")
+            stored = storage.store(
+                [body],
+                original_name="secop1.pdf",
+                content_type="application/pdf",
+                expected_size=record["observed_size"],
+                max_bytes=DOCUMENT_BYTES,
+            )
+            if stored.sha256 != record["sha256"] or stored.observed_size != len(body):
+                (storage.root / stored.storage_path).unlink(missing_ok=True)
+                rejected.append({"source_run": source.name, "reason": "copy_mismatch"})
+                continue
+            receipts[key] = {
+                "storage_path": stored.storage_path,
+                "sha256": stored.sha256,
+                "observed_size": stored.observed_size,
+                "content_type": "application/pdf",
+            }
+            decisions.append(
+                {
+                    "document_id": item["document_id"],
+                    "constancia": item["constancia"],
+                    "decision": "reused_receipt",
+                    **record,
+                    "rejected_sources": rejected,
+                }
+            )
+            break
+        else:
+            decisions.append(
+                {
+                    "document_id": item["document_id"],
+                    "constancia": item["constancia"],
+                    "decision": "acquire",
+                    "rejected_sources": rejected,
+                }
+            )
+    temp = run / (RECEIPTS_FILE + ".tmp")
+    temp.write_text(json.dumps(receipts, ensure_ascii=False, indent=2), encoding="utf-8")
+    temp.replace(run / RECEIPTS_FILE)
+    (run / REUSE_FILE).write_text(
+        json.dumps({"network_requests": 0, "decisions": decisions}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return decisions
+
+
 # ---------------------------------------------------------------- offline queue rebuild
 
 REBUILD_FILE = "secop1_queue_rebuild.json"
@@ -395,6 +564,7 @@ def rebuild_queue(run):
     admission rules. No request of any kind. The previous queue is archived, never deleted;
     processes and inventories are not modified."""
     previous = load_queue(run)
+    receipts = load_receipts(run)
     inventories = {
         case["process_reference"]: case["documents"]
         for case in json.loads((run / "documents.json").read_text(encoding="utf-8"))
@@ -411,6 +581,8 @@ def rebuild_queue(run):
         if governing is None or governing["document_id"] != old["document_id"]:
             raise SpikeError("La cola guardada no coincide con su inventario.")
         reason, known = acquisition_size_check(governing)
+        if reason is None and f"{old['document_id']}:{old['extension']}" in receipts:
+            reason = "reused_receipt"
         decisions.append(
             {
                 "process_reference": reference,
@@ -432,7 +604,7 @@ def rebuild_queue(run):
     record = {
         "previous_batch_sha256": previous["batch_sha256"],
         "batch_sha256": queue["batch_sha256"],
-        "rule": "displayed_size_over_limit",
+        "rule": "displayed_size_over_limit; reused_receipt",
         "document_max_bytes": DOCUMENT_BYTES,
         "network_requests": 0,
         "decisions": decisions,
@@ -805,6 +977,11 @@ def main(argv=None):
         help="Regenerar la cola desde los inventarios guardados, sin peticiones.",
     )
     parser.add_argument(
+        "--reuse-receipts",
+        action="store_true",
+        help="Reutilizar recibos verificados de otras corridas y regenerar la cola.",
+    )
+    parser.add_argument(
         "--only-constancia",
         action="append",
         metavar="CONSTANCIA",
@@ -822,6 +999,27 @@ def main(argv=None):
     try:
         root = runner.OUTPUT_ROOT
         source = ensure_inside(root, root / run_dir_name(args.run))
+        if args.reuse_receipts:
+            if (source / "secop1_attempts").exists():
+                print("EN-01 SECOP I: el lote ya tiene intentos; no se regenera.")
+                return 1
+            decisions = reuse_receipts(source, root, runner.spike.LocalBinaryStorage)
+            queue, record = rebuild_queue(source)
+            print(
+                json.dumps(
+                    {
+                        "batch_sha256": queue["batch_sha256"],
+                        "previous_batch_sha256": record["previous_batch_sha256"],
+                        "max_posts": queue["max_posts"],
+                        "reuse": [
+                            [d.get("constancia"), d["decision"], d.get("source_run")]
+                            for d in decisions
+                        ],
+                        "queue": [[d["constancia"], d["decision"]] for d in record["decisions"]],
+                    }
+                )
+            )
+            return 0
         if args.rebuild_queue:
             if (source / "secop1_attempts").exists():
                 print("EN-01 SECOP I: el lote ya tiene intentos; no se regenera.")
