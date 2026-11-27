@@ -1203,3 +1203,16 @@ El análisis conjunto con las invitaciones espera autorización.
   sigue sin tipo conocido ni soporte.
 
 [Detalle](eureka-nacional-experience-spike.md#revisión-documental-de-betéitiva-26-13-14851414-y-diagnóstico-del-falso-positivo).
+
+
+### Detector de dependencias corregido; Betéitiva sigue en not_resolved
+
+«Reglamento interno» sólo cuenta como dependencia en contexto de
+requisitos o de régimen de contratación. La regresión sobre 74 PDF y
+85 instancias muestra que sólo cambia la razón de Betéitiva, sin
+cambios de estado ni de revisión. Para reconocer una oportunidad sin
+experiencia exigida falta una vía para listas cerradas de requisitos
+habilitantes; hay tres alternativas propuestas, sin implementar.
+FONAM: hay una propuesta de revisión manual de «FORMATOS» sin
+peticiones.
+[Detalle](eureka-nacional-experience-spike.md#corrección-del-detector-de-dependencias-y-regresión-sobre-documentos-almacenados).

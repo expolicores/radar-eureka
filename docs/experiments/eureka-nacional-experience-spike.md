@@ -4356,3 +4356,94 @@ explícita.
      proveedor en los inventarios.
 
 Mientras tanto, FONAM sigue en evidencia insuficiente.
+
+
+### Corrección del detector de dependencias y regresión sobre documentos almacenados
+
+Cambio (`0cde13b` y `a879054`): una mención de «reglamento
+interno» sólo produce dependencia documental si la cláusula trata
+de experiencia o de requisitos habilitantes, o si `REGULATION_TOPIC`
+encuentra alguno de estos contextos:
+
+- un reglamento, manual o estatuto de contratación;
+- cualquier forma de «regirse» o «regido por»;
+- un régimen especial o propio;
+- requisitos o verificaciones;
+- la selección del contratista.
+
+Las demás remisiones (anexos, numerales, documentos) no cambian.
+
+Nota de proceso: `0cde13b` se registró con una prueba existente
+fallando («se regirán» no estaba cubierto), porque la comprobación
+encadenada no evaluaba el código de salida de pytest. `a879054`
+corrige la expresión y la prueba antes de publicar nada. Desde
+entonces la regresión se valida por su código de salida.
+
+Pruebas:
+
+- 17 del detector: positivas para el régimen, la selección, los
+  requisitos y la experiencia; negativas para el ordenador del
+  gasto, las funciones, la supervisión y la delegación; además del
+  silencio que no se convierte en ausencia y de la dependencia
+  espuria que ya no vuelve ambigua una ausencia explícita.
+- Suite nacional: 544 pruebas, con código de salida 0.
+
+En las 13 evidencias históricas de dependencia, las 11 legítimas se
+conservan y la de Betéitiva desaparece. La línea del cronograma no
+cambia.
+
+Regresión offline sobre documentos almacenados
+(`.local/eureka-nacional-spike/dependency-regression-f8tbzw5c`): se
+extrajeron 74 PDF sólo con texto nativo, el mismo texto para ambas
+versiones, y se clasificaron 85 instancias de proceso de todas las
+corridas. Las dependencias pasan de 18 a 15. Cambian 3 instancias,
+todas del mismo proceso, Betéitiva 26-13-14851414, en tres corridas.
+En ellas la razón pasa de document_dependency a no_decisive_clause;
+el estado sigue en not_resolved y la revisión en
+documentary_silence. No cambia ningún otro estado ni ninguna otra
+revisión.
+
+Por qué Betéitiva sigue en not_resolved: el clasificador sólo
+concluye `no_experience_required` con una ausencia explícita
+(NEG_CONCLUSIVA) en un documento rector completo y con todos los
+documentos completos. No tiene ninguna vía para reconocer una lista
+cerrada de requisitos habilitantes que no incluye experiencia.
+
+Alternativas generalizables, sin implementar:
+
+1. Una categoría de revisión prioritaria para una lista cerrada de
+   requisitos habilitantes sin experiencia. Se aplicaría cuando la
+   sección de requisitos habilitantes del rector completo enumera
+   sus ítems, no menciona experiencia ni capacidad técnica,
+   financiera u organizacional, el estudio previo está completo, no
+   hay dependencias rectoras pendientes y los anexos están dentro
+   del documento. Mantiene not_resolved y la deja en prioridad 1
+   para revisión humana.
+2. Lo mismo como estado formal nuevo y separado (por ejemplo,
+   «sin_exigencia_detectada»), distinto de la ausencia explícita.
+3. No cambiar nada y apoyarse en la lectura de validación
+   («silencio documental con cobertura suficiente») más la revisión
+   humana.
+
+Riesgos comunes a las tres: requisitos que aparezcan en adendas
+posteriores, formatos o documentos no leídos, páginas sin texto y
+plantillas copiadas.
+
+### FONAM: propuesta mínima para identificar «FORMATOS», sin peticiones
+
+1. Comprobación interna: no se guardó el tipo original del
+   inventario. Sólo se sabe que no era pdf, docx ni xlsx.
+2. Revisión manual a cargo del titular: abrir los documentos del
+   proceso CO1.NTC.11284005 en SECOP II desde su navegador, anotar
+   el nombre y la extensión de «FORMATOS» y, si lo autoriza,
+   descargarlo manualmente.
+3. Importación verificada del archivo con el procedimiento de
+   importación asistida existente, que comprueba procedencia,
+   identidad y SHA-256. Después, identificación offline por firma
+   binaria (por ejemplo `PK` para zip o docx y `Rar!` para rar),
+   listado de entradas sin extraer y revisión humana de los formatos
+   1 a 7 y de cualquier adicional.
+4. Mejora general futura: guardar en los inventarios el tipo
+   declarado por el proveedor.
+
+No se implementó soporte de formatos ni se hizo ninguna petición.
