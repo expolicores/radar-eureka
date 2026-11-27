@@ -3707,3 +3707,70 @@ correctamente como incompleta y el resultado se mantuvo
 not_resolved. Corrección propuesta: planificar desde las páginas
 que realmente requieren OCR. No se aplicó ni se repitió la
 extracción.
+
+
+### Corrección del planificador OCR y reevaluación de Taraira
+
+Corrección: la pasada 0 lee sólo texto nativo y no consume
+presupuesto de OCR. Las pasadas siguientes planifican
+exclusivamente entre las páginas sin texto utilizable: primero las
+señaladas por las reglas de relevancia existentes, luego la ventana
+inicial y después en orden. Una página intentada o que el
+extractor no procesa no vuelve a planificarse, y se eliminó la
+parada por falta de progreso. Los presupuestos no cambian y la
+cobertura real queda registrada, con candidatas y páginas
+planificadas sin procesar. Se añadió `--only-constancia` para
+reevaluar un documento de la cola en un directorio propio.
+
+Pruebas: 73 del módulo, con documentos mixtos (nativas,
+escaneadas, en blanco y rechazadas por el extractor) y el caso de
+Taraira; 437 de la suite nacional y 30 de laboratorio. SECOP II
+sigue idéntico al código anterior.
+
+Reevaluación de Taraira (26-13-14853220), offline, con el PDF y el
+recibo ya guardados: 75 de 75 páginas, la 43 por OCR en una sola
+pasada, cobertura completa y 59 páginas de presupuesto restantes.
+La página 43 no contiene evidencia de experiencia. El estado sigue
+en not_resolved, pero la razón pasa de
+governing_documents_incomplete a document_dependency: la p. 30
+remite al Formato 3 de experiencia. Revisión documentary_silence,
+prioridad 2. No se tocaron los otros tres procesos.
+
+### Análisis del clasificador: Fómeque y Montelíbano (sin cambios)
+
+Fómeque (p. 14), «El proponente debe acreditar UN (1) contrato…».
+El clasificador la reconoce como EXIGENCIA, pero no concluye por
+dos causas independientes:
+
+1. Alcance `unspecified`. El título de la sección es «EXPERIENCIA
+   DEL PROPONENTE», y las reglas sólo reconocen como sección
+   general «experiencia general/específica/habilitante…» o
+   «experiencia del proponente – formulario No. N». El sujeto es
+   el proponente y la frase no tiene limitaciones, así que es un
+   probable falso negativo por un patrón de sección demasiado
+   estrecho.
+2. Documento posiblemente rector pendiente. «ANALISIS DEL SECTOR»
+   tiene rol unknown y no se descargó, y la regla exige que no
+   quede ningún documento rector posible sin leer. Es prudencia
+   razonable en general, pero excesiva para un título que por
+   definición es un estudio de mercado, no un pliego ni una adenda.
+
+Montelíbano (p. 15), «Certificado de experiencia de al menos un
+contrato de objeto similar». Es una fila de una lista de
+documentos, fusionada con «Pacto Anticorrupción», sin verbo de
+obligación ni título de sección capturado. La regla de listas sólo
+reconoce un formato numerado concreto. La prudencia es en parte
+necesaria, porque sin el encabezado de la tabla no se sabe si la
+lista es habilitante o puntuable, aunque el Anexo de experiencia
+de la p. 21 lo sugiere. Hace falta verificar a mano el encabezado
+de la tabla antes de proponer una regla.
+
+Ajustes propuestos, no implementados:
+
+- Ampliar el reconocimiento de sección general a «experiencia del
+  proponente/oferente», manteniendo las exclusiones por limitación
+  o hipótesis de cada frase.
+- Tratar como no rectores «análisis/estudio del sector», «CDP o
+  certificado de disponibilidad presupuestal», «PAA» y «BPIN». Así
+  aparecen en los seis inventarios SECOP I observados.
+- Montelíbano: sólo revisión humana por ahora.

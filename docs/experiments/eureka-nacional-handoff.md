@@ -1043,3 +1043,21 @@ de experiencia y ninguno es favorable. Se detectó un defecto en la
 primera pasada de OCR, que dejó sin leer la página 43 de Taraira;
 la corrección está pendiente de autorización.
 [Detalle](eureka-nacional-experience-spike.md#etapa-3-extracción-y-clasificación-offline-de-cuatro-procesos-secop-i).
+
+
+### Planificador OCR corregido; Taraira con cobertura completa
+
+El OCR ahora planifica sólo páginas sin texto nativo. La página 43
+de Taraira se leyó y el documento quedó completo, pero sigue en
+not_resolved por dependencia documental (Formato 3). Análisis del
+clasificador:
+
+- Fómeque: la exigencia explícita no concluye por un patrón de
+  sección estrecho («experiencia del proponente») y por un
+  «Análisis del sector» de rol desconocido.
+- Montelíbano: la exigencia está en una lista sin verbo ni
+  encabezado.
+
+Hay dos ajustes propuestos sin implementar, pendientes de
+autorización.
+[Detalle](eureka-nacional-experience-spike.md#análisis-del-clasificador-fómeque-y-montelíbano-sin-cambios).
