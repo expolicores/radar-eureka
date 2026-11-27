@@ -910,3 +910,15 @@ marcador liberado. ready_for_acquisition fue true. No se descargó
 nada. La única descarga SECOP I de Encino queda pendiente de
 autorización explícita.
 [Detalle](eureka-nacional-experience-spike.md#verificación-real-del-perfil-infoexpress-preflight-listo).
+
+
+### Descarga SECOP I de Encino: POST interceptado, PDF sin tamaño declarado
+
+El preflight volvió a quedar listo y se reenvió un único POST
+interceptado. VerDocumento respondió 200 application/pdf sin
+Content-Length. La sonda lo rechazó sin leer el cuerpo: cero
+bytes, ningún archivo y ninguna descarga nativa. El cierre fue
+seguro y el marcador se liberó. pdf-attempt.lock agota el intento.
+Antes de otra ronda hay que decidir si conviene aceptar respuestas
+sin tamaño declarado o usar la importación asistida existente.
+[Detalle](eureka-nacional-experience-spike.md#adquisición-secop-i-de-encino-detenida-por-tamaño-no-declarado).

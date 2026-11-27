@@ -3292,3 +3292,35 @@ completa y los flags de operador se consumieron. Las pestañas
 habituales no se tocaron. En paralelo, el titular abrió Contratos
 en una ventana de incógnito ajena a la sonda, que sí consultó el
 feed; no fue una consulta de la sonda.
+
+
+### Adquisición SECOP I de Encino detenida por tamaño no declarado
+
+Se autorizó una única adquisición real de la invitación de Encino
+(MC-014-2026, constancia 26-13-14853238). Se repitió el preflight
+con login manual y sólo infoexpress seleccionado: sesión válida,
+only_configured, profile_count 1 y ready_for_acquisition true. El
+titular confirmó el POST y luego se creó confirmed-post.flag. Se
+reutilizó el inventario conservado, con seis documentos y una
+única fila primaria en PDF.
+
+La interceptación CDP quedó armada antes del envío. Se reenvió un
+único POST a VerDocumento, con la identidad y el cuerpo
+verificados. La respuesta fue HTTP 200 con content-type
+application/pdf y sin codificación, pero no traía Content-Length.
+El adaptador exige un tamaño declarado. La sonda rechazó la
+respuesta con missing_declared_size a los 1,7 segundos, sin leer
+el cuerpo: cero bytes, ningún archivo en staging. No hubo
+reintentos ni redirecciones. No apareció ninguna descarga nativa
+en Descargas ni en `.local` posterior al intento.
+
+El contexto cerró y quedó verificado, CDP se desconectó sin error
+y el trabajador salió con 0. El marcador preventivo se liberó con
+evidencia completa. pdf-attempt.lock permanece y agota el único
+intento autorizado. No hubo nuevas consultas al feed ni
+inventarios, y no se ejecutaron OCR, extracción ni clasificación.
+El documento no queda listo para extracción.
+
+Hallazgo: VerDocumento entrega el PDF sin tamaño declarado,
+probablemente con transferencia por bloques. La regla de tamaño
+declarado, heredada de SECOP II, impide aceptarlo tal como está.
