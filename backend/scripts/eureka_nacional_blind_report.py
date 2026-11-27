@@ -74,6 +74,7 @@ def build_report(run, secop1_results=None, *, commit=None):
                 "governing_complete": 0,
                 "classification": Counter(),
                 "review_categories": Counter(),
+                "finding_categories": Counter(),
                 "potentially_favorable": [],
             },
         )
@@ -105,6 +106,9 @@ def build_report(run, secop1_results=None, *, commit=None):
         bucket["analyzed"] += 1
         bucket["classification"][result["status"]] += 1
         bucket["review_categories"][result["review_category"]] += 1
+        bucket["finding_categories"][
+            (result.get("finding") or {}).get("category", "not_computed")
+        ] += 1
         if result["status"] == FAVORABLE_STATUS or result["review_category"] == FAVORABLE_REVIEW:
             bucket["potentially_favorable"].append(
                 {
@@ -127,6 +131,7 @@ def build_report(run, secop1_results=None, *, commit=None):
             "eligible_not_selected",
             "classification",
             "review_categories",
+            "finding_categories",
         ):
             bucket[key] = dict(bucket[key])
     secop1_acquisition = None
@@ -187,6 +192,7 @@ def markdown(report):
             f"{b['documents_downloaded']} · rector completo: {b['governing_complete']}",
             f"- Clasificación: {json.dumps(b['classification'])}",
             f"- Revisión: {json.dumps(b['review_categories'])}",
+            f"- Hallazgos (presentación): {json.dumps(b['finding_categories'])}",
             f"- Potencialmente favorables: {len(b['potentially_favorable'])}",
             "",
         ]

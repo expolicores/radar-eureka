@@ -21,6 +21,7 @@ from eureka_nacional_experience import (
     document_priority,
     normalized,
 )
+from eureka_nacional_findings import assess_finding, load_human_reviews
 from eureka_nacional_secop1_inventory import CONSTANCIA, normalize_document
 from licitaciones_cdp_runtime import DOCUMENT_ENDPOINT
 from spike_licitaciones_info import SpikeError
@@ -941,9 +942,15 @@ def resume_secop1(
             stop = f"ocr_{document['ocr_stop_reason']}"
             break
         classification = classify_experience(documents, inventory_complete=bool(documents))
+        process = processes.get(reference, {})
+        finding = assess_finding(
+            classification,
+            documents,
+            identifiers=[reference, item["constancia"], process.get("source_identity")],
+            human_reviews=load_human_reviews(),
+        )
         for document in documents:
             document.pop("fragments", None)
-        process = processes.get(reference, {})
         cases.append({"process_reference": reference, "documents": documents})
         results.append(
             {
@@ -960,6 +967,7 @@ def resume_secop1(
                 "document_stop_reason": stop,
                 "evidence_pages_by_document": evidence_pages(classification),
                 **classification,
+                "finding": finding,
             }
         )
     statuses = {}

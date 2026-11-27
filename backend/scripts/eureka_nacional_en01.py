@@ -35,6 +35,7 @@ from eureka_nacional_experience import (
     document_role,
     document_role_hint,
 )
+from eureka_nacional_findings import assess_finding, load_human_reviews
 from licitaciones_candidate_contracts import CandidateProcess
 from licitaciones_cdp_runtime import (
     CandidateError,
@@ -1092,6 +1093,12 @@ def analyze_secop1_sample(client, sample, output, metrics, results, inventories,
                 {"stage": "inventory", "code": getattr(error, "code", type(error).__name__)}
             )
         classification = classify_experience(documents, inventory_complete=bool(documents))
+        finding = assess_finding(
+            classification,
+            documents,
+            identifiers=[reference, process.get("source_identity")],
+            human_reviews=load_human_reviews(),
+        )
         inventories.append({"process_reference": reference, "documents": documents})
         results.append(
             {
@@ -1111,6 +1118,7 @@ def analyze_secop1_sample(client, sample, output, metrics, results, inventories,
                 },
                 "coverage": {"inventory_available": bool(documents), "documents_complete": 0},
                 **classification,
+                "finding": finding,
             }
         )
         errors.extend({"process_reference": reference, **error} for error in process_errors)
@@ -1297,6 +1305,12 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             if not documents and not process_errors:
                 classification["reason"] = "empty_inventory"
                 classification["review_reason"] = "empty_inventory"
+            finding = assess_finding(
+                classification,
+                documents,
+                identifiers=[reference, process.get("source_identity")],
+                human_reviews=load_human_reviews(),
+            )
             for document in documents:
                 document.pop("fragments", None)
                 if document.get("sha256"):
@@ -1322,6 +1336,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                         "documents_complete": sum(d["complete"] for d in documents),
                     },
                     **classification,
+                    "finding": finding,
                 }
             )
             errors.extend({"process_reference": reference, **error} for error in process_errors)

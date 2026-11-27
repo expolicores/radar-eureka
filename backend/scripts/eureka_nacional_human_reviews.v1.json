@@ -1,0 +1,31 @@
+{
+  "schema": "eureka-nacional-human-reviews/v1",
+  "purpose": "Anotaciones de revisión documental humana. Se presentan aparte de la conclusión automática y nunca modifican el estado formal ni la categoría del hallazgo.",
+  "reviews": [
+    {
+      "identifiers": [
+        "secop1:26-13-14851414",
+        "26-13-14851414",
+        "licitaciones_info:1130951:12351893"
+      ],
+      "recorded_on": "2026-11-27",
+      "reviewer": "operador EN-01",
+      "observation": "no_experience_requirement_found",
+      "documents_reviewed": ["Invitación", "ESTUDIOS PREVIOS"],
+      "note": "Revisión humana de la invitación y el estudio previo: no se encontró requisito de experiencia. Los requisitos habilitantes (2.9.2 a–j) son de capacidad jurídica.",
+      "system_verified": false
+    },
+    {
+      "identifiers": [
+        "CO1.NTC.11284005",
+        "licitaciones_info:1130951:12357925"
+      ],
+      "recorded_on": "2026-11-27",
+      "reviewer": "operador EN-01",
+      "observation": "no_experience_requirement_found",
+      "documents_reviewed": ["FORMATOS (dentro de un ZIP, revisión manual)"],
+      "note": "Revisión manual de FORMATOS: no se encontró anexo ni requisito de experiencia. El ZIP no fue procesado ni validado por el sistema; el estado formal no cambia.",
+      "system_verified": false
+    }
+  ]
+}

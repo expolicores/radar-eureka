@@ -18,6 +18,7 @@ from datetime import UTC, datetime
 
 import eureka_nacional_secop1_flow as secop1
 from eureka_nacional_experience import NON_GOVERNING_TITLE, classify_experience, document_title
+from eureka_nacional_findings import assess_finding, load_human_reviews
 
 TARGET_PREFIX = "en01-target_"
 PLAN_FILE = "targeted_plan.json"
@@ -360,6 +361,12 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                 document["validation_gap"] = "cobertura_incompleta"
         classification = classify_experience(documents, inventory_complete=True)
         reading, unresolved = validation_reading(classification, documents)
+        finding = assess_finding(
+            classification,
+            documents,
+            identifiers=[reference, process.get("source_identity")],
+            human_reviews=load_human_reviews(),
+        )
         for document in documents:
             document.pop("fragments", None)
         results.append(
@@ -370,6 +377,7 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                 "commercial_priority": process.get("commercial_priority"),
                 "commercial_category": process.get("primary_category"),
                 "validation_reading": reading,
+                "finding": finding,
                 "unresolved_dependencies": unresolved,
                 "documents": [
                     {
