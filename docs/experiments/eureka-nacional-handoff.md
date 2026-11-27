@@ -1123,3 +1123,11 @@ un recibo previo verificado. La etapa 2 está pendiente de revisión.
   propuesta, sin implementar.
 
 [Detalle](eureka-nacional-experience-spike.md#decisiones-tras-la-búsqueda-ciega-recibos-cobertura-y-cortacircuitos).
+
+
+### Etapa 2 de la búsqueda ciega completada
+
+El lote `c610064c…` (Panqueba y dos de Betéitiva) se adquirió con
+tres POST: tres PDF recibidos sin Content-Length, verificados y con
+recibos. Jericó se reutilizó sin descargarlo. El cierre fue seguro.
+La extracción y la clasificación esperan autorización.

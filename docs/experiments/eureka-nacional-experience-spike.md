@@ -4008,3 +4008,30 @@ Sin favorables formales. No hubo POST SECOP I ni etapa 2.
      de inmediato.
 
    Ni se desactiva el cortacircuitos ni se cambian los 10 MiB.
+
+
+### Etapa 2 de la búsqueda ciega: tres PDF SECOP I y Jericó reutilizado
+
+Lote aprobado `c610064c…550d0eb4`: 3 documentos, con login manual
+y sólo infoexpress. Preflight: sesión válida, only_configured,
+profile_count 1, dos get-info/MP bloqueados y cero errores del
+proveedor. La confirmación quedó ligada al hash exacto.
+
+| Constancia | Entidad | Mostrado | Recibido | SHA-256 | Tiempo |
+| --- | --- | --- | --- | --- | --- |
+| 26-13-14852082 | Alcaldía de Panqueba | 769 KB | 787.646 B | `5188312a…b69b7dde` | 1,8 s |
+| 26-13-14851419 | Concejo de Betéitiva | 559 KB | 572.916 B | `619adbc0…d74c3bc5` | 0,7 s |
+| 26-13-14851414 | Concejo de Betéitiva | 552 KB | 565.475 B | `ea0da155…a9058b9bd` | 0,8 s |
+
+SHA-256 completos en `download_receipts.json` de en01-uc9h1l8y.
+
+Tres POST, cero reintentos y cero rechazos. Respuesta 200 sin
+Content-Length, `%PDF-1.7` y `%%EOF` en los tres. Los tamaños
+coinciden con los mostrados y hay tres intentos stored con el hash
+del lote. Jericó no se descargó: se usa su recibo reutilizado y
+verificado.
+
+No hubo descargas nativas. El contexto se cerró y quedó
+verificado, el trabajador salió con 0 y el marcador se liberó.
+Hubo cero consultas al feed o inventarios, cero OCR y cero
+clasificación.
