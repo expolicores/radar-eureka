@@ -2924,3 +2924,66 @@ salir el POST. Una vez acreditado ese control, validar una
 sola constancia con autorización nueva. Integrar la
 adquisición al descubrimiento sólo después de comprobar el
 límite, recibo, extracción y clasificación en ese flujo.
+
+
+### Cierre seguro de una pestaña SECOP I en un contexto desechable
+
+Se reprodujo en Edge aislado, con dos orígenes loopback,
+la condición que invalidó la sonda de Encino. Un formulario
+sintético con destino _blank abrió una pestaña sin acceso al
+origen. Con el gestor nativo habilitado, el servidor recibió
+el POST y Edge notificó una descarga completada aunque la
+pestaña carecía de una asociación verificable. La prueba usa
+noopener para producir esa condición. La traza real de Encino
+sigue sin identificar por qué faltó esa asociación.
+
+La guarda experimental de SECOP I reutiliza el patrón
+existente de abrir una pestaña en blanco, verificarla y
+armar Fetch antes de enviar el formulario. Se exige un
+contexto desechable propio y se confirma por CDP que existe.
+Se deniega la descarga nativa a nivel de ese contexto antes
+de abrir la pestaña. Se verifica el origen no opaco, la
+relación con la pestaña de origen, el contexto y el marco
+antes de aceptar el acuse de Fetch.enable. La guarda no
+ejecuta el formulario y sigue fuera del runner nacional.
+
+En la limpieza se cierra el contexto entero sin reanudar
+destinos ni revocar la denegación nativa. Se confirma que el
+identificador del contexto y sus destinos desaparecieron.
+La marca sólo se retira cuando se acredita ese cierre y
+la salida del trabajador. Si alguna comprobación falla,
+se conserva la marca y se impide iniciar otro intento bajo
+ese marcador. Se mantuvo la marca real de Encino.
+
+| Regresión | Resultado offline |
+| --- | --- |
+| Formulario _blank sin guarda y sin acceso al origen | Un POST sintético y descarga nativa completada. |
+| Pestaña asociada, contexto propio y Fetch armado | Un POST sintético verificado, 431 bytes, SHA-256 concordante y cierre del flujo. |
+| Pestaña sin origen verificable | Rechazo antes del envío. Cero POST. Contexto y pestañas cerrados. |
+| Pestaña cerrada antes de activar Fetch | Rechazo antes del envío. Cero POST. Contexto cerrado. |
+| Respuesta no interceptada, inyectada sólo en laboratorio | CDP notificó cancelación nativa. El servidor sintético recibió el POST deliberado. Cero archivos nativos conservados. |
+| Cierre incierto simulado y salida del trabajador | La marca bloqueó una segunda adquisición. En los cierres verificados se mantuvo hasta confirmar la salida del trabajador. |
+
+Pasaron las seis regresiones focalizadas con
+RUN_EN01_POPUP_LAB=1 y 245 pruebas de EN-01 y del agregador.
+También pasaron los diez escenarios del laboratorio de
+Streaming existente. Se conservaron los límites de 10 MiB,
+12 s, los créditos e intentos y el formato de recibos.
+Se reutilizaron la lectura por bloques y el almacenamiento
+verificado. Las pruebas de recibos cubrieron reutilización e
+idempotencia, sin crear recibos de SECOP I reales.
+
+**Conclusión para otra sonda.** La guarda funciona en el
+contexto aislado probado. La denegación nativa impide guardar
+una respuesta que llegue al navegador. El control anterior
+al formulario es el que impide el envío de un POST desde
+una pestaña sin verificar. La denegación nativa por sí
+sola no acredita ausencia de tráfico o de bytes en búferes.
+Antes de considerar otra sonda real, falta demostrar la
+sesión autorizada y que el formulario original queda en
+un destino prearmado dentro de un contexto cuya disposición
+se pueda verificar. El control del proveedor que abre por
+sí mismo _blank sigue desactivado para adquisiciones
+automáticas. La sesión real y el archivo nativo anterior
+quedaron fuera de esta fase. No se emitieron solicitudes
+a SECOP, Licitaciones.info ni al feed.

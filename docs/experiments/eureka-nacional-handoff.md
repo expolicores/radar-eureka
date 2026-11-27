@@ -797,3 +797,25 @@ la descarga automática. El
 documenta los límites observados y el alcance de una
 validación futura. No se autoriza un nuevo intento a partir
 de este resultado.
+
+
+### Guarda offline de pestañas para SECOP I
+
+Se reprodujo en Edge aislado el formulario _blank sin
+acceso al origen y su descarga nativa. La guarda de EN-01
+abre una pestaña en blanco en un contexto desechable con
+las descargas nativas denegadas. Verifica origen y marco y
+exige el acuse de Fetch antes de permitir el envío en la
+prueba. Cierra el contexto sin reanudar destinos y retiene
+la marca si queda incierto el cierre del contexto o del
+trabajador.
+
+Pasaron seis regresiones focalizadas, 245 pruebas
+existentes y el laboratorio de Streaming. La marca real de
+Encino se conservó. La descarga automática sigue
+desactivada hasta verificar un modo de usar la sesión
+autorizada dentro de un contexto desechable y prearmar el
+destino del formulario oficial. El
+[resultado del laboratorio](eureka-nacional-experience-spike.md#cierre-seguro-de-una-pestaña-secop-i-en-un-contexto-desechable)
+documenta el bloqueo, el alcance de las guardas y la
+condición pendiente. La prueba real no se repitió.
