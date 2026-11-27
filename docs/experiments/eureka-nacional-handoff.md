@@ -948,3 +948,23 @@ seguro, el marcador se liberó y no hubo descargas nativas. La
 siguiente fase es integrar esta descarga con la extracción y la
 clasificación de experiencia, y requiere autorización.
 [Detalle](eureka-nacional-experience-spike.md#segunda-adquisición-secop-i-de-encino-pdf-recuperado).
+
+
+### Encino clasificado: not_resolved por cobertura insuficiente
+
+La invitación recuperada es un escaneo de 36 páginas sin texto
+nativo. Con el límite de dos páginas de OCR se leyeron las páginas
+1 y 2: identidad confirmada, objeto y alcance, sin menciones de
+experiencia. El clasificador devolvió not_resolved con
+governing_documents_incomplete y review_priority 4. La prioridad
+comercial no está determinada porque no hay registro de
+descubrimiento guardado. Para resolver el caso hace falta
+autorizar más OCR sobre la invitación. Para incorporar SECOP I al
+flujo nacional falta, además:
+
+- Una política de OCR para escaneos largos.
+- Un registro de intentos por documento.
+- Descubrimiento persistido con prioridad comercial.
+- La integración del preflight con login manual en el runner.
+
+[Detalle](eureka-nacional-experience-spike.md#primera-clasificación-documental-secop-i-encino).

@@ -3406,3 +3406,40 @@ liberó. El nuevo pdf-attempt.lock agota este intento. Hubo cero
 consultas nuevas al feed o a inventarios, sin reintentos, y no se
 ejecutaron OCR, extracción ni clasificación. `%%EOF` no garantiza
 integridad absoluta.
+
+
+### Primera clasificación documental SECOP I: Encino
+
+Se procesó sólo el PDF recuperado de la invitación de MC-014-2026.
+Antes de extraer, se comprobó la traza de la adquisición: un POST,
+un intento, flujo cerrado, firma, `%%EOF`, tamaño dentro del
+límite, cierre seguro y SHA-256 coincidente con el archivo en
+staging. El tamaño recibido, 5.651.103 bytes, equivale a los
+5,39 MB que mostraba el inventario.
+
+Se usó el extractor existente con un máximo de dos páginas de OCR
+y el clasificador existente, sin cambios de reglas.
+extraction-attempt.lock limita esta extracción a una única
+ejecución.
+
+Resultado: el PDF tiene 36 páginas y es escaneado, sin texto
+nativo en ninguna. El OCR en español procesó las páginas 1 y 2 en
+8,8 segundos y quedaron 34 pendientes. La identidad quedó
+confirmada en el texto: aparecen MC-014-2026 y el Municipio de
+Encino. La página 1 contiene el aviso de invitación de mínima
+cuantía y la justificación de la modalidad. La página 2 contiene
+las condiciones generales, con el objeto (adquisición de
+elementos para el sistema penitenciario y carcelario, convenio
+con el INPEC EPMSC Socorro) y el alcance. Ninguna de las dos
+menciona experiencia y el clasificador no registró evidencia.
+
+Estado formal: not_resolved, con razón
+governing_documents_incomplete, revisión insufficient_evidence y
+review_priority 4. La invitación quedó incompleta y los otros
+cinco documentos del inventario no se descargaron. Prioridad
+comercial: no determinada. Encino no figura en las corridas de
+descubrimiento guardadas, porque provenía de un registro en
+memoria de la sesión, y calcularla exigiría consultar el feed.
+No hubo IA, descargas, POST, inventarios ni consultas al feed.
+`%%EOF` y SHA-256 no se consideran garantía absoluta de
+integridad.
