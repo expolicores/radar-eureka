@@ -922,3 +922,17 @@ seguro y el marcador se liberó. pdf-attempt.lock agota el intento.
 Antes de otra ronda hay que decidir si conviene aceptar respuestas
 sin tamaño declarado o usar la importación asistida existente.
 [Detalle](eureka-nacional-experience-spike.md#adquisición-secop-i-de-encino-detenida-por-tamaño-no-declarado).
+
+
+### SECOP I sin Content-Length: streaming acotado listo (offline)
+
+`read_secop1_pdf` acepta PDF sin tamaño declarado dentro de 10 MiB
+y 12 s. Exige cierre verificado del flujo, `%PDF-`, `%%EOF` cerca
+del final y SHA-256, y no escribe nada hasta aceptar. El
+laboratorio aislado lo validó con Edge real en tres variantes: por
+bloques, con cierre de conexión y truncada, que se rechaza. Edge
+no señala la truncación, así que `%%EOF` es la única defensa y no
+garantiza integridad. La sonda local quedó preparada en modo
+`--acquire`, pero `pdf-attempt.lock` bloquea el intento hasta que
+se autorice expresamente archivarlo.
+[Detalle](eureka-nacional-experience-spike.md#streaming-acotado-de-secop-i-sin-content-length-offline).

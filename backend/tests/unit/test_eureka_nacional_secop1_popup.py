@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import os
 import sys
+import time
 from contextlib import contextmanager, suppress
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -25,6 +26,7 @@ from eureka_nacional_cdp_stream import (
     response_length,
 )
 from eureka_nacional_cdp_stream_lab import fixture_pdf, fixture_server
+from eureka_nacional_secop1_pdf import read_secop1_pdf
 from eureka_nacional_secop1_popup import Secop1PopupGuard
 
 from public_procurement.documents.adapters.local_storage import LocalBinaryStorage
@@ -52,10 +54,22 @@ LAB = pytest.mark.skipif(
 
 
 @contextmanager
-def attachment_server(pdf, received, *, observe_headers=None):
+def attachment_server(pdf, received, *, observe_headers=None, mode="length"):
+    """mode: length (Content-Length), chunked, close (no length, ends on close) or truncated."""
+
     class Handler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1" if mode in ("chunked", "truncated") else "HTTP/1.0"
+
         def log_message(self, *_args):
             pass
+
+        def send_chunked(self, data, *, finish):
+            for start in range(0, len(data), 4096):
+                part = data[start : start + 4096]
+                self.wfile.write(b"%x\r\n" % len(part) + part + b"\r\n")
+            if finish:
+                self.wfile.write(b"0\r\n\r\n")
+            self.wfile.flush()
 
         def do_POST(self):
             length = int(self.headers.get("Content-Length", "0"))
@@ -69,10 +83,21 @@ def attachment_server(pdf, received, *, observe_headers=None):
             with suppress(OSError):
                 self.send_response(200)
                 self.send_header("Content-Type", "application/pdf")
-                self.send_header("Content-Length", str(len(pdf)))
+                if mode == "length":
+                    self.send_header("Content-Length", str(len(pdf)))
+                elif mode in ("chunked", "truncated"):
+                    self.send_header("Transfer-Encoding", "chunked")
+                    self.send_header("Connection", "close")
                 self.send_header("Content-Disposition", 'attachment; filename="synthetic.pdf"')
                 self.end_headers()
-                self.wfile.write(pdf)
+                if mode == "chunked":
+                    self.send_chunked(pdf, finish=True)
+                elif mode == "truncated":
+                    # Half the body, no terminating chunk, then the connection drops.
+                    self.send_chunked(pdf[: len(pdf) // 2], finish=False)
+                else:
+                    self.wfile.write(pdf)
+                self.close_connection = True
 
     with ThreadingHTTPServer(("127.0.0.1", 0), Handler) as server:
         thread = Thread(target=server.serve_forever, daemon=True)
@@ -249,6 +274,75 @@ def test_isolated_popup_controls(case, tmp_path):
         assert received == ([True] if case == "native_denied" else [])
         assert chunks is None
         assert not list(storage.root.glob("sha256/*/*"))
+
+
+@LAB
+@pytest.mark.parametrize("mode", ["chunked", "close", "truncated"])
+def test_isolated_popup_reads_pdf_without_content_length(mode, tmp_path):
+    # Arrange: synthetic loopback response without Content-Length, native downloads denied.
+    pdf = fixture_pdf()
+    received = []
+    guard = Secop1PopupGuard(tmp_path / "uncertain.lock")
+    outcome = {}
+
+    async def run(origin, target):
+        async with async_playwright() as pw:
+            browser = await launch(pw, tmp_path / "downloads")
+            try:
+                source = await guard.start(browser)
+                await source.goto(origin, timeout=4000)
+                popup = await guard.open_blank()
+                queue = asyncio.Queue()
+                cdp, _frame = await guard.prepare(popup, queue.put_nowait)
+                trace = {"stream_bytes": 0, "io_closed": False, "navigation_abort_ack": False}
+                started = time.monotonic()
+                # Act
+                try:
+                    async with asyncio.timeout(DEADLINE):
+                        await popup.evaluate(
+                            FORM, {"url": target, "route": ROUTE, "detached": False}
+                        )
+                        request = await queue.get()
+                        rid = request["requestId"]
+                        await cdp.send(
+                            "Fetch.continueRequest", {"requestId": rid, "interceptResponse": True}
+                        )
+                        response = await queue.get()
+                        if "responseErrorReason" in response:
+                            raise RejectionError("response_error")
+                        outcome["body"] = await read_secop1_pdf(
+                            cdp, rid, response, trace, started=started
+                        )
+                except RejectionError as error:
+                    outcome["rejected"] = str(error)
+                outcome["trace"] = trace
+                assert await guard.close()
+            finally:
+                await browser.close()
+
+    with fixture_server(pdf) as origin, attachment_server(pdf, received, mode=mode) as target:
+        asyncio.run(run(origin, target))
+
+    # Assert
+    assert received == [True]
+    assert guard.release_after_worker(worker_closed=True)
+    assert not list((tmp_path / "downloads").glob("*"))
+    trace = outcome["trace"]
+    if mode == "truncated":
+        assert "body" not in outcome
+        assert outcome["rejected"] in {
+            "stream_interrupted",
+            "pdf_eof_marker_missing",
+            "response_error",
+        }
+        assert "sha256" not in trace
+    else:
+        assert outcome.get("rejected") is None
+        assert outcome["body"] == pdf
+        assert trace["declared_size"] is False
+        assert trace["size_origin"] == "received_undeclared"
+        assert trace["received_bytes"] == len(pdf)
+        assert trace["sha256"] == hashlib.sha256(pdf).hexdigest()
 
 
 @contextmanager

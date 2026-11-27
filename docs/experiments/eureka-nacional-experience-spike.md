@@ -3324,3 +3324,51 @@ El documento no queda listo para extracción.
 Hallazgo: VerDocumento entrega el PDF sin tamaño declarado,
 probablemente con transferencia por bloques. La regla de tamaño
 declarado, heredada de SECOP II, impide aceptarlo tal como está.
+
+
+### Streaming acotado de SECOP I sin Content-Length (offline)
+
+Revisión: `read_stream` ya admitía una longitud desconocida. Lee
+por bloques de 64 KiB, corta en 10 MiB, exige el fin del flujo,
+cierra el handle y aborta la navegación. Sólo compara contra el
+tamaño declarado cuando existe. `response_length` rechaza todo lo
+que no sea 200 `application/pdf` sin codificación, un tamaño
+inválido o uno declarado mayor que 10 MiB. El almacenamiento
+escribe en un temporal y luego lo renombra. El rechazo por falta
+de Content-Length estaba sólo en la sonda local.
+
+Cambio: `eureka_nacional_secop1_pdf.read_secop1_pdf` reutiliza
+esas dos funciones. Mide el plazo restante de los 12 s y convierte
+cualquier error del flujo CDP en un rechazo. Valida el cuerpo
+completo:
+
+- Cierre verificado del flujo y cuadre de los bytes contados.
+- Cuerpo no vacío, como máximo 10 MiB, y tamaño igual al
+  declarado si lo hay.
+- Firma `%PDF-` sobre el cuerpo completo y `%%EOF` en los últimos
+  1024 bytes.
+- Tamaño recibido, origen del tamaño (declarado o recibido) y
+  SHA-256.
+
+No escribe nada. La sonda local guarda sólo los bytes aceptados.
+Después compara hash y tamaño con lo guardado y borra el archivo
+si no cuadran. Siguen rechazándose las redirecciones, los tipos
+incorrectos, la compresión y los tamaños declarados excesivos. Se
+conservó una copia de la versión ejecutada en la corrida real.
+
+Pruebas: 25 pruebas unitarias con un CDP falso. En el laboratorio
+aislado, con Edge headless y servidor sintético en loopback, se
+probaron tres respuestas sin Content-Length: por bloques, con fin
+por cierre de conexión y por bloques truncada. Las dos primeras se
+aceptaron con SHA-256 correcto. La truncada se rechazó y no hubo
+descargas nativas en ningún caso.
+
+Hallazgo: ante el flujo truncado, Edge informó por CDP un fin de
+flujo normal tras 215 bytes, sin error. Sólo la falta de `%%EOF`
+lo detectó. Riesgo residual: un corte justo después de un `%%EOF`
+intermedio, por ejemplo en un PDF con actualizaciones
+incrementales, pasaría la validación. La extracción posterior
+debe tratar el documento como no garantizado. No se ejecutó
+ninguna sonda real. `pdf-attempt.lock` permanece intacto y
+bloquea un nuevo intento hasta que se autorice expresamente
+archivarlo.
