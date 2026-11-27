@@ -74,6 +74,10 @@ GENERAL_EXPERIENCE_SECTION = re.compile(
     r"^experiencia (?:general|especifica|habilitante)(?: del (?:proponente|oferente))?"
     r"(?: \(admisible/no admisible\))?$"
 )
+BIDDER_SECTION = re.compile(
+    r"^(?:\d+(?:[.-]\d+)*[.)]*\s*)?experiencia (?:del|de los) (?:proponentes?|oferentes?)"
+    r"\s*[:.;\-–]*$"
+)
 LIMITED_SECTION = re.compile(
     r"\b(?:mipymes?|proponentes? plurales?|desempates?|lotes?|subsanacion)\b"
 )
@@ -161,6 +165,10 @@ ACCREDITATION_METHOD = re.compile(
     r"^(?:para (?:efectos de )?acreditar (?:la |su )?experiencia|"
     r"(?:dicha|la) experiencia se (?:acreditara|demostrara) mediante (?:certificados?|"
     r"certificaciones?|copias?))\b"
+)
+NON_GOVERNING_TITLE = re.compile(
+    r"^(?:analisis (?:del|de) (?:el )?sector|estudios? (?:del|de) (?:el )?sector|cdp|"
+    r"certificados? de disponibilidad presupuestal|paa|plan anual de adquisiciones|bpin)\b"
 )
 MANDATE_BASES = {"bidder_experience_mandate", "ocr_corroborated_bidder_mandate"}
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
@@ -560,6 +568,10 @@ def document_assertions(document):
                         in {"minimum_experience_in_heading", "mandatory_offer_certificates"}
                         or GENERAL_EXPERIENCE_SECTION.fullmatch(section_text)
                         or BIDDER_EXPERIENCE_FORM.fullmatch(section_text)
+                        or BIDDER_SECTION.fullmatch(section_text)
+                        or BIDDER_SECTION.fullmatch(
+                            normalized_for_matching(heading_text or "", method)
+                        )
                         or section_text == "condiciones de experiencia"
                         or heading == "lettered_experience"
                     )
@@ -589,8 +601,17 @@ def classify_experience(documents, *, inventory_complete=True):
     }
     dependencies = [item for item in relevant if item["basis"] in DEPENDENCY_BASES]
     restricted = any(item["scope"] == "limited" for item in relevant)
+    non_blocking = {
+        doc["document_id"]
+        for doc in documents
+        if doc["role"] == "unknown"
+        and not doc["complete"]
+        and NON_GOVERNING_TITLE.search(document_title(doc["name"]))
+    }
     governing_pending = any(
-        doc["role"] in {"primary", "amendment", "unknown"} and not doc["complete"]
+        doc["role"] in {"primary", "amendment", "unknown"}
+        and not doc["complete"]
+        and doc["document_id"] not in non_blocking
         for doc in documents
     )
     known_governing_pending = any(
@@ -700,6 +721,11 @@ def classify_experience(documents, *, inventory_complete=True):
                 {"document_id": doc["document_id"], "document": doc["name"], "role": doc["role"]}
                 for doc in documents
                 if doc["document_id"] in pending_ids
+            ],
+            "non_governing_pending": [
+                {"document_id": doc["document_id"], "document": doc["name"]}
+                for doc in documents
+                if doc["document_id"] in non_blocking
             ],
         },
         "dependencies": [
