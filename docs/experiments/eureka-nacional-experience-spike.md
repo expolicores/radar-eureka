@@ -3372,3 +3372,37 @@ debe tratar el documento como no garantizado. No se ejecutó
 ninguna sonda real. `pdf-attempt.lock` permanece intacto y
 bloquea un nuevo intento hasta que se autorice expresamente
 archivarlo.
+
+
+### Segunda adquisición SECOP I de Encino: PDF recuperado
+
+El titular autorizó un segundo intento único. El pdf-attempt.lock
+anterior se archivó con su SHA-256 junto a la evidencia de la
+corrida de las 21:52, sin borrarse. El titular inició sesión, dejó
+sólo infoexpress y confirmó el POST. Preflight: sesión válida,
+only_configured, profile_count 1 y dos get-info/MP bloqueados.
+
+Se reutilizó el inventario conservado y se armó la interceptación
+CDP antes del envío. Salió un único POST a VerDocumento, con la
+identidad y el cuerpo verificados. La respuesta fue 200
+application/pdf sin Content-Length. La lectura por streaming
+terminó con fin de flujo verificado y navegación abortada en 2,2
+segundos:
+
+- 5.651.103 bytes recibidos, por debajo del límite de 10 MiB.
+- Origen del tamaño: received_undeclared.
+- Firma `%PDF-1.4` y `%%EOF` en los últimos 1024 bytes.
+- SHA-256
+  `174e63c957f77eee893fa1d0dd699d32a013405b64c25517f9c5e6fdc606fddd`.
+
+El archivo se guardó en staging por hash y una verificación
+independiente posterior confirmó hash, tamaño, firma y marca
+final. No quedaron temporales.
+
+Las descargas nativas siguieron denegadas: no apareció nada en
+Descargas. El contexto cerró y quedó verificado, CDP se desconectó
+sin error, el trabajador salió con 0 y el marcador preventivo se
+liberó. El nuevo pdf-attempt.lock agota este intento. Hubo cero
+consultas nuevas al feed o a inventarios, sin reintentos, y no se
+ejecutaron OCR, extracción ni clasificación. `%%EOF` no garantiza
+integridad absoluta.

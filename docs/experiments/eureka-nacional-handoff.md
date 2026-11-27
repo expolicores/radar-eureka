@@ -936,3 +936,15 @@ garantiza integridad. La sonda local quedó preparada en modo
 `--acquire`, pero `pdf-attempt.lock` bloquea el intento hasta que
 se autorice expresamente archivarlo.
 [Detalle](eureka-nacional-experience-spike.md#streaming-acotado-de-secop-i-sin-content-length-offline).
+
+
+### PDF de Encino recuperado por SECOP I
+
+La invitación de MC-014-2026 (constancia 26-13-14853238) se
+recuperó con un único POST interceptado, sin Content-Length:
+5.651.103 bytes, `%PDF-1.4`, `%%EOF` y SHA-256
+`174e63c9…6fddd`. Está en staging local por hash. El cierre fue
+seguro, el marcador se liberó y no hubo descargas nativas. La
+siguiente fase es integrar esta descarga con la extracción y la
+clasificación de experiencia, y requiere autorización.
+[Detalle](eureka-nacional-experience-spike.md#segunda-adquisición-secop-i-de-encino-pdf-recuperado).
