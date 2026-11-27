@@ -3560,3 +3560,41 @@ SECOP I. Los cinco procesos quedaron seleccionados sin inventario
 y la cola quedó vacía. No hubo POST ni descargas SECOP I. Es un
 defecto de orquestación de la integración: un fallo de descargas
 de una fuente impidió la etapa sin descargas de la otra.
+
+
+### Corrección de orquestación y recuperación de inventarios SECOP I
+
+Corrección A: con `--include-secop1`, sólo el cortacircuitos de
+descargas SECOP II se aplaza hasta después de los inventarios
+SECOP I, y luego se vuelve a lanzar. El resto de topes de
+créditos o tiempo, la sesión y el cierre incierto siguen
+deteniendo de inmediato. Sin la opción, el runner se comporta
+exactamente igual que antes; la comparación contra el código
+anterior lo confirmó también con el cortacircuitos abierto.
+
+Corrección B: `--secop1-inventory-from` con `--secop1-constancia`
+inventaría sólo procesos ya seleccionados en una corrida
+persistida y dentro de una lista explícita. No sondea la sesión,
+porque ese sondeo consulta el feed, ni repite el descubrimiento o
+los filtros, ni descarga. El cliente queda limitado a una petición
+por constancia y cada proceso a una página, para que un proceso
+paginado no gaste el crédito de otro. Pruebas: 418 en la suite
+nacional y 30 de laboratorio.
+
+Operación real única (en01-secop1inv_xgcp5mgp): 5 inventarios con
+5 peticiones, cero consultas al feed, cero descargas y cero POST.
+Los cinco tenían la Invitación como único rector por título, así
+que se encolaron 5. Ningún proceso quedó excluido. Hash del lote:
+`a9871484328a9e8e48ea2eb9a9899c8129918201b34e40fc0668c23a53b5c614`.
+
+| Constancia | Entidad | Rector | Tamaño mostrado | Documentos |
+| --- | --- | --- | --- | --- |
+| 26-13-14853244 | Sutatenza, Boyacá | Invitación, PDF | 22,68 MB | 5 |
+| 26-13-14853220 | Concejo de Taraira, Vaupés | Invitación, PDF | 2,10 MB | 4 |
+| 26-13-14853212 | Jericó, Boyacá | Invitación, PDF | 742 KB | 6 |
+| 26-13-14853190 | Fómeque, Cundinamarca | Invitación, PDF | 539 KB | 3 |
+| 26-13-14853123 | Montelíbano, Córdoba | Invitación, PDF | 602 KB | 3 |
+
+La invitación de Sutatenza supera ampliamente los 10 MiB, de modo
+que su adquisición se rechazaría por tamaño. Queda pendiente la
+revisión del lote por el titular antes de cualquier descarga.

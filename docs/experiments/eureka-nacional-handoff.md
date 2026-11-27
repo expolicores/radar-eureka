@@ -997,3 +997,13 @@ II dio 6 procesos analizados y todos not_resolved. Hace falta
 autorizar una corrección para desacoplar las etapas antes de
 seguir.
 [Detalle](eureka-nacional-experience-spike.md#primera-corrida-nacional-integrada-etapa-1-en01-xgcp5mgp).
+
+
+### Lote SECOP I recuperado, pendiente de aprobación
+
+Se recuperaron los inventarios de los 5 procesos SECOP I
+seleccionados en en01-xgcp5mgp, con 5 peticiones y sin feed. Se
+encolaron 5 invitaciones; lote `a9871484…53b5c614`. La de
+Sutatenza mide 22,68 MB y excede el límite. No hubo descargas ni
+POST.
+[Detalle](eureka-nacional-experience-spike.md#corrección-de-orquestación-y-recuperación-de-inventarios-secop-i).
