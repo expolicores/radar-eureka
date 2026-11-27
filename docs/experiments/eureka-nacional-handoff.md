@@ -1107,3 +1107,19 @@ Cuellos de botella:
 Lote SECOP I `a2f83173…` con 4 rectores, uno de ellos (Jericó) con
 un recibo previo verificado. La etapa 2 está pendiente de revisión.
 [Detalle](eureka-nacional-experience-spike.md#exploración-ciega-boyacá--huila-etapa-1-en01-uc9h1l8y).
+
+
+### Recibos reutilizables, cobertura y cortacircuitos
+
+- La reutilización de recibos por identidad inequívoca está
+  implementada. Jericó se resolvió con su recibo previo y el lote
+  quedó en 3 documentos nuevos, hash `c610064c…e4c5`, pendiente de
+  revisión.
+- Cobertura: no hay filtro de fecha verificado. Se propone capturar
+  el payload de la UI con filtro de fecha o un descubrimiento
+  paginado aparte: unas 38 páginas para 10 días y unas 115 para 30.
+- Cortacircuitos: los 4 fallos de la corrida ciega fueron
+  previsibles, no de infraestructura. Hay una clasificación
+  propuesta, sin implementar.
+
+[Detalle](eureka-nacional-experience-spike.md#decisiones-tras-la-búsqueda-ciega-recibos-cobertura-y-cortacircuitos).

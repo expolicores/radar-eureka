@@ -3920,3 +3920,91 @@ en01-secop1inv_xgcp5mgp, pero la etapa 2 no reutiliza recibos de
 otras corridas: queda pendiente de revisión.
 
 Sin favorables formales. No hubo POST SECOP I ni etapa 2.
+
+
+### Decisiones tras la búsqueda ciega: recibos, cobertura y cortacircuitos
+
+1. Reutilización de recibos SECOP I (implementada, `f50922d`).
+   `--reuse-receipts` reutiliza un recibo de otra corrida sólo si se
+   cumplen todas estas condiciones:
+
+   - El mismo `document_id` (constancia más ruta exacta), constancia,
+     extensión y ruta figuran en una cola de la corrida de origen.
+   - Un intento finalizado como stored registra el mismo SHA-256 y
+     tamaño.
+   - El binario se verifica por tamaño y hash, tiene `%PDF-` y
+     `%%EOF`, y encaja con el tamaño mostrado dentro del redondeo.
+
+   La copia se vuelve a calcular al guardarse y la fuente nunca se
+   modifica. Pruebas: 10 nuevas, que incluyen el rechazo por misma
+   constancia y título con otra ruta, sin procedencia, intento sin
+   coincidencia, binario alterado, sin `%%EOF` y tamaño mostrado
+   incoherente. Suite nacional: 494; laboratorio: 30.
+
+   Aplicada offline a en01-uc9h1l8y: Jericó (26-13-14853212) quedó
+   resuelto con el recibo de en01-secop1inv_xgcp5mgp (SHA-256
+   `bd4c8b02…`, 759.314 bytes) y la fuente conservó su hash. Nueva
+   cola con 3 documentos nuevos (Panqueba 26-13-14852082, Betéitiva
+   26-13-14851419 y 26-13-14851414); max_posts 3; hash
+   `c610064ca584ea7770c1ff424287b706fc138a0f537a01d92954a811550d0eb4`.
+   El lote anterior, `a2f83173…`, quedó archivado.
+
+2. Cobertura temporal (sólo análisis). El payload capturado sólo
+   filtra por `query.ubicacion_filter`, ordenado de forma descendente
+   por FechaPublicacion, y la documentación registra que no hay
+   verificación de filtros remotos por fecha. Las subventanas no son
+   verificables offline. La paginación cuesta 1 crédito por cada 30
+   avisos, con unos 2,1 s de espaciado:
+
+   - 240 avisos cubrieron unas 50 horas, unos 4,8 por hora.
+   - 30 días son unos 3.400 avisos: unas 115 páginas y créditos, y
+     unos 4 minutos sólo de descubrimiento.
+   - 10 días son unas 38 páginas.
+
+   La mínima cuantía cierra en días, de modo que el valor útil se
+   concentra en los avisos recientes. Propuesta, por pasos:
+
+   a. Capturar con Network el payload de la UI con un filtro de
+      fecha. Si existe un campo remoto, se podrían hacer subventanas
+      verificables.
+   b. Si no existe, un modo sólo de descubrimiento con un presupuesto
+      propio de páginas. Pararía cuando una página completa no aporte
+      procesos abiertos, guardaría una instantánea deduplicada con
+      cobertura por página y procesaría después lotes desde esa
+      instantánea sin volver a consultar el feed.
+
+   Riesgo: se desconoce si el proveedor limita la profundidad de
+   paginación.
+
+3. Cortacircuitos SECOP II (sólo diagnóstico).
+   `DownloadState.record_failure` cuenta cualquier fallo de descarga
+   y se abre con 3 fallos en al menos 2 procesos. En en01-uc9h1l8y
+   los 4 fallos contados fueron:
+
+   - 1 rechazo por tamaño tras un Streaming con 200 (11,3 MB).
+   - 2 respuestas 403 directas en documentos no rectores, sin
+     Streaming autorizado.
+   - 1 respuesta 403 en un rector sin intento de Streaming, porque la
+     descarga directa agotó el cupo del proceso y no se registró
+     `edge_skipped`.
+
+   Ninguno fue de infraestructura. El Streaming recuperó 4 de 5
+   rectores. En todas las corridas: 7 recuperados por Streaming, 3
+   rechazos por tamaño, 2 errores de protocolo del Streaming y 8
+   respuestas 403 sin Streaming aplicable.
+
+   Corrección mínima propuesta, no implementada: clasificar cada
+   fallo en el punto de captura.
+
+   - Los rechazos por tamaño, los 403 en documentos sin Streaming
+     autorizado y los Streaming omitidos por cupo o duración no
+     cuentan para el cortacircuitos. Se registran con métricas
+     propias y con `edge_skipped` explícito.
+   - Cuentan, con el mismo umbral, los fallos efectivos: Streaming
+     intentado que falla por otra causa (protocolo, respuesta
+     inesperada, tiempo agotado o interrupción) y errores directos
+     que no son 403.
+   - La sesión, el cierre incierto y la seguridad siguen deteniendo
+     de inmediato.
+
+   Ni se desactiva el cortacircuitos ni se cambian los 10 MiB.
