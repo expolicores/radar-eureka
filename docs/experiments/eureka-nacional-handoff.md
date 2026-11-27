@@ -1131,3 +1131,11 @@ El lote `c610064c…` (Panqueba y dos de Betéitiva) se adquirió con
 tres POST: tres PDF recibidos sin Content-Length, verificados y con
 recibos. Jericó se reutilizó sin descargarlo. El cierre fue seguro.
 La extracción y la clasificación esperan autorización.
+
+
+### Cortacircuitos corregido; captura de fechas pendiente
+
+Sólo los fallos de infraestructura abren ya el cortacircuitos
+SECOP II; los rechazos previsibles quedan medidos aparte. Las
+instrucciones de captura del filtro de fechas esperan al titular.
+[Detalle](eureka-nacional-experience-spike.md#corrección-del-cortacircuitos-secop-ii-y-captura-del-filtro-de-fechas).

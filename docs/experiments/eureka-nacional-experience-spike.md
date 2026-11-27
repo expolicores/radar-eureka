@@ -4035,3 +4035,27 @@ No hubo descargas nativas. El contexto se cerró y quedó
 verificado, el trabajador salió con 0 y el marcador se liberó.
 Hubo cero consultas al feed o inventarios, cero OCR y cero
 clasificación.
+
+
+### Corrección del cortacircuitos SECOP II y captura del filtro de fechas
+
+Cortacircuitos (implementado): cada fallo de descarga se clasifica
+como `size_rejection`, `access_restricted_no_fallback`,
+`fallback_skipped` o `infrastructure`, y queda en
+`errors[].failure_kind` y en las métricas `download_<tipo>`. Sólo
+`infrastructure` alimenta el cortacircuitos, con el umbral de 3
+fallos en 2 procesos. Cuando un rector elegible no recibe Streaming
+por haber agotado el cupo, se registra
+`edge_skipped=document_allowance`. Sesión, seguridad y cierre
+incierto siguen deteniendo de inmediato, y el límite sigue en 10 MiB.
+
+Pruebas: 15 nuevas. Una prueba propia escribía el marcador en el
+directorio compartido de pytest; se aisló y se eliminaron los
+marcadores de los temporales de prueba. Totales: suite nacional 509
+y laboratorio 30. Con salidas idénticas en el escenario normal; en el
+escenario con cortacircuitos sólo se añaden `failure_kind` y la
+métrica `download_infrastructure`.
+
+Cobertura: instrucciones para capturar a mano el payload del filtro de
+fechas en
+[eureka-nacional-captura-filtro-fechas.md](eureka-nacional-captura-filtro-fechas.md).
