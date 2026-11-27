@@ -819,3 +819,26 @@ destino del formulario oficial. El
 [resultado del laboratorio](eureka-nacional-experience-spike.md#cierre-seguro-de-una-pestaña-secop-i-en-un-contexto-desechable)
 documenta el bloqueo, el alcance de las guardas y la
 condición pendiente. La prueba real no se repitió.
+
+
+### Compatibilidad offline de sesión y formulario SECOP I
+
+En Edge aislado, una sesión sintética de otro contexto no
+estuvo disponible en el contexto desechable. El login por
+la interfaz dentro del contexto protegido sí funcionó.
+El mismo formulario HTML, enviado desde una pestaña
+asociada con Fetch preparado, produjo un solo POST
+interceptado entre dos sitios loopback y un PDF
+sintético verificado. Se mantuvieron la denegación de
+descargas nativas, el cierre comprobado y el bloqueo
+preventivo. La marca real de Encino sigue en su sitio.
+
+El flujo es viable en el laboratorio con una sesión
+establecida dentro del contexto protegido. Sigue por
+validar el login real y la aceptación del POST oficial
+con la pestaña prearmada. El control original que crea
+el destino _blank continúa desactivado para adquisiciones
+automáticas. El
+[procedimiento de una sonda](eureka-nacional-experience-spike.md#sonda-única-propuesta-pendiente-de-autorización)
+queda pendiente de autorización. La contingencia disponible
+es la importación asistida de un PDF verificado.

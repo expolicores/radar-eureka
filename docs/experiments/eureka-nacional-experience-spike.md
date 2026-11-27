@@ -2987,3 +2987,103 @@ sí mismo _blank sigue desactivado para adquisiciones
 automáticas. La sesión real y el archivo nativo anterior
 quedaron fuera de esta fase. No se emitieron solicitudes
 a SECOP, Licitaciones.info ni al feed.
+
+
+### Compatibilidad offline de sesión y formulario SECOP I
+
+El contrato se cotejó contra la inspección ya registrada de
+AccionesDocumentos.js. Para una ruta relativa, la rama
+Colombia construye y envía inmediatamente un formulario POST
+a /consultas/VerDocumento, con un campo oculto ruta y
+destino _blank. El código documentado no recibe un destino
+preabierto ni expone una preparación separada del envío.
+Invocar ese control sin cambios vuelve a delegar la creación
+del destino al navegador. La prueba de Encino demuestra el
+riesgo de depender de que ese destino se asocie a tiempo.
+
+**Resultado del laboratorio.** Se usó Edge aislado y dos
+sitios sintéticos loopback. Una sesión emitida por el
+formulario de login del primer contexto no se compartió con
+el contexto desechable. En el contexto protegido, el mismo
+login por interfaz estableció una sesión nueva en el
+navegador. La respuesta mostró una cookie sintética HttpOnly
+y de ámbito de host. Se comprobó el acceso por HTTP a la
+página protegida sin extraer ni copiar su cookie. Cerrar el
+contexto protegido eliminó su sesión. El primer contexto
+siguió autenticado y otro contexto nuevo comenzó sin sesión.
+
+Desde la página sintética autenticada se abrió una pestaña
+en blanco. Conservó el origen y la asociación con la
+página inicial. El formulario HTML en esa pestaña mantuvo
+el método POST y el campo ruta. Navegó a un segundo sitio
+loopback, con el Origin esperado y Sec-Fetch-Site cross-site.
+La cookie del proveedor sintético no llegó al segundo sitio.
+Ese sitio no requería una sesión propia. Sus requisitos
+reales de cookies, cabeceras u otras comprobaciones quedan
+pendientes.
+
+Fetch quedó armado antes de enviar el formulario. Se
+verificaron método, marco, destino y dato antes de continuar.
+El servidor sintético registró cero solicitudes antes de
+la autorización de CDP y recibió un solo POST. La respuesta
+de 431 bytes se leyó con las guardas existentes y su
+SHA-256 coincidió con la muestra. Se confirmaron cierre
+del flujo, aborto de la navegación interceptada y
+disposición del contexto. Las regresiones también cubren
+el rechazo de un destino no asociado, la cancelación
+nativa y el bloqueo ante cierre incierto. Se mantuvo la
+marca real de Encino durante toda la validación.
+
+**Conclusión.** El flujo es técnicamente viable si la
+autenticación legítima se establece por la interfaz dentro
+del propio contexto desechable y el envío usa el mismo
+contrato HTML en una pestaña ya preparada. El inicio de
+sesión preexistente en otro contexto permanece aislado.
+El control del proveedor que crea y envía a _blank de
+inmediato sigue fuera del alcance de la guarda. El laboratorio
+no acredita que Licitaciones.info permita el inicio de
+sesión en ese contexto ni que VerDocumento acepte allí el
+POST. La descarga automática permanece desactivada.
+
+Pasaron 252 pruebas offline del conjunto de EN-01 y
+agregador, con RUN_EN01_POPUP_LAB=1 y RUN_REAL_OCR=1.
+Se incluyeron los siete casos de pestañas SECOP I,
+presupuestos y reuso de recibos. El cambio no agrega
+transporte, dependencias ni un punto de entrada real.
+
+#### Sonda única propuesta, pendiente de autorización
+
+1. Antes de cualquier acceso, resolver el estado de la marca
+   anterior sólo después de verificar que no quedan
+   transferencias ni cierres pendientes. Reservar el intento
+   y crear un contexto desechable dedicado con descargas
+   nativas denegadas.
+2. Iniciar sesión manualmente por la interfaz normal dentro
+   del contexto bajo prueba. Verificar el origen y el acceso
+   autorizado a una sola constancia acordada. Si la sesión
+   no puede establecerse o la constancia no puede
+   identificarse sin ejecutar el feed, detenerse. Usar un
+   inventario ya verificado o consultar como máximo una vez
+   el inventario de esa constancia, con las claves de su
+   ficha. Elegir un rector inequívoco y verificar su ruta.
+3. Abrir una pestaña en blanco asociada. Exigir el acuse de
+   Fetch y verificar marco, método, endpoint oficial y un
+   único campo ruta. Enviar el formulario HTML con el
+   contrato observado desde esa pestaña ya armada. No
+   invocar el control que crea un destino nuevo a la vez
+   que lo envía. Permitir un solo POST documental de 12 s
+   y hasta 10 MiB aceptados. Ante redirección, CAPTCHA,
+   sesión adicional, longitud no válida o cierre incierto,
+   detener el intento sin reintentos.
+4. Verificar cierre del flujo, pestañas, contexto y
+   trabajador. Conservar la marca si el cierre es incierto.
+   Guardar únicamente el PDF con firma, tamaño y SHA-256
+   verificados y un recibo asociado. Reutilizar extracción
+   y clasificación con hasta dos páginas OCR y cero IA.
+   Publicar sólo el resultado depurado.
+
+Si la sesión real no puede establecerse dentro de ese
+contexto, la contingencia ya disponible es la importación
+asistida de un PDF obtenido por el control oficial y
+verificado por procedencia e identidad. No se probaron
+portales ni se ejecutó la sonda real en esta fase.
