@@ -714,6 +714,31 @@ class DownloadState:
         return len(self.failed_processes) == 3 and len(set(self.failed_processes)) >= 2
 
 
+SIZE_REJECTIONS = {"declared_size_limit", "stream_size_limit", "too_large", "size_limit"}
+
+
+def download_failure_kind(code, diagnostics, entry, download_state):
+    """Predictable rejections never count as infrastructure failures for the circuit.
+
+    size_rejection: the document exceeds the authorized size (direct or streamed).
+    access_restricted_no_fallback: direct 403 on a document the stream may not fetch.
+    fallback_skipped: direct 403 on a governing PDF whose stream was not attempted
+    (disabled, document allowance, duration or unverified target); edge_skipped says why.
+    infrastructure: anything else, including a stream attempted that failed otherwise.
+    """
+    edge = diagnostics.get("edge") if isinstance(diagnostics.get("edge"), dict) else None
+    if code in SIZE_REJECTIONS or (edge is not None and edge.get("error") in SIZE_REJECTIONS):
+        return "size_rejection"
+    if diagnostics.get("http_status") == 403 and edge is None:
+        if entry.get("role") != "primary":
+            return "access_restricted_no_fallback"
+        if not (download_state and download_state.edge_enabled):
+            diagnostics.setdefault("edge_skipped", "fallback_disabled")
+        diagnostics.setdefault("edge_skipped", "not_attempted")
+        return "fallback_skipped"
+    return "infrastructure"
+
+
 def can_stream_fallback(document, role, direct_error, diagnostics):
     if (
         role != "primary"
@@ -854,12 +879,14 @@ def analyze_documents(
                         if corroborating or ordinary_allowance is None
                         else (min(allowance, ordinary_allowance))
                     )
-                    if not (
+                    stream_eligible = (
                         download_state
                         and download_state.edge_enabled
-                        and attempted < available
                         and can_stream_fallback(document, entry["role"], direct_error, diagnostics)
-                    ):
+                    )
+                    if stream_eligible and attempted >= available:
+                        diagnostics["edge_skipped"] = "document_allowance"
+                    if not (stream_eligible and attempted < available):
                         raise
                     if (
                         time.monotonic() + streaming.OPERATION_MARGIN + START_EXTRACTION_MARGIN
@@ -947,12 +974,16 @@ def analyze_documents(
             metrics[f"{stage}_failures"] += 1
             if stage == "download" and download_state and download_state.stream_marker.exists():
                 raise BudgetReached("download_close_unverified") from None
-            if (
-                stage == "download"
-                and download_state
-                and download_state.record_failure(process.get("process_reference", ""))
-            ):
-                raise BudgetReached("download_circuit_open") from None
+            if stage == "download":
+                kind = download_failure_kind(code, diagnostics, entry, download_state)
+                failure["failure_kind"] = kind
+                metrics[f"download_{kind}"] += 1
+                if (
+                    kind == "infrastructure"
+                    and download_state
+                    and download_state.record_failure(process.get("process_reference", ""))
+                ):
+                    raise BudgetReached("download_circuit_open") from None
         finally:
             if diagnostics:
                 entry["download_diagnostics"] = diagnostics
