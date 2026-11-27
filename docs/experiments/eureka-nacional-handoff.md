@@ -842,3 +842,20 @@ automáticas. El
 [procedimiento de una sonda](eureka-nacional-experience-spike.md#sonda-única-propuesta-pendiente-de-autorización)
 queda pendiente de autorización. La contingencia disponible
 es la importación asistida de un PDF verificado.
+
+
+### Resultado del preflight protegido de Encino
+
+Tras el login manual, la pestaña de Contratos presentó
+el cliente del portal, pero get-config-user no
+acreditó la sesión en el contexto desechable. El titular
+reportó un aviso de URL inexistente. La causa sigue
+indeterminada. Se bloquearon siete solicitudes del feed.
+
+La sonda se detuvo con cero POST documentales y cero
+inventarios. El contexto y el trabajador cerraron y se
+retiró la marca propia. No se probó el POST oficial ni
+se ejecutaron extracción o clasificación. Se mantiene
+not_resolved. El
+[detalle del preflight](eureka-nacional-experience-spike.md#sonda-final-secop-i-detenida-en-el-preflight-de-sesión)
+quedó en el informe.

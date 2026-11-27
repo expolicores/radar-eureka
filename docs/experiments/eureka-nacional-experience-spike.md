@@ -3087,3 +3087,44 @@ contexto, la contingencia ya disponible es la importación
 asistida de un PDF obtenido por el control oficial y
 verificado por procedencia e identidad. No se probaron
 portales ni se ejecutó la sonda real en esta fase.
+
+
+### Sonda final SECOP I detenida en el preflight de sesión
+
+Para la sonda de Encino, constancia 26-13-14853238, se
+verificaron localmente los estados terminales de las
+descargas anteriores y la ausencia de destinos de
+adquisición. Se archivó la marca de la sonda anterior
+y se abrió un contexto desechable con una marca propia,
+las descargas nativas denegadas y el feed bloqueado.
+
+El propietario inició sesión manualmente e informó que
+el portal mostró una URL inexistente. En la inspección
+posterior, se observó una única pestaña de Contratos con
+el cliente del portal disponible y sin el mensaje de
+error en el contenido de la página. La guarda bloqueó
+siete solicitudes del feed. El diagnóstico no permite
+determinar si esas solicitudes causaron el aviso.
+
+La comprobación de get-config-user desde la pestaña no
+acreditó una sesión válida. El preflight devolvió
+authorized_session_unverified. El registro depurado
+conservó el resultado booleano de la comprobación.
+No se conservó un estado HTTP ni la respuesta, por lo
+que queda indeterminado si falló la autenticación, la
+ruta o la respuesta esperada por el cliente.
+
+La sonda se detuvo antes de preparar el formulario.
+Hubo cero consultas de inventario, cero intentos
+documentales, cero POST a VerDocumento, cero bytes
+aceptados, cero páginas procesadas, cero OCR y cero IA.
+La clasificación histórica de Encino permanece
+not_resolved por evidencia insuficiente. Se verificaron
+el cierre del contexto y la salida del trabajador.
+Se retiró sólo la marca propia de esta sonda. No hubo
+descargas o corridas adicionales.
+
+La compatibilidad del formulario permanece demostrada
+con la sesión sintética. En la sesión real, el bloqueo
+observado fue anterior a la adquisición, al verificar
+el acceso autenticado en el contexto desechable.
