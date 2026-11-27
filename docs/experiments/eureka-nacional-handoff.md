@@ -1080,3 +1080,13 @@ de SECOP II podrían cambiar con B y no se tocaron. Conviene
 discutir los resultados de búsqueda antes de seguir afinando el
 clasificador.
 [Detalle](eureka-nacional-experience-spike.md#ajustes-a-y-b-del-clasificador-y-cierre-del-piloto-secop-i).
+
+
+### Exploración ciega Boyacá + Huila preparada (sin ejecutar)
+
+Geografía departamental versionada (4006 Boyacá, verificado; 4017
+Huila, inferido y verificado fila a fila), motivos explícitos de no
+selección por cuota e informe de embudo por fuente. Los dos
+resultados históricos de SECOP II que A y B podrían cambiar siguen
+sin reprocesar. La corrida real espera aprobación.
+[Detalle](eureka-nacional-experience-spike.md#preparación-de-la-exploración-ciega-en-boyacá-y-huila-offline).

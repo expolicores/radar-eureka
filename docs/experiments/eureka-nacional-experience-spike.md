@@ -3826,3 +3826,44 @@ revisión humana, una exigencia habilitante para todo proponente.
 El estado automático sigue not_resolved: el encabezado obligatorio
 y la fila están separados en la tabla, y no se crearon reglas
 nuevas.
+
+
+### Preparación de la exploración ciega en Boyacá y Huila (offline)
+
+Geografía: la captura nacional sólo contiene identificadores. Su
+estructura es «40» + un código de departamento de Licitaciones.info
++ municipio, con 32 códigos. El código 4006 corresponde a Boyacá
+porque coincide con los 123 identificadores capturados para Eureka
+Regional. El 4017 corresponde a Huila por inferencia: 37
+identificadores, igual que sus 37 municipios, y posición 17 del
+orden alfabético, que también cuadra con Antioquia (125), Santander
+(87) y Córdoba (30).
+
+El archivo versionado
+`eureka_nacional_geography_boyaca_huila(from_licitaciones_info).v1.json`
+tiene 160 ubicaciones. Sólo se acepta si es exactamente el
+subconjunto nacional de los códigos declarados. Como la parte de
+Huila es inferida, cada fila del feed se verifica contra
+TextoDepartamento: las de otro departamento se excluyen como
+`outside_geography_scope` y se cuentan.
+
+Cuotas: el runner selecciona como máximo 15 procesos SECOP II en
+modo exploratorio y 5 SECOP I. En en01-xgcp5mgp quedaron fuera por
+cuota 10 SECOP II y 3 SECOP I elegibles. Con `--include-secop1`,
+cada elegible no seleccionado lleva `not_selected_reason` y se
+cuenta por fuente.
+
+Informe: `eureka_nacional_blind_report.py` genera un embudo por
+fuente: descubiertos, exclusiones, elegibles, seleccionados,
+elegibles no seleccionados, inventarios, descargas, rector
+completo, clasificación, revisión y potencialmente favorables
+(no_experience_required o explicit_favorable; el silencio no
+cuenta). Incluye datos de reproducibilidad: commit, corte,
+geografía, perfil comercial y límites. No modifica sus entradas.
+
+Pruebas: 14 nuevas; 484 de la suite nacional y 30 de laboratorio.
+Sin las opciones nuevas, la salida es idéntica al código anterior.
+
+Nota vigente: los ajustes A y B del clasificador compartido podrían
+cambiar dos resultados históricos de SECOP II (en01-le73ddhz y
+en01-manual_hsxjhqpg). No se reprocesan.
