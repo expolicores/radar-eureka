@@ -136,6 +136,43 @@ def load_national_locations(path=DEFAULT_GEOGRAPHY):
     return tuple(ids)
 
 
+def load_geography(path):
+    """National capture, or a department subset derived from it and validated against it.
+
+    Returns (location_ids, scope); scope is None for the national capture."""
+    try:
+        config = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as error:
+        raise spike.SpikeError("No se pudo leer la configuraci\u00f3n geogr\u00e1fica.") from error
+    if not isinstance(config, dict) or config.get("scope") != "departments":
+        return load_national_locations(path), None
+    national = load_national_locations(path.with_name(str(config.get("derived_from", ""))))
+    codes = config.get("department_codes")
+    ids = config.get("location_ids")
+    expected = config.get("expected_departments")
+    if (
+        config.get("source") != GEOGRAPHY_SOURCE
+        or config.get("derived_from_sha256")
+        != hashlib.sha256(",".join(national).encode("ascii")).hexdigest()
+        or not isinstance(codes, dict)
+        or not codes
+        or not isinstance(expected, list)
+        or sorted(plain(v) for v in codes.values()) != sorted(plain(v) for v in expected)
+        or not isinstance(ids, list)
+        # Exactly every national location of the declared departments, in capture order.
+        or ids != [item for item in national if item[:4] in codes]
+        or config.get("location_count") != len(ids)
+    ):
+        raise spike.SpikeError("Geograf\u00eda departamental no derivada de la captura nacional.")
+    scope = {
+        "scope": "departments",
+        "department_codes": codes,
+        "expected_departments": expected,
+        "location_count": len(ids),
+    }
+    return tuple(ids), scope
+
+
 def load_analyzed_secop_ids(root, run_names):
     ids = set()
     for name in run_names:
@@ -173,6 +210,14 @@ def discover(client, args, now, discovery, profile, locations):
         "location_count": len(locations),
         "ubicacion_filter_sha256": hashlib.sha256(location_filter.encode("ascii")).hexdigest(),
     }
+    geography_scope = getattr(args, "geography_scope", None)
+    if geography_scope:
+        discovery["geography"].update(
+            scope="departments",
+            department_codes=geography_scope["department_codes"],
+            expected_departments=geography_scope["expected_departments"],
+        )
+        expected_departments = {plain(d) for d in geography_scope["expected_departments"]}
     candidates = {}
     signatures = set()
     extra_pages = getattr(args, "conditional_extra_feed_pages", 0)
@@ -254,6 +299,11 @@ def discover(client, args, now, discovery, profile, locations):
                         "idUltimaFase": phase,
                     },
                 )
+                if geography_scope:
+                    # Verified per row: the provider's department must be a declared one.
+                    process["geography_mismatch"] = (
+                        plain(process["department"]) not in expected_departments
+                    )
                 if kind == "secop1" and getattr(args, "include_secop1", False):
                     process["phase_explicit_null"] = secop1.phase_is_explicit_null(row)
                 candidates[key] = process
@@ -311,7 +361,9 @@ def select_processes(candidates, args, now, discovery, profile):
         )
         reason = process["commercial_exclusion"]
         opt_in_secop1 = include_secop1 and process["source"] == "secop1"
-        if not process["recent"]:
+        if process.get("geography_mismatch"):
+            reason = "outside_geography_scope"
+        elif not process["recent"]:
             reason = "outside_publication_window"
         elif not reason and opt_in_secop1:
             if not secop1.inventory_ready(process):
@@ -347,6 +399,10 @@ def select_processes(candidates, args, now, discovery, profile):
         discovery["secop1_sample"] = round_robin(
             secop1_buckets, getattr(args, "secop1_processes", 0)
         )
+        for process in processes:
+            if process["excluded_reason"] is None and not process["sampled"]:
+                quota = "secop1" if include_secop1 and process["source"] == "secop1" else "secop2"
+                process["not_selected_reason"] = f"{quota}_selection_quota"
     discovery["processes"] = processes
     discovery["exclusion_review_sample"] = excluded_samples
     return sample
@@ -1035,7 +1091,14 @@ def metrics_by_source(discovery, results, secop1_items):
     for process in discovery["processes"]:
         bucket = sources.setdefault(
             process.get("source") or "unknown",
-            {"discovered": 0, "eligible": 0, "sampled": 0, "analyzed": 0, "excluded_by_reason": {}},
+            {
+                "discovered": 0,
+                "eligible": 0,
+                "sampled": 0,
+                "eligible_not_selected": 0,
+                "analyzed": 0,
+                "excluded_by_reason": {},
+            },
         )
         bucket["discovered"] += 1
         reason = process.get("excluded_reason")
@@ -1044,6 +1107,7 @@ def metrics_by_source(discovery, results, secop1_items):
         else:
             bucket["eligible"] += 1
         bucket["sampled"] += bool(process.get("sampled"))
+        bucket["eligible_not_selected"] += bool(process.get("not_selected_reason"))
         bucket["analyzed"] += process["process_reference"] in analyzed
     if "secop1" in sources:
         sources["secop1"]["queued_governing_pdfs"] = len(secop1_items)
@@ -1566,7 +1630,7 @@ def main(argv=None):
         if args.secop1_inventory_from:
             return recover_secop1_main(args, profile_id)
         profile = load_commercial_profile(args.commercial_profile)
-        locations = load_national_locations(args.geography)
+        locations, args.geography_scope = load_geography(args.geography)
         from playwright.sync_api import sync_playwright
 
         if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
