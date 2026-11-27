@@ -1139,3 +1139,13 @@ Sólo los fallos de infraestructura abren ya el cortacircuitos
 SECOP II; los rechazos previsibles quedan medidos aparte. Las
 instrucciones de captura del filtro de fechas esperan al titular.
 [Detalle](eureka-nacional-experience-spike.md#corrección-del-cortacircuitos-secop-ii-y-captura-del-filtro-de-fechas).
+
+
+### Etapa 3 Boyacá + Huila: ningún favorable confirmado
+
+Panqueba, los dos procesos de Betéitiva y Jericó quedan en
+not_resolved. Tres tienen indicios de exigencia. Hay un candidato a
+revisión humana (26-13-14851414): invitación completa sin ninguna
+mención de experiencia, con el estudio previo pendiente. El embudo
+completo de la búsqueda ciega da 0 favorables formales.
+[Detalle](eureka-nacional-experience-spike.md#etapa-3-de-la-búsqueda-ciega-cuatro-procesos-secop-i).

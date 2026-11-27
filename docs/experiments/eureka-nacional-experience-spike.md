@@ -4059,3 +4059,42 @@ métrica `download_infrastructure`.
 Cobertura: instrucciones para capturar a mano el payload del filtro de
 fechas en
 [eureka-nacional-captura-filtro-fechas.md](eureka-nacional-captura-filtro-fechas.md).
+
+
+### Etapa 3 de la búsqueda ciega: cuatro procesos SECOP I
+
+La etapa 3 ahora también analiza los documentos resueltos por un
+recibo reutilizado, que conservan su identidad de la cola archivada
+y registran `receipt_origin` (`3a3661e`). Antes de extraer se
+verificaron identidad, tamaño, SHA-256, firma, `%%EOF`, coherencia
+con el tamaño mostrado y procedencia de los cuatro PDF. Ejecución
+offline: cero peticiones, cero IA y 21 s. Se leyeron 125 de 126
+páginas, con una página de OCR.
+
+| Constancia | Páginas | Estado y razón | Revisión | Evidencia principal | Dependencias |
+| --- | --- | --- | --- | --- | --- |
+| 26-13-14852082 Panqueba | 26/26 nativas | not_resolved, no_decisive_clause | documentary_silence, prioridad 2 | p. 13, en «Experiencia específica»: los contratos de experiencia específica deben diferir de los de experiencia general, y los soportes de experiencia «NO SERÁN SUBSANABLES… causal de rechazo»; verificación de experiencia «HÁBIL O NO HÁBIL» | Otro documento rector pendiente («INVITACIÓN PÚBLICA»), estudios previos |
+| 26-13-14851419 Betéitiva | 31/32; la p. 32 se pasó por OCR sin texto | not_resolved, governing_documents_incomplete | insufficient_evidence, prioridad 4 | p. 9, en «Requisitos habilitantes»: «Se debe contratar con una persona… que acredite experiencia en la ejecución de mínimo… dos (02) contratos» | p. 32 sin texto; estudios previos; análisis del sector y CDP, no rectores |
+| 26-13-14851414 Betéitiva | 26/26 nativas | not_resolved, no_decisive_clause | documentary_silence, prioridad 2 | Ninguna mención de experiencia en la invitación | Estudios previos pendientes; análisis del sector y CDP, no rectores |
+| 26-13-14853212 Jericó (reutilizado) | 42/42 nativas | not_resolved, no_decisive_clause | documentary_silence, prioridad 2 | p. 17: «se tendrá en cuenta como requisito habilitante la experiencia» y «la entidad solicita que el oferente acredite…»; p. 19: presentar contrato y acta de liquidación | p. 16 remite al estudio previo |
+
+Prioridad comercial A en los cuatro: informática o papelería, en
+mínima cuantía.
+
+Ningún favorable confirmado. Hay un candidato a revisión humana:
+26-13-14851414. Su invitación completa no contiene ninguna mención
+de experiencia, pero el estudio previo está pendiente y puede
+contener la exigencia, así que no se declara ausencia. Los otros
+tres muestran indicios de exigencia sin conclusión formal: en
+Panqueba y Jericó la evidencia es ambigua o remite a otro
+documento, y en 26-13-14851419 la exigencia se redacta de forma
+impersonal y la cobertura es incompleta.
+
+Embudo actualizado de en01-uc9h1l8y:
+
+- SECOP I: 5 seleccionados, 4 PDF y 5 not_resolved, Sutatenza
+  incluido.
+- SECOP II: 15 seleccionados y 8 analizados, con 7 not_resolved y 1
+  experience_ambiguous. Corrige el «9 analizados» del informe de
+  etapa 1.
+- Favorables formales: 0.
