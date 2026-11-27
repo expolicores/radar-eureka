@@ -4193,3 +4193,51 @@ el marcador se liberó. Hubo cero consultas al feed o inventarios,
 cero reintentos y ningún otro documento. Las invitaciones
 guardadas se conservan para el análisis conjunto, pendiente de
 autorización.
+
+
+### Análisis conjunto de los dos candidatos (invitación y estudio previo)
+
+Se ejecutó sólo `analyze en01-target_uc9h1l8y --expect-sha256
+aaed3563…83598f9`, después de verificar los cuatro recibos. Cero
+peticiones y cero IA. El clasificador no cambió.
+
+Betéitiva 26-13-14851414 (Concejo, informática, prioridad A):
+
+- Cobertura: invitación 26/26 y estudio previo 8/8, todas nativas.
+  Quedan pendientes el análisis del sector y el CDP, no rectores.
+- Clasificador: not_resolved con razón document_dependency y
+  revisión documentary_silence, prioridad 2.
+- Lectura: `silencio_documental_con_cobertura_suficiente`.
+- La única evidencia registrada es una dependencia de la p. 1 del
+  estudio previo sobre el «reglamento interno del Concejo» (el
+  presidente como ordenador del gasto). No trata de experiencia; la
+  regla de dependencia reacciona a «reglamento interno» sin importar
+  el tema. No se cambió la regla.
+- Comprobación independiente del texto nativo: «experien» no
+  aparece en ninguno de los dos documentos. La sección 2.9 de
+  requisitos habilitantes se limita a la capacidad jurídica (2.9.1
+  verificada por la entidad, 2.9.2 aportada por el oferente:
+  antecedentes y certificados).
+- Conclusión: candidato potencialmente favorable, por silencio
+  documental con cobertura suficiente de invitación y estudio
+  previo. No es una ausencia explícita ni una conclusión formal
+  favorable; requiere revisión humana.
+
+DTAO-FONAM CO1.NTC.11284005 (ferretería, prioridad A):
+
+- Cobertura: invitación 18/18 nativa y estudio previo y anexos
+  61/61. La p. 61 se pasó por OCR y está vacía.
+- Clasificador: not_resolved con razón no_decisive_clause y revisión
+  documentary_silence, prioridad 2. Sin evidencia.
+- Lectura: `evidencia_insuficiente`, porque los «FORMATOS» no son
+  procesables y quedan como dependencia no resuelta.
+- Comprobación independiente: «experien» no aparece en ninguno de
+  los dos documentos. Los requisitos habilitantes (p. 14 y 15) son
+  jurídicos y remiten a formatos numerados (Formato No. 01, carta de
+  presentación; Formato No. 4, declaración).
+- Conclusión: no puede considerarse favorable mientras los formatos
+  no estén verificados.
+
+Resumen: cero favorables formales. Betéitiva 26-13-14851414 es el
+mejor candidato para revisión humana. FONAM queda condicionado a
+los formatos.

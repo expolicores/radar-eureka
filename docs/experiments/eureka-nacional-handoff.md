@@ -1174,3 +1174,17 @@ autorización expresa.
 FONAM: 2,47 MB, por Streaming tras un 403. Betéitiva: 256 KB, por
 un POST. Ambos tienen recibos verificados y el cierre fue seguro.
 El análisis conjunto con las invitaciones espera autorización.
+
+
+### Análisis conjunto de los candidatos
+
+- Betéitiva 26-13-14851414: silencio documental con cobertura
+  suficiente de la invitación y el estudio previo. Los requisitos
+  habilitantes son sólo jurídicos y «experien» no aparece. Es un
+  candidato potencialmente favorable para revisión humana, no un
+  favorable formal.
+- FONAM: sin menciones de experiencia en la invitación ni en el
+  estudio previo. Queda en evidencia insuficiente por los «FORMATOS»
+  no procesables.
+
+[Detalle](eureka-nacional-experience-spike.md#análisis-conjunto-de-los-dos-candidatos-invitación-y-estudio-previo).
