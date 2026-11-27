@@ -755,3 +755,23 @@ una importación asistida desde el control oficial con
 autorización separada. El
 [resultado y límites de cobertura](eureka-nacional-experience-spike.md#navegación-controlada-en-edge-a-la-ficha-secop-i-de-casabianca)
 quedan en el informe.
+
+
+### SECOP I mediante el inventario de Licitaciones.info
+
+El JavaScript ya cargado confirmó que las rutas relativas se
+envían por formulario POST con el campo ruta al servicio
+oficial VerDocumento. El normalizador offline valida
+identidad, formato y metadatos y reutiliza el ranking EN-01.
+La adquisición automática sigue desactivada. El CDP del
+laboratorio pudo leer y cerrar un POST sintético y rechazar
+tamaño excesivo, falta de longitud y redirecciones. Falta
+verificar la pestaña de destino del control real y la
+respuesta oficial dentro de las guardas.
+
+La propuesta pendiente de autorización usa únicamente la
+constancia 26-13-14853238, con una solicitud de inventario,
+un solo PDF rector, 10 MiB, 12 s y dos páginas OCR. El
+[diagnóstico y procedimiento](eureka-nacional-experience-spike.md#inventarios-secop-i-de-licitacionesinfo)
+quedan en el informe. No se realizaron llamadas al
+proveedor ni descargas reales.

@@ -2738,3 +2738,112 @@ queda demostrado para esta constancia. La adquisición
 automática de documentos de SECOP I sigue pendiente de una
 ruta autorizada y verificable dentro de los límites. No se
 amplió la implementación ni se consultaron otros procesos.
+
+
+### Inventarios SECOP I de Licitaciones.info
+
+Se leyó el JavaScript que ya estaba cargado en Edge mediante
+CDP local. No se recargó la pestaña ni se llamó al proveedor.
+El componente AccionesDocumentos.js confirma que
+openDocumentoSecop1 pasa la ruta relativa a descargaUnicaSecop1.
+En la rama Colombia, el componente envía un formulario POST
+al servicio HTTPS oficial de contratos.gov.co, ruta
+/consultas/VerDocumento. El formulario envía la ruta sin
+reconstruirla, como valor del campo ruta, con destino _blank.
+El código maneja aparte enlaces de almacenamiento que ya son
+absolutos. La reproducción manual del propietario acredita
+que el control funciona para su ejemplo. La ruta relativa se
+trata como dato del formulario y no se convierte en URL pública.
+
+El código de inventario del proveedor usa
+/cliente/contratos/obtener-documentos-proceso y envía
+idContrato, id_fuente_contract, idUltimaFase y page. Después
+lee cantidad y documentos.campos. Las claves provienen del
+evento de ficha del proveedor. Los avisos SECOP I archivados
+sin idUltimaFase no permiten deducir ese valor ni practicar
+una solicitud autorizada. No se verificó en vivo el formato
+exacto de una fila SECOP I ni el valor admitido para una fase
+faltante. El parser SECOP II sigue dedicado a sus enlaces
+RetrieveFile con DocumentId.
+
+**Validación de inventario disponible offline.** El módulo
+eureka_nacional_secop1_inventory recibe un JSON local normalizado
+con constancia, process_reference y documents. Cada documento
+aporta name, extension, size_bytes en bytes exactos o null y
+relative_path. La constancia debe aparecer como segmento
+exacto de la ruta y coincidir con la del nombre de archivo
+cuando éste contiene el patrón de proceso. La extensión
+declarada debe concordar con el sufijo. Las rutas absolutas,
+de red, con parámetros, codificaciones o recorrido de
+directorios se rechazan. Una fila inválida no invalida las
+demás. Se deduplican rutas idénticas y se excluyen metadatos
+conflictivos para la misma ruta. La salida conserva un
+identificador estable derivado de la constancia y del SHA-256
+de la ruta, sin publicar la ruta. Ese hash identifica la fila.
+El SHA-256 del binario debe calcularse sobre el archivo
+real. Se reutiliza el ranking de EN-01 por título y se
+conserva cobertura pendiente. El tamaño declarado en el
+inventario es preliminar. Un valor faltante queda registrado
+y un valor superior a 10 MiB queda fuera de ese presupuesto.
+
+Para validar un archivo local preparado en ese formato, fijar
+PYTHONPATH a backend/src y ejecutar desde el worktree experimental
+python backend/scripts/eureka_nacional_secop1_inventory.py con
+la ruta al JSON local. El normalizador carece de operaciones
+de navegador o red y marca explícitamente la adquisición
+automática como desactivada. No se conecta al runner nacional
+ni modifica el parser de SECOP II.
+
+**Laboratorio de POST sintético.** Una navegación por
+formulario entre dos orígenes loopback permitió verificar
+por CDP destino, método, marco y un campo ruta exacto antes
+de continuar un único POST. La respuesta PDF de 431 bytes
+se leyó por bloques con las guardas existentes y coincidió
+por SHA-256 con la muestra. Se confirmaron EOF, cierre del
+flujo, aborto de la navegación interceptada y cierre de la
+pestaña. Las respuestas con longitud declarada por encima de
+10 MiB, sin longitud o con redirección se rechazaron sin leer
+el cuerpo. Se confirmó el cierre en los cuatro escenarios.
+Se reutilizaron response_length, read_stream y close_target.
+El laboratorio no valida el destino _blank creado por el
+componente real, tiempos de la sesión autorizada, respuesta
+del servicio oficial ni el comportamiento ante sus controles
+de acceso. El gestor nativo aún carece de un límite estricto
+sobre los bytes transferidos y no se habilitó como alternativa.
+
+Pasaron 245 pruebas offline, incluidas las 14 regresiones
+del nuevo normalizador y la prueba de OCR local. La ruta de
+ejemplo proporcionada por el propietario también pasó el
+cotejo offline de constancia, formato y rol. El tamaño
+exacto no estaba en el ejemplo.
+
+**Propuesta de una sola constancia.** Con autorización nueva,
+usar 26-13-14853238, el ejemplo que el propietario ya verificó
+manualmente. Confirmar primero la identidad del proceso en
+su ficha de Licitaciones.info y usar exclusivamente las claves
+documentales de esa ficha. Leer un solo inventario inicial
+de ese proceso, validar la fila de invitación y cotejar sus
+metadatos y ruta con la constancia. Antes de activar el
+control oficial, verificar que la interceptación puede quedar
+armada en la pestaña de destino. Si no puede verificarse,
+detenerse sin solicitar el PDF. Si las guardas están listas,
+permitir un único POST coincidente, sin redirecciones ni
+reintentos, con un máximo de 10 MiB aceptados y 12 s. Ante
+CAPTCHA, autenticación adicional, destino no previsto o
+cierre incierto, detener el procedimiento. El tope de la
+sonda es una solicitud de inventario y un intento documental
+con un único POST. Registrar método, resultado, cierre y
+consumo sin rutas completas, tokens ni cabeceras sensibles.
+
+Si se recupera el PDF, verificar firma, estructura básica,
+tamaño y SHA-256 con LocalBinaryStorage y su relectura
+verificada. Registrar un recibo que asocie constancia,
+identidad de la ruta y hash del binario. Reutilizarlo en
+lugar de duplicar la adquisición. Pasar el archivo a la
+extracción EN-01, mantener hasta dos páginas OCR y aplicar
+reconocimiento de portada, clasificador y prioridad
+comercial. Mantener la cobertura pendiente de documentos
+complementarios cuando corresponda. El tope de EN-01 protege
+bytes aceptados y tiempo de adquisición. No mide todos los
+búferes de Edge o del sistema. Esta fase no ejecutó esa
+prueba ni realizó descargas reales.
