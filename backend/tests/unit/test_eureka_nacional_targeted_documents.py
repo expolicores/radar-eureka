@@ -187,6 +187,7 @@ def test_plan_is_never_overwritten_and_tampering_is_detected(tmp_path):
 class Fakes:
     def __init__(self, direct_status=403, direct_code="http_error", stream_error=None):
         self.direct_calls = self.stream_calls = 0
+        self.stream_limits = []
         self.direct_status, self.direct_code, self.stream_error = (
             direct_status,
             direct_code,
@@ -222,8 +223,11 @@ class Fakes:
         )
 
     def streaming(self):
-        def stream(document, storage, marker, diagnostics, *, cdp_url):
+        def stream(
+            document, storage, marker, diagnostics, *, cdp_url, max_bytes=en01.DOCUMENT_BYTES
+        ):
             self.stream_calls += 1
+            self.stream_limits.append(max_bytes)
             if self.stream_error:
                 diagnostics["error"] = self.stream_error
                 raise en01.AcquisitionError(self.stream_error, "rechazado")
@@ -243,14 +247,14 @@ class Fakes:
         )
 
 
-def run_acquire(target, digest, fakes, *, direct_ok=False):
+def run_acquire(target, digest, fakes, *, direct_ok=False, settings=None):
     return targeted.acquire_secop2(
         target,
         digest,
         runner=fakes.runner(direct_ok),
         streaming=fakes.streaming(),
         client=targeted.DirectOnlyClient(),
-        settings=None,
+        settings=settings,
         cdp_url="http://127.0.0.1:9232",
     )
 
@@ -407,3 +411,152 @@ def test_analysis_is_offline_and_never_overwritten(tmp_path):
     assert data["network_requests"] == 0
     with pytest.raises(ValueError, match="ya existe"):
         targeted.analyze(target, digest, runner=runner, settings=None, budget=flow.OcrBudget())
+
+
+# ---------------------------------------------------------------- exceptional size ceiling
+
+MIB = 1024 * 1024
+
+
+def governing_plan(tmp_path, limit_mib=16, document="11"):
+    run, _s1, _s2 = source_run(tmp_path)
+    item = ["secop2", "CO1.NTC.9", document, SECOP + document]
+    digest = targeted.batch_digest([[*item, limit_mib * MIB]])
+    target = tmp_path / "en01-target_blind_r16"
+    plan = targeted.build_plan(
+        run, target, [document], digest, max_bytes_by_document={document: limit_mib * MIB}
+    )
+    return run, target, plan, digest
+
+
+def test_ceiling_applies_only_to_the_named_governing_document_and_joins_the_digest(tmp_path):
+    # Arrange / Act
+    _run, _target, plan, digest = governing_plan(tmp_path)
+
+    # Assert
+    [item] = plan["items"]
+    assert item["max_bytes"] == 16 * MIB
+    assert item["current_role"] == "primary"
+    assert plan["batch_sha256"] == digest
+    default_digest = targeted.batch_digest([["secop2", "CO1.NTC.9", "11", SECOP + "11"]])
+    assert digest != default_digest
+
+
+def test_default_plans_keep_their_previous_digest(tmp_path):
+    _run, _target, plan, digest, _s1, _s2 = planned(tmp_path)
+
+    assert all("max_bytes" not in item for item in plan["items"])
+    assert plan["batch_sha256"] == digest
+
+
+@pytest.mark.parametrize(
+    ("document", "limit_mib"),
+    [("12", 16), ("11", 17), ("11", 10)],  # support document, above 16 MiB, not exceptional
+)
+def test_ceiling_is_rejected_outside_a_governing_document_or_range(tmp_path, document, limit_mib):
+    run, _s1, _s2 = source_run(tmp_path)
+    item = ["secop2", "CO1.NTC.9", document, SECOP + document]
+    limit = limit_mib * MIB
+    digest = targeted.batch_digest([[*item, limit]] if limit != 10 * MIB else [item])
+
+    with pytest.raises(ValueError, match=r"(?i)limite"):
+        targeted.build_plan(
+            run,
+            tmp_path / "en01-target_x",
+            [document],
+            digest,
+            max_bytes_by_document={document: limit if limit != 10 * MIB else 9 * MIB},
+        )
+
+
+def test_ceiling_for_a_document_outside_the_lot_is_rejected(tmp_path):
+    run, _s1, _s2 = source_run(tmp_path)
+    digest = targeted.batch_digest([["secop2", "CO1.NTC.9", "11", SECOP + "11"]])
+
+    with pytest.raises(ValueError, match="fuera del lote"):
+        targeted.build_plan(
+            run, tmp_path / "en01-target_x", ["11"], digest, max_bytes_by_document={"12": 16 * MIB}
+        )
+
+
+def test_tampering_with_the_ceiling_is_detected(tmp_path):
+    _run, target, plan, digest = governing_plan(tmp_path)
+    plan["items"][0]["max_bytes"] = 15 * MIB
+    (target / targeted.PLAN_FILE).write_text(json.dumps(plan), "utf-8")
+
+    with pytest.raises(ValueError, match="alterado"):
+        targeted.load_plan(target, digest)
+
+
+def test_prior_attempts_of_the_same_document_are_listed_in_the_new_plan(tmp_path):
+    run, _s1, _s2 = source_run(tmp_path)
+    earlier = tmp_path / "en01-target_blind" / "targeted_attempts"
+    earlier.mkdir(parents=True)
+    (earlier / "a.json").write_text(
+        json.dumps({"document_id": "11", "outcome": "rejected", "reason": "declared_size_limit"}),
+        "utf-8",
+    )
+    item = ["secop2", "CO1.NTC.9", "11", SECOP + "11", 16 * MIB]
+
+    plan = targeted.build_plan(
+        run,
+        tmp_path / "en01-target_blind_r16",
+        ["11"],
+        targeted.batch_digest([item]),
+        max_bytes_by_document={"11": 16 * MIB},
+    )
+
+    [attempt] = plan["prior_attempts"]["11"]
+    assert attempt["reason"] == "declared_size_limit"
+    assert attempt["run"] == "en01-target_blind"
+
+
+def test_acquisition_passes_the_ceiling_only_for_the_authorized_document(tmp_path):
+    _run, target, _plan, digest = governing_plan(tmp_path)
+    fakes = Fakes()
+    copies = []
+    settings = SimpleNamespace(model_copy=lambda update: copies.append(update) or update)
+
+    report = run_acquire(target, digest, fakes, settings=settings)
+
+    assert copies == [{"document_max_bytes": 16 * MIB, "extraction_max_bytes": 16 * MIB}]
+    assert fakes.stream_limits == [16 * MIB]
+    assert report[0]["max_bytes"] == 16 * MIB
+    assert report[0]["outcome"] == "stored"
+
+
+def test_default_acquisition_keeps_the_10_mib_ceiling(tmp_path):
+    _, target, _, digest, _, _ = planned(tmp_path)
+    fakes = Fakes()
+
+    run_acquire(target, digest, fakes)
+
+    assert fakes.stream_limits == [10 * MIB]
+
+
+def headers_event(length):
+    return {
+        "responseStatusCode": 200,
+        "responseHeaders": [
+            {"name": "Content-Type", "value": "application/pdf"},
+            {"name": "Content-Length", "value": str(length)},
+        ],
+    }
+
+
+def test_declared_size_is_checked_against_the_document_ceiling():
+    twelve = 12 * MIB
+    diagnostics = {}
+
+    with pytest.raises(streaming.RejectionError, match="declared_size_limit"):
+        streaming.response_length(headers_event(twelve), diagnostics=diagnostics)
+    assert diagnostics["declared_bytes"] == twelve
+    assert streaming.response_length(headers_event(twelve), max_bytes=16 * MIB) == twelve
+    with pytest.raises(streaming.RejectionError, match="declared_size_limit"):
+        streaming.response_length(headers_event(17 * MIB), max_bytes=16 * MIB)
+
+
+@pytest.mark.parametrize("limit", [9 * 1024 * 1024, 17 * 1024 * 1024, "16"])
+def test_stream_ceiling_outside_the_allowed_range_is_rejected(limit):
+    with pytest.raises(streaming.RejectionError, match="invalid_size_limit"):
+        streaming.stream_limit(limit)

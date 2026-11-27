@@ -7,6 +7,11 @@ acquire-secop2  real (needs authorization): direct download; only on HTTP 403 an
 analyze         offline: joint extraction + existing classifier over every held document.
 
 No feed, inventory or discovery request. No rule changes. One attempt per document.
+
+A plan may raise the size ceiling (at most 16 MiB) for a named governing document only. The
+ceiling is part of the approved digest; every other document keeps the 10 MiB default.
+Attempts already consumed for the same DocumentId in other target runs are listed in the
+plan, so a new plan is never presented as a first attempt.
 """
 
 import argparse
@@ -17,7 +22,13 @@ import time
 from datetime import UTC, datetime
 
 import eureka_nacional_secop1_flow as secop1
-from eureka_nacional_experience import NON_GOVERNING_TITLE, classify_experience, document_title
+from eureka_nacional_experience import (
+    NON_GOVERNING_TITLE,
+    classify_experience,
+    document_role,
+    document_role_hint,
+    document_title,
+)
 from eureka_nacional_findings import assess_finding, load_human_reviews
 
 TARGET_PREFIX = "en01-target_"
@@ -25,6 +36,9 @@ PLAN_FILE = "targeted_plan.json"
 ATTEMPTS_DIR = "targeted_attempts"
 RESULTS_FILE = "validation_results.json"
 SUPPORT_OCR_PAGES = 2  # existing per-document OCR for non-governing documents
+MIB = 1024 * 1024
+DEFAULT_MAX_BYTES = 10 * MIB
+MAX_GOVERNING_BYTES = 16 * MIB
 
 
 def write_json(path, data):
@@ -54,7 +68,49 @@ def _inventories(run, stage3=None):
 # ---------------------------------------------------------------- plan (offline)
 
 
-def build_plan(source, target, document_ids, expected_sha256, *, stage3=None):
+def digest_row(item):
+    row = [
+        item["source"],
+        item["source_identity"].removeprefix("secop1:"),
+        item["document_id"],
+        item["locator"],
+    ]
+    if item.get("max_bytes", DEFAULT_MAX_BYTES) != DEFAULT_MAX_BYTES:
+        row.append(item["max_bytes"])
+    return row
+
+
+def item_limit(item):
+    return item.get("max_bytes", DEFAULT_MAX_BYTES)
+
+
+def prior_attempts(root, document_id, *, exclude=None):
+    """Attempts recorded for this DocumentId in any target run (archived ones included)."""
+    found = []
+    for path in sorted(root.glob(f"{TARGET_PREFIX}*/{ATTEMPTS_DIR}*/*.json")):
+        if exclude is not None and path.parents[1] == exclude:
+            continue
+        record = read_json(path) or {}
+        if str(record.get("document_id")) == str(document_id):
+            found.append(
+                {
+                    "run": path.parents[1].name,
+                    "folder": path.parent.name,
+                    "batch_sha256": record.get("batch_sha256"),
+                    "outcome": record.get("outcome"),
+                    "reason": record.get("reason"),
+                }
+            )
+    return found
+
+
+def build_plan(
+    source, target, document_ids, expected_sha256, *, stage3=None, max_bytes_by_document=None
+):
+    limits = dict(max_bytes_by_document or {})
+    unknown = set(limits) - {str(d) for d in document_ids}
+    if unknown:
+        raise ValueError("Limite de tamano para un documento fuera del lote.")
     processes = {
         p["process_reference"]: p for p in read_json(source / "processes.json")["processes"]
     }
@@ -77,6 +133,16 @@ def build_plan(source, target, document_ids, expected_sha256, *, stage3=None):
         locator = doc.get("relative_path") if source_kind == "secop1" else doc.get("url")
         if not locator:
             raise ValueError("Documento sin ruta o URL verificable.")
+        item_max = limits.get(str(doc["document_id"]), DEFAULT_MAX_BYTES)
+        if item_max != DEFAULT_MAX_BYTES:
+            current_role = document_role(doc["name"])
+            governing = current_role in {"primary", "amendment"} or (
+                document_role_hint(doc["name"], current_role) == "primary"
+            )
+            if not (governing and source_kind == "secop2"):
+                raise ValueError("El limite excepcional solo aplica a un rector SECOP II.")
+            if not DEFAULT_MAX_BYTES < item_max <= MAX_GOVERNING_BYTES:
+                raise ValueError("Limite excepcional fuera del rango permitido (10-16 MiB).")
         items.append(
             {
                 "source": source_kind,
@@ -89,12 +155,11 @@ def build_plan(source, target, document_ids, expected_sha256, *, stage3=None):
                 "locator": locator,
                 "displayed_size": doc.get("displayed_size"),
                 "displayed_size_bytes": doc.get("displayed_size_bytes"),
+                **({"max_bytes": item_max} if item_max != DEFAULT_MAX_BYTES else {}),
+                "current_role": document_role(doc["name"]),
             }
         )
-    digest = batch_digest(
-        [i["source"], i["source_identity"].removeprefix("secop1:"), i["document_id"], i["locator"]]
-        for i in items
-    )
+    digest = batch_digest(digest_row(i) for i in items)
     if digest != expected_sha256:
         raise ValueError("El lote no coincide con el hash aprobado.")
     target.mkdir(exist_ok=False)
@@ -105,6 +170,9 @@ def build_plan(source, target, document_ids, expected_sha256, *, stage3=None):
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "network_requests": 0,
         "items": items,
+        "prior_attempts": {
+            i["document_id"]: prior_attempts(target.parent, i["document_id"]) for i in items
+        },
     }
     write_json(target / PLAN_FILE, plan)
     references = {i["process_reference"] for i in items}
@@ -148,10 +216,7 @@ def build_plan(source, target, document_ids, expected_sha256, *, stage3=None):
 
 def load_plan(target, expected_sha256):
     plan = read_json(target / PLAN_FILE)
-    entries = [
-        [i["source"], i["source_identity"].removeprefix("secop1:"), i["document_id"], i["locator"]]
-        for i in plan["items"]
-    ]
+    entries = [digest_row(i) for i in plan["items"]]
     if plan["batch_sha256"] != expected_sha256 or batch_digest(entries) != expected_sha256:
         raise ValueError("Plan alterado o distinto del lote aprobado.")
     return plan
@@ -184,7 +249,17 @@ def acquire_secop2(target, expected_sha256, *, runner, streaming, client, settin
             item["name"], "pdf", item["locator"], item["document_id"]
         )
         streaming.validate_target(document)  # exact RetrieveFile URL for this DocumentId
-        if state.cached(document, runner.DOCUMENT_BYTES):
+        limit = item_limit(item)
+        if not DEFAULT_MAX_BYTES <= limit <= MAX_GOVERNING_BYTES:
+            raise ValueError("Limite de tamano invalido en el plan.")
+        item_settings = (
+            settings
+            if limit == DEFAULT_MAX_BYTES
+            else settings.model_copy(
+                update={"document_max_bytes": limit, "extraction_max_bytes": limit}
+            )
+        )
+        if state.cached(document, limit):
             report.append({"document_id": item["document_id"], "outcome": "already_present"})
             continue
         path = _attempt_path(target, item["document_id"])
@@ -208,7 +283,7 @@ def acquire_secop2(target, expected_sha256, *, runner, streaming, client, settin
         try:
             try:
                 stored = runner.spike.download_document(
-                    client, document, storage, settings, diagnostics=diagnostics
+                    client, document, storage, item_settings, diagnostics=diagnostics
                 )
                 outcome["mechanism"] = "direct"
             except runner.AcquisitionError as direct_error:
@@ -219,10 +294,15 @@ def acquire_secop2(target, expected_sha256, *, runner, streaming, client, settin
                     raise
                 edge_diagnostics = diagnostics["edge"] = {}
                 stored = streaming.download_stream_pdf(
-                    document, storage, marker, edge_diagnostics, cdp_url=cdp_url
+                    document,
+                    storage,
+                    marker,
+                    edge_diagnostics,
+                    cdp_url=cdp_url,
+                    **({} if limit == DEFAULT_MAX_BYTES else {"max_bytes": limit}),
                 )
                 outcome["mechanism"] = "edge_cdp_stream_authorized_support"
-            runner.verify_document_type(storage, stored, document, runner.DOCUMENT_BYTES)
+            runner.verify_document_type(storage, stored, document, limit)
             state.remember(document, stored)
             outcome.update(
                 outcome="stored", sha256=stored.sha256, received_bytes=stored.observed_size
@@ -233,6 +313,8 @@ def acquire_secop2(target, expected_sha256, *, runner, streaming, client, settin
             outcome["seconds"] = round(time.monotonic() - started, 3)
             outcome["direct_http_status"] = diagnostics.get("http_status")
             outcome["edge_error"] = (diagnostics.get("edge") or {}).get("error")
+            outcome["max_bytes"] = limit
+            outcome["declared_bytes"] = (diagnostics.get("edge") or {}).get("declared_bytes")
             record = read_json(path)
             record.update(state="finished", **outcome)
             write_json(path, record)
@@ -247,8 +329,14 @@ def acquire_secop2(target, expected_sha256, *, runner, streaming, client, settin
 
 
 def _held_receipts(plan, source, target):
+    """Receipts of the source run, this target and earlier targets of the same source."""
     receipts = {}
-    for run in (source, target):
+    siblings = sorted(
+        path
+        for path in target.parent.glob(f"{TARGET_PREFIX}{source.name[5:]}*")
+        if path.is_dir() and path != target
+    )
+    for run in (source, target, *siblings):
         for key, record in secop1.load_receipts(run).items():
             receipts.setdefault(key, (run, record))
     return receipts
@@ -313,6 +401,7 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
     processes = {
         p["process_reference"]: p for p in read_json(target / "processes.json")["processes"]
     }
+    limits = {i["document_id"]: item_limit(i) for i in plan["items"]}
     results = []
     for reference in sorted(inventories):
         documents = [dict(d) for d in inventories[reference]]
@@ -320,6 +409,12 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
         for document in documents:
             document["complete"] = False
             document.pop("fragments", None)
+            # Roles follow the current recognition; the stored inventory role is kept.
+            role = document_role(document["name"])
+            if role != document.get("role"):
+                document["stored_role"] = document.get("role")
+            document["role"] = role
+            document["role_hint"] = document_role_hint(document["name"], role)
             key = f"{document['document_id']}:{document.get('extension')}"
             if document.get("extension") not in {"pdf", "docx"}:
                 document["validation_gap"] = "formato_no_procesable"
@@ -340,7 +435,15 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                 str(document["document_id"]),
             )
             stored = runner.StoredBinary(**record)
-            runner.verify_document_type(storage, stored, spike_document, runner.DOCUMENT_BYTES)
+            limit = limits.get(str(document["document_id"]), DEFAULT_MAX_BYTES)
+            document_settings = (
+                settings
+                if limit == DEFAULT_MAX_BYTES
+                else settings.model_copy(
+                    update={"document_max_bytes": limit, "extraction_max_bytes": limit}
+                )
+            )
+            runner.verify_document_type(storage, stored, spike_document, limit)
             per_document = (
                 secop1.GOVERNING_OCR_PAGES
                 if document.get("role") in {"primary", "amendment"}
@@ -351,7 +454,7 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                 spike_document,
                 stored,
                 storage,
-                settings,
+                document_settings,
                 document,
                 budget,
                 per_document=per_document,
@@ -393,6 +496,7 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                             "ocr_pages",
                             "receipt_run",
                             "validation_gap",
+                            "stored_role",
                         )
                     }
                     for d in documents
@@ -443,6 +547,14 @@ def main(argv=None):
     p_plan.add_argument("source_run")
     p_plan.add_argument("--stage3-run")
     p_plan.add_argument("--document", action="append", required=True)
+    p_plan.add_argument(
+        "--max-mib",
+        action="append",
+        default=[],
+        metavar="DOCUMENT_ID=MIB",
+        help="Techo excepcional (11-16 MiB) solo para un documento rector del lote.",
+    )
+    p_plan.add_argument("--target-suffix", help="Sufijo [a-z0-9] para un plan adicional.")
     for p in (p_plan, sub.add_parser("acquire-secop2"), sub.add_parser("analyze")):
         p.add_argument("--expect-sha256", required=True)
         if p is not p_plan:
@@ -459,16 +571,35 @@ def main(argv=None):
                 if args.stage3_run
                 else None
             )
-            target = secop1.ensure_inside(root, root / f"{TARGET_PREFIX}{args.source_run[5:]}")
-            plan = build_plan(source, target, args.document, args.expect_sha256, stage3=stage3)
+            suffix = args.target_suffix or ""
+            if (suffix and not suffix.isalnum()) or suffix != suffix.lower():
+                raise ValueError("Sufijo invalido.")
+            name = f"{TARGET_PREFIX}{args.source_run[5:]}" + (f"_{suffix}" if suffix else "")
+            target = secop1.ensure_inside(root, root / secop1.run_dir_name(name))
+            limits = {}
+            for entry in args.max_mib:
+                document_id, _, mib = entry.partition("=")
+                if not mib.isdigit():
+                    raise ValueError("--max-mib requiere DOCUMENT_ID=MIB.")
+                limits[document_id] = int(mib) * MIB
+            plan = build_plan(
+                source,
+                target,
+                args.document,
+                args.expect_sha256,
+                stage3=stage3,
+                max_bytes_by_document=limits,
+            )
             print(
                 json.dumps(
                     {
                         "target": target.name,
                         "batch_sha256": plan["batch_sha256"],
                         "items": [
-                            [i["source"], i["document_id"], i["name"]] for i in plan["items"]
+                            [i["source"], i["document_id"], i["name"], item_limit(i)]
+                            for i in plan["items"]
                         ],
+                        "prior_attempts": plan["prior_attempts"],
                     },
                     ensure_ascii=False,
                 )

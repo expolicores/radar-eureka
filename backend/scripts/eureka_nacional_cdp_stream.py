@@ -23,6 +23,8 @@ from public_procurement.documents.adapters.secop import RETRIEVE_PATH, validate_
 from public_procurement.documents.domain.document import AcquisitionError, StoredBinary
 
 DOCUMENT_BYTES = 10 * 1024 * 1024
+# Exceptional ceiling, only when a hash-bound plan authorizes it for one governing document.
+MAX_STREAM_BYTES = 16 * 1024 * 1024
 DEADLINE = 12
 CHUNK = 64 * 1024
 CLOSE_TIMEOUT = 2
@@ -63,7 +65,13 @@ def fallback_eligible(direct):
     )
 
 
-def response_length(event, *, diagnostics=None):
+def stream_limit(max_bytes):
+    if not isinstance(max_bytes, int) or not DOCUMENT_BYTES <= max_bytes <= MAX_STREAM_BYTES:
+        raise RejectionError("invalid_size_limit")
+    return max_bytes
+
+
+def response_length(event, *, diagnostics=None, max_bytes=DOCUMENT_BYTES):
     status = event.get("responseStatusCode")
     headers = {}
     for header in event.get("responseHeaders", []):
@@ -82,16 +90,19 @@ def response_length(event, *, diagnostics=None):
     length = int(lengths[0])
     if diagnostics is not None:
         diagnostics["declared_bytes"] = length
-    if length > DOCUMENT_BYTES:
+    if length > stream_limit(max_bytes):
         raise RejectionError("declared_size_limit")
     return length
 
 
-async def read_stream(cdp, request_id, length, result, *, after_chunk=None):
+async def read_stream(
+    cdp, request_id, length, result, *, after_chunk=None, max_bytes=DOCUMENT_BYTES
+):
+    limit = stream_limit(max_bytes)
     stream = (await cdp.send("Fetch.takeResponseBodyAsStream", {"requestId": request_id}))["stream"]
     chunks = []
-    while result["stream_bytes"] < DOCUMENT_BYTES:
-        size = min(CHUNK, DOCUMENT_BYTES - result["stream_bytes"])
+    while result["stream_bytes"] < limit:
+        size = min(CHUNK, limit - result["stream_bytes"])
         part = await cdp.send("IO.read", {"handle": stream, "size": size})
         chunk = (
             base64.b64decode(part["data"], validate=True)
@@ -128,7 +139,7 @@ async def close_target(page, browser_cdp, target_id):
     return page.is_closed()
 
 
-async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
+async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232", max_bytes=DOCUMENT_BYTES):
     from playwright.async_api import Error as PlaywrightError
     from playwright.async_api import async_playwright
 
@@ -237,11 +248,11 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
                         result["response_intercepted"] = True
                         result["http_status"] = event.get("responseStatusCode")
                         result["stage"] = "headers"
-                        length = response_length(event, diagnostics=result)
+                        length = response_length(event, diagnostics=result, max_bytes=max_bytes)
                         if not length:
                             raise RejectionError("missing_declared_size")
                         result["stage"] = "body"
-                        chunks = await read_stream(cdp, rid, length, result)
+                        chunks = await read_stream(cdp, rid, length, result, max_bytes=max_bytes)
                         if time.monotonic() - started >= DEADLINE:
                             chunks = None
                             raise TimeoutError
@@ -261,8 +272,8 @@ async def stream_pdf(url, result, *, cdp_url="http://127.0.0.1:9232"):
         return chunks
 
 
-async def acquire_pdf(url, storage, diagnostics, *, cdp_url):
-    chunks = await stream_pdf(url, diagnostics, cdp_url=cdp_url)
+async def acquire_pdf(url, storage, diagnostics, *, cdp_url, max_bytes=DOCUMENT_BYTES):
+    chunks = await stream_pdf(url, diagnostics, cdp_url=cdp_url, max_bytes=max_bytes)
     if diagnostics.get("requests_forwarded") != 1 or not all(
         diagnostics.get(key) is True
         for key in ("io_closed", "navigation_abort_ack", "target_closed")
@@ -275,7 +286,7 @@ async def acquire_pdf(url, storage, diagnostics, *, cdp_url):
         original_name="document.pdf",
         content_type="application/pdf",
         expected_size=diagnostics["stream_bytes"],
-        max_bytes=DOCUMENT_BYTES,
+        max_bytes=stream_limit(max_bytes),
     )
 
 
@@ -297,7 +308,13 @@ def worker_main():
         validate_target(document)
         staged = LocalBinaryStorage(Path(payload["staging"]))
         stored = asyncio.run(
-            acquire_pdf(document.source_url, staged, diagnostics, cdp_url=payload["cdp_url"])
+            acquire_pdf(
+                document.source_url,
+                staged,
+                diagnostics,
+                cdp_url=payload["cdp_url"],
+                max_bytes=stream_limit(payload.get("max_bytes", DOCUMENT_BYTES)),
+            )
         )
     except TimeoutError as error:
         diagnostics.update(error="deadline", exception_type=type(error).__name__)
@@ -309,12 +326,13 @@ def worker_main():
     print(json.dumps({"stored": asdict(stored) if stored else None, "diagnostics": diagnostics}))
 
 
-def invoke_worker(document, staging, diagnostics, *, cdp_url):
+def invoke_worker(document, staging, diagnostics, *, cdp_url, max_bytes=DOCUMENT_BYTES):
     payload = {
         "source_url": document.source_url,
         "document_id": document.document_id,
         "staging": str(staging.root),
         "cdp_url": cdp_url,
+        "max_bytes": stream_limit(max_bytes),
     }
     try:
         worker = subprocess.run(  # noqa: S603
@@ -353,12 +371,21 @@ def invoke_worker(document, staging, diagnostics, *, cdp_url):
     )
 
 
-def wait_for_worker(document, staging, diagnostics, *, cdp_url, parent_page):
+def wait_for_worker(
+    document, staging, diagnostics, *, cdp_url, parent_page, max_bytes=DOCUMENT_BYTES
+):
     from playwright.sync_api import Error as PlaywrightError
 
     # The parent's Playwright routes may need dispatch before the child can attach.
     with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(invoke_worker, document, staging, diagnostics, cdp_url=cdp_url)
+        future = executor.submit(
+            invoke_worker,
+            document,
+            staging,
+            diagnostics,
+            cdp_url=cdp_url,
+            **({} if max_bytes == DOCUMENT_BYTES else {"max_bytes": max_bytes}),
+        )
         while not future.done():
             try:
                 parent_page.wait_for_timeout(50)
@@ -368,7 +395,12 @@ def wait_for_worker(document, staging, diagnostics, *, cdp_url, parent_page):
         return future.result()
 
 
-def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url, parent_page=None):
+def download_stream_pdf(
+    document, storage, marker, diagnostics, *, cdp_url, parent_page=None, max_bytes=DOCUMENT_BYTES
+):
+    limit = stream_limit(max_bytes)
+    # The default ceiling keeps the historical call shape; only an exception is forwarded.
+    extra = {} if limit == DOCUMENT_BYTES else {"max_bytes": limit}
     validate_target(document)
     validate_cdp_url(cdp_url)
     diagnostics.update(stream_bytes=0, requests_forwarded=0, worker_closed=False)
@@ -383,10 +415,15 @@ def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url, pare
         with tempfile.TemporaryDirectory(prefix="en01-edge-worker-") as temporary:
             staging = LocalBinaryStorage(Path(temporary))
             if parent_page is None:
-                result = invoke_worker(document, staging, diagnostics, cdp_url=cdp_url)
+                result = invoke_worker(document, staging, diagnostics, cdp_url=cdp_url, **extra)
             else:
                 result = wait_for_worker(
-                    document, staging, diagnostics, cdp_url=cdp_url, parent_page=parent_page
+                    document,
+                    staging,
+                    diagnostics,
+                    cdp_url=cdp_url,
+                    parent_page=parent_page,
+                    **extra,
                 )
             if diagnostics["requests_forwarded"] != 1 or not all(
                 diagnostics.get(key) is True
@@ -394,7 +431,7 @@ def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url, pare
             ):
                 raise AcquisitionError("unverified_close", "Cierre no verificado en Edge.")
             with staging.open_verified(
-                result.storage_path, result.sha256, result.observed_size, DOCUMENT_BYTES
+                result.storage_path, result.sha256, result.observed_size, limit
             ) as stream:
                 if stream.read(5) != b"%PDF-":
                     raise AcquisitionError("invalid_pdf_signature", "El archivo no es un PDF.")
@@ -404,7 +441,7 @@ def download_stream_pdf(document, storage, marker, diagnostics, *, cdp_url, pare
                     original_name="document.pdf",
                     content_type="application/pdf",
                     expected_size=result.observed_size,
-                    max_bytes=DOCUMENT_BYTES,
+                    max_bytes=limit,
                 )
     finally:
         safe = (diagnostics.get("worker_closed") is True) and (
