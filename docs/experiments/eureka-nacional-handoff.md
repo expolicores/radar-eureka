@@ -1310,3 +1310,14 @@ Segundo intento: estudio previo guardado por streaming (9,2 MB, SHA
 17. CO1.NTC.11293222 sigue `not_resolved` y con incertidumbre.
 Pendiente de decisión: OCR offline del resto y un tope mayor para
 el rector.
+
+### CO1.NTC.11293222: indicios de experiencia y plan del rector
+
+- OCR completo del estudio (17 de 17 páginas). En la página 10 se
+  exige al proponente experiencia en hasta 2 contratos de equipos
+  de cómputo. El hallazgo pasa a «Indicios de experiencia exigida»
+  y el estado formal sigue en `not_resolved`.
+- Plan `en01-target_k94ws3so_r16` para las condiciones generales,
+  con techo de 16 MiB ligado al hash
+  `b7fe9e15b7c20203ef8d388930a71cc6e7038bf1d65d16ee8f7b5cf2f3fabaad`.
+  No ejecutado; sólo sirve para la corroboración formal.

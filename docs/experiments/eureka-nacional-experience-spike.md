@@ -5155,3 +5155,115 @@ Opciones, pendientes de decisión:
    soporte.
 2. Una descarga de las condiciones generales con un tope mayor
    para documentos rectores.
+
+### CO1.NTC.11293222: OCR completo del estudio y plan del rector a 16 MiB
+
+#### Paso 1: OCR completo offline (autorizado)
+
+- Se leyó el estudio previo guardado (899021138, SHA `82045440…`)
+  con Tesseract local.
+- Tope excepcional: 17 páginas y 600 s. Ninguna petición.
+- Resultado en `en01-target_k94ws3so/validation_results_full_ocr.json`;
+  el `validation_results.json` original se conserva.
+- Cobertura: 17 de 17 páginas, todas por OCR (sin texto nativo); el
+  documento queda completo.
+
+Evidencia:
+
+- **Página 10, EXIGENCIA de alcance general para el proponente**:
+  «El proponente deberá acreditar experiencia mediante máximo dos
+  (2) certificaciones y/o actas de liquidación de contratos
+  celebrados, ejecutados y terminados con entidades públicas o
+  privadas, cuyo objeto corresponda a la compraventa, suministro o
+  comercialización de equipos de cómputo (…), y cuya sumatoria de
+  valores ejecutados (…)».
+- Páginas 7, 10 y 11: cláusulas condicionales que desarrollan la
+  misma exigencia:
+  - verificación directa de la capacidad jurídica y de la
+    experiencia por ser mínima cuantía;
+  - relación de la experiencia con el objeto;
+  - actualización de valores;
+  - proponentes plurales;
+  - cesión;
+  - contratos que reposan en la entidad.
+- No se detectó dependencia documental.
+
+Estado:
+
+- Formal: `not_resolved` (`requirement_requires_corroboration`).
+  La exigencia está en un documento de soporte y la regla formal
+  exige que conste en un rector completo.
+- Lectura: experiencia exigida sin conclusión formal.
+- Hallazgo: pasa de «con incertidumbre» a **«Indicios de
+  experiencia exigida — requiere revisión»**
+  (`requirement_signal_without_formal_conclusion`). Sigue visible.
+
+¿Siguen siendo decisivas las condiciones generales?
+
+- Para la conclusión formal, sí: sólo un rector completo puede
+  confirmar `experience_required`, o contradecirlo con una ausencia
+  explícita.
+- Para la oportunidad comercial ya no, salvo que las condiciones
+  generales eliminen la exigencia. El estudio previo exige
+  experiencia general en equipos de cómputo, con detalle de
+  acreditación.
+
+#### Paso 2: plan del rector con techo excepcional de 16 MiB (no ejecutado)
+
+Cambio `d9bcf66`, sin modificar reglas de experiencia ni de
+hallazgos:
+
+- Un plan focalizado puede fijar un techo de 11 a 16 MiB para un
+  documento con nombre propio. Sólo se admite si es SECOP II y rector
+  según el reconocimiento vigente.
+- El techo entra en el hash aprobado. Los demás documentos siguen en
+  10 MiB, y los planes sin techo conservan su hash anterior.
+- Con ese techo se comprueban el tamaño declarado (Content-Length),
+  la lectura acotada del stream, la verificación SHA-256 al guardar
+  y la extracción.
+- El intento registra `max_bytes` y `declared_bytes`. Antes, el
+  tamaño declarado no quedaba registrado; por eso del intento
+  anterior sólo se sabe que era mayor de 10 MiB.
+- El plan lista los intentos previos del mismo DocumentId.
+- El análisis conjunto lee también los recibos de otros planes de
+  la misma corrida (el estudio previo ya guardado). Aplica el rol
+  vigente y conserva el rol almacenado como `stored_role`.
+- Se mantienen el plazo de 12 s, la URL exacta de RetrieveFile, la
+  pestaña autorizada, el marcador preventivo, un único intento y
+  ninguna descarga nativa.
+- Pruebas: 12 nuevas. Suite nacional: 653 pasan y 11 se omiten, con
+  código de salida 0.
+
+Plan `en01-target_k94ws3so_r16`:
+
+| Campo | Valor |
+|---|---|
+| Proceso | CO1.NTC.11293222 |
+| DocumentId | 899021135 |
+| Documento | CONDICIONES GENERALES DE PARTICIPACION_0001 |
+| URL | `community.secop.gov.co/Public/Archive/RetrieveFile/Index?DocumentId=899021135` |
+| Rol vigente / almacenado | rector / no identificado (etapa 1) |
+| Techo | 16 MiB (16.777.216 bytes) |
+| Hash | `b7fe9e15b7c20203ef8d388930a71cc6e7038bf1d65d16ee8f7b5cf2f3fabaad` |
+
+- Tamaño declarado: desconocido. Sólo consta que supera 10 MiB;
+  conocerlo exigiría una petición, que no se hizo.
+- Intentos previos registrados del documento, ambos del lote
+  `f38de50d`:
+  - `authorized_tab_unavailable`, archivado;
+  - `declared_size_limit`.
+- El nuevo plan es un intento distinto que requiere autorización
+  propia.
+
+Condiciones para ejecutarlo:
+
+- una sola pestaña en `/cliente/contratos`;
+- preflight con `only_configured`, `profile_count: 1` y sesión
+  válida;
+- sin marcador preventivo;
+- una descarga directa y, sólo ante 403, un streaming;
+- se rechaza si el tamaño declarado supera 16 MiB, si falta, o si
+  lo recibido no coincide con lo declarado;
+- 12 s como máximo;
+- después, análisis conjunto offline con el estudio previo ya
+  guardado.
