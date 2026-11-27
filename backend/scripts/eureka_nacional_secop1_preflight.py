@@ -6,6 +6,7 @@ The feed stays blocked; the provider's URL notice caused by that block is not an
 authentication failure.
 """
 
+import json
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -82,20 +83,74 @@ def classify_request(url):
     return "allowed"
 
 
-def profile_match(url, expected_profile_id):
-    """Compare the app's own blocked feed request with the configured profile.
+PROFILE_KEY = re.compile(r"^(?:id_?)?perfil(?:es|_id|_ids)?$", re.IGNORECASE)
 
-    Returns only a category; the identifier never leaves this function.
-    """
-    if urlsplit(url).path.rstrip("/") != PROFILE_FEED_PATH:
+
+def _ids_from_values(values):
+    ids = []
+    for value in values:
+        items = value if isinstance(value, list) else [value]
+        for item in items:
+            if isinstance(item, bool) or item is None:
+                continue
+            ids.extend(part.strip() for part in str(item).split(",") if part.strip())
+    return ids
+
+
+def _body_profile_values(body, depth=0):
+    """Profile-like keys anywhere in a JSON object; values stay in memory only."""
+    if depth > 4:
+        return []
+    found = []
+    if isinstance(body, dict):
+        for key, value in body.items():
+            if isinstance(key, str) and PROFILE_KEY.fullmatch(key):
+                found.append(value)
+            elif isinstance(value, (dict, list)):
+                found.extend(_body_profile_values(value, depth + 1))
+    elif isinstance(body, list):
+        for value in body:
+            found.extend(_body_profile_values(value, depth + 1))
+    return found
+
+
+def _parse_body(post_data):
+    if not post_data or len(post_data) > 65536:
         return None
-    values = parse_qs(urlsplit(url).query).get("perfiles", [])
-    ids = [item.strip() for value in values for item in value.split(",") if item.strip()]
+    try:
+        return json.loads(post_data)
+    except ValueError:
+        pass
+    try:
+        return parse_qs(post_data, strict_parsing=True)
+    except ValueError:
+        return None
+
+
+def _category(ids, expected_profile_id):
     if not ids:
         return "absent"
     if len(ids) > 1:
         return "multiple"
     return "match" if ids[0] == str(expected_profile_id).strip() else "mismatch"
+
+
+def profile_match(url, expected_profile_id, post_data=None):
+    """Compare the app's own blocked feed request with the configured profile.
+
+    The query is checked first; only if it has no `perfiles` is the body parsed in memory.
+    Returns (category, source); the identifier and the body never leave this function.
+    """
+    if urlsplit(url).path.rstrip("/") != PROFILE_FEED_PATH:
+        return None
+    ids = _ids_from_values(parse_qs(urlsplit(url).query).get("perfiles", []))
+    if ids:
+        return _category(ids, expected_profile_id), "query"
+    body = _parse_body(post_data)
+    if body is None:
+        return "absent", None
+    ids = _ids_from_values(_body_profile_values(body))
+    return _category(ids, expected_profile_id), "body" if ids else None
 
 
 @dataclass
@@ -109,6 +164,7 @@ class PassivePreflight:
     inventory_blocked: int = 0
     official_blocked: int = 0
     profile_checks: list = field(default_factory=list)
+    profile_sources: list = field(default_factory=list)
     provider_errors: list = field(default_factory=list)
     expired: bool = False
     sequence: int = 0
@@ -120,7 +176,7 @@ class PassivePreflight:
     def record_own_navigation(self, url):
         self.own_navigations.append(url)
 
-    def observe_request(self, url):
+    def observe_request(self, url, post_data=None):
         """Classify a request before routing; the caller aborts anything not 'allowed'."""
         decision = classify_request(url)
         if decision == "official":
@@ -129,9 +185,10 @@ class PassivePreflight:
             self.inventory_blocked += 1
         elif decision == "feed":
             self.feed_blocked += 1
-            check = profile_match(url, self.expected_profile_id)
+            check = profile_match(url, self.expected_profile_id, post_data)
             if check is not None:
-                self.profile_checks.append(check)
+                self.profile_checks.append(check[0])
+                self.profile_sources.append(check[1])
         return decision
 
     def observe_response(self, url, *, method, resource_type, status, json=None):
@@ -249,6 +306,7 @@ class PassivePreflight:
             "feed": {"blocked": self.feed_blocked, "state": "blocked_by_guard"},
             "url_notice": notice,
             "profile": profile,
+            "profile_source": sorted({src or "none" for src in self.profile_sources}),
             "official_blocked": self.official_blocked,
             "inventory_blocked": self.inventory_blocked,
             "provider_errors": len(self.provider_errors),

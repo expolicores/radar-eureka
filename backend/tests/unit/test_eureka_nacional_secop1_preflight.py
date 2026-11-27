@@ -344,3 +344,57 @@ def test_dedicated_browser_rejections(changes, failed):
 
     assert ok is False
     assert checks[failed] is False
+
+
+BARE_FEED = "https://col.licitaciones.info/cliente/contratos/get-info/MP"
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ('{"query": {}, "perfiles": "1234"}', ("match", "body")),
+        ('{"query": {"perfil_id": 1234}, "limit": 30}', ("match", "body")),
+        ('{"perfiles": [1234]}', ("match", "body")),
+        ('{"perfiles": "999"}', ("mismatch", "body")),
+        ('{"perfiles": "1234,999"}', ("multiple", "body")),
+        ("perfiles=1234&page=1", ("match", "body")),
+        ('{"query": {}, "limit": 30}', ("absent", None)),
+        ("not a body", ("absent", None)),
+        (None, ("absent", None)),
+    ],
+)
+def test_profile_in_body_is_checked_only_when_query_lacks_it(body, expected):
+    # Arrange / Act
+    result = profile_match(BARE_FEED, PROFILE, body)
+
+    # Assert
+    assert result == expected
+
+
+def test_query_profile_takes_precedence_over_body():
+    result = profile_match(FEED + PROFILE, PROFILE, '{"perfiles": "999"}')
+
+    assert result == ("match", "query")
+
+
+def test_body_profile_reaches_verdict_with_source_and_without_identifier():
+    # Arrange
+    builder = PreflightBuilder().with_feed()
+    body = '{"query": {"Objeto": "secreto"}, "perfiles": "1234"}'
+    builder.preflight.observe_request(BARE_FEED, body)
+
+    # Act
+    verdict = builder.build().verdict()
+
+    # Assert
+    assert verdict["profile"] == "match"
+    assert verdict["profile_source"] == ["body"]
+    assert verdict["ready_for_acquisition"] is True
+    assert "secreto" not in repr(verdict)
+    assert PROFILE not in repr(verdict)
+
+
+def test_oversized_body_is_not_parsed():
+    body = '{"perfiles": "1234", "pad": "' + "x" * 70000 + '"}'
+
+    assert profile_match(BARE_FEED, PROFILE, body) == ("absent", None)
