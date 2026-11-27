@@ -3520,3 +3520,43 @@ perfiles o si el navegador no es el dedicado.
 La suite unitaria completa tiene 7 fallos ajenos a este trabajo,
 que también fallan en el commit base. No hubo login, feed,
 inventarios, POST ni descargas reales.
+
+
+### Primera corrida nacional integrada, etapa 1 (en01-xgcp5mgp)
+
+Parámetros autorizados: `--exploratory --processes 10
+--documents 20 --edge-stream-fallback --include-secop1
+--secop1-processes 5`, ocho páginas, 30 días y filtros sin
+cambios. Antes se verificaron el Edge dedicado, una única pestaña
+de Contratos y la ausencia de marcadores. El feed se consultó con
+el perfil configurado.
+
+Descubrimiento: 240 procesos únicos. De ellos, 75 eran de SECOP I
+(31 %), 164 de SECOP II y 1 de otro portal.
+
+| Fuente | Elegibles | Comercial fuera | Servicio principal | Objeto no claro | Seleccionados |
+| --- | --- | --- | --- | --- | --- |
+| SECOP I | 8 | 52 | 14 | 1 | 5 |
+| SECOP II | 20 | 104 | 36 | 4 | 10 |
+
+Los ocho SECOP I elegibles traían la fase null de forma explícita
+y pasaron la verificación de claves. Siete son de mínima cuantía.
+Encino no figura entre ellos.
+
+SECOP II: se analizaron 6 de los 10 seleccionados. Todas las
+descargas directas recibieron HTTP 403. El streaming por Edge
+recuperó 3 PDF, pero rechazó dos rectores que declaraban 11,3 MB
+y 24,4 MB, por encima del límite de 10 MiB. Otras dos descargas
+quedaron sin respaldo porque no eran rectoras. Tras tres fallos
+en dos procesos se abrió el cortacircuitos de descargas
+(`download_circuit_open`) y la corrida terminó como parcial a los
+96 segundos, con 69 de 200 créditos. Resultado: 6 not_resolved
+(5 por evidencia insuficiente y 1 por silencio documental),
+ningún resuelto y 0 páginas de OCR.
+
+SECOP I: la etapa de inventario no se ejecutó. El cortacircuitos
+de descargas de SECOP II detuvo la corrida antes del bucle de
+SECOP I. Los cinco procesos quedaron seleccionados sin inventario
+y la cola quedó vacía. No hubo POST ni descargas SECOP I. Es un
+defecto de orquestación de la integración: un fallo de descargas
+de una fuente impidió la etapa sin descargas de la otra.

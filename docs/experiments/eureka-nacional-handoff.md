@@ -984,3 +984,16 @@ flujo nacional falta, además:
 
 Pendiente: autorizar la primera corrida nacional controlada.
 [Detalle](eureka-nacional-experience-spike.md#integración-experimental-de-secop-i-en-el-runner-nacional-offline).
+
+
+### Corrida nacional integrada: SECOP I bloqueado por el cortacircuitos de SECOP II
+
+En en01-xgcp5mgp, SECOP I fue el 31 % del descubrimiento: 75 de
+240 procesos, con 8 elegibles y 5 seleccionados. Pero el
+cortacircuitos de descargas de SECOP II, abierto por un 403
+directo generalizado y por rectores de más de 10 MiB, detuvo la
+corrida antes del inventario SECOP I: la cola quedó vacía. SECOP
+II dio 6 procesos analizados y todos not_resolved. Hace falta
+autorizar una corrección para desacoplar las etapas antes de
+seguir.
+[Detalle](eureka-nacional-experience-spike.md#primera-corrida-nacional-integrada-etapa-1-en01-xgcp5mgp).
