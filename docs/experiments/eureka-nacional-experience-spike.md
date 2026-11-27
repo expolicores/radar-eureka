@@ -3266,3 +3266,29 @@ es una función pura versionada con pruebas offline. Un arnés
 temporal con dobles en memoria ejercitó la sonda local en cinco
 escenarios de cierre, sin navegador ni red. No hubo login, feed,
 inventario, POST ni descargas.
+
+
+### Verificación real del perfil infoexpress: preflight listo
+
+Se ejecutó una única corrida en modo preflight_only, sin `--acquire`
+y sin confirmed-post.flag, con el Edge dedicado del puerto 9232
+verificado antes de empezar. La evidencia de la corrida anterior se
+archivó en una subcarpeta local. El titular inició sesión, entró a
+Contratos desde la UI del contexto desechable y dejó seleccionado
+sólo infoexpress, nombre que confirmó visualmente.
+
+Veredicto: sesión válida, navegación por la UI, perfil
+only_configured con profile_count 1 y fuente query. La selección
+cambió durante la sesión y la última solicitud tenía sólo el
+perfil configurado. La guarda bloqueó siete get-info/MP. La vista
+quedó vacía, con un aviso de falta de conexión: la aplicación
+interpreta el aborto como pérdida de red. Hubo cero errores del
+proveedor, cero solicitudes oficiales, cero inventarios, cero POST
+y cero descargas. ready_for_acquisition fue true.
+
+El contexto cerró y quedó verificado, CDP se desconectó sin error
+y el trabajador salió con 0. El marcador se liberó con evidencia
+completa y los flags de operador se consumieron. Las pestañas
+habituales no se tocaron. En paralelo, el titular abrió Contratos
+en una ventana de incógnito ajena a la sonda, que sí consultó el
+feed; no fue una consulta de la sonda.

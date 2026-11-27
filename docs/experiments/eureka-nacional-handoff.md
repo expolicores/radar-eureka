@@ -900,3 +900,13 @@ evidencia completa de cierre seguro. La próxima corrida real debe
 hacerse con sólo infoexpress seleccionado en la UI y requiere
 autorización.
 [Detalle](eureka-nacional-experience-spike.md#correcciones-offline-cierre-seguro-y-diagnóstico-de-perfiles).
+
+
+### Preflight real listo con infoexpress
+
+La sesión es válida, el perfil es only_configured con un solo
+perfil, el feed estuvo bloqueado y el cierre fue seguro, con el
+marcador liberado. ready_for_acquisition fue true. No se descargó
+nada. La única descarga SECOP I de Encino queda pendiente de
+autorización explícita.
+[Detalle](eureka-nacional-experience-spike.md#verificación-real-del-perfil-infoexpress-preflight-listo).
