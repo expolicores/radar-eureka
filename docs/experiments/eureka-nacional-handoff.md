@@ -775,3 +775,25 @@ un solo PDF rector, 10 MiB, 12 s y dos páginas OCR. El
 [diagnóstico y procedimiento](eureka-nacional-experience-spike.md#inventarios-secop-i-de-licitacionesinfo)
 quedan en el informe. No se realizaron llamadas al
 proveedor ni descargas reales.
+
+
+### Resultado de la sonda POST de Encino
+
+En Licitaciones.info, la constancia 26-13-14853238 corresponde
+a Encino MC-014-2026. El único inventario devolvió HTTP 200 y
+seis PDF con fase nula explícita. La invitación de 5,39 MB
+quedó primera por título. El control se activó una sola vez.
+La pestaña emergente no se pudo vincular al origen y la
+limpieza del supervisor la reanudó fuera de la intercepción.
+La descarga nativa dejó un archivo de 5.651.103 bytes que
+no se incorporó a EN-01. Sin recibo ni análisis, el caso
+sigue not_resolved y la marca de cierre incierto se conserva.
+
+La próxima mejora admisible es el parser de inventario
+offline y una regresión del cierre que pruebe que un destino
+no identificado no puede emitir el POST. Mantener desactivada
+la descarga automática. El
+[resultado de la sonda](eureka-nacional-experience-spike.md#sonda-real-secop-i-por-formulario-post-en-encino)
+documenta los límites observados y el alcance de una
+validación futura. No se autoriza un nuevo intento a partir
+de este resultado.

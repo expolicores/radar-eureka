@@ -2847,3 +2847,80 @@ complementarios cuando corresponda. El tope de EN-01 protege
 bytes aceptados y tiempo de adquisición. No mide todos los
 búferes de Edge o del sistema. Esta fase no ejecutó esa
 prueba ni realizó descargas reales.
+
+
+### Sonda real SECOP I por formulario POST en Encino
+
+El 26 de noviembre de 2026, la sesión de Licitaciones.info
+ya tenía en memoria un registro de SECOP I con la constancia
+26-13-14853238. Confirmó Municipio de Encino, Santander, y
+la referencia MC-014-2026. Se envió una sola solicitud
+autenticada de inventario al endpoint existente con las claves
+observadas. idUltimaFase tenía el valor explícito null en ese
+registro. El endpoint devolvió HTTP 200 y declaró seis filas.
+No se volvió a consultar el feed ni se dedujo una fase.
+
+| Documento | Formato | Tamaño mostrado |
+| --- | --- | --- |
+| Invitación | PDF | 5,39 MB |
+| Estudios previos | PDF | 4,55 MB |
+| Estudios del sector | PDF | 1,88 MB |
+| CDP | PDF | 151 KB |
+| BPIN | PDF | 225 KB |
+| PAA | PDF | 239 KB |
+
+Las filas correspondieron a las columnas Nombre, Tipo,
+Tamaño, Fecha publicación del documento y Documento. En
+las seis, el control del documento llamó al componente del
+proveedor y la ruta incluía la constancia exacta. Se usó el
+ranking existente y la invitación fue el único rector por
+título. La ficha indica un tamaño visual redondeado. La
+longitud HTTP exacta y el contenido quedaron sin verificar.
+
+Antes de invocar el control real se probó en Edge aislado
+la pausa automática de la pestaña emergente y la captura
+del POST sintético antes de enviarlo. En la sesión real se
+habilitó esa pausa y se invocó una sola vez el control
+oficial. Apareció un destino nuevo que el protocolo local
+no pudo asociar con la pestaña de origen. El supervisor
+registró unexpected_new_target en la etapa paused_popup.
+La guarda no continuó ningún POST vía Fetch. El código
+temporal de limpieza reanudó el destino no identificado
+al retirar la autoasociación. Esa acción dejó la descarga
+fuera de la intercepción.
+
+Edge registró una descarga nativa completada y la inspección
+local encontró un archivo nuevo de 5.651.103 bytes cuyo
+nombre coincide con el rector elegido. Se creó 0,861 s
+después de iniciar el intento según los metadatos locales.
+En la prueba no se observó el código HTTP ni la longitud
+declarada y no se acreditó la aplicación efectiva de las
+guardas de 10 MiB y 12 s. Tampoco se verificaron la firma,
+SHA-256 y cierre del flujo de adquisición. El archivo
+nativo quedó fuera del corpus de EN-01 y no se abrió ni se
+movió. Cero archivos aceptados por CDP, recibos, páginas
+procesadas, OCR y llamadas de IA. El caso queda
+not_resolved por evidencia insuficiente.
+
+La inspección posterior encontró únicamente la pestaña
+original de Licitaciones.info y descargas en estado
+terminal entre las registradas. Se conservó la marca
+preventiva porque el cierre de la transferencia controlada
+no se verificó. Hubo una sola activación del control, sin
+reintentos ni uso de mecanismos alternativos. Las trazas,
+rutas y el detalle local del inventario quedan fuera de Git.
+
+**Recomendación.** La prueba acredita disponibilidad del
+inventario SECOP I mediante Licitaciones.info para esta
+constancia. Usar el contrato observado como fixture depurado
+para extender primero el parser experimental con claves
+de expediente verificadas, incluso fase nula sólo cuando
+provenga del registro exacto. La adquisición automática
+debe seguir desactivada. Antes de otra sonda, demostrar en
+un laboratorio entre orígenes que un destino sin identidad
+confirmada permanece bloqueado durante el cierre y
+desactivar la autoasociación sólo tras verificar que no puede
+salir el POST. Una vez acreditado ese control, validar una
+sola constancia con autorización nueva. Integrar la
+adquisición al descubrimiento sólo después de comprobar el
+límite, recibo, extracción y clasificación en ese flujo.
