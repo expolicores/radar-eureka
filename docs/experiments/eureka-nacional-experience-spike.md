@@ -4241,3 +4241,118 @@ DTAO-FONAM CO1.NTC.11284005 (ferretería, prioridad A):
 Resumen: cero favorables formales. Betéitiva 26-13-14851414 es el
 mejor candidato para revisión humana. FONAM queda condicionado a
 los formatos.
+
+
+### Revisión documental de Betéitiva 26-13-14851414 y diagnóstico del falso positivo
+
+Revisión offline del texto nativo guardado, sin peticiones. Es un
+juicio documental humano y queda separado del estado automático,
+que sigue en not_resolved.
+
+Requisitos efectivamente exigidos al oferente (invitación, sección
+2.9, p. 6-8):
+
+- 2.9.1, que verifica la entidad: «capacidad jurídica». La lista
+  anunciada no aparece en el texto extraído; el encabezado salta
+  directamente al 2.9.2.
+- 2.9.2, que aporta el oferente para verificar la capacidad
+  jurídica:
+  a) índice; b) antecedentes disciplinarios; c) antecedentes
+  fiscales; d) RNMC; e) carta de presentación (anexo 1); f) cédula;
+  g) RUT y certificado de existencia o matrícula con CIIU 4741;
+  h) aportes a seguridad social y parafiscales; i) libreta militar;
+  j) pacto de integridad (anexo 6).
+- 2.8 (p. 6): descripción técnica según el numeral 1.2.
+- 2.11 e) (p. 9): rechazo si faltan requisitos habilitantes.
+
+No hay ningún requisito de experiencia, de capacidad financiera ni
+de organización. «Experien» no aparece en las 26 páginas.
+
+Estudio previo (8 p.): necesidad, UNSPSC 43211508, condiciones
+técnicas y obligatorias del contratista (3.1), valor de 3.000.000 y
+plazo de 5 días, CDP, garantías no exigidas (mínima cuantía con
+pago contra entrega), forma de pago, PAA y conclusiones. No tiene
+sección de requisitos habilitantes ni de idoneidad, y no menciona
+la experiencia.
+
+Remisiones de la invitación:
+
+- Rectoras e incluidas en el propio PDF: los anexos 1 a 6
+  (p. 14-22): cartas, propuesta económica, aportes, declaración de
+  inhabilidades y pacto de integridad. Ninguno trata de
+  experiencia.
+- Normativas generales: Ley 1150, Decreto 1082 y Manual de mínima
+  cuantía de Colombia Compra Eficiente, citados para la modalidad,
+  la verificación y la subsanación.
+- Informativas: el estudio previo (p. 2, consulta) y la posibilidad
+  de adendas (p. 11); no había adendas en el inventario.
+- En el estudio previo, el análisis del sector «se anexa… y hace
+  parte integral» sólo para justificar el valor estimado (p. 4), no
+  los requisitos.
+
+Dependencia por «reglamento interno»: la p. 1 del estudio previo
+cita el reglamento interno del Concejo para establecer que su
+presidente es el ordenador del gasto. Es una referencia
+administrativa de competencia presupuestal, ajena a la habilitación
+del proponente. Falso positivo.
+
+Causa: en `assertion`, cualquier mención de «reglamento interno»
+devuelve `document_dependency` aunque la cláusula no trate de
+experiencia ni de requisitos. La consecuencia general es grave: una
+dependencia espuria junto a una ausencia explícita produce
+`experience_ambiguous` y bloquearía un favorable. En el histórico
+hay 13 evidencias de dependencia: 8 temáticas, 3 que citan un
+reglamento de contratación, 1 de «reglamento interno» sin tema (la
+de Betéitiva) y 1 línea de cronograma, que conviene revisar aparte.
+
+Propuesta generalizable, no implementada: una mención de
+«reglamento interno» sólo cuenta como dependencia si se cumple
+alguna de estas condiciones:
+
+a. La cláusula trata de experiencia, requisitos habilitantes o
+   selección.
+b. Nombra un régimen de contratación: «reglamento interno, manual o
+   estatuto de contratación», «se rige por» o «régimen especial o
+   propio».
+
+Las remisiones a anexos o documentos sobre experiencia quedan
+igual. Pruebas previstas:
+
+- Positivas: reglamento de contratación; «requisitos habilitantes
+  conforme al reglamento interno»; «el proceso se rige por el
+  reglamento interno».
+- Negativas: ordenador del gasto; funciones; supervisión o
+  delegación.
+- Una regresión que verifique que un histórico conserva las 11
+  dependencias legítimas.
+
+Juicio documental: Betéitiva exige sólo capacidad jurídica, sin
+experiencia. Es un candidato favorable por silencio documental con
+cobertura completa de los documentos rectores, no una ausencia
+explícita.
+
+### FONAM: qué se sabe de «FORMATOS»
+
+- Inventario: nombre «FORMATOS», DocumentId 897735545. El tipo
+  declarado por el proveedor no era pdf, docx ni xlsx, y el parser
+  usa entonces el sufijo del nombre, que no existe; por eso la
+  extensión quedó vacía. El valor original del tipo no se guardó.
+- Según la invitación (p. 15-16), los formatos 1 a 7 son: 01 carta
+  de presentación; 2 o 3 registro SIIF según el tipo de proponente;
+  4 declaración de inhabilidades; 5 aportes parafiscales; 6
+  cumplimiento del Decreto 1072; 7 autorización de datos para
+  factores de desempate. Ninguno es de experiencia. La lista de
+  requisitos habilitantes (A, ítems 1-15) es jurídica o
+  administrativa.
+- Para procesarlo faltan tres cosas:
+  1. Conocer su tipo real, con una respuesta del RetrieveFile o el
+     tipo original del inventario; ambas cosas requieren peticiones
+     autorizadas.
+  2. Soporte seguro del formato. Si es un comprimido, haría falta
+     descompresión con límites de tamaño, número de entradas,
+     proporción y rutas. Si es DOCX, hoy sólo se admite para
+     rectores. XLSX no tiene soporte.
+  3. Como mejora general: guardar el tipo declarado por el
+     proveedor en los inventarios.
+
+Mientras tanto, FONAM sigue en evidencia insuficiente.

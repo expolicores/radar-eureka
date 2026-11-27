@@ -1188,3 +1188,18 @@ El análisis conjunto con las invitaciones espera autorización.
   no procesables.
 
 [Detalle](eureka-nacional-experience-spike.md#análisis-conjunto-de-los-dos-candidatos-invitación-y-estudio-previo).
+
+
+### Betéitiva revisada y falso positivo diagnosticado
+
+- Betéitiva 26-13-14851414 exige sólo capacidad jurídica (2.9.2
+  a-j). La experiencia no aparece en la invitación ni en el estudio
+  previo. Es un candidato favorable por juicio documental; el estado
+  automático sigue en not_resolved.
+- La dependencia por «reglamento interno» era administrativa
+  (ordenador del gasto). Hay una propuesta generalizable, sin
+  implementar.
+- FONAM: los formatos citados no son de experiencia, pero el archivo
+  sigue sin tipo conocido ni soporte.
+
+[Detalle](eureka-nacional-experience-spike.md#revisión-documental-de-betéitiva-26-13-14851414-y-diagnóstico-del-falso-positivo).
