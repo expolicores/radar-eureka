@@ -22,6 +22,8 @@ DEPENDENCY = ("NORMATIVA_CONDICIONAL", "document_dependency")
         "El proceso derivado de este análisis se rige por lo determinado en el manual de "
         "contratación institucional y el reglamento interno.",
         "La institución dará inicio al proceso de selección conforme al reglamento interno.",
+        "Las verificaciones se regirán por el reglamento interno.",
+        "Los proponentes se regían por el reglamento interno vigente.",
         "La contratación se adelanta según el reglamento interno de contratación de la entidad.",
         "Los requisitos que deberá cumplir el oferente se establecen en el reglamento interno.",
         # Requirements or experience referred to other documents (unchanged behavior).

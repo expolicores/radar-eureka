@@ -73,8 +73,9 @@ DEPENDENCY = re.compile(
 # clause is about them or names a contracting regime. Administrative mentions (spending
 # authority, functions, delegation, supervision) are not documentary dependencies.
 REGULATION_TOPIC = re.compile(
-    r"\b(?:(?:reglamento interno|manual|estatuto)(?: interno)? de contratacion|se rige|"
-    r"regid[oa]s? por|regimen (?:especial|propio)|requisitos?|"
+    r"\b(?:(?:reglamento interno|manual|estatuto)(?: interno)? de contratacion|"
+    r"se (?:rige|rigen|regira|regiran|regia|regian)|regid[oa]s? por|"
+    r"regimen (?:especial|propio)|requisitos?|verificacion(?:es)?|"
     r"seleccion (?:del|de) contratista|proceso de seleccion|modalidad de seleccion)\b"
 )
 NUMBERED_SECTION = re.compile(r"^\d+(?:[.-]\d+)*[.\s_):–-]+")
