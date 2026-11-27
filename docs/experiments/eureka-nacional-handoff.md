@@ -1061,3 +1061,22 @@ clasificador:
 Hay dos ajustes propuestos sin implementar, pendientes de
 autorización.
 [Detalle](eureka-nacional-experience-spike.md#análisis-del-clasificador-fómeque-y-montelíbano-sin-cambios).
+
+
+### Cierre de ajustes del piloto SECOP I
+
+Ajustes A (sección «experiencia del proponente/oferente») y B
+(pendientes no rectores por título) implementados con pruebas
+positivas y negativas. Estado de los cuatro procesos:
+
+- Fómeque: experience_required (p. 14).
+- Montelíbano: not_resolved en automático; la revisión humana de
+  las tablas «Debe anexar con la propuesta: CUMPLE / NO CUMPLE»
+  sostiene una exigencia habilitante.
+- Taraira y Jericó: not_resolved.
+
+No hubo nuevas descargas ni consultas. Dos resultados históricos
+de SECOP II podrían cambiar con B y no se tocaron. Conviene
+discutir los resultados de búsqueda antes de seguir afinando el
+clasificador.
+[Detalle](eureka-nacional-experience-spike.md#ajustes-a-y-b-del-clasificador-y-cierre-del-piloto-secop-i).

@@ -3774,3 +3774,55 @@ Ajustes propuestos, no implementados:
   certificado de disponibilidad presupuestal», «PAA» y «BPIN». Así
   aparecen en los seis inventarios SECOP I observados.
 - Montelíbano: sólo revisión humana por ahora.
+
+
+### Ajustes A y B del clasificador y cierre del piloto SECOP I
+
+A. Un patrón estrecho, `BIDDER_SECTION`, reconoce como sección
+general del proponente «experiencia del proponente/oferente», con
+numeración y puntuación variables. Se aplica a la sección o al
+encabezado de la cláusula, y sólo da alcance general a una
+cláusula que ya es EXIGENCIA. Un encabezado nunca crea una
+exigencia. Las cláusulas condicionales, hipotéticas, puntuables,
+dirigidas a terceros, no aplicables o limitadas conservan su
+lectura, y así lo verifican las pruebas negativas.
+
+B. Un documento pendiente de rol desconocido con título claramente
+no rector (análisis o estudio del sector, CDP, certificado de
+disponibilidad presupuestal, PAA, plan anual de adquisiciones o
+BPIN) ya no bloquea una exigencia explícita en una invitación
+completa. El rol no cambia: si se lee y su portada indica adenda,
+vuelve a bloquear. Los pendientes genéricos desconocidos, las
+adendas y los rectores siguen bloqueando, y la conclusión
+favorable sigue exigiendo todos los documentos. Por diseño, B sólo
+puede volver más desfavorable un resultado, nunca producir uno
+favorable. La trazabilidad queda en
+`document_coverage.non_governing_pending`.
+
+Pruebas: 32 nuevas, positivas y negativas. En total, 470 de la
+suite nacional y 30 de laboratorio, sin regresiones. Impacto
+estimado en 96 resultados históricos: 3 podrían cambiar de estado
+con B (Fómeque y dos procesos SECOP II en en01-le73ddhz y
+en01-manual_hsxjhqpg). No se modificaron.
+
+Reevaluación de Fómeque (26-13-14853190), offline, con el PDF y el
+recibo guardados: 34 de 34 páginas nativas. Resultado:
+experience_required, explicit_bidder_requirement, revisión
+explicit_requirement y prioridad 5. Evidencia en la p. 14, sección
+«EXPERIENCIA DEL PROPONENTE», alcance general: «El proponente debe
+acreditar UN (1) contrato y/o certificación… FERRETERÍA Y/O
+ELEMENTOS PARA ACUEDUCTOS». El «ANALISIS DEL SECTOR» figura como
+pendiente no rector. La prioridad comercial A se mantiene.
+
+Montelíbano (26-13-14853123), revisión documental offline de las
+páginas 14 a 16, sin reclasificar. La fila «Certificado de
+experiencia de al menos un contrato de objeto similar… Se
+acreditará con la certificación expedida por el contratante…»
+pertenece a las tablas «Persona jurídica. Debe anexar con la
+propuesta: CUMPLE / NO CUMPLE» (p. 14, bajo DOCUMENTOS JURÍDICOS)
+y «Persona natural. Debe anexar con la propuesta: CUMPLE / NO
+CUMPLE» (p. 15). La evidencia documental basta para sostener, en
+revisión humana, una exigencia habilitante para todo proponente.
+El estado automático sigue not_resolved: el encabezado obligatorio
+y la fila están separados en la tabla, y no se crearon reglas
+nuevas.
