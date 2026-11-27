@@ -7,7 +7,11 @@ from spike_licitaciones_info import normalized
 
 NUMBER_PREFIX = re.compile(r"^(?:(?:\d+(?:[.-]\d+)*)(?:[.\s_):–-]+|$))+")
 PRIMARY = re.compile(
-    r"\b(?:invitacion|inv\s*mc|pliegos?|condiciones definitivas|terminos de referencia)\b"
+    r"\b(?:invitacion|inv\s*mc|pliegos?|condiciones definitivas|terminos de referencia|"
+    # Documents that govern participation: requirements and how offers are submitted.
+    r"(?:condiciones|reglas)(?: generales)? (?:de|para)(?: la)? participacion|"
+    r"condiciones(?: generales)? (?:de|para)(?: la)? presentacion de "
+    r"(?:las )?(?:ofertas|propuestas))\b"
 )
 AMENDMENT = re.compile(
     r"\b(?:adendas?|modificaciones?|modificacion|aclaraciones?|aclaracion|enmiendas?)\b"
@@ -179,6 +183,12 @@ NON_GOVERNING_TITLE = re.compile(
     r"^(?:analisis (?:del|de) (?:el )?sector|estudios? (?:del|de) (?:el )?sector|cdp|"
     r"certificados? de disponibilidad presupuestal|paa|plan anual de adquisiciones|bpin)\b"
 )
+# Selection order only (never coverage or classification): administrative support titles.
+ADMINISTRATIVE_TITLE = re.compile(
+    r"\b(?:cdp|certificados? de disponibilidad presupuestal|disponibilidad presupuestal|"
+    r"registro presupuestal|paa|plan anual de adquisiciones|bpin|banco de proyectos|"
+    r"(?:analisis|estudios?) (?:del|de) (?:el )?sector)\b"
+)
 MANDATE_BASES = {"bidder_experience_mandate", "ocr_corroborated_bidder_mandate"}
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
@@ -225,10 +235,12 @@ def document_priority(name, role, role_hint=None):
         return (0, not bool(re.search(r"\b(?:definitiv[oa]|final|vigente)\b", text)))
     if role_hint == "primary":
         return (1, True)
-    return (
-        {"amendment": 2, "support": 3, "unknown": 4, "excluded": 5}[role],
-        "habilitante" not in text,
-    )
+    rank = {"amendment": 2, "support": 3, "unknown": 4, "excluded": 6}[role]
+    if role == "unknown" and ADMINISTRATIVE_TITLE.search(document_title(name)):
+        # Administrative support (CDP, PAA, BPIN, sector analysis) never displaces an
+        # unidentified document that may govern participation.
+        rank = 5
+    return (rank, "habilitante" not in text)
 
 
 def document_cover_metadata(first_page):
