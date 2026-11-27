@@ -8,8 +8,12 @@ of apparently exhaustive habilitating-requirement lists, and decides how a proce
 - priority_review: not formally resolved, but the governing documents carry a closed
   habilitating-requirement list without contractual experience (or an explicit waiver that
   still needs corroboration) and no documentary gap is known.
-- uncertain: anything else that is not an experience requirement. Always visible.
-- experience_required: formal ``experience_required`` or an explicit requirement review.
+- uncertain: no documentary signal either way strong enough to prioritize. Always visible.
+- experience_indications: documentary signals of an experience requirement without a formal
+  conclusion (a requirement clause, an explicit-requirement review or contractual-experience
+  terms inside a habilitating list); shown with their clauses, pages, coverage and why no
+  conclusion was reached. Capacity-only terms (financial indicators, RUP) stay uncertain.
+- experience_required: reserved for the formal ``experience_required`` status.
 
 No process is ever excluded here: uncertainty lowers priority and adds warnings only. Human
 review evidence is attached as a separate annotation and never changes category or status.
@@ -22,15 +26,25 @@ from pathlib import Path
 from eureka_nacional_experience import NON_GOVERNING_TITLE, document_title
 from spike_licitaciones_info import normalized
 
-CATEGORIES = ("confirmed", "priority_review", "uncertain", "experience_required")
+CATEGORIES = (
+    "confirmed",
+    "priority_review",
+    "uncertain",
+    "experience_indications",
+    "experience_required",
+)
 LABELS = {
     "confirmed": "Hallazgo confirmado",
     "priority_review": "Hallazgo prioritario para revisión",
     "uncertain": "Hallazgo con incertidumbre",
+    "experience_indications": "Indicios de experiencia exigida — requiere revisión",
     "experience_required": "Experiencia exigida",
 }
-RANK = {"confirmed": 1, "priority_review": 2, "uncertain": 3, "experience_required": 4}
-METHOD = "en01-findings-v1"
+RANK = {category: index for index, category in enumerate(CATEGORIES, start=1)}
+ATTENTION = {"priority_review", "uncertain", "experience_indications"}
+# Review effort, used only to order human review inside a category (never to exclude).
+EFFORT = {"lectura_humana": 1, "documento_pendiente": 2, "formato_no_soportado": 3}
+METHOD = "en01-findings-v2"
 HUMAN_REVIEWS_FILE = Path(__file__).with_name("eureka_nacional_human_reviews.v1.json")
 
 # Heading of a habilitating-requirements section, optionally numbered ("2.9") or lettered
@@ -50,6 +64,13 @@ EXPERIENCE_TERMS = re.compile(
     r"certificaciones? de (?:experiencia|contratos?|cumplimiento contractual)|"
     r"indicadores? financieros?|registro unico de proponentes|rup)\b"
 )
+# Subset that points to contractual experience itself (not only financial capacity or RUP):
+# inside a habilitating list it is a documentary indication of an experience requirement.
+CONTRACT_EXPERIENCE_TERMS = re.compile(
+    r"^(?:experiencia|contratos? .+|certificaciones? de (?:experiencia|contratos?|cumplimiento"
+    r" contractual))$"
+)
+MAX_LISTED_ACTIONS = 5
 ANNEX_REFERENCE = re.compile(r"\b(?:anexos?|formatos?|formularios?)\s*(?:no\.?\s*)?\d+\b")
 MIN_ITEMS = 3
 
@@ -220,6 +241,46 @@ def _coverage(documents, classification):
     }
 
 
+def resolution_actions(category, coverage, classification, sections):
+    """Documentary actions that would resolve the doubt; descriptive, never automatic."""
+    actions = []
+    gaps = sorted(
+        coverage["not_verified_by_system"],
+        key=lambda gap: {"primary": 0, "amendment": 1, "support": 2}.get(gap.get("role"), 3),
+    )
+    for gap in gaps[:MAX_LISTED_ACTIONS]:
+        if gap["reason"] == "formato_no_procesable":
+            actions.append(
+                f"Revisar manualmente «{gap['document']}» (formato no soportado por el sistema)."
+            )
+        else:
+            actions.append(f"Obtener y verificar «{gap['document']}» ({gap['reason']}).")
+    if len(gaps) > MAX_LISTED_ACTIONS:
+        actions.append(
+            f"Y {len(gaps) - MAX_LISTED_ACTIONS} documentos más sin verificar "
+            "(lista completa en la cobertura)."
+        )
+    if not coverage["inventory_complete"]:
+        actions.append("Recuperar el inventario documental completo del proceso.")
+    if classification.get("dependencies"):
+        actions.append("Verificar el documento al que remite la cláusula de dependencia.")
+    if category == "experience_indications":
+        actions.append(
+            "Confirmar en el documento rector si la cláusula de experiencia aplica a todo "
+            "proponente y si hay adendas que la modifiquen."
+        )
+    elif category == "priority_review":
+        actions.append(
+            "Revisión humana confirmatoria de la lista habilitante y del estudio previo; "
+            "comprobar adendas publicadas."
+        )
+    elif category == "uncertain" and not sections:
+        actions.append("Ubicar manualmente la sección de requisitos habilitantes.")
+    elif category == "uncertain":
+        actions.append("Revisión humana de la sección habilitante y de las advertencias.")
+    return actions
+
+
 def assess_finding(classification, documents, *, identifiers=(), human_reviews=None):
     """Presentation category for one process; never alters ``classification``."""
     status, review = classification["status"], classification["review_category"]
@@ -229,6 +290,7 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
         if item.get("role") in {"primary", "amendment", "support"}
     ]
     requirement_signals = [item for item in evidence if item["assertion_type"] == "EXIGENCIA"]
+    waiver_signals = [item for item in evidence if item["assertion_type"] == "NEG_CONCLUSIVA"]
     conditional_signals = [
         item for item in evidence if item["assertion_type"] == "NORMATIVA_CONDICIONAL"
     ]
@@ -245,6 +307,11 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
         if section["apparently_exhaustive"] and not section["experience_terms"]
     ]
     sections_with_experience = [section for section in sections if section["experience_terms"]]
+    experience_sections = [
+        section
+        for section in sections_with_experience
+        if any(CONTRACT_EXPERIENCE_TERMS.match(term) for term in section["experience_terms"])
+    ]
     warnings = []
     if coverage["not_verified_by_system"]:
         warnings.append("documentos_no_verificados_por_el_sistema")
@@ -263,12 +330,18 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
 
     if status == "no_experience_required":
         category, basis = "confirmed", "formal_no_experience_required"
-    elif status == "experience_required" or review == "explicit_requirement":
-        category = "experience_required"
+    elif status == "experience_required":
+        category, basis = "experience_required", "formal_experience_required"
+    elif (
+        review == "explicit_requirement" or requirement_signals or experience_sections
+    ) and not waiver_signals:
+        category = "experience_indications"
         basis = (
-            "formal_experience_required"
-            if status == "experience_required"
-            else "explicit_requirement_review"
+            "explicit_requirement_review_without_formal_conclusion"
+            if review == "explicit_requirement"
+            else "requirement_signal_without_formal_conclusion"
+            if requirement_signals
+            else "experience_terms_in_habilitating_list"
         )
     elif status != "not_resolved":
         category, basis = "uncertain", f"formal_{status}"
@@ -288,15 +361,47 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
     else:
         category = "uncertain"
         basis = (
-            "requirement_signal_without_formal_conclusion"
+            "conflicting_requirement_and_waiver_signals"
             if requirement_signals
             else "habilitating_list_mentions_experience"
+            if experience_sections
+            else "habilitating_list_mentions_capacity"
             if sections_with_experience
             else "closed_list_with_unverified_documents"
             if closed_without_experience
             else "no_closed_habilitating_list"
         )
     reviews = human_reviews_for(identifiers, human_reviews or [])
+    names = {doc["document_id"]: doc["name"] for doc in documents}
+    indications = [
+        {
+            "document": names.get(item["document_id"], item["document_id"]),
+            "role": item.get("role"),
+            "page": item.get("page"),
+            "basis": item.get("basis"),
+            "scope": item.get("scope"),
+            "excerpt": " ".join(str(item.get("excerpt", "")).split())[:400],
+        }
+        for item in requirement_signals
+    ] + [
+        {
+            "document": section["document"],
+            "role": section["role"],
+            "page": section["heading_page"],
+            "basis": "experience_terms_in_habilitating_list",
+            "scope": "habilitating_section",
+            "excerpt": f"{section['heading']}: {', '.join(section['experience_terms'])}",
+        }
+        for section in experience_sections
+    ]
+    gaps = coverage["not_verified_by_system"]
+    effort = (
+        "formato_no_soportado"
+        if any(gap["reason"] == "formato_no_procesable" for gap in gaps)
+        else "documento_pendiente"
+        if gaps or not coverage["inventory_complete"]
+        else "lectura_humana"
+    )
     return {
         "method": METHOD,
         "category": category,
@@ -304,9 +409,25 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
         "rank": RANK[category],
         "basis": basis,
         "visible": True,
+        "needs_human_attention": category in ATTENTION,
+        "review_effort": effort,
         "formal_status": status,
         "formal_status_unchanged": True,
+        "formal_reason": classification.get("reason"),
         "review_category": review,
+        "review_reason": classification.get("review_reason"),
+        "why_not_formal": (
+            None
+            if status in {"experience_required", "no_experience_required"}
+            else {
+                "reason": classification.get("reason"),
+                "review_reason": classification.get("review_reason"),
+                "documents_not_verified": [gap["document"] for gap in gaps],
+                "dependencies": len(classification.get("dependencies") or []),
+            }
+        ),
+        "requirement_indications": indications,
+        "resolution_actions": resolution_actions(category, coverage, classification, sections),
         "warnings": warnings,
         "habilitating_sections": sections,
         "coverage": coverage,

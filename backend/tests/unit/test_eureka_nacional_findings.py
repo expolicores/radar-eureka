@@ -196,6 +196,7 @@ def test_capacity_terms_in_the_list_prevent_priority():
     _, finding = assess([document([text]), study()])
 
     assert finding["category"] == "uncertain"
+    assert finding["basis"] == "habilitating_list_mentions_capacity"
     assert "lista_habilitante_menciona_experiencia_o_capacidad" in finding["warnings"]
 
 
@@ -220,8 +221,9 @@ def test_experience_inside_the_list_is_never_priority_even_without_formal_conclu
     classification, finding = assess([document([text]), study()])
 
     assert classification["status"] == "not_resolved"
-    assert finding["category"] == "uncertain"
-    assert finding["basis"] == "habilitating_list_mentions_experience"
+    assert finding["category"] == "experience_indications"
+    assert finding["basis"] == "experience_terms_in_habilitating_list"
+    assert finding["requirement_indications"][0]["scope"] == "habilitating_section"
 
 
 def test_formal_waiver_is_confirmed():
@@ -290,3 +292,81 @@ def test_repository_human_reviews_are_annotations_only():
     assert all(review["system_verified"] is False for review in reviews)
     assert findings.human_reviews_for(["CO1.NTC.11284005"], reviews)
     assert findings.human_reviews_for(["secop1:26-13-14851414"], reviews)
+
+
+REQUIREMENT = (
+    "EXPERIENCIA DEL PROPONENTE\n"
+    "El proponente deberá acreditar experiencia mínima en dos contratos ejecutados."
+)
+
+
+def test_requirement_signal_without_formal_conclusion_is_an_indication_not_a_requirement():
+    # Arrange: the requirement appears only in the study, so there is no formal conclusion.
+    documents = [document([LIST_WITHOUT_EXPERIENCE]), document([REQUIREMENT], "support", "2")]
+
+    # Act
+    classification, finding = assess(documents)
+
+    # Assert
+    assert classification["status"] == "not_resolved"
+    assert finding["category"] == "experience_indications"
+    assert finding["label"] == "Indicios de experiencia exigida — requiere revisión"
+    assert finding["visible"] is True
+    assert finding["needs_human_attention"] is True
+    [indication] = finding["requirement_indications"]
+    assert indication["document"] == "support.pdf"
+    assert indication["page"] == 1
+    assert "contratos ejecutados" in indication["excerpt"]
+    assert finding["why_not_formal"]["reason"] == "requirement_requires_corroboration"
+    assert finding["resolution_actions"]
+
+
+def test_experience_required_is_reserved_for_the_formal_status():
+    documents = [document([LIST_WITHOUT_EXPERIENCE + "\n" + REQUIREMENT]), study()]
+
+    classification, finding = assess(documents)
+
+    assert classification["status"] == "experience_required"
+    assert finding["category"] == "experience_required"
+    assert finding["why_not_formal"] is None
+    assert finding["needs_human_attention"] is False
+
+
+def test_conflicting_requirement_and_waiver_stays_uncertain():
+    text = LIST_WITHOUT_EXPERIENCE + "\nNo se exige experiencia contractual al proponente."
+    documents = [document([text]), document([REQUIREMENT], "support", "2")]
+
+    _, finding = assess(documents)
+
+    assert finding["category"] == "uncertain"
+
+
+def test_review_effort_orders_without_excluding():
+    formats = document(
+        [], "support", "3", name="FORMATOS", complete=False, validation_gap="formato_no_procesable"
+    )
+    pending = {**study(), "complete": False, "fragments": []}
+
+    _, reading = assess([document([LIST_WITHOUT_EXPERIENCE]), study()])
+    _, missing = assess([document([LIST_WITHOUT_EXPERIENCE]), pending])
+    _, unsupported = assess([document([LIST_WITHOUT_EXPERIENCE]), study(), formats])
+
+    assert reading["review_effort"] == "lectura_humana"
+    assert missing["review_effort"] == "documento_pendiente"
+    assert unsupported["review_effort"] == "formato_no_soportado"
+    assert any("FORMATOS" in action for action in unsupported["resolution_actions"])
+    assert all(f["visible"] for f in (reading, missing, unsupported))
+
+
+def test_actions_list_governing_documents_first_and_summarize_the_rest():
+    pending = [
+        document([], "unknown", str(10 + index), name=f"Anexo {index}", complete=False)
+        for index in range(7)
+    ]
+    invitation = document([], "primary", "9", name="Invitación", complete=False)
+
+    _, finding = assess([*pending, invitation])
+
+    actions = finding["resolution_actions"]
+    assert "Invitación" in actions[0]
+    assert any(action.startswith("Y 3 documentos más") for action in actions)
