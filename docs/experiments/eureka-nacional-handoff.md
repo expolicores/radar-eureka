@@ -1149,3 +1149,12 @@ revisión humana (26-13-14851414): invitación completa sin ninguna
 mención de experiencia, con el estudio previo pendiente. El embudo
 completo de la búsqueda ciega da 0 favorables formales.
 [Detalle](eureka-nacional-experience-spike.md#etapa-3-de-la-búsqueda-ciega-cuatro-procesos-secop-i).
+
+
+### Lote de validación de candidatos pendiente de aprobación
+
+Dos documentos: el estudio previo de Betéitiva 26-13-14851414
+(SECOP I, 250 KB) y el estudio previo y anexos de DTAO-FONAM
+(SECOP II, DocumentId 897735547). Hash `aaed3563…83598f9`. No hay
+recibos reutilizables.
+[Detalle](eureka-nacional-experience-spike.md#validación-focalizada-de-dos-candidatos-lote-documental-propuesto).

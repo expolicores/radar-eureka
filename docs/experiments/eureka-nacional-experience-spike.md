@@ -4098,3 +4098,26 @@ Embudo actualizado de en01-uc9h1l8y:
   experience_ambiguous. Corrige el «9 analizados» del informe de
   etapa 1.
 - Favorables formales: 0.
+
+
+### Validación focalizada de dos candidatos: lote documental propuesto
+
+Revisión sin peticiones de los inventarios y recibos guardados. No
+existen copias reutilizables de los documentos pendientes en
+ninguna corrida.
+
+| Candidato | Documento indispensable | Identidad | Tamaño mostrado | Mecanismo |
+| --- | --- | --- | --- | --- |
+| Betéitiva 26-13-14851414 (SECOP I) | ESTUDIOS PREVIOS (apoyo) | `secop1:26-13-14851414:8d5c9bbb…aa06d3b`, ruta `…/DA_PROCESO_26-13-14851414_21509215_140899271.pdf` | 250 KB | POST interceptado del lote SECOP I (login, preflight, confirmación ligada al hash, 10 MiB y 12 s) |
+| DTAO-FONAM CO1.NTC.11284005 (SECOP II) | ESTUDIO PREVIO Y ANEXOS (apoyo) | DocumentId `897735547` | SECOP II no lo informa | Descarga directa y, ante un 403, Streaming por Edge (10 MiB y 12 s). Requiere autorizar el Streaming para un documento de apoyo. |
+
+Hash del lote de dos documentos:
+`aaed35635bbbd6d124332102a4191b120983e7773b80317aa82e95f9883598f9`.
+
+No indispensables:
+
+- Betéitiva: análisis del sector y CDP.
+- FONAM: «FORMATOS», que no tiene extensión reconocida y no es
+  procesable por el pipeline.
+
+Pendiente: la aprobación del lote antes de cualquier descarga.
