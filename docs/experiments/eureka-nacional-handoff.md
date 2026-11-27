@@ -1216,3 +1216,22 @@ habilitantes; hay tres alternativas propuestas, sin implementar.
 FONAM: hay una propuesta de revisión manual de «FORMATOS» sin
 peticiones.
 [Detalle](eureka-nacional-experience-spike.md#corrección-del-detector-de-dependencias-y-regresión-sobre-documentos-almacenados).
+
+
+### Hallazgos con alta sensibilidad y revisión humana
+
+- Capa aditiva `finding` (`311a51b`): confirmado, prioritario para
+  revisión, con incertidumbre y experiencia exigida. Los estados
+  formales no cambian y ningún proceso se excluye.
+- Detector generalizable de listas habilitantes cerradas sin
+  experiencia; registra páginas, ítems, cierre, términos y anexos.
+- Betéitiva: prioritario para revisión y sigue en not_resolved.
+- FONAM: con incertidumbre y visible. El ZIP no está verificado por
+  el sistema y la revisión humana es una anotación aparte.
+- Regresión: 60 procesos únicos; 1 prioritario, 39 con
+  incertidumbre y 20 con experiencia exigida. No se pierde nada ni
+  cambia ningún estado formal.
+- Detenido antes de cualquier exploración real o cambio de la regla
+  formal de ausencia.
+
+[Detalle](eureka-nacional-experience-spike.md#evolución-de-hallazgos-alta-sensibilidad-y-revisión-humana).

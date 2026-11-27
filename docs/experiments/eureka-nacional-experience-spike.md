@@ -4447,3 +4447,168 @@ plantillas copiadas.
    declarado por el proveedor.
 
 No se implementó soporte de formatos ni se hizo ninguna petición.
+
+### Evolución de hallazgos: alta sensibilidad y revisión humana
+
+Commit `311a51b`. Es una capa de presentación aditiva
+(`backend/scripts/eureka_nacional_findings.py`, método
+`en01-findings-v1`). Los cuatro estados formales y la regla de
+ausencia formal no cambian: el resultado formal se calcula igual que
+antes y la capa añade el campo `finding`. La prioridad comercial
+A/B/C sigue siendo independiente.
+
+| Categoría | Cuándo |
+|---|---|
+| Hallazgo confirmado | estado formal `no_experience_required` |
+| Hallazgo prioritario para revisión | `not_resolved` y, además, una lista cerrada de requisitos habilitantes sin experiencia, o una ausencia explícita pendiente de corroborar, sin vacíos documentales |
+| Hallazgo con incertidumbre | todo lo demás que no sea una exigencia; siempre visible |
+| Experiencia exigida | estado formal `experience_required` o revisión `explicit_requirement` |
+
+Ningún proceso se excluye por falta de lista cerrada, por
+documentos pendientes, por `not_resolved` ni por falta de una frase
+literal de ausencia. La incertidumbre sólo baja la prioridad y añade
+advertencias. `not_resolved` nunca equivale a descartado. Las
+exclusiones por cupo o por geografía siguen en el embudo de
+descubrimiento con su motivo explícito y no se presentan como
+descartes por experiencia.
+
+Detector de listas habilitantes (generalizable, sin reglas por
+entidad):
+
+- Encabezado: «requisitos (mínimos) habilitantes» numerado (2.9),
+  con letra (A.) o en mayúsculas. La prosa partida en dos líneas no
+  cuenta como encabezado.
+- Cierre: la sección termina en el siguiente encabezado en
+  mayúsculas que sea hermano o posterior (2.10 tras 2.9, B. tras
+  A.). Las subsecciones (2.9.2) siguen dentro. Una línea que
+  continúa la numeración de los ítems (6 tras 5) es un ítem aunque
+  esté en mayúsculas, para que una lista larga no parezca cerrada
+  antes de tiempo.
+- Registra páginas, encabezado, línea de cierre, número de ítems,
+  ítems, términos de experiencia o capacidad (experiencia, capacidad
+  técnica, financiera, organizacional o residual, contratos
+  ejecutados o similares, certificaciones de contratos, indicadores
+  financieros, RUP), referencias a anexos o formatos y un extracto.
+- Una lista se considera aparentemente exhaustiva si cierra dentro
+  del texto leído y tiene al menos 3 ítems.
+
+Condiciones para «prioritario» por lista cerrada, todas a la vez:
+
+- Una lista aparentemente exhaustiva y sin términos de experiencia
+  en un rector completo.
+- Ninguna sección habilitante que mencione experiencia o capacidad.
+- Ninguna EXIGENCIA ni NORMATIVA_CONDICIONAL en la evidencia.
+- Ninguna dependencia documental.
+- Inventario completo.
+- Todos los documentos no auxiliares verificados por el sistema.
+  Sólo CDP, PAA, BPIN y análisis del sector pueden quedar
+  pendientes sin bajar la prioridad.
+
+Revisión humana: `eureka_nacional_human_reviews.v1.json` guarda
+anotaciones con `system_verified: false`. Se adjuntan en
+`finding.human_review` y nunca cambian la categoría
+(`human_review_changes_category: false`) ni el estado formal. Cada
+hallazgo separa `coverage.system_verified` de
+`coverage.not_verified_by_system`.
+
+Integración (aditiva): campo `finding` en los resultados del
+runner, de la etapa 3 SECOP I y del análisis focalizado; conteo
+`finding_categories` por fuente en el informe ciego.
+
+#### Controles, reanalizados offline
+
+Se usaron los mismos binarios, OCR local y ninguna petición. El
+resultado está en
+`en01-target_uc9h1l8y/validation_results_findings.json`; el
+`validation_results.json` original no se tocó.
+
+| | Betéitiva 26-13-14851414 | FONAM CO1.NTC.11284005 |
+|---|---|---|
+| Estado formal | not_resolved (no_decisive_clause), sin cambios | not_resolved (no_decisive_clause), sin cambios |
+| Hallazgo | **Prioritario para revisión** | **Con incertidumbre**, visible |
+| Base | `closed_habilitating_list_without_experience` | `closed_list_with_unverified_documents` |
+| Lista detectada | «2.9 REQUISITOS HABILITANTES», páginas 6 a 8, 14 ítems, cierra en «2.10 VALIDEZ MÍNIMA DE LA OFERTA», sin términos de experiencia, anexos 1 y 6 | «A. REQUISITOS HABILITANTES:», páginas 14 a 16, 15 ítems, cierra en «B. PROPUESTA TÉCNICA:», sin términos de experiencia, formatos 1, 2, 4, 5, 6 y 7 |
+| Verificado por el sistema | Invitación 26 de 26 páginas; estudio previo 8 de 8 | Invitación 18 de 18; estudio previo y anexos 61 de 61 |
+| No verificado por el sistema | ninguno (CDP y análisis del sector son auxiliares) | FORMATOS (`formato_no_procesable`, ZIP) |
+| Revisión humana (anotación aparte) | sin requisito de experiencia en la invitación ni en el estudio | FORMATOS revisado a mano dentro del ZIP: sin anexo ni requisito de experiencia; el ZIP no fue validado por el sistema |
+
+La prioridad de Betéitiva se basa en la lista habilitante y en la
+cobertura, no en una excepción por proceso. Sin el estudio previo,
+el mismo proceso queda con incertidumbre (ver la ablación). FONAM no
+se descarta por el ZIP pendiente, no se vuelve favorable formal y
+muestra por separado lo que verificó el sistema y lo que se revisó
+a mano.
+
+#### Regresión histórica
+
+Resultado en `.local/eureka-nacional-spike/findings-regression-2u68bkh_`.
+Se extrajeron 74 PDF sólo con texto nativo y se evaluaron 85
+instancias de proceso (60 procesos únicos) de todas las corridas.
+El clasificador no se modificó y se comprobó en cada caso que la
+capa no altera la clasificación.
+
+| Métrica (procesos únicos) | Antes | Después |
+|---|---|---|
+| Hallazgos visibles (favorable confirmado o pendiente de corroborar) | 0 | 40 (todo lo que no es exigencia) |
+| Confirmados | 0 | 0 |
+| Prioritarios | 0 | 1 (Betéitiva) |
+| Con incertidumbre | — | 39 |
+| Experiencia exigida | — | 20 (8 formales y 12 por revisión `explicit_requirement`) |
+| Excluidos por motivos no documentales (corrida ciega `en01-uc9h1l8y`) | 5 por geografía, 10 por cupo | iguales; la capa no excluye |
+
+Comprobaciones:
+
+- Exigencias explícitas: las 14 instancias con `experience_required`
+  formal siguen como «Experiencia exigida».
+- Pérdidas: ningún hallazgo antes visible se pierde (antes no había
+  ninguno y ahora todos los procesos son visibles).
+- Estados formales: ningún cambio.
+- Falsos positivos de alta prioridad: 1 proceso prioritario (3
+  instancias, el mismo proceso en tres corridas). De las 8 instancias
+  con una lista cerrada sin experiencia, 5 no suben de prioridad:
+  - CO1.NTC.11268916: otra sección habilitante menciona experiencia
+    o capacidad, hay una cláusula condicional y quedan documentos
+    sin verificar;
+  - CO1.NTC.11287125: hay una señal de exigencia y documentos sin
+    verificar;
+  - FONAM: el ZIP no está verificado.
+- Ablación: al quitar el estudio previo completo de los 3 casos
+  prioritarios, los 3 pasan a incertidumbre y siguen visibles.
+- No resueltos relevantes: los 38 procesos únicos en `not_resolved`
+  siguen visibles. Quedan 25 con incertidumbre, 1 prioritario y 12
+  como «Experiencia exigida» por revisión. Los 14
+  `experience_ambiguous` quedan con incertidumbre.
+- Pruebas: 15 nuevas. Suite nacional: 599 pasan y 11 se omiten, con
+  código de salida 0. ruff sin errores.
+
+#### Riesgos
+
+- Requisitos que aparecen sólo en adendas posteriores, en formatos o
+  en documentos no leídos. La capa exige cobertura completa salvo
+  documentos auxiliares, pero no puede ver lo que no se publicó.
+- Listas cuyo cierre se detecta mal: encabezados sin mayúsculas,
+  numeración irregular o textos de OCR. El efecto es conservador:
+  una lista no cerrada da incertidumbre, no prioridad.
+- Plantillas copiadas con listas habilitantes que no corresponden al
+  proceso.
+- Los términos de capacidad (financiera, RUP) bloquean la prioridad
+  aunque no sean experiencia. Es una decisión deliberada a favor de
+  menos falsos prioritarios.
+- La categoría «Experiencia exigida» incluye 12 procesos que no
+  tienen conclusión formal (revisión `explicit_requirement` con
+  cobertura parcial). Siguen visibles y su `formal_status` se
+  muestra.
+- La validez de la anotación humana depende del operador y de la
+  versión del documento revisado.
+
+#### Próximos pasos propuestos (sin ejecutar)
+
+1. Presentar `finding` en el informe ciego como lista ordenada por
+   categoría y después por prioridad comercial A/B/C.
+2. Validar el detector en una nueva muestra ciega, lo que requiere
+   autorización para una exploración real.
+3. Soporte de ZIP/RAR/DOCX/XLSX para cerrar vacíos como el de
+   FONAM: pendiente de decisión.
+4. Revisar con el titular si los 12 casos de «Experiencia exigida»
+   sin conclusión formal deben presentarse como tales o con
+   incertidumbre.
