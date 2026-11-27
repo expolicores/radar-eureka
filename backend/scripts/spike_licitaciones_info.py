@@ -29,6 +29,10 @@ from public_procurement.extraction.domain.content import (
 from public_procurement.extraction.ocr_config import load_ocr_policy
 from public_procurement.extraction.services import ExtractionService
 from public_procurement.extraction.structured_rules import extract_facts
+from public_procurement.licitaciones_cdp.configuration import (
+    ProfileConfigurationError,
+    resolve_profile_id,
+)
 from public_procurement.shared.config import Settings
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -171,7 +175,6 @@ def load_session(path: Path | None) -> dict[str, str]:
         "LICITACIONES_X_CSRF_TOKEN",
         "LICITACIONES_X_XSRF_TOKEN",
         "LICITACIONES_BOYACA_LOCATION_IDS",
-        "LICITACIONES_PROFILE_ID",
     )
     return {key: os.environ.get(key, str(config.get(key, ""))) for key in keys}
 
@@ -282,9 +285,7 @@ class Client:
 
 
 def fetch_processes(client, config, term, limit):
-    profile = config["LICITACIONES_PROFILE_ID"] or "1086005"
-    if not profile.isdigit():
-        raise SpikeError("Perfil inválido.")
+    profile = resolve_profile_id(config.get("LICITACIONES_PROFILE_ID"))
     payload = build_process_payload(config["LICITACIONES_BOYACA_LOCATION_IDS"], term, limit)
     received = rows(client.post(f"/cliente/contratos/get-info/MP?perfiles={profile}", payload))
     if len(received) > limit:
@@ -490,6 +491,9 @@ def main(argv=None):
     parser.add_argument("--storage-state", type=Path)
     parser.add_argument("--auth-check-only", action="store_true")
     parser.add_argument(
+        "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
+    )
+    parser.add_argument(
         "--location-ids-file",
         type=Path,
         default=ROOT / "scripts" / ".local" / "licitaciones_boyaca_ids.txt",
@@ -497,7 +501,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     client = None
     try:
+        profile = resolve_profile_id(args.profile_id)
         config = load_session(args.session_file)
+        config["LICITACIONES_PROFILE_ID"] = profile
         if not config["LICITACIONES_BOYACA_LOCATION_IDS"]:
             if not args.location_ids_file.is_file():
                 raise SpikeError("Falta el archivo local con IDs de ubicación de Boyacá.")
@@ -514,9 +520,6 @@ def main(argv=None):
             else Client(config)
         )
         if args.auth_check_only:
-            profile = config["LICITACIONES_PROFILE_ID"] or "1086005"
-            if not profile.isdigit():
-                raise SpikeError("Perfil inválido.")
             client.post(
                 f"/cliente/contratos/get-info/MP?perfiles={profile}",
                 build_process_payload(
@@ -588,7 +591,7 @@ def main(argv=None):
     except Exception as error:
         print(
             str(error)
-            if isinstance(error, SpikeError)
+            if isinstance(error, (SpikeError, ProfileConfigurationError))
             else f"Spike detenido: {type(error).__name__}."
         )
         return 1

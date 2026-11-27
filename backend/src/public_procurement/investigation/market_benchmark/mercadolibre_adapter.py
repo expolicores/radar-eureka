@@ -14,6 +14,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from public_procurement.shared.config import ENV_FILE
 from public_procurement.shared.text import normalize_text
 
 from .matching import IdentityMatch, match_identity
@@ -27,7 +28,7 @@ SITE_ID = "MCO"
 
 class MercadoLibreSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=ENV_FILE,
         extra="ignore",
         frozen=True,
         hide_input_in_errors=True,

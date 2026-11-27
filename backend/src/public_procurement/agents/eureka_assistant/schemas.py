@@ -9,6 +9,8 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from public_procurement.shared.config import ENV_FILE
+
 TOOL_NAME = "get_latest_cdp_run"
 TOOL_SCHEMA: dict[str, Any] = {
     "type": "function",
@@ -86,7 +88,7 @@ TOOL_SCHEMAS = [
 
 
 class FoundrySettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", frozen=True)
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore", frozen=True)
 
     azure_foundry_project_endpoint: str
     eureka_foundry_agent_name: str = "eureka-assistant"

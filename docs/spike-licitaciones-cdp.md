@@ -8,8 +8,10 @@ El perfil comercial se resuelve desde una única configuración runtime:
 2. LICITACIONES_PROFILE_ID del entorno del proceso o backend/.env, mediante Settings.
 3. Si falta, error configuration_error antes de conectar a CDP. No hay fallback al perfil histórico.
 
-Ejemplo local (no secreto): LICITACIONES_PROFILE_ID=1130951. La cuenta/perfil visible
-actual es infoexpress; su nombre es informativo y no interviene en la lógica.
+El valor operativo vive solo en backend/.env local (no versionado); la documentación no
+fija ningún ID. CLI, API y worker leen ese archivo por ruta absoluta, sin depender del
+directorio de trabajo. El nombre visible del perfil es informativo y no interviene en la
+lógica.
 El plan licitaciones_search_plan.v1.json describe búsquedas y ya no admite profile_id;
 el loader añade el ID resuelto solo al plan en memoria. Los planes antiguos con esa
 clave deben quitarla: se rechazan para impedir dos fuentes de verdad.

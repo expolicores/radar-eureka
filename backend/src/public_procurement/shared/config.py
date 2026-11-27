@@ -17,6 +17,10 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# .env propio de Regional (backend/.env) por ruta absoluta: no depende del directorio de
+# trabajo del proceso. La precedencia no cambia: argumentos > entorno > .env > defaults.
+ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
+
 REQUIRED_VARIABLES = ("DATABASE_URL",)
 
 
@@ -40,7 +44,7 @@ class MissingConfigurationError(RuntimeError):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", frozen=True)
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore", frozen=True)
 
     database_url: str
     licitaciones_profile_id: str | None = None

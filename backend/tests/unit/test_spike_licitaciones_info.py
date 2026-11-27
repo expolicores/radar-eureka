@@ -49,7 +49,7 @@ def config(**overrides):
         "LICITACIONES_X_CSRF_TOKEN": "",
         "LICITACIONES_X_XSRF_TOKEN": "",
         "LICITACIONES_BOYACA_LOCATION_IDS": "1,2,3",
-        "LICITACIONES_PROFILE_ID": "1086005",
+        "LICITACIONES_PROFILE_ID": "1234567",
         **overrides,
     }
 
@@ -92,7 +92,7 @@ def test_payload_filters_and_discovery_dedup_no_additional_queries():
     assert len(processes) == 1
     client.post.assert_called_once()
     path, payload = client.post.call_args.args
-    assert path.endswith("?perfiles=1086005")
+    assert path.endswith("?perfiles=1234567")
     assert payload["query"] == {"Objeto": "refrigerio", "ubicacion_filter": "1,2,3"}
     assert payload["orderBy"] == "FechaPublicacion"
     assert payload["ascending"] == 0
@@ -326,7 +326,7 @@ def test_main_reads_local_ids_without_querying_real_source_or_db(tmp_path, monke
     monkeypatch.setattr(spike, "Client", factory)
     monkeypatch.setattr(spike, "SPIKE_ROOT", tmp_path / "runs")
     monkeypatch.setattr(spike, "fetch_processes", Mock(return_value=([], 0)))
-    assert spike.main(["--location-ids-file", str(ids)]) == 0
+    assert spike.main(["--location-ids-file", str(ids), "--profile-id", "1234567"]) == 0
     assert factory.call_args.args[0]["LICITACIONES_BOYACA_LOCATION_IDS"] == "40060001,40060002"
     report = json.loads(
         next((tmp_path / "runs").glob("*/results.json")).read_text(encoding="utf-8")
@@ -377,10 +377,13 @@ def test_context_request_shares_cookie_jar_and_never_follows_redirects():
     response.status = 302
     response.headers = {"location": "/login?token=secret"}
     report = auth.validate_context(
-        context, {"accept": "application/json"}, {"Cookie": "secret"}, {"limit": 30}
+        context, {"accept": "application/json"}, {"Cookie": "secret"}, {"limit": 30}, "1234567"
     )
     assert report["accepted"] is False
     assert "secret" not in json.dumps(report)
+    assert (
+        context.request.post.call_args.args[0] == f"{auth.ORIGIN}{auth.ENDPOINT}?perfiles=1234567"
+    )
     assert context.request.post.call_args.kwargs["max_redirects"] == 0
     assert context.request.post.call_args.kwargs["max_retries"] == 0
     response.dispose.assert_called_once()
@@ -405,7 +408,7 @@ def test_auth_check_stops_before_any_documents_or_extraction(tmp_path, monkeypat
     monkeypatch.setattr(spike, "Client", Mock(return_value=client))
     fetch = Mock(side_effect=AssertionError("must not run discovery parser or documents"))
     monkeypatch.setattr(spike, "fetch_processes", fetch)
-    assert spike.main(["--auth-check-only"]) == 0
+    assert spike.main(["--auth-check-only", "--profile-id", "1234567"]) == 0
     client.post.assert_called_once()
     fetch.assert_not_called()
 
@@ -508,7 +511,9 @@ def test_visible_helper_keeps_browser_open_after_success_or_navigation_error(
         monkeypatch.setattr(helper, "write_local", Mock())
     else:
         page.goto.side_effect = TimeoutError("sensitive text must not appear")
-    assert helper.run_visible(None, context, browser, {}, 120, "test") == (0 if captured else 1)
+    assert helper.run_visible(None, context, browser, {}, 120, "test", "1234567") == (
+        0 if captured else 1
+    )
     page.wait_for_timeout.assert_called_once_with(500)
     browser.close.assert_not_called()
     text = (tmp_path / "browser-network-test.jsonl").read_text(encoding="utf-8")

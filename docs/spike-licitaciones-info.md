@@ -88,7 +88,8 @@ Claves del objeto JSON local:
   `backend/scripts/.local/licitaciones_boyaca_ids.txt` con los 123 IDs proporcionados.
   `--location-ids-file` permite indicar otra ruta local. No se inventan IDs ni se
   sustituyen por códigos DANE. `backend/scripts/.local/` está ignorado por Git.
-- `LICITACIONES_PROFILE_ID`: opcional; por defecto `1086005`, proporcionado para el spike.
+- `LICITACIONES_PROFILE_ID`: obligatorio (o `--profile-id`); sin valor por defecto. Se lee
+  solo de la configuración local de Regional (`backend/.env`), nunca del código.
 
 No se imprime ni se copia la sesión a los resultados. Los errores de librerías se
 reportan por tipo, sin cuerpos HTTP ni headers. No hay login automatizado, CAPTCHA

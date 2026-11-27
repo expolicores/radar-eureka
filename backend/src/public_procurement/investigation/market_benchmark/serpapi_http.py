@@ -11,12 +11,14 @@ import httpx
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from public_procurement.shared.config import ENV_FILE
+
 ENDPOINT = "https://serpapi.com/search.json"
 ENGINES = {"google_shopping", "google_product", "google_immersive_product"}
 
 
 class SerpApiSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore", hide_input_in_errors=True)
     serpapi_api_key: SecretStr | None = Field(default=None, repr=False)
     serpapi_timeout_seconds: float = Field(default=45, ge=5, le=60)
 

@@ -10,6 +10,8 @@ from urllib.parse import urlsplit
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from public_procurement.shared.config import ENV_FILE
+
 from .matching import observe
 from .ports import ScoutRequest, ScoutUnavailableError
 from .schemas import MarketObservation, RejectionReason, SearchResult
@@ -17,7 +19,7 @@ from .urls import canonical_url
 
 
 class ScoutSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore", hide_input_in_errors=True)
 
     azure_foundry_project_endpoint: str
     market_price_scout_model: str = "gpt-4.1-mini-eureka"
