@@ -1257,3 +1257,22 @@ peticiones.
   documentos rectores para 9 procesos de prioridad A.
 
 [Detalle](eureka-nacional-experience-spike.md#indicios-de-experiencia-y-presentación-del-embudo).
+
+
+### Perfil Vila Frontier y búsqueda controlada
+
+- Perfil permanente en `backend/.env` de Eureka Nacional (no
+  versionado; sin dependencia del `.env` regional). Preflight
+  pasivo: `only_configured`, `profile_count: 1`, sesión válida.
+- `en01-k94ws3so`: 24 de 200 créditos; 240 avisos publicados entre
+  el 18 y el 27 de noviembre; sólo 2 dentro de las 48 horas y 1
+  elegible.
+- Ese elegible, CO1.NTC.11293222 (Huila, prioridad A), queda con
+  incertidumbre y visible: dio 403 en el estudio previo y las
+  condiciones generales no se reconocen como rector.
+- Pendiente de decisión: un lote de 2 documentos, la reevaluación
+  offline de una ventana de 10 días, comprobar en la interfaz el
+  hueco del 21 al 26 de noviembre y si se reconocen las «condiciones
+  generales de participación» como rector.
+
+[Detalle](eureka-nacional-experience-spike.md#perfil-permanente-vila-frontier-y-búsqueda-controlada-en01-k94ws3so).

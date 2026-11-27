@@ -4803,3 +4803,129 @@ prioridad A que hoy tienen incertidumbre o indicios por cobertura:
   prioritario).
 
 Requiere autorización explícita. Me detengo aquí.
+
+### Perfil permanente Vila Frontier y búsqueda controlada (en01-k94ws3so)
+
+#### Perfil
+
+- Identidad: el titular verificó la asociación entre el nombre y el
+  ID en la pestaña Network de Licitaciones.info
+  (`MP?perfiles=…` con Vila Frontier seleccionado).
+- Configuración: `backend/.env` de Eureka Nacional contiene sólo
+  `LICITACIONES_PROFILE_ID`. Git lo ignora y no se publica. Eureka
+  Nacional deja de leer el `.env` de Eureka Regional, que usaban
+  las corridas anteriores (otro perfil). El ID no se escribe en
+  este informe.
+- Preflight pasivo:
+  - Se usó `PassivePreflight` sin cambios desde un arnés temporal:
+    una pestaña nueva en la sesión del Edge dedicado, con el feed
+    bloqueado y la pestaña habitual intacta.
+  - Los dos primeros intentos dieron `configured_with_others` y
+    `profile_count: 2`: la carga desde cero enviaba también otro
+    perfil de la cuenta. Se detuvo sin consultar el feed.
+  - Tras dejar la cuenta con un único perfil, dio `only_configured`,
+    `profile_count: 1` y sesión válida, con 0 consultas al feed.
+
+#### Comprobaciones previas
+
+- Rama `experiment/eureka-nacional` en `5eb7c3e`; todo el código se
+  importa desde Eureka Nacional.
+- Geografía: 160 ubicaciones de Boyacá y Huila.
+- Sin el marcador `cdp-stream-live-uncertain.lock` y con 0 intentos
+  de adquisición sin resultado.
+- 84 binarios históricos con su SHA-256 correcto.
+- Capa de hallazgos con 611 pruebas en verde.
+- Presupuesto: 200 créditos y 720 s.
+
+#### Corrida
+
+- Parámetros: los mismos de la búsqueda ciega con una ventana de 2
+  días. `--exploratory --processes 15 --documents 24
+  --discovery-pages 8 --recent-days 2 --edge-stream-fallback
+  --include-secop1 --secop1-processes 5 --ocr-pages 2` y la
+  geografía de Boyacá y Huila.
+- Sin POST a SECOP I.
+- Consumo: 24 de 200 créditos en 28 s; resultado parcial.
+
+Cobertura real:
+
+- Se leyeron 240 avisos en 8 páginas, publicados entre el 18-11 a
+  las 06:22 y el 27-11 a las 15:54.
+- El feed llega ordenado por fecha de publicación descendente,
+  salvo 6 solapes de minutos entre páginas.
+- Con este perfil y esta geografía saltó del 27-11 al 20-11: no
+  devolvió ningún aviso del 21 al 26 de noviembre. Falta verificar
+  en la interfaz si es lo esperado para este perfil.
+- La ventana de 48 horas quedó cubierta por completo en la primera
+  página; sólo 2 avisos caían dentro. Las páginas 2 a 8 sólo
+  confirmaron que no había más avisos recientes.
+- `--recent-days` no limita lo que pagina el proveedor; sólo filtra
+  después.
+
+| Fuente / departamento | Descubiertos | Dentro de 48 h | Elegibles | Seleccionados |
+|---|---|---|---|---|
+| SECOP II Boyacá | 112 | 1 | 0 (servicio principal) | 0 |
+| SECOP II Huila | 62 | 1 | 1 | 1 |
+| SECOP I Boyacá | 48 | 0 | 0 | 0 |
+| SECOP I Huila | 8 | 0 | 0 | 0 |
+| Otros portales y otras geografías | 10 | 0 | 0 | 0 |
+
+- Exclusiones: 232 fuera de la ventana de publicación, 6 fuera de la
+  geografía y 1 por servicio principal.
+- Ninguna exclusión es documental, y no hay elegibles fuera de
+  cuota.
+- Procesos nuevos: 235 de 240 no aparecían en corridas anteriores.
+  El elegible también es nuevo.
+
+#### Hallazgos
+
+Informe `en01-k94ws3so/blind_report_findings.md`, recalculado
+offline:
+
+| Categoría | Procesos |
+|---|---|
+| Confirmado | 0 |
+| Prioritario para revisión | 0 |
+| Con incertidumbre | 1 |
+| Indicios de experiencia exigida | 0 |
+| Experiencia exigida (formal) | 0 |
+
+- CO1.NTC.11293222, Instituto Financiero para el Desarrollo del
+  Huila: adquisición de equipos de cómputo, prioridad A.
+  - Estado formal: `not_resolved` (`governing_documents_incomplete`).
+    No es un descarte.
+  - El runner eligió «CDP» y «ESTUDIOS PREVIOS»; ambos dieron 403
+    en descarga directa.
+  - No hubo intento por Edge: no son documentos rectores para el
+    runner, porque «CONDICIONES GENERALES DE PARTICIPACIÓN» se
+    reconoce con rol desconocido y quedó fuera por el límite de
+    documentos.
+  - Faltan las condiciones generales, el estudio previo y el
+    estudio de mercado.
+
+#### Limitaciones observadas
+
+- Con este perfil, el feed de Boyacá y Huila es mucho más escaso en
+  días recientes que con el perfil anterior: 240 avisos en 2 días
+  entonces, frente a 2 avisos en 48 horas ahora.
+- El nombre «Condiciones generales de participación», usado como
+  pliego en mínima cuantía de SECOP II, no se reconoce como rector.
+  En su lugar se seleccionó un CDP. Ya se había visto en Neiva
+  (CO1.NTC.11276610). Corregirlo implica tocar la detección de
+  roles del módulo de experiencia, lo que requiere decisión del
+  titular.
+
+#### Propuesta (sin ejecutar)
+
+1. Lote documental focalizado para CO1.NTC.11293222: «CONDICIONES
+   GENERALES DE PARTICIPACION_0001» y «ESTUDIOS PREVIOS_0001». Ir
+   por descarga directa y, ante 403, streaming por Edge sólo para
+   estos dos documentos, con el plan y la confirmación por hash
+   existentes.
+2. Reevaluación offline, sin créditos, de los 232 avisos ya leídos
+   del 18 al 20 de noviembre con una ventana de 10 días. Mostraría
+   cuántos pasan los filtros comerciales sin consultar el feed.
+3. Verificar en la interfaz si Vila Frontier tiene avisos de Boyacá
+   y Huila entre el 21 y el 26 de noviembre.
+4. Decidir si se reconoce «condiciones generales de participación»
+   como documento rector.
