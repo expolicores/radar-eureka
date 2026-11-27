@@ -1167,3 +1167,10 @@ real reproduce el lote `aaed3563…`, y la cola SECOP I derivada es
 `892d8ebc…`. La adquisición real de los dos estudios previos espera
 autorización expresa.
 [Detalle](eureka-nacional-experience-spike.md#herramientas-de-validación-focalizada-offline-y-procedimiento-de-adquisición).
+
+
+### Estudios previos de los dos candidatos recuperados
+
+FONAM: 2,47 MB, por Streaming tras un 403. Betéitiva: 256 KB, por
+un POST. Ambos tienen recibos verificados y el cierre fue seguro.
+El análisis conjunto con las invitaciones espera autorización.

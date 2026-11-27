@@ -4166,3 +4166,30 @@ Límites: 10 MiB y 12 s por documento, sin reintentos.
 Riesgos: los «FORMATOS» de FONAM no son procesables y su lectura
 quedará como mucho en evidencia insuficiente. El tamaño del estudio
 previo y anexos de FONAM es desconocido y podría superar el límite.
+
+
+### Adquisición focalizada de los dos estudios previos
+
+Lote aprobado `aaed3563…83598f9`, en en01-target_uc9h1l8y.
+
+| Documento | Mecanismo | Bytes | SHA-256 | Tiempo |
+| --- | --- | --- | --- | --- |
+| FONAM, ESTUDIO PREVIO Y ANEXOS (DocumentId 897735547) | Directa con HTTP 403; un Streaming autorizado | 2.474.123 | `b6507608f3c8e2aac8c15ae84a31697b63643933a42bfe8b20aca7ed4d12362a` | 5,8 s |
+| Betéitiva, ESTUDIOS PREVIOS (26-13-14851414; cola `892d8ebc…`) | Un POST interceptado, 200 sin Content-Length | 255.827 | `48547ead869cce1cada616c42fd82e2e2899d50a4dfe7d40987032dbafd2c311` | 1,8 s |
+
+FONAM: `download_stream_pdf` sólo devuelve el archivo con una
+petición reenviada y el cierre del trabajador, el flujo, la
+navegación y la pestaña verificados, y liberó el marcador.
+
+Betéitiva: preflight con sesión válida, only_configured y
+profile_count 1; confirmación ligada al hash. El tamaño recibido
+coincide con los 250 KB mostrados.
+
+Ambos tienen `%PDF-1.7` y `%%EOF`, un recibo verificado contra el
+almacenamiento y un intento finalizado como stored con el hash de
+su lote. No quedaron temporales ni hubo descargas nativas. El
+contexto se cerró y quedó verificado, el trabajador salió con 0 y
+el marcador se liberó. Hubo cero consultas al feed o inventarios,
+cero reintentos y ningún otro documento. Las invitaciones
+guardadas se conservan para el análisis conjunto, pendiente de
+autorización.
