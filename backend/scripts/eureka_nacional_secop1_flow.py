@@ -830,6 +830,31 @@ def ensure_inside(root: Path, path: Path):
 # ---------------------------------------------------------------- stage 3: offline resume
 
 
+def analysis_items(run, queue):
+    """Queued documents plus those resolved by a reused receipt in this run.
+
+    A reused document left the acquisition queue but must still be analyzed; its full
+    identity comes from the archived queue where it was originally listed."""
+    items = list(queue["items"])
+    path = run / REUSE_FILE
+    if not path.is_file():
+        return items
+    reused = {
+        d["document_id"]
+        for d in json.loads(path.read_text(encoding="utf-8"))["decisions"]
+        if d.get("decision") == "reused_receipt"
+    }
+    known = {i["document_id"] for i in items}
+    for archived in sorted(run.glob("secop1_queue.superseded-*.json")):
+        for old in json.loads(archived.read_text(encoding="utf-8")).get("items", []):
+            if old["document_id"] in reused and old["document_id"] not in known:
+                items.append({**old, "reused_receipt": True})
+                known.add(old["document_id"])
+    if reused - known:
+        raise SpikeError("Documento reutilizado sin identidad archivada.")
+    return items
+
+
 def resume_secop1(
     source, output, *, settings, budget, runner, per_document=GOVERNING_OCR_PAGES, only=None
 ):
@@ -862,7 +887,7 @@ def resume_secop1(
         "secop1_extraction_seconds": 0.0,
         "secop1_receipt_rejected": 0,
     }
-    selected = [i for i in queue["items"] if only is None or i["constancia"] in only]
+    selected = [i for i in analysis_items(source, queue) if only is None or i["constancia"] in only]
     if only is not None and {i["constancia"] for i in selected} != set(only):
         raise SpikeError("Constancia fuera de la cola SECOP I.")
     for item in selected:
@@ -927,6 +952,7 @@ def resume_secop1(
                 "source": "secop1",
                 "process_reference": reference,
                 "constancia": item["constancia"],
+                "receipt_origin": "reused" if item.get("reused_receipt") else "acquired",
                 "department": process.get("department"),
                 "validity_status": process.get("validity_status"),
                 "commercial_category": process.get("primary_category"),

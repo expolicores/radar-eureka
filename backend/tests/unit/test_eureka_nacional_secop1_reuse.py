@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import eureka_nacional_secop1_acquire as acquire
 import eureka_nacional_secop1_flow as flow
@@ -208,3 +209,58 @@ def test_cli_refuses_reuse_once_the_batch_has_attempts(tmp_path, monkeypatch):
 
     assert flow.main([target.name, "--reuse-receipts"]) == 1
     assert not (target / flow.REUSE_FILE).exists()
+
+
+def test_reused_document_is_analyzed_offline_with_its_copied_receipt(tmp_path):
+    import eureka_nacional_en01 as en01
+    from test_eureka_nacional_secop1_flow import FakeExtractor
+
+    # Arrange: Jericó-like reuse plus one newly acquired document.
+    jerico, new_doc = item(1), item(2, "559 KB")
+    acquired_source(tmp_path, jerico)
+    target = run_dir(tmp_path, "en01-blind", [jerico, new_doc])
+    flow.reuse_receipts(target, tmp_path, LocalBinaryStorage)
+    flow.rebuild_queue(target)
+    storage = LocalBinaryStorage(target / "binaries")
+    body = b"%PDF-1.7\n" + b"1" * (572_400 - 16) + b"\n%%EOF\n"
+    stored = storage.store(
+        [body],
+        original_name="x.pdf",
+        content_type="application/pdf",
+        expected_size=len(body),
+        max_bytes=flow.DOCUMENT_BYTES,
+    )
+    acquire.write_receipt(
+        target,
+        new_doc,
+        {
+            "storage_path": stored.storage_path,
+            "sha256": stored.sha256,
+            "received_bytes": stored.observed_size,
+        },
+    )
+    output = tmp_path / "en01-secop1_blind"
+    output.mkdir()
+    runner = SimpleNamespace(
+        spike=en01.spike,
+        StoredBinary=en01.StoredBinary,
+        verify_document_type=en01.verify_document_type,
+        DOCUMENT_BYTES=en01.DOCUMENT_BYTES,
+        AcquisitionError=en01.AcquisitionError,
+        extract_document=FakeExtractor({}, total=3),
+    )
+
+    # Act
+    summary = flow.resume_secop1(
+        target, output, settings=None, budget=flow.OcrBudget(), runner=runner
+    )
+
+    # Assert
+    results = json.loads((output / "experience_requirements.json").read_text(encoding="utf-8"))
+    origins = {r["process_reference"]: r["receipt_origin"] for r in results}
+    assert origins == {
+        jerico["process_reference"]: "reused",
+        new_doc["process_reference"]: "acquired",
+    }
+    assert summary["secop1_receipts_used"] == 2
+    assert summary["secop1_download_pending"] == 0
