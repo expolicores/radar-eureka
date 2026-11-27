@@ -4929,3 +4929,163 @@ offline:
    y Huila entre el 21 y el 26 de noviembre.
 4. Decidir si se reconoce «condiciones generales de participación»
    como documento rector.
+
+### Ventana de 10 días, selección de rectores y cobertura por perfil
+
+Commit `481dfd8`. Todo offline: ninguna consulta, descarga ni POST.
+No cambian la regla formal de experiencia, los filtros comerciales,
+MPNE ni el perfil Vila Frontier.
+
+#### Cobertura del feed según el perfil
+
+- El titular comprobó en la interfaz que Vila Frontier no se usó
+  entre el 20 y el 27 de noviembre, mientras se trabajaba con otro
+  perfil, y que la interfaz muestra el mismo salto de fechas.
+- Por eso, la falta de avisos del 21 al 26 de noviembre en
+  `en01-k94ws3so` se atribuye a la inactividad del perfil. No es un
+  fallo demostrado del descubridor y no se investigará con más
+  consultas.
+- Regla de lectura: la cobertura histórica puede variar entre
+  perfiles. Un aviso ausente del feed no significa que el proceso
+  no exista. Las comparaciones entre corridas con perfiles distintos
+  no miden novedad ni volumen real del mercado.
+- Si hiciera falta distinguirlo en el futuro, se puede comprobar a
+  mano en la interfaz:
+  - con el mismo perfil, filtrar por departamento y fecha de
+    publicación;
+  - buscar en SECOP II un proceso conocido de esas fechas;
+  - ver si aparece en el feed del perfil, o con otro perfil
+    seleccionado.
+
+#### Reevaluación de los 240 avisos con ventana de 10 días
+
+- `eureka_nacional_window_reevaluation.py` reutiliza la selección
+  del runner sobre `processes.json`: frescura, vigencia, geografía,
+  preparación SECOP I y cuotas.
+- La evaluación comercial no se recalcula: se reproduce la de la
+  corrida original, así que los filtros y MPNE son exactamente los
+  mismos.
+- El reloj de referencia es el corte original.
+- Con la ventana original, reproduce de forma idéntica la selección
+  de `en01-k94ws3so` y de `en01-uc9h1l8y`.
+
+| Embudo con 10 días | Avisos |
+|---|---|
+| Descubiertos | 240 |
+| Fuera del perfil comercial | 139 |
+| Servicio principal | 56 |
+| Proceso cerrado | 21 |
+| Objeto no claramente de bienes | 8 |
+| Fuera de la geografía | 6 |
+| Servicio digital | 1 |
+| **Elegibles** | **9**: SECOP II Huila 6, SECOP II Boyacá 3; SECOP I 0 |
+| Prioridad comercial | 8 A y 1 B |
+| Seleccionables dentro de las cuotas (15 + 5) | 9 de 9 |
+| Nuevos (no vistos en corridas anteriores) | 9 de 9 |
+
+Elegibles, ordenados por prioridad comercial:
+
+| Prioridad | Proceso | Departamento | Publicado | Vigencia | Modalidad | Objeto |
+|---|---|---|---|---|---|---|
+| A | CO1.NTC.11293222 · Instituto Financiero para el Desarrollo del Huila | Huila | 27-11 | abierto | Mínima cuantía | Equipos de cómputo |
+| A | CO1.NTC.11257086 · I. E. José Miguel M. | Huila | 20-11 | desconocida | Régimen especial | Juegos didácticos |
+| A | CO1.NTC.11250835 · I. E. El Limonar | Huila | 19-11 | desconocida | Régimen especial | Papelería impresa y diplomas |
+| A | CO1.NTC.11249056 · I. E. San Joaquín | Huila | 19-11 | desconocida | Régimen especial | Diplomas y elementos de oficina |
+| A | CO1.NTC.11247014 · Alcaldía de Puerto Boyacá | Boyacá | 18-11 | abierto | Subasta inversa | Elementos de protección personal y dotación |
+| A | CO1.NTC.11293769 · Municipio de La Plata | Huila | 18-11 | abierto | Subasta inversa | Uniformes deportivos |
+| A | CO1.NTC.11286624 · ITBOY | Boyacá | 18-11 | abierto | Menor cuantía | Báscula electrónica portátil |
+| A | CO1.NTC.11243868 · I. E. Buenos Aires | Huila | 18-11 | desconocida | Régimen especial | Material pedagógico, instrumentos y deportes |
+| B | CO1.NTC.11259162 · Alcaldía de Puerto Boyacá | Boyacá | 20-11 | abierto | Subasta inversa | Elementos tecnológicos y mobiliario |
+
+Sólo CO1.NTC.11293222 tiene inventario documental. Los otros 8
+necesitarían inventario (créditos del proveedor) antes de cualquier
+adquisición. Ninguno tiene todavía hallazgo de experiencia: no
+significa nada sobre la exigencia, sólo que falta el análisis
+documental.
+
+#### Selección de documentos rectores
+
+Cambios:
+
+- `PRIMARY` reconoce como rector:
+  - «condiciones (generales) de/para la participación»;
+  - «reglas (generales) de participación»;
+  - «condiciones (generales) de/para la presentación de ofertas o
+    propuestas».
+- `document_priority`: los títulos administrativos (CDP, PAA,
+  BPIN, banco de proyectos, disponibilidad y registro
+  presupuestal, análisis o estudio del sector) bajan detrás de
+  cualquier documento no identificado. `ADMINISTRATIVE_TITLE` sólo
+  afecta al orden de selección; la cobertura y el clasificador
+  siguen usando `NON_GOVERNING_TITLE` sin cambios.
+
+Sin cambios:
+
+- invitación, pliego, condiciones definitivas, términos de
+  referencia, estudios previos, adendas y formatos;
+- una modificación de las condiciones sigue siendo adenda;
+- «condiciones técnicas mínimas» o «condiciones del contrato» no se
+  promueven a rector.
+
+Pruebas: 28 nuevas. Suite nacional: 639 pasan y 11 se omiten, con
+código de salida 0. ruff sin errores.
+
+Selección corregida para CO1.NTC.11293222 (3 documentos por
+proceso):
+
+| Orden | Antes | Después |
+|---|---|---|
+| 1 | ESTUDIOS PREVIOS_0001 (soporte) | CONDICIONES GENERALES DE PARTICIPACION_0001 (rector) |
+| 2 | CDP_0001 | ESTUDIOS PREVIOS_0001 |
+| 3 | CONDICIONES GENERALES DE PARTICIPACION_0001 (no identificado) | ESTUDIO DE MERCADO_0001 |
+
+El CDP queda cuarto y COTIZACIONES sigue excluido. Al ser rector,
+las condiciones generales también pueden pasar al streaming por
+Edge si la descarga directa da 403.
+
+#### Regresión sobre los inventarios guardados
+
+Resultado en `.local/eureka-nacional-spike/roles-regression-cmcye3tw`:
+122 inventarios y 85 procesos clasificados con 74 PDF, sólo texto
+nativo.
+
+- Cambios de rol: 2, ambos de no identificado a rector, y ambos
+  «condiciones generales de participación»:
+  - CO1.NTC.11293222;
+  - Neiva CO1.NTC.11276610.
+- Estado formal y categoría de revisión: 0 cambios en los 85
+  procesos.
+- Top 3 de selección: cambia en 18 inventarios.
+  - En ninguno se desplaza una invitación ni un pliego; las
+    invitaciones siguen primero.
+  - En la mayoría sólo cambia el tercer puesto: un CDP, PAA,
+    BPIN o análisis del sector cede su lugar.
+  - En 4 casos, un estudio previo con título no estándar sube
+    por delante del CDP: «estudios y documentos previos» en dos
+    inventarios repetidos, «estudios y documentos previos
+    semillas» y «estudioso y documentos previos dron».
+- Efecto neutro: a veces el tercer puesto pasa a otro documento
+  administrativo no reconocido («Matriz de riesgo», «Memorando
+  comité evaluador», «BIPIN…» con errata). No empeora la
+  cobertura rectora, porque un CDP tampoco la aportaba.
+- Los resultados de las corridas anteriores no se reescriben.
+
+#### Lote propuesto (pendiente de aprobación; no ejecutado)
+
+| Fuente | Proceso | DocumentId | Documento | Ruta |
+|---|---|---|---|---|
+| SECOP II | CO1.NTC.11293222 | 899021135 | CONDICIONES GENERALES DE PARTICIPACION_0001 | community.secop.gov.co |
+| SECOP II | CO1.NTC.11293222 | 899021138 | ESTUDIOS PREVIOS_0001 (403 en descarga directa el 27-11) | community.secop.gov.co |
+
+- Hash del lote (`batch_digest` del plan focalizado):
+  `f38de50d74c47c3d239bf5d751148a4694babaa4f7a0ac1c559c11dc3df00cab`
+- Procedimiento:
+  1. `plan` crea `en01-target_k94ws3so` con este hash;
+  2. `acquire-secop2`: descarga directa y streaming por Edge sólo
+     ante 403, únicamente para estos 2 documentos;
+  3. `analyze` offline.
+- Sin POST a SECOP I y sin créditos del proveedor: la descarga
+  directa y el streaming por Edge van a SECOP II, no a
+  Licitaciones.info.
+- Siguiente paso posible, aparte: inventario de los 8 elegibles
+  nuevos. Tendría coste en créditos y requiere otra autorización.

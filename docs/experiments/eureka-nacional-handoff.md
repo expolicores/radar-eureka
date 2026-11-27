@@ -1276,3 +1276,21 @@ peticiones.
   generales de participación» como rector.
 
 [Detalle](eureka-nacional-experience-spike.md#perfil-permanente-vila-frontier-y-búsqueda-controlada-en01-k94ws3so).
+
+
+### Ventana de 10 días y rectores de participación
+
+- La cobertura del feed varía entre perfiles. El salto del 21 al 26
+  de noviembre se atribuye a la inactividad de Vila Frontier. Un
+  aviso ausente no significa que el proceso no exista.
+- Reevaluación offline con 10 días: 9 elegibles, todos nuevos y de
+  SECOP II (8 A y 1 B; 6 en Huila y 3 en Boyacá). Sólo
+  CO1.NTC.11293222 tiene inventario.
+- «Condiciones generales de participación» y equivalentes se
+  reconocen como rector, y los títulos administrativos bajan en la
+  selección (`481dfd8`). Regresión: 2 roles cambian y 0 estados
+  formales.
+- Lote pendiente de aprobación: 2 documentos de CO1.NTC.11293222,
+  hash `f38de50d74c47c3d239bf5d751148a4694babaa4f7a0ac1c559c11dc3df00cab`.
+
+[Detalle](eureka-nacional-experience-spike.md#ventana-de-10-días-selección-de-rectores-y-cobertura-por-perfil).
