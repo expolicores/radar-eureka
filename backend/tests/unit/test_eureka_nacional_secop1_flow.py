@@ -980,3 +980,190 @@ def test_recovery_cli_refuses_existing_queue_and_preventive_marker(tmp_path, mon
     done.mkdir()
     (done / flow.QUEUE_FILE).write_text("{}", encoding="utf-8")
     assert en01.recover_secop1_main(args, EXAMPLE_PROFILE) == 1
+
+
+# ---------------------------------------------------------------- displayed size admission
+
+
+@pytest.mark.parametrize(
+    ("shown", "reason", "known"),
+    [
+        (round(22.68 * 1024**2), "displayed_size_over_limit", True),
+        (en01.DOCUMENT_BYTES + 1, "displayed_size_over_limit", True),
+        (en01.DOCUMENT_BYTES, None, True),  # rounded value at the limit: bytes decide
+        (round(2.10 * 1024**2), None, True),
+        (None, None, False),  # unknown: never invented, admitted and flagged
+        (0, None, False),
+        ("5 MB", None, False),
+    ],
+)
+def test_acquisition_size_check(shown, reason, known):
+    assert flow.acquisition_size_check({"displayed_size_bytes": shown}) == (reason, known)
+
+
+def test_oversized_governing_pdf_is_kept_in_inventory_but_not_queued():
+    # Arrange
+    rows = [secop1_row("Invitación", doc_path("INVMC", 1), "22.68 MB"), *ENCINO_LIKE[1:]]
+    client = SimpleNamespace(post=Mock(return_value=inventory_body(rows)))
+    documents = []
+
+    # Act
+    stop, item, issues = flow.analyze_secop1_inventory(
+        client, secop1_process(), {"secop1_inventories": 0}, documents
+    )
+
+    # Assert
+    assert (stop, item, issues) == ("governing_displayed_size_over_limit", None, [])
+    assert len(documents) == 3
+    assert documents[0]["selection"] == "displayed_size_over_limit"
+    assert documents[0]["status"] == "excluded_from_acquisition"
+    outcome = flow.classify_experience(documents)
+    assert outcome["status"] == "not_resolved"
+    assert outcome["review_category"] != "explicit_requirement"
+
+
+def recovered_run(tmp_path, sizes):
+    """Five saved inventories, queued before the size rule existed."""
+    run = tmp_path / "en01-secop1inv_test"
+    run.mkdir()
+    constancias = [f"26-13-1111111{n}" for n in range(len(sizes))]
+    processes, inventories, items = [], [], []
+    for n, (constancia, size) in enumerate(zip(constancias, sizes, strict=True)):
+        reference = f"licitaciones_info:1:{n}"
+        documents, _, _ = flow.parse_secop1_page(
+            inventory_body(
+                [
+                    secop1_row("Invitación", doc_path("INVMC", 1, constancia), size),
+                    secop1_row("ESTUDIOS PREVIOS", doc_path("DA", 2, constancia), "1 MB"),
+                ]
+            ),
+            constancia,
+        )
+        governing = documents[0]
+        processes.append({"process_reference": reference, "commercial_priority": "A"})
+        inventories.append({"process_reference": reference, "documents": documents})
+        items.append(
+            {
+                "process_reference": reference,
+                "constancia": constancia,
+                "document_id": governing["document_id"],
+                "name": governing["name"],
+                "extension": "pdf",
+                "relative_path": governing["relative_path"],
+                "role": "primary",
+                "role_hint": None,
+                "displayed_size": governing["displayed_size"],
+                "displayed_size_bytes": governing["displayed_size_bytes"],
+            }
+        )
+    (run / "processes.json").write_text(json.dumps({"processes": processes}), "utf-8")
+    (run / "documents.json").write_text(json.dumps(inventories), "utf-8")
+    queue = flow.write_queue(run, items, run.name)
+    return run, queue, constancias
+
+
+SIZES = ["22.68 MB", "2.10 MB", "742 KB", "539 KB", "602 KB"]
+
+
+def snapshot(run):
+    return {
+        p.name: p.read_bytes()
+        for p in run.iterdir()
+        if p.name in {"processes.json", "documents.json"}
+    }
+
+
+def test_rebuild_excludes_only_oversized_and_preserves_everything_else(tmp_path):
+    # Arrange
+    run, previous, constancias = recovered_run(tmp_path, SIZES)
+    before = snapshot(run)
+
+    # Act
+    queue, record = flow.rebuild_queue(run)
+
+    # Assert
+    assert [i["constancia"] for i in queue["items"]] == constancias[1:]
+    assert queue["max_posts"] == 4
+    assert queue["run_id"] == previous["run_id"]
+    assert [d["decision"] for d in record["decisions"]] == [
+        "displayed_size_over_limit",
+        "queued",
+        "queued",
+        "queued",
+        "queued",
+    ]
+    assert record["network_requests"] == 0
+    assert record["previous_batch_sha256"] == previous["batch_sha256"]
+    assert snapshot(run) == before  # processes and inventories are never modified
+    archived = run / f"secop1_queue.superseded-{previous['batch_sha256'][:16]}.json"
+    assert json.loads(archived.read_text(encoding="utf-8")) == previous
+    assert flow.load_queue(run)["batch_sha256"] == queue["batch_sha256"]
+
+
+def test_rebuild_is_deterministic(tmp_path):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    first_run, _, _ = recovered_run(tmp_path / "a", SIZES)
+    second_run, _, _ = recovered_run(tmp_path / "b", SIZES)
+
+    first = flow.rebuild_queue(first_run)[0]["batch_sha256"]
+    again = flow.rebuild_queue(first_run)[0]["batch_sha256"]
+    second = flow.rebuild_queue(second_run)[0]["batch_sha256"]
+
+    assert first == again == second
+
+
+def test_rebuild_refuses_a_queue_that_no_longer_matches_its_inventory(tmp_path):
+    run, _, _ = recovered_run(tmp_path, SIZES)
+    inventories = json.loads((run / "documents.json").read_text(encoding="utf-8"))
+    inventories[0]["documents"].pop(0)
+    (run / "documents.json").write_text(json.dumps(inventories), "utf-8")
+
+    with pytest.raises(SpikeError, match="no coincide"):
+        flow.rebuild_queue(run)
+
+
+def test_rebuilt_queue_feeds_acquisition_plan_and_offline_resume(tmp_path):
+    import eureka_nacional_secop1_acquire as acquire
+
+    run, _, constancias = recovered_run(tmp_path, SIZES)
+    queue, _ = flow.rebuild_queue(run)
+
+    items, recorded = acquire.plan_batch(queue, run)
+    assert [i["constancia"] for i in items] == constancias[1:]
+    assert recorded == 0
+
+    storage = LocalBinaryStorage(run / "binaries")
+    pdf = b"%PDF-1.4\n%%EOF\n"
+    staged = storage.store(
+        [pdf],
+        original_name="x.pdf",
+        content_type="application/pdf",
+        expected_size=len(pdf),
+        max_bytes=en01.DOCUMENT_BYTES,
+    )
+    acquire.write_receipt(
+        run,
+        items[0],
+        {
+            "storage_path": staged.storage_path,
+            "sha256": staged.sha256,
+            "received_bytes": staged.observed_size,
+        },
+    )
+    summary, results = resume(tmp_path, run, FakeExtractor({}))
+
+    assert summary["secop1_processes"] == 4
+    assert summary["secop1_receipts_used"] == 1
+    assert summary["secop1_download_pending"] == 3
+    assert constancias[0] not in {r["constancia"] for r in results}
+    assert all(r["status"] == "not_resolved" for r in results)
+
+
+def test_stage3_cli_refuses_rebuild_once_attempts_exist(tmp_path, monkeypatch):
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    run, _, _ = recovered_run(tmp_path, SIZES)
+    (run / "secop1_attempts").mkdir()
+
+    assert flow.main([run.name, "--rebuild-queue"]) == 1
+    assert flow.load_queue(run)["max_posts"] == 5

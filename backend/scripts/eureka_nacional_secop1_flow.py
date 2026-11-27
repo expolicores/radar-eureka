@@ -15,6 +15,7 @@ import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
 
+from eureka_nacional_cdp_stream import DOCUMENT_BYTES
 from eureka_nacional_experience import (
     classify_experience,
     document_priority,
@@ -187,6 +188,22 @@ def governing_document(documents):
     return candidates[0] if candidates else None
 
 
+def acquisition_size_check(document):
+    """Admission of a governing PDF to the automatic acquisition queue by displayed size.
+
+    The provider shows a rounded binary size (MB = MiB). Only a displayed size strictly above
+    the download limit excludes the document. An unknown or unparseable size is never
+    invented: the document is admitted and flagged, and the strict limit on received bytes
+    still applies during streaming. Commercial eligibility and experience status are untouched.
+    """
+    shown = document.get("displayed_size_bytes")
+    if not isinstance(shown, int) or shown <= 0:
+        return None, False
+    if shown > DOCUMENT_BYTES:
+        return "displayed_size_over_limit", True
+    return None, True
+
+
 def inventory_digest(documents):
     rows = sorted((d["document_id"], d["name"], d["extension"]) for d in documents)
     return hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode("utf-8")).hexdigest()
@@ -206,6 +223,9 @@ def analyze_secop1_inventory(client, process, metrics, documents, *, max_pages=M
         stop = "empty_inventory"
     elif (governing := governing_document(found)) is None:
         stop = "governing_document_not_identified"
+    elif (size_reason := acquisition_size_check(governing)[0]) is not None:
+        governing.update(selection=size_reason, status="excluded_from_acquisition")
+        stop = f"governing_{size_reason}"
     else:
         governing.update(selection="queued", status="queued_for_acquisition")
         item = {
@@ -219,6 +239,7 @@ def analyze_secop1_inventory(client, process, metrics, documents, *, max_pages=M
             "role_hint": governing.get("role_hint"),
             "displayed_size": governing.get("displayed_size"),
             "displayed_size_bytes": governing.get("displayed_size_bytes"),
+            "displayed_size_known": acquisition_size_check(governing)[1],
             "commercial_priority": process.get("commercial_priority"),
             "inventory_declared_count": declared,
             "inventory_sha256": inventory_digest(found),
@@ -362,6 +383,62 @@ def recover_secop1_inventories(client, source, output, constancias, *, is_fatal)
     ):
         (output / name).write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
     return summary
+
+
+# ---------------------------------------------------------------- offline queue rebuild
+
+REBUILD_FILE = "secop1_queue_rebuild.json"
+
+
+def rebuild_queue(run):
+    """Re-derive the queue from the inventories already saved in `run`, with the current
+    admission rules. No request of any kind. The previous queue is archived, never deleted;
+    processes and inventories are not modified."""
+    previous = load_queue(run)
+    inventories = {
+        case["process_reference"]: case["documents"]
+        for case in json.loads((run / "documents.json").read_text(encoding="utf-8"))
+    }
+    processes = {
+        p["process_reference"]: p
+        for p in json.loads((run / "processes.json").read_text(encoding="utf-8"))["processes"]
+    }
+    items, decisions = [], []
+    for old in previous["items"]:
+        reference = old["process_reference"]
+        documents = inventories.get(reference, [])
+        governing = governing_document(documents)
+        if governing is None or governing["document_id"] != old["document_id"]:
+            raise SpikeError("La cola guardada no coincide con su inventario.")
+        reason, known = acquisition_size_check(governing)
+        decisions.append(
+            {
+                "process_reference": reference,
+                "constancia": old["constancia"],
+                "document_id": old["document_id"],
+                "name": old["name"],
+                "displayed_size": governing.get("displayed_size"),
+                "displayed_size_bytes": governing.get("displayed_size_bytes"),
+                "decision": reason or "queued",
+                "commercial_priority": processes.get(reference, {}).get("commercial_priority"),
+            }
+        )
+        if reason is None:
+            items.append({**old, "displayed_size_known": known})
+    archive = run / f"secop1_queue.superseded-{previous['batch_sha256'][:16]}.json"
+    if not archive.exists():
+        archive.write_bytes((run / QUEUE_FILE).read_bytes())
+    queue = write_queue(run, items, previous["run_id"])
+    record = {
+        "previous_batch_sha256": previous["batch_sha256"],
+        "batch_sha256": queue["batch_sha256"],
+        "rule": "displayed_size_over_limit",
+        "document_max_bytes": DOCUMENT_BYTES,
+        "network_requests": 0,
+        "decisions": decisions,
+    }
+    (run / REBUILD_FILE).write_text(json.dumps(record, ensure_ascii=False, indent=2), "utf-8")
+    return queue, record
 
 
 # ---------------------------------------------------------------- OCR plan (stage 3)
@@ -707,6 +784,11 @@ def main(argv=None):
 
     parser = argparse.ArgumentParser(description="EN-01 SECOP I etapa 3: reanudacion offline.")
     parser.add_argument("run", help="Corrida de la etapa 1 (en01-...).")
+    parser.add_argument(
+        "--rebuild-queue",
+        action="store_true",
+        help="Regenerar la cola desde los inventarios guardados, sin peticiones.",
+    )
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
     parser.add_argument(
@@ -719,6 +801,24 @@ def main(argv=None):
     try:
         root = runner.OUTPUT_ROOT
         source = ensure_inside(root, root / run_dir_name(args.run))
+        if args.rebuild_queue:
+            if (source / "secop1_attempts").exists():
+                print("EN-01 SECOP I: el lote ya tiene intentos; no se regenera.")
+                return 1
+            queue, record = rebuild_queue(source)
+            print(
+                json.dumps(
+                    {
+                        "batch_sha256": queue["batch_sha256"],
+                        "previous_batch_sha256": record["previous_batch_sha256"],
+                        "max_posts": queue["max_posts"],
+                        "decisions": [
+                            [d["constancia"], d["decision"]] for d in record["decisions"]
+                        ],
+                    }
+                )
+            )
+            return 0
         output = ensure_inside(root, root / f"en01-secop1_{args.run[5:]}")
         if (output / "metrics.json").exists():
             print("EN-01 SECOP I: la reanudacion ya existe; no se sobrescribe.")
