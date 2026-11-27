@@ -1,0 +1,647 @@
+"""SECOP I stages for the national EN-01 runner. Opt-in via --include-secop1.
+
+Stage 1 (runner, habitual session): inventory through the existing provider endpoint and a
+persistent queue of governing PDFs. Nothing is downloaded here.
+Stage 3 (offline): extraction and classification from verified receipts only, with a
+selective multi-pass OCR plan for scanned governing PDFs. No provider or SECOP request.
+Stage 2 (acquisition) lives in eureka_nacional_secop1_acquire.py.
+"""
+
+import hashlib
+import json
+import re
+import time
+import unicodedata
+from html.parser import HTMLParser
+from pathlib import Path
+
+from eureka_nacional_experience import (
+    classify_experience,
+    document_priority,
+    normalized,
+)
+from eureka_nacional_secop1_inventory import CONSTANCIA, normalize_document
+from licitaciones_cdp_runtime import DOCUMENT_ENDPOINT
+from spike_licitaciones_info import SpikeError
+
+QUEUE_FILE = "secop1_queue.json"
+RECEIPTS_FILE = "download_receipts.json"
+MAX_SECOP1_PROCESSES = 5
+MAX_INVENTORY_PAGES = 10
+SECOP1_HEADERS = ["nombre", "tipo", "tamano", "fecha publicacion del documento", "documento"]
+OPENER = re.compile(r"""^\s*window\.openDocumentoSecop1\(\s*"([^"\\<>]{1,512})"\s*\)\s*;?\s*$""")
+EXTENSION_ICON = re.compile(r"/img/extensiones/([a-z0-9]{1,8})\.svg")
+DISPLAYED_SIZE = re.compile(r"^\s*([0-9]{1,6}(?:[.,][0-9]{1,3})?)\s*(KB|MB|GB|B)\s*$", re.I)
+GOVERNING_ROLES = {"primary", "amendment"}
+
+
+def _plain(text):
+    folded = unicodedata.normalize("NFD", str(text or ""))
+    return "".join(c for c in folded if unicodedata.category(c) != "Mn").casefold().strip()
+
+
+class _Cell(HTMLParser):
+    def __init__(self, text):
+        super().__init__(convert_charrefs=True)
+        self.onclicks, self.images, self.text = [], [], []
+        self.feed(text)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        values = dict(attrs)
+        if tag == "a":
+            self.onclicks.append(values.get("onclick") or "")
+        elif tag == "img":
+            self.images.append(values.get("src") or "")
+
+    def handle_data(self, data):
+        self.text.append(data)
+
+
+def displayed_size_bytes(text):
+    """Approximate size shown by the provider (binary units); evidence, never a limit check."""
+    match = DISPLAYED_SIZE.match("".join(_Cell(text).text))
+    if not match:
+        return None
+    factor = {"b": 1, "kb": 1024, "mb": 1024**2, "gb": 1024**3}[match[2].lower()]
+    return round(float(match[1].replace(",", ".")) * factor)
+
+
+def phase_is_explicit_null(row):
+    """idUltimaFase may be null only when the provider record states it explicitly."""
+    return isinstance(row, dict) and "idUltimaFase" in row and row["idUltimaFase"] is None
+
+
+def constancia_of(process):
+    identity = str(process.get("source_identity") or "")
+    constancia = identity.removeprefix("secop1:")
+    return (
+        constancia if identity.startswith("secop1:") and CONSTANCIA.fullmatch(constancia) else None
+    )
+
+
+def inventory_ready(process):
+    """Stage-1 eligibility of a SECOP I process for one inventory request."""
+    keys = process.get("inventory_keys") or {}
+    phase_ok = bool(keys.get("idUltimaFase")) or (
+        keys.get("idUltimaFase") is None and process.get("phase_explicit_null") is True
+    )
+    return bool(
+        process.get("source") == "secop1"
+        and constancia_of(process)
+        and keys.get("idContrato")
+        and keys.get("id_fuente_contract")
+        and phase_ok
+    )
+
+
+def parse_secop1_page(body, constancia):
+    """Parse one provider inventory page for SECOP I. Unknown contracts raise SpikeError."""
+    if not isinstance(body, dict) or body.get("status") != 1:
+        raise SpikeError("Estado documental SECOP I desconocido.")
+    table = body.get("documentos")
+    if table == []:
+        return [], [], body.get("cantidad")
+    if not isinstance(table, dict) or [_plain(h) for h in table.get("encabezados") or []] != (
+        SECOP1_HEADERS
+    ):
+        raise SpikeError("Contrato de tabla documental SECOP I desconocido.")
+    rows = table.get("campos")
+    if not isinstance(rows, list):
+        raise SpikeError("Filas documentales SECOP I desconocidas.")
+    documents, issues = [], []
+    for index, row in enumerate(rows, 1):
+        if not isinstance(row, list) or len(row) != 5 or not all(isinstance(c, str) for c in row):
+            issues.append({"row": index, "code": "invalid_row"})
+            continue
+        link, icon = _Cell(row[4]), _Cell(row[1])
+        opener = OPENER.match(link.onclicks[0]) if len(link.onclicks) == 1 else None
+        extension = EXTENSION_ICON.fullmatch(icon.images[0]) if len(icon.images) == 1 else None
+        if not opener or not extension:
+            issues.append({"row": index, "code": "ambiguous_document_control"})
+            continue
+        name = "".join(_Cell(row[0]).text).strip()
+        path = opener[1]
+        try:
+            document = normalize_document(
+                {
+                    "name": name,
+                    "extension": extension[1],
+                    "relative_path": path,
+                    "size_bytes": None,
+                },
+                constancia,
+            )
+        except ValueError as error:
+            issues.append({"row": index, "code": str(error)})
+            continue
+        document.update(
+            relative_path=path,
+            displayed_size="".join(_Cell(row[2]).text).strip()[:20],
+            displayed_size_bytes=displayed_size_bytes(row[2]),
+            url=None,
+            status="not_selected",
+        )
+        documents.append(document)
+    return documents, issues, body.get("cantidad")
+
+
+def fetch_secop1_inventory(client, process):
+    """One inventory per process through the existing endpoint; paginates like SECOP II
+    but stops as soon as the provider's declared count is reached."""
+    constancia = constancia_of(process)
+    if not inventory_ready(process):
+        raise SpikeError("Claves documentales SECOP I no verificadas.")
+    keys = process["inventory_keys"]
+    payload = {key: keys.get(key) for key in ("idContrato", "id_fuente_contract", "idUltimaFase")}
+    documents, issues, signatures = {}, [], set()
+    for page in range(1, MAX_INVENTORY_PAGES + 1):
+        rows, page_issues, declared = parse_secop1_page(
+            client.post(DOCUMENT_ENDPOINT, {**payload, "page": page}), constancia
+        )
+        issues.extend({"page": page, **issue} for issue in page_issues)
+        if not rows and not page_issues:
+            return list(documents.values()), issues, declared
+        signature = tuple(doc["document_id"] for doc in rows)
+        if signature in signatures:
+            raise SpikeError("Pagina documental SECOP I repetida; inventario incompleto.")
+        signatures.add(signature)
+        for document in rows:
+            documents[document["document_id"]] = document
+        if isinstance(declared, int) and len(documents) + len(issues) >= declared:
+            return list(documents.values()), issues, declared
+    raise SpikeError("Limite de paginas SECOP I; inventario incompleto.")
+
+
+def governing_document(documents):
+    """The single governing PDF to queue, by title role and the existing ranking."""
+    candidates = [
+        doc
+        for doc in documents
+        if doc["extension"] == "pdf"
+        and (doc["role"] in GOVERNING_ROLES or doc.get("role_hint") == "primary")
+    ]
+    candidates.sort(key=lambda doc: document_priority(doc["name"], doc["role"], doc["role_hint"]))
+    return candidates[0] if candidates else None
+
+
+def inventory_digest(documents):
+    rows = sorted((d["document_id"], d["name"], d["extension"]) for d in documents)
+    return hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def analyze_secop1_inventory(client, process, metrics, documents):
+    """Stage 1 for one SECOP I process: inventory and at most one queued governing PDF."""
+    found, issues, declared = fetch_secop1_inventory(client, process)
+    metrics["secop1_inventories"] += 1
+    documents.extend(found)
+    for document in found:
+        document["selection"] = "document_limit"
+    item = None
+    if issues:
+        stop = "secop1_inventory_issues"
+    elif not found:
+        stop = "empty_inventory"
+    elif (governing := governing_document(found)) is None:
+        stop = "governing_document_not_identified"
+    else:
+        governing.update(selection="queued", status="queued_for_acquisition")
+        item = {
+            "process_reference": process["process_reference"],
+            "constancia": constancia_of(process),
+            "document_id": governing["document_id"],
+            "name": governing["name"],
+            "extension": governing["extension"],
+            "relative_path": governing["relative_path"],
+            "role": governing["role"],
+            "role_hint": governing.get("role_hint"),
+            "displayed_size": governing.get("displayed_size"),
+            "displayed_size_bytes": governing.get("displayed_size_bytes"),
+            "commercial_priority": process.get("commercial_priority"),
+            "inventory_declared_count": declared,
+            "inventory_sha256": inventory_digest(found),
+        }
+        metrics["secop1_queued"] += 1
+        stop = "secop1_queued_for_acquisition"
+    return stop, item, [{"stage": "inventory", **issue} for issue in issues]
+
+
+def write_queue(output, items, run_id):
+    queue = {
+        "run_id": run_id,
+        "source": "secop1",
+        "max_posts": min(MAX_SECOP1_PROCESSES, len(items)),
+        "items": items,
+    }
+    queue["batch_sha256"] = batch_digest(queue)
+    (output / QUEUE_FILE).write_text(
+        json.dumps(queue, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return queue
+
+
+def batch_digest(queue):
+    """Digest the operator confirms: exactly these documents, at most max_posts POSTs."""
+    core = {
+        "run_id": queue["run_id"],
+        "max_posts": queue["max_posts"],
+        "items": [
+            [item["process_reference"], item["document_id"], item["relative_path"]]
+            for item in queue["items"]
+        ],
+    }
+    return hashlib.sha256(json.dumps(core, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def load_queue(output):
+    queue = json.loads((output / QUEUE_FILE).read_text(encoding="utf-8"))
+    if queue.get("batch_sha256") != batch_digest(queue) or queue["max_posts"] > (
+        MAX_SECOP1_PROCESSES
+    ):
+        raise SpikeError("Cola SECOP I alterada o fuera de limites.")
+    for item in queue["items"]:
+        if not CONSTANCIA.fullmatch(item["constancia"]) or not item["document_id"].startswith(
+            f"secop1:{item['constancia']}:"
+        ):
+            raise SpikeError("Identidad documental SECOP I invalida en la cola.")
+    return queue
+
+
+# ---------------------------------------------------------------- OCR plan (stage 3)
+
+OCR_TOPIC = re.compile(r"\b(?:experiencia|requisitos? habilitantes?|acreditacion)\b")
+PAGE_REFERENCE = re.compile(r"\b(?:paginas?|pags?\.?|folios?)\s+(\d{1,4})\b")
+INDEX_ENTRY = re.compile(r"(?:\.\s*){3,}(\d{1,4})\s*$")
+GOVERNING_OCR_PAGES = 12
+RUN_OCR_PAGES = 60
+RUN_OCR_SECONDS = 360
+PASS_PAGES = 2  # keeps each pass within the existing 14 s OCR document timeout
+INITIAL_WINDOW = (1, 2, 3)
+
+
+class OcrBudget:
+    def __init__(self, pages=RUN_OCR_PAGES, seconds=RUN_OCR_SECONDS):
+        self.pages_left = pages
+        self.deadline = time.monotonic() + seconds
+        self.limits = {"pages": pages, "seconds": seconds}
+
+    def take(self, wanted):
+        if time.monotonic() >= self.deadline:
+            return 0
+        return max(0, min(wanted, self.pages_left))
+
+    def spend(self, pages):
+        self.pages_left -= pages
+
+
+def ocr_targets(fragments, total_pages):
+    """Pages that the text itself points to for habilitation or experience."""
+    ranked = {}
+
+    def prefer(page, rank):
+        if 1 <= page <= total_pages and rank < ranked.get(page, 10):
+            ranked[page] = rank
+
+    for fragment in fragments:
+        page = fragment.source_locator.get("page_number") or 0
+        for raw in fragment.text.splitlines():
+            line = normalized(raw).strip()
+            if not OCR_TOPIC.search(line):
+                continue
+            if target := PAGE_REFERENCE.search(line) or INDEX_ENTRY.search(line):
+                prefer(int(target[1]), 0)
+                prefer(int(target[1]) + 1, 1)
+            elif len(line) <= 110 and page:
+                # A heading: its section usually continues on the following pages.
+                prefer(page + 1, 1)
+                prefer(page + 2, 2)
+    return [page for page, _ in sorted(ranked.items(), key=lambda item: (item[1], item[0]))]
+
+
+def next_pass(read, total_pages, targets, remaining):
+    """Located pages first, then the initial window, then conservative sequential reading."""
+    order = [*targets, *INITIAL_WINDOW, *range(1, total_pages + 1)]
+    plan = []
+    for page in order:
+        if 1 <= page <= total_pages and page not in read and page not in plan:
+            plan.append(page)
+        if len(plan) == min(PASS_PAGES, remaining):
+            break
+    return plan
+
+
+def merge_pass(merged, entry, pass_number):
+    """Accumulate page coverage across passes; a page keeps its first successful text."""
+    pages = {f.source_locator.get("page_number") for f in merged["fragments"]}
+    new = [f for f in entry["fragments"] if f.source_locator.get("page_number") not in pages]
+    merged["fragments"] = sorted(
+        merged["fragments"] + new, key=lambda f: f.source_locator.get("page_number") or 0
+    )
+    merged["seen"] |= set(entry["pages_seen"])
+    merged["ocr_pages"] |= set(entry["ocr_pages"])
+    merged["ocr_success"] |= set(entry["ocr_success_pages"])
+    merged["extraction_seconds"] += entry["extraction_seconds"] or 0
+    merged["passes"].append(
+        {
+            "pass": pass_number,
+            "requested": entry.get("ocr_plan", []),
+            "ocr_success": entry["ocr_success_pages"],
+            "status": entry["status"],
+            "error_code": entry.get("error_code"),
+        }
+    )
+
+
+def extract_with_ocr_plan(
+    extract,
+    document,
+    stored,
+    storage,
+    settings,
+    entry,
+    budget,
+    *,
+    per_document=GOVERNING_OCR_PAGES,
+    classify=classify_experience,
+):
+    """Multi-pass selective OCR over the existing extractor. Partial coverage stays partial:
+    pending pages keep the document incomplete, so silence is never read as absence."""
+    base = dict(entry)
+    merged = {
+        "fragments": [],
+        "seen": set(),
+        "ocr_pages": set(),
+        "ocr_success": set(),
+        "extraction_seconds": 0.0,
+        "passes": [],
+    }
+    first, allowance, stop = None, per_document, None
+    while stop is None:
+        total = first["total_pages"] if first else None
+        granted = budget.take(min(PASS_PAGES, allowance))
+        if first is None:
+            plan = list(INITIAL_WINDOW[:granted])
+        elif not granted:
+            stop = "document_ocr_budget" if allowance <= 0 else "run_ocr_budget"
+            break
+        else:
+            tried = merged["seen"] | merged["ocr_pages"]
+            plan = next_pass(tried, total, ocr_targets(merged["fragments"], total), granted)
+            if not plan:
+                stop = "pages_exhausted"
+                break
+        current = dict(base)
+        extract(
+            document,
+            stored,
+            storage,
+            settings,
+            current,
+            ocr_pages=max(1, len(plan)),
+            page_plan=plan,
+        )
+        current["ocr_plan"] = plan
+        spent = len(current["ocr_pages"])
+        budget.spend(spent)
+        allowance -= spent
+        merge_pass(merged, current, len(merged["passes"]) + 1)
+        if first is None:
+            first = current
+            if current.get("error_code") or not current["total_pages"]:
+                stop = "extraction_failed" if current.get("error_code") else "no_pages"
+                break
+        if not set(range(1, first["total_pages"] + 1)) - merged["seen"]:
+            stop = "document_complete"
+        elif current.get("error_code"):
+            stop = "ocr_pass_failed"
+        elif plan and spent == 0:
+            stop = "ocr_no_progress"
+        else:
+            probe = {**first, "fragments": merged["fragments"], "complete": False}
+            outcome = classify([probe])
+            if outcome["status"] == "experience_required" or (
+                outcome["review_category"] == "explicit_requirement"
+            ):
+                stop = "explicit_requirement_found"
+    total = first["total_pages"] if first else 0
+    pending = sorted(set(range(1, total + 1)) - merged["seen"])
+    complete = bool(total) and not pending and not (first or {}).get("error_code")
+    entry.update(first or {})
+    entry.update(
+        fragments=merged["fragments"],
+        pages_seen=sorted(merged["seen"]),
+        ocr_pages=sorted(merged["ocr_pages"]),
+        ocr_success_pages=sorted(merged["ocr_success"]),
+        pending_pages=pending,
+        content_complete=complete,
+        complete=complete and not entry.get("role_hint"),
+        extraction_seconds=round(merged["extraction_seconds"], 3),
+        ocr_passes=merged["passes"],
+        ocr_stop_reason=stop,
+        ocr_policy={
+            "per_document": per_document,
+            "pass_pages": PASS_PAGES,
+            "run_limits": budget.limits,
+        },
+    )
+    entry.pop("ocr_plan", None)
+    return entry
+
+
+def load_receipts(output):
+    path = output / RECEIPTS_FILE
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def run_dir_name(value):
+    if not re.fullmatch(r"en01-[a-z0-9_]+", value or ""):
+        raise ValueError("Nombre de corrida invalido.")
+    return value
+
+
+def evidence_pages(classification):
+    pages = {}
+    for item in classification.get("evidence", []):
+        pages.setdefault(item.get("document_id"), set()).add(item.get("page"))
+    return {key: sorted(p for p in value if p) for key, value in pages.items()}
+
+
+def ensure_inside(root: Path, path: Path):
+    if path.resolve() != path or not path.is_relative_to(root):
+        raise ValueError("Ruta fuera del almacenamiento experimental.")
+    return path
+
+
+# ---------------------------------------------------------------- stage 3: offline resume
+
+
+def resume_secop1(source, output, *, settings, budget, runner, per_document=GOVERNING_OCR_PAGES):
+    """Extract and classify queued SECOP I processes from verified receipts only.
+
+    No provider, feed, inventory or SECOP request: documents without a receipt stay pending.
+    Results are written to a new directory; the source run is never modified.
+    """
+    started = time.monotonic()
+    queue = load_queue(source)
+    receipts = load_receipts(source)
+    inventories = {
+        case["process_reference"]: case["documents"]
+        for case in json.loads((source / "documents.json").read_text(encoding="utf-8"))
+    }
+    processes = {
+        p["process_reference"]: p
+        for p in json.loads((source / "processes.json").read_text(encoding="utf-8"))["processes"]
+    }
+    storage = runner.spike.LocalBinaryStorage(source / "binaries")
+    results, cases, errors = [], [], []
+    metrics = {
+        "secop1_processes": 0,
+        "secop1_receipts_used": 0,
+        "secop1_download_pending": 0,
+        "secop1_pages_reported": 0,
+        "secop1_pages_seen": 0,
+        "secop1_ocr_pages": 0,
+        "secop1_pending_pages": 0,
+        "secop1_extraction_seconds": 0.0,
+        "secop1_receipt_rejected": 0,
+    }
+    for item in queue["items"]:
+        reference = item["process_reference"]
+        documents = [dict(doc) for doc in inventories.get(reference, [])]
+        metrics["secop1_processes"] += 1
+        stop = "download_pending"
+        for document in documents:
+            if document["document_id"] != item["document_id"]:
+                continue
+            record = receipts.get(f"{item['document_id']}:{item['extension']}")
+            if not record:
+                metrics["secop1_download_pending"] += 1
+                document["status"] = "download_pending"
+                break
+            spike_document = runner.spike.SpikeDocument(
+                item["name"], item["extension"], "", item["document_id"]
+            )
+            try:
+                stored = runner.StoredBinary(**record)
+                runner.verify_document_type(storage, stored, spike_document, runner.DOCUMENT_BYTES)
+            except (runner.AcquisitionError, TypeError, OSError) as error:
+                metrics["secop1_receipt_rejected"] += 1
+                document["status"] = "receipt_rejected"
+                errors.append(
+                    {
+                        "process_reference": reference,
+                        "stage": "receipt",
+                        "code": getattr(error, "code", type(error).__name__),
+                    }
+                )
+                stop = "receipt_rejected"
+                break
+            metrics["secop1_receipts_used"] += 1
+            document["sha256"] = stored.sha256
+            extract_with_ocr_plan(
+                runner.extract_document,
+                spike_document,
+                stored,
+                storage,
+                settings,
+                document,
+                budget,
+                per_document=per_document,
+            )
+            metrics["secop1_pages_reported"] += document["total_pages"]
+            metrics["secop1_pages_seen"] += len(document["pages_seen"])
+            metrics["secop1_ocr_pages"] += len(document["ocr_pages"])
+            metrics["secop1_pending_pages"] += len(document["pending_pages"])
+            metrics["secop1_extraction_seconds"] += document["extraction_seconds"]
+            stop = f"ocr_{document['ocr_stop_reason']}"
+            break
+        classification = classify_experience(documents, inventory_complete=bool(documents))
+        for document in documents:
+            document.pop("fragments", None)
+        process = processes.get(reference, {})
+        cases.append({"process_reference": reference, "documents": documents})
+        results.append(
+            {
+                "run_id": output.name,
+                "source_run": source.name,
+                "source": "secop1",
+                "process_reference": reference,
+                "constancia": item["constancia"],
+                "department": process.get("department"),
+                "validity_status": process.get("validity_status"),
+                "commercial_category": process.get("primary_category"),
+                "commercial_priority": process.get("commercial_priority"),
+                "document_stop_reason": stop,
+                "evidence_pages_by_document": evidence_pages(classification),
+                **classification,
+            }
+        )
+    statuses = {}
+    for result in results:
+        statuses[result["status"]] = statuses.get(result["status"], 0) + 1
+    summary = {
+        "run_id": output.name,
+        "source_run": source.name,
+        "source": "secop1",
+        "batch_sha256": queue["batch_sha256"],
+        "network_requests": 0,
+        "ai_calls": 0,
+        "ocr_budget": {**budget.limits, "pages_left": budget.pages_left},
+        "per_document_ocr_pages": per_document,
+        "classification": statuses,
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+        **{k: round(v, 3) if isinstance(v, float) else v for k, v in metrics.items()},
+    }
+    for name, data in (
+        ("documents.json", cases),
+        ("experience_requirements.json", results),
+        ("review_queue.json", sorted(results, key=lambda r: r["review_priority"])),
+        ("metrics.json", summary),
+        ("errors.json", errors),
+    ):
+        (output / name).write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    return summary
+
+
+def main(argv=None):
+    import argparse
+
+    import eureka_nacional_en01 as runner
+
+    parser = argparse.ArgumentParser(description="EN-01 SECOP I etapa 3: reanudacion offline.")
+    parser.add_argument("run", help="Corrida de la etapa 1 (en01-...).")
+    parser.add_argument("--tesseract", default="tesseract")
+    parser.add_argument("--tessdata", type=Path)
+    parser.add_argument(
+        "--governing-ocr-pages",
+        type=int,
+        choices=range(1, GOVERNING_OCR_PAGES + 1),
+        default=GOVERNING_OCR_PAGES,
+    )
+    args = parser.parse_args(argv)
+    try:
+        root = runner.OUTPUT_ROOT
+        source = ensure_inside(root, root / run_dir_name(args.run))
+        output = ensure_inside(root, root / f"en01-secop1_{args.run[5:]}")
+        if (output / "metrics.json").exists():
+            print("EN-01 SECOP I: la reanudacion ya existe; no se sobrescribe.")
+            return 1
+        output.mkdir(exist_ok=True)
+        settings = runner.settings_for_run(output, args.tesseract, args.tessdata, PASS_PAGES)
+        summary = resume_secop1(
+            source,
+            output,
+            settings=settings,
+            budget=OcrBudget(),
+            runner=runner,
+            per_document=args.governing_ocr_pages,
+        )
+    except (OSError, ValueError, SpikeError) as error:
+        print(f"EN-01 SECOP I: {type(error).__name__}")
+        return 1
+    print(json.dumps({"output": str(output), "classification": summary["classification"]}))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -3443,3 +3443,80 @@ memoria de la sesión, y calcularla exigiría consultar el feed.
 No hubo IA, descargas, POST, inventarios ni consultas al feed.
 `%%EOF` y SHA-256 no se consideran garantía absoluta de
 integridad.
+
+
+### Integración experimental de SECOP I en el runner nacional (offline)
+
+SECOP I se incorpora en tres etapas, sin arquitectura nueva y
+detrás de `--include-secop1`, desactivado por defecto.
+
+Etapa 1, en el runner y con la sesión habitual. La selección
+admite procesos SECOP I con una cuota separada
+(`--secop1-processes`, máximo 5). La cuota es un tope y no se
+rellena. Un proceso se admite sólo si pasó los filtros
+comerciales vigentes, tiene constancia válida, idContrato e
+id_fuente_contract, y su fase existe o figura explícitamente como
+null en el registro del proveedor. En otro caso se excluye con
+`secop1_inventory_keys_unverified`.
+
+Hace una sola petición de inventario por proceso al endpoint
+existente. El parser nuevo valida el contrato real observado en
+Encino: Nombre, Tipo, Tamaño, Fecha y Documento, con
+`openDocumentoSecop1`. La paginación se detiene al alcanzar la
+cantidad declarada. Si alguna fila no es válida, se registra la
+incidencia y el proceso no entra en la cola. Se encola sólo el
+PDF rector, uno por proceso, en `secop1_queue.json`, con un hash
+de lote. Las métricas por fuente van en `by_source`. En esta
+etapa no hay descargas.
+
+Etapa 2, `eureka_nacional_secop1_acquire.py`. Generaliza la sonda
+validada: Edge dedicado verificado, contexto desechable con
+descargas nativas denegadas, login manual, preflight pasivo y una
+única confirmación del titular, ligada al hash exacto del lote.
+Como máximo hay cinco POST. Antes de cada uno se crea en exclusiva
+un registro de intento por documento, que nunca se repite. Cada
+PDF se lee con streaming acotado (10 MiB, 12 s, `%PDF-`, `%%EOF`
+y SHA-256) y se guarda con un recibo en el formato que usa el
+runner. Un fallo aislado no detiene el lote. Lo detienen dos
+fallos consecutivos, un error inesperado o un cierre incierto.
+El marcador preventivo sólo se libera con evidencia completa de
+cierre.
+
+Etapa 3, `eureka_nacional_secop1_flow.py`, offline. Extrae y
+clasifica sólo a partir de recibos verificados y escribe en un
+directorio nuevo sin modificar la corrida de origen. Política de
+OCR para PDF rectores escaneados:
+
+- Pasadas de dos páginas, dentro del límite de 14 s del OCR
+  existente.
+- Primero se leen las páginas que el propio texto señala como
+  requisitos habilitantes o experiencia (índice, referencia a una
+  página o título). Si no hay ninguna, se lee de forma secuencial
+  y conservadora.
+- Como máximo 12 páginas por documento y 60 páginas o 6 minutos
+  por corrida.
+- La búsqueda se detiene ante una exigencia explícita.
+
+La cobertura parcial deja el documento incompleto y el
+clasificador, sin cambios, mantiene `not_resolved`.
+
+Validación: 399 pruebas de la suite nacional y 30 de laboratorio
+aislado. Las pruebas de etapa 1 corren el runner con datos
+mixtos. Con la opción desactivada, una comparación contra el
+código anterior dio salidas idénticas en seis archivos, en las
+llamadas al proveedor y en las descargas. Con la opción activada,
+SECOP II no cambia y sólo se añade la petición de inventario
+SECOP I con la fase null.
+
+El laboratorio de lote, con Edge headless y servidor sintético,
+probó una respuesta PDF por bloques, una HTML y una truncada. Se
+guardó la primera, se rechazaron las otras dos y el lote se
+detuvo sin enviar el cuarto POST. No hubo descargas nativas y el
+recibo fue aceptado por la caché del runner. El trabajador real
+se probó con dobles en memoria: ejecuta el lote sólo con
+preflight listo y confirmación exacta, y lo rechaza si hay otros
+perfiles o si el navegador no es el dedicado.
+
+La suite unitaria completa tiene 7 fallos ajenos a este trabajo,
+que también fallan en el commit base. No hubo login, feed,
+inventarios, POST ni descargas reales.

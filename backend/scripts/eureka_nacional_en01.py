@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import eureka_nacional_cdp_stream as streaming
+import eureka_nacional_secop1_flow as secop1
 import spike_licitaciones_info as spike
 from eureka_nacional_commercial import (
     DEFAULT_PROFILE,
@@ -253,6 +254,8 @@ def discover(client, args, now, discovery, profile, locations):
                         "idUltimaFase": phase,
                     },
                 )
+                if kind == "secop1" and getattr(args, "include_secop1", False):
+                    process["phase_explicit_null"] = secop1.phase_is_explicit_null(row)
                 candidates[key] = process
             if not rows or page * DISCOVERY_PAGE_SIZE >= int(body["count"]):
                 discovery["stop_reason"] = "provider_end"
@@ -264,14 +267,33 @@ def discover(client, args, now, discovery, profile, locations):
     return sample
 
 
+def round_robin(buckets, limit):
+    sample = []
+    for rank in sorted(buckets):
+        departments = buckets[rank]
+        while departments and len(sample) < limit:
+            for department, queue in list(departments.items()):
+                process = queue.popleft()
+                process["sampled"] = True
+                sample.append(process)
+                if not queue:
+                    del departments[department]
+                if len(sample) == limit:
+                    break
+        if len(sample) == limit:
+            break
+    return sample
+
+
 def select_processes(candidates, args, now, discovery, profile):
     processes, _, _ = apply_freshness(list(candidates.values()), args.recent_days, now)
     processes, _, _ = apply_validity(processes, now)
     preferred = {plain(value) for value in profile.preferred_modalities}
     terminal = {plain(value) for value in profile.terminal_states}
-    buckets = {}
+    buckets, secop1_buckets = {}, {}
     excluded_samples = {}
     analyzed_ids = getattr(args, "excluded_secop_ids", frozenset())
+    include_secop1 = getattr(args, "include_secop1", False)
     for process in processes:
         process.pop("raw_source_reference")
         process.update(
@@ -288,8 +310,12 @@ def select_processes(candidates, args, now, discovery, profile):
             process["recent"] and process["commercial_exclusion"] is None
         )
         reason = process["commercial_exclusion"]
+        opt_in_secop1 = include_secop1 and process["source"] == "secop1"
         if not process["recent"]:
             reason = "outside_publication_window"
+        elif not reason and opt_in_secop1:
+            if not secop1.inventory_ready(process):
+                reason = "secop1_inventory_keys_unverified"
         elif not reason and (process["source"] != "secop2" or not process["inventory_capable"]):
             reason = "inventory_unavailable_for_source"
         if (
@@ -298,7 +324,7 @@ def select_processes(candidates, args, now, discovery, profile):
             and process["validity_status"] == "closed"
         ):
             reason = "closed_process"
-        if not reason and analyzed_ids:
+        if not reason and analyzed_ids and not opt_in_secop1:
             identity = process["source_identity"] or ""
             if not re.fullmatch(r"CO1\.NTC\.\d+", identity):
                 reason = "secop_notice_identity_unverified"
@@ -311,23 +337,16 @@ def select_processes(candidates, args, now, discovery, profile):
             if len(examples) < 2:
                 examples.append(process["process_reference"])
             continue
-        departments = buckets.setdefault(selection_rank(process), {})
+        target = secop1_buckets if opt_in_secop1 else buckets
+        departments = target.setdefault(selection_rank(process), {})
         department = plain(process["department"])
         departments.setdefault(department, deque()).append(process)
-    sample = []
-    for rank in sorted(buckets):
-        departments = buckets[rank]
-        while departments and len(sample) < args.processes:
-            for department, queue in list(departments.items()):
-                process = queue.popleft()
-                process["sampled"] = True
-                sample.append(process)
-                if not queue:
-                    del departments[department]
-                if len(sample) == args.processes:
-                    break
-        if len(sample) == args.processes:
-            break
+    sample = round_robin(buckets, args.processes)
+    if include_secop1:
+        # A maximum, never a quota to fill: only processes that passed every filter.
+        discovery["secop1_sample"] = round_robin(
+            secop1_buckets, getattr(args, "secop1_processes", 0)
+        )
     discovery["processes"] = processes
     discovery["exclusion_review_sample"] = excluded_samples
     return sample
@@ -400,8 +419,14 @@ def select_ocr_pages(native, low_text, budget, *, bookmarks=()):
     return sorted(scores, key=lambda page: (scores[page], page))[:budget]
 
 
-def extract_document(document, stored, storage, settings, entry, *, ocr_pages=OCR_PER_DOCUMENT):
+def extract_document(
+    document, stored, storage, settings, entry, *, ocr_pages=OCR_PER_DOCUMENT, page_plan=None
+):
     def choose_ocr_pages(native, low_text):
+        if page_plan is not None:
+            # Explicit plan from the SECOP I OCR policy; only pages that need OCR.
+            needed = set(low_text)
+            return [page for page in page_plan if page in needed][:ocr_pages]
         bookmarks = ()
         if ocr_pages and low_text and not native.error_code and isinstance(stored, StoredBinary):
             with storage.open_verified(
@@ -949,6 +974,78 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
     }
 
 
+def analyze_secop1_sample(client, sample, output, metrics, results, inventories, errors, items):
+    """Stage 1 for SECOP I: inventory and queue only. A single process failure is recorded
+    and the run continues; budget, session or tab failures stop it."""
+    for process in sample:
+        reference = process["process_reference"]
+        documents, process_errors = [], []
+        process_start, request_start = time.monotonic(), client.requests
+        try:
+            stop, item, issues = secop1.analyze_secop1_inventory(
+                client, process, metrics, documents
+            )
+            process_errors.extend(issues)
+            if item:
+                items.append(item)
+        except CandidateError as error:
+            if error.code in {"session_expired", "invalid_tab"}:
+                raise
+            stop = error.code
+            process_errors.append({"stage": "inventory", "code": error.code})
+        except (AcquisitionError, spike.SpikeError, OSError) as error:
+            if isinstance(error, BudgetReached):
+                raise
+            stop = "inventory_failed"
+            process_errors.append(
+                {"stage": "inventory", "code": getattr(error, "code", type(error).__name__)}
+            )
+        classification = classify_experience(documents, inventory_complete=bool(documents))
+        inventories.append({"process_reference": reference, "documents": documents})
+        results.append(
+            {
+                "run_id": output.name,
+                "source": "secop1",
+                "process_reference": reference,
+                "validity_status": process["validity_status"],
+                "department": process["department"],
+                "document_stop_reason": stop,
+                "commercial_category": process["primary_category"],
+                "commercial_priority": process["commercial_priority"],
+                "operational_cost": {
+                    "elapsed_seconds": round(time.monotonic() - process_start, 3),
+                    "request_credits": client.requests - request_start,
+                    "downloads": 0,
+                    "ocr_pages_reported": 0,
+                },
+                "coverage": {"inventory_available": bool(documents), "documents_complete": 0},
+                **classification,
+            }
+        )
+        errors.extend({"process_reference": reference, **error} for error in process_errors)
+
+
+def metrics_by_source(discovery, results, secop1_items):
+    sources = {}
+    analyzed = {r["process_reference"] for r in results}
+    for process in discovery["processes"]:
+        bucket = sources.setdefault(
+            process.get("source") or "unknown",
+            {"discovered": 0, "eligible": 0, "sampled": 0, "analyzed": 0, "excluded_by_reason": {}},
+        )
+        bucket["discovered"] += 1
+        reason = process.get("excluded_reason")
+        if reason:
+            bucket["excluded_by_reason"][reason] = bucket["excluded_by_reason"].get(reason, 0) + 1
+        else:
+            bucket["eligible"] += 1
+        bucket["sampled"] += bool(process.get("sampled"))
+        bucket["analyzed"] += process["process_reference"] in analyzed
+    if "secop1" in sources:
+        sources["secop1"]["queued_governing_pdfs"] = len(secop1_items)
+    return sources
+
+
 def run(client, args, settings, output, *, now=None, profile=None, locations=None):
     profile = profile or load_commercial_profile()
     locations = load_national_locations() if locations is None else locations
@@ -1003,6 +1100,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     hashes = set()
     status = "failed"
     exit_code = 1
+    include_secop1 = getattr(args, "include_secop1", False)
+    secop1_items = []
     try:
         if (output.parent / streaming.MARKER_NAME).exists():
             raise BudgetReached("download_close_unverified")
@@ -1128,6 +1227,17 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             errors.extend({"process_reference": reference, **error} for error in process_errors)
             if stop:
                 raise stop
+        if include_secop1:
+            analyze_secop1_sample(
+                client,
+                discovery.get("secop1_sample", []),
+                output,
+                metrics,
+                results,
+                inventories,
+                errors,
+                secop1_items,
+            )
         complete = (
             len(sample) == args.processes
             and discovery["stop_reason"] != "provider_repeated_page"
@@ -1160,6 +1270,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             write_json(output / "deprioritized_review_sample.json", deprioritized)
             metrics["deprioritized_review_sample"] = len(deprioritized)
         metrics["unique_document_hashes"] = len(hashes)
+        if include_secop1:
+            secop1.write_queue(output, secop1_items, output.name)
         limits = {
             "processes": args.processes,
             "discovery_pages": args.discovery_pages,
@@ -1177,6 +1289,12 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "duration_seconds": EXPLORATORY_DURATION_SECONDS if exploratory else DURATION_SECONDS,
             "ai_calls": 0,
         }
+        if include_secop1:
+            limits.update(
+                secop1_processes=getattr(args, "secop1_processes", 0),
+                secop1_max_posts=secop1.MAX_SECOP1_PROCESSES,
+                secop1_downloads_in_stage_1=0,
+            )
         summary = {
             "run_id": output.name,
             "status": status,
@@ -1184,6 +1302,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "parent_cpu_seconds": round(time.process_time() - parent_cpu, 3),
             **metrics_summary(discovery, results, metrics, client, started, profile),
         }
+        if include_secop1:
+            summary["by_source"] = metrics_by_source(discovery, results, secop1_items)
         for filename, data in (
             ("processes.json", discovery),
             ("documents.json", inventories),
@@ -1303,6 +1423,17 @@ def main(argv=None):
     parser.add_argument(
         "--profile-id", help="Override de LICITACIONES_PROFILE_ID para esta ejecucion."
     )
+    parser.add_argument(
+        "--include-secop1",
+        action="store_true",
+        help="Etapa 1 SECOP I: inventario y cola de PDF rectores, sin descargas.",
+    )
+    parser.add_argument(
+        "--secop1-processes",
+        type=int,
+        choices=range(1, secop1.MAX_SECOP1_PROCESSES + 1),
+        help="Máximo de procesos SECOP I (no es un cupo a completar).",
+    )
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
@@ -1322,6 +1453,13 @@ def main(argv=None):
                 f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
             )
         setattr(args, name, value)
+    if args.secop1_processes is not None and not args.include_secop1:
+        parser.error("--secop1-processes requiere --include-secop1.")
+    if args.include_secop1 and args.resume_inventory_from:
+        parser.error("La reanudación SECOP I usa eureka_nacional_secop1_flow.py.")
+    args.secop1_processes = (
+        (args.secop1_processes or secop1.MAX_SECOP1_PROCESSES) if args.include_secop1 else 0
+    )
     if not args.exploratory and args.governing_pdf_max_mib > 10:
         parser.error("El tope opcional de PDF rectores requiere --exploratory.")
     if args.exploratory and args.documents < args.processes:

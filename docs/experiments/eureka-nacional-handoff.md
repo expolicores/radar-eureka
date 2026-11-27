@@ -968,3 +968,19 @@ flujo nacional falta, además:
 - La integración del preflight con login manual en el runner.
 
 [Detalle](eureka-nacional-experience-spike.md#primera-clasificación-documental-secop-i-encino).
+
+
+### SECOP I integrado al runner en tres etapas (offline)
+
+- `--include-secop1` y `--secop1-processes`, como máximo 5,
+  añaden inventario y cola de PDF rectores. SECOP II queda
+  idéntico con la opción desactivada.
+- `eureka_nacional_secop1_acquire.py <corrida>` hace un login,
+  el preflight, una confirmación ligada al hash del lote y como
+  máximo 5 POST con registro de intento por documento.
+- `eureka_nacional_secop1_flow.py <corrida>` hace la reanudación
+  offline con OCR selectivo: 12 páginas por rector y 60 páginas o
+  6 minutos por corrida.
+
+Pendiente: autorizar la primera corrida nacional controlada.
+[Detalle](eureka-nacional-experience-spike.md#integración-experimental-de-secop-i-en-el-runner-nacional-offline).
