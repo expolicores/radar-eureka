@@ -3669,3 +3669,41 @@ el marcador se liberó con evidencia completa. Las pestañas
 habituales no se tocaron. Hubo cero consultas al feed y a
 inventarios, cero OCR y cero clasificación. Sutatenza no se
 incluyó.
+
+
+### Etapa 3: extracción y clasificación offline de cuatro procesos SECOP I
+
+Salida en en01-secop1_secop1inv_xgcp5mgp: cero peticiones de red,
+cero llamadas de IA y 22 segundos. Se usaron los cuatro recibos,
+verificados contra el almacenamiento, sin rechazos. Los cuatro
+PDF tenían texto nativo: 185 páginas, 184 leídas y 0 páginas de
+OCR. El clasificador, sin cambios, devolvió not_resolved en los
+cuatro.
+
+| Constancia | Páginas | Nativo | Pendiente | Estado y razón | Evidencia principal |
+| --- | --- | --- | --- | --- | --- |
+| 26-13-14853220 Taraira | 75 | 74 | p. 43 | not_resolved, governing_documents_incomplete | p. 30: «Experiencia General oferente en máximo un (01) contrato» (Formato 3) |
+| 26-13-14853212 Jericó | 42 | 42 | ninguna | not_resolved, no_decisive_clause | p. 17: «se tendrá en cuenta como requisito habilitante la experiencia»; p. 16 remite al estudio previo |
+| 26-13-14853190 Fómeque | 34 | 34 | ninguna | not_resolved, requirement_requires_corroboration | p. 14, EXIGENCIA: «El proponente debe acreditar UN (1) contrato…» |
+| 26-13-14853123 Montelíbano | 34 | 34 | ninguna | not_resolved, no_decisive_clause | p. 15: «Certificado de experiencia de al menos un contrato de objeto similar»; p. 21 remite al anexo de experiencia |
+
+Prioridad comercial: A en los cuatro, por coincidencia de
+categoría por palabras clave (papelería, informática, ferretería y
+uniformes/EPP) en procesos abiertos de mínima cuantía. La
+prioridad comercial es independiente del estado formal.
+
+Lectura para revisión humana, no un estado formal: los cuatro
+documentos contienen indicios de exigencia de experiencia. Ninguno
+es favorable. El clasificador no los resolvió porque la exigencia
+está en formatos o anexos, remite al estudio previo o requiere
+corroboración del alcance del proponente.
+
+Defecto observado en la política de OCR de la etapa 3: la primera
+pasada pide las páginas 1 y 2 aunque tengan texto nativo. En
+Taraira, esa pasada no realizó OCR y el bucle se detuvo como
+`ocr_no_progress` sin leer la página 43, la única que requería
+OCR, aunque quedaba presupuesto. La cobertura quedó registrada
+correctamente como incompleta y el resultado se mantuvo
+not_resolved. Corrección propuesta: planificar desde las páginas
+que realmente requieren OCR. No se aplicó ni se repitió la
+extracción.

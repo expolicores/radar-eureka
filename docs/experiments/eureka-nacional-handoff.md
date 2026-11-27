@@ -1026,3 +1026,20 @@ sin Content-Length y aceptados por streaming acotado, con recibos
 e intentos registrados y un cierre seguro. La etapa 3, extracción
 y clasificación offline, queda pendiente de autorización.
 [Detalle](eureka-nacional-experience-spike.md#etapa-2-adquisición-secop-i-por-lote-cuatro-pdf).
+
+
+### Etapa 3 SECOP I: 4 not_resolved, con indicios de exigencia en los cuatro
+
+Taraira, Jericó, Fómeque y Montelíbano tenían texto nativo (184 de
+185 páginas leídas, sin OCR). El clasificador dejó los cuatro en
+not_resolved:
+
+- Uno por documento rector incompleto.
+- Dos sin cláusula decisiva.
+- Uno con exigencia explícita que requiere corroboración.
+
+En la revisión humana, los cuatro muestran indicios de exigencia
+de experiencia y ninguno es favorable. Se detectó un defecto en la
+primera pasada de OCR, que dejó sin leer la página 43 de Taraira;
+la corrección está pendiente de autorización.
+[Detalle](eureka-nacional-experience-spike.md#etapa-3-extracción-y-clasificación-offline-de-cuatro-procesos-secop-i).
