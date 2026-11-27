@@ -492,12 +492,14 @@ def ocr_targets(fragments, total_pages):
     return [page for page, _ in sorted(ranked.items(), key=lambda item: (item[1], item[0]))]
 
 
-def next_pass(read, total_pages, targets, remaining):
-    """Located pages first, then the initial window, then conservative sequential reading."""
-    order = [*targets, *INITIAL_WINDOW, *range(1, total_pages + 1)]
+def next_pass(tried, candidates, targets, remaining):
+    """Only pages without usable text are planned: located ones first, then the initial
+    window, then the remaining candidates in order. Tried pages are never planned again."""
+    pool = [page for page in sorted(candidates) if page not in tried]
+    order = [*targets, *INITIAL_WINDOW, *pool]
     plan = []
     for page in order:
-        if 1 <= page <= total_pages and page not in read and page not in plan:
+        if page in pool and page not in plan:
             plan.append(page)
         if len(plan) == min(PASS_PAGES, remaining):
             break
@@ -539,7 +541,11 @@ def extract_with_ocr_plan(
     classify=classify_experience,
 ):
     """Multi-pass selective OCR over the existing extractor. Partial coverage stays partial:
-    pending pages keep the document incomplete, so silence is never read as absence."""
+    pending pages keep the document incomplete, so silence is never read as absence.
+
+    Pass 0 reads native text only (no OCR budget) to learn which pages lack usable text;
+    every later pass plans exclusively among those pages.
+    """
     base = dict(entry)
     merged = {
         "fragments": [],
@@ -549,18 +555,18 @@ def extract_with_ocr_plan(
         "extraction_seconds": 0.0,
         "passes": [],
     }
-    first, allowance, stop = None, per_document, None
+    first, candidates, skipped, allowance, stop = None, set(), set(), per_document, None
     while stop is None:
-        total = first["total_pages"] if first else None
-        granted = budget.take(min(PASS_PAGES, allowance))
         if first is None:
-            plan = list(INITIAL_WINDOW[:granted])
-        elif not granted:
-            stop = "document_ocr_budget" if allowance <= 0 else "run_ocr_budget"
-            break
+            plan = []
         else:
-            tried = merged["seen"] | merged["ocr_pages"]
-            plan = next_pass(tried, total, ocr_targets(merged["fragments"], total), granted)
+            granted = budget.take(min(PASS_PAGES, allowance))
+            if not granted:
+                stop = "document_ocr_budget" if allowance <= 0 else "run_ocr_budget"
+                break
+            tried = merged["seen"] | merged["ocr_pages"] | skipped
+            targets = ocr_targets(merged["fragments"], first["total_pages"])
+            plan = next_pass(tried, candidates, targets, granted)
             if not plan:
                 stop = "pages_exhausted"
                 break
@@ -578,18 +584,19 @@ def extract_with_ocr_plan(
         spent = len(current["ocr_pages"])
         budget.spend(spent)
         allowance -= spent
+        # A planned page the extractor did not process is never planned again.
+        skipped |= set(plan) - set(current["ocr_pages"])
         merge_pass(merged, current, len(merged["passes"]) + 1)
         if first is None:
             first = current
             if current.get("error_code") or not current["total_pages"]:
                 stop = "extraction_failed" if current.get("error_code") else "no_pages"
                 break
+            candidates = set(range(1, first["total_pages"] + 1)) - merged["seen"]
         if not set(range(1, first["total_pages"] + 1)) - merged["seen"]:
             stop = "document_complete"
         elif current.get("error_code"):
             stop = "ocr_pass_failed"
-        elif plan and spent == 0:
-            stop = "ocr_no_progress"
         else:
             probe = {**first, "fragments": merged["fragments"], "complete": False}
             outcome = classify([probe])
@@ -611,6 +618,8 @@ def extract_with_ocr_plan(
         complete=complete and not entry.get("role_hint"),
         extraction_seconds=round(merged["extraction_seconds"], 3),
         ocr_passes=merged["passes"],
+        ocr_candidates=sorted(candidates),
+        ocr_unprocessed_planned=sorted(skipped),
         ocr_stop_reason=stop,
         ocr_policy={
             "per_document": per_document,
@@ -649,7 +658,9 @@ def ensure_inside(root: Path, path: Path):
 # ---------------------------------------------------------------- stage 3: offline resume
 
 
-def resume_secop1(source, output, *, settings, budget, runner, per_document=GOVERNING_OCR_PAGES):
+def resume_secop1(
+    source, output, *, settings, budget, runner, per_document=GOVERNING_OCR_PAGES, only=None
+):
     """Extract and classify queued SECOP I processes from verified receipts only.
 
     No provider, feed, inventory or SECOP request: documents without a receipt stay pending.
@@ -679,7 +690,10 @@ def resume_secop1(source, output, *, settings, budget, runner, per_document=GOVE
         "secop1_extraction_seconds": 0.0,
         "secop1_receipt_rejected": 0,
     }
-    for item in queue["items"]:
+    selected = [i for i in queue["items"] if only is None or i["constancia"] in only]
+    if only is not None and {i["constancia"] for i in selected} != set(only):
+        raise SpikeError("Constancia fuera de la cola SECOP I.")
+    for item in selected:
         reference = item["process_reference"]
         documents = [dict(doc) for doc in inventories.get(reference, [])]
         metrics["secop1_processes"] += 1
@@ -758,6 +772,7 @@ def resume_secop1(source, output, *, settings, budget, runner, per_document=GOVE
         "source_run": source.name,
         "source": "secop1",
         "batch_sha256": queue["batch_sha256"],
+        "only_constancias": sorted(only) if only is not None else None,
         "network_requests": 0,
         "ai_calls": 0,
         "ocr_budget": {**budget.limits, "pages_left": budget.pages_left},
@@ -789,6 +804,12 @@ def main(argv=None):
         action="store_true",
         help="Regenerar la cola desde los inventarios guardados, sin peticiones.",
     )
+    parser.add_argument(
+        "--only-constancia",
+        action="append",
+        metavar="CONSTANCIA",
+        help="Reevaluar solo estas constancias de la cola, en un directorio propio.",
+    )
     parser.add_argument("--tesseract", default="tesseract")
     parser.add_argument("--tessdata", type=Path)
     parser.add_argument(
@@ -819,7 +840,11 @@ def main(argv=None):
                 )
             )
             return 0
-        output = ensure_inside(root, root / f"en01-secop1_{args.run[5:]}")
+        only = args.only_constancia
+        if only and not all(CONSTANCIA.fullmatch(c) for c in only):
+            raise ValueError("Constancia invalida.")
+        suffix = "_" + "_".join(sorted(c.replace("-", "") for c in only)) if only else ""
+        output = ensure_inside(root, root / f"en01-secop1_{args.run[5:]}{suffix}")
         if (output / "metrics.json").exists():
             print("EN-01 SECOP I: la reanudacion ya existe; no se sobrescribe.")
             return 1
@@ -832,6 +857,7 @@ def main(argv=None):
             budget=OcrBudget(),
             runner=runner,
             per_document=args.governing_ocr_pages,
+            only=only,
         )
     except (OSError, ValueError, SpikeError) as error:
         print(f"EN-01 SECOP I: {type(error).__name__}")

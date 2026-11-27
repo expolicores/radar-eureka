@@ -504,8 +504,9 @@ def test_index_located_pages_are_read_first_and_partial_coverage_stays_unresolve
     flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
 
     # Assert
-    assert extractor.calls[0] == [1, 2]
-    assert extractor.calls[1] == [20, 21]
+    assert extractor.calls[0] == []  # native pass: no OCR budget
+    assert extractor.calls[1] == [1, 2]  # scanned: the index is only known after OCR
+    assert extractor.calls[2] == [20, 21]
     assert len(entry["ocr_pages"]) == 12
     assert entry["complete"] is False
     assert len(entry["pending_pages"]) == 24
@@ -522,7 +523,7 @@ def test_without_located_pages_reading_is_sequential_and_bounded():
         extractor, None, None, None, None, entry, flow.OcrBudget(), per_document=6
     )
 
-    assert extractor.calls == [[1, 2], [3, 4], [5, 6]]
+    assert extractor.calls == [[], [1, 2], [3, 4], [5, 6]]
     assert entry["ocr_stop_reason"] == "document_ocr_budget"
 
 
@@ -532,7 +533,8 @@ def test_explicit_requirement_stops_the_search():
 
     flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
 
-    assert extractor.calls == [[1, 2], [20, 21]]
+    assert extractor.calls[:2] == [[], [1, 2]]
+    assert extractor.calls[2] == [20, 21]
     assert entry["ocr_stop_reason"] == "explicit_requirement_found"
 
 
@@ -1167,3 +1169,153 @@ def test_stage3_cli_refuses_rebuild_once_attempts_exist(tmp_path, monkeypatch):
 
     assert flow.main([run.name, "--rebuild-queue"]) == 1
     assert flow.load_queue(run)["max_posts"] == 5
+
+
+class MixedExtractor:
+    """Native pages, scanned pages (OCR yields text), blank pages (OCR yields nothing) and
+    pages the extractor refuses to OCR. Mirrors extract_document's entry fields."""
+
+    def __init__(self, total, *, native, scanned=(), blank=(), refused=(), texts=None):
+        self.total, self.native, self.scanned = total, set(native), set(scanned)
+        self.blank, self.refused = set(blank), set(refused)
+        self.texts, self.calls = texts or {}, []
+
+    def __call__(self, document, stored, storage, settings, entry, *, ocr_pages, page_plan):
+        plan = list(page_plan)[:ocr_pages]
+        self.calls.append(plan)
+        processed = [p for p in plan if p not in self.native and p not in self.refused]
+        success = [p for p in processed if p in self.scanned]
+        fragments = [
+            fragment(self.texts.get(p, f"Texto nativo {p}"), p) for p in sorted(self.native)
+        ]
+        fragments += [fragment(self.texts.get(p, f"OCR {p}"), p, "ocr_text") for p in success]
+        seen = sorted(self.native | set(success))
+        entry.update(
+            total_pages=self.total,
+            pages_seen=seen,
+            ocr_pages=processed,
+            ocr_success_pages=success,
+            native_pages=sorted(self.native),
+            pending_pages=[p for p in range(1, self.total + 1) if p not in seen],
+            status="ocr_success" if success else "native_success",
+            error_code=None,
+            extraction_seconds=0.1 + 4.4 * len(processed),
+            fragments=fragments,
+            cover_metadata={},
+            content_complete=False,
+            complete=False,
+        )
+
+
+def test_taraira_like_document_reads_its_only_scanned_page():
+    # Arrange: 75 pages, all native except page 43 (the reported defect).
+    extractor = MixedExtractor(75, native=set(range(1, 76)) - {43}, scanned={43})
+    entry = governing_entry()
+    budget = flow.OcrBudget()
+
+    # Act
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, budget)
+
+    # Assert
+    assert extractor.calls == [[], [43]]
+    assert entry["ocr_candidates"] == [43]
+    assert entry["ocr_pages"] == [43]
+    assert entry["pending_pages"] == []
+    assert entry["complete"] is True
+    assert entry["ocr_stop_reason"] == "document_complete"
+    assert budget.pages_left == flow.RUN_OCR_PAGES - 1
+
+
+def test_native_pages_never_consume_ocr_budget_and_blank_pages_stay_pending():
+    extractor = MixedExtractor(10, native={1, 2, 3, 5, 6, 8, 9, 10}, scanned={4}, blank={7})
+    entry = governing_entry()
+    budget = flow.OcrBudget()
+
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, budget)
+
+    assert extractor.calls == [[], [4, 7]]
+    assert entry["ocr_pages"] == [4, 7]
+    assert entry["ocr_success_pages"] == [4]
+    assert entry["pending_pages"] == [7]
+    assert entry["complete"] is False
+    assert entry["ocr_stop_reason"] == "pages_exhausted"
+    assert budget.pages_left == flow.RUN_OCR_PAGES - 2
+    assert flow.classify_experience([entry])["status"] == "not_resolved"
+
+
+def test_relevance_rules_prioritize_located_scanned_pages():
+    texts = {2: "4. REQUISITOS HABILITANTES ........ 9"}
+    extractor = MixedExtractor(
+        12, native=set(range(1, 13)) - {5, 9, 12}, scanned={5, 9, 12}, texts=texts
+    )
+    entry = governing_entry()
+
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
+
+    assert extractor.calls[1][0] == 9
+    assert sorted(entry["ocr_pages"]) == [5, 9, 12]
+
+
+def test_planned_page_the_extractor_refuses_does_not_stall_or_repeat():
+    extractor = MixedExtractor(6, native={1, 2, 3}, scanned={5, 6}, refused={4})
+    entry = governing_entry()
+
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
+
+    assert extractor.calls == [[], [4, 5], [6]]
+    assert entry["ocr_unprocessed_planned"] == [4]
+    assert entry["pending_pages"] == [4]
+    assert entry["ocr_stop_reason"] == "pages_exhausted"
+
+
+def test_native_explicit_requirement_needs_no_ocr():
+    extractor = MixedExtractor(5, native={1, 2, 3, 4}, scanned={5}, texts={3: REQUIRED})
+    entry = governing_entry()
+
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
+
+    assert extractor.calls == [[]]
+    assert entry["ocr_stop_reason"] == "explicit_requirement_found"
+    assert entry["pending_pages"] == [5]
+
+
+def test_fully_native_document_is_complete_after_one_pass():
+    extractor = MixedExtractor(4, native={1, 2, 3, 4})
+    entry = governing_entry()
+
+    flow.extract_with_ocr_plan(extractor, None, None, None, None, entry, flow.OcrBudget())
+
+    assert extractor.calls == [[]]
+    assert entry["complete"] is True
+    assert entry["ocr_candidates"] == []
+
+
+def test_resume_can_be_limited_to_one_queued_constancia(tmp_path):
+    run, _, constancias = recovered_run(tmp_path, ["2.10 MB", "742 KB"])
+    output = tmp_path / "en01-secop1_only"
+    output.mkdir()
+    runner = SimpleNamespace(
+        spike=en01.spike,
+        StoredBinary=en01.StoredBinary,
+        verify_document_type=en01.verify_document_type,
+        DOCUMENT_BYTES=en01.DOCUMENT_BYTES,
+        AcquisitionError=en01.AcquisitionError,
+        extract_document=FakeExtractor({}),
+    )
+
+    summary = flow.resume_secop1(
+        run, output, settings=None, budget=flow.OcrBudget(), runner=runner, only=[constancias[0]]
+    )
+
+    results = report(output, "experience_requirements.json")
+    assert [r["constancia"] for r in results] == [constancias[0]]
+    assert summary["only_constancias"] == [constancias[0]]
+    with pytest.raises(SpikeError, match="fuera de la cola"):
+        flow.resume_secop1(
+            run,
+            output,
+            settings=None,
+            budget=flow.OcrBudget(),
+            runner=runner,
+            only=["26-13-99999999"],
+        )
