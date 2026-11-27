@@ -5089,3 +5089,27 @@ nativo.
   Licitaciones.info.
 - Siguiente paso posible, aparte: inventario de los 8 elegibles
   nuevos. Tendría coste en créditos y requiere otra autorización.
+
+### Adquisición focalizada de CO1.NTC.11293222 (lote f38de50d): sin documentos
+
+- Plan `en01-target_k94ws3so`, verificado contra el hash
+  `f38de50d74c47c3d239bf5d751148a4694babaa4f7a0ac1c559c11dc3df00cab`.
+  No había recibos ni intentos previos de 899021135 ni de 899021138.
+- Edge dedicado verificado. El primer preflight mostró dos perfiles
+  y se detuvo. Tras eliminar el titular el segundo perfil de la
+  cuenta: `only_configured`, `profile_count: 1` y sesión válida.
+  Sin marcador preventivo.
+- Resultado: los dos documentos dieron HTTP 403 en la descarga
+  directa. El streaming por Edge se rechazó antes de abrir la
+  pestaña (`authorized_tab_unavailable`): el mecanismo exige
+  exactamente una pestaña en `col.licitaciones.info/cliente/contratos`,
+  y la única pestaña abierta estaba en `/cliente/grupo`, la
+  administración de perfiles.
+- No hay recibos, binarios ni marcador. Los dos intentos quedaron
+  registrados como consumidos en `targeted_attempts/`, y el
+  mecanismo impide repetirlos.
+- No se hizo análisis documental: CO1.NTC.11293222 sigue
+  `not_resolved` y visible como hallazgo con incertidumbre.
+- Un nuevo intento requiere autorización expresa: archivar los
+  registros conservando la evidencia y hacer un intento por
+  documento con la pestaña de contratos abierta.

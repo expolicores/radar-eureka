@@ -1294,3 +1294,12 @@ peticiones.
   hash `f38de50d74c47c3d239bf5d751148a4694babaa4f7a0ac1c559c11dc3df00cab`.
 
 [Detalle](eureka-nacional-experience-spike.md#ventana-de-10-días-selección-de-rectores-y-cobertura-por-perfil).
+
+
+### Lote f38de50d sin documentos
+
+Los dos documentos de CO1.NTC.11293222 dieron 403 directo. El
+streaming no arrancó porque no había una pestaña en
+`/cliente/contratos`. Los intentos quedaron consumidos; un nuevo
+intento requiere autorización.
+[Detalle](eureka-nacional-experience-spike.md#adquisición-focalizada-de-co1ntc11293222-lote-f38de50d-sin-documentos).
