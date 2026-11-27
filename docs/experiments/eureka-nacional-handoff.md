@@ -1158,3 +1158,12 @@ Dos documentos: el estudio previo de Betéitiva 26-13-14851414
 (SECOP II, DocumentId 897735547). Hash `aaed3563…83598f9`. No hay
 recibos reutilizables.
 [Detalle](eureka-nacional-experience-spike.md#validación-focalizada-de-dos-candidatos-lote-documental-propuesto).
+
+
+### Validación de candidatos preparada
+
+Herramientas `plan`, `acquire-secop2` y `analyze` listas. El plan
+real reproduce el lote `aaed3563…`, y la cola SECOP I derivada es
+`892d8ebc…`. La adquisición real de los dos estudios previos espera
+autorización expresa.
+[Detalle](eureka-nacional-experience-spike.md#herramientas-de-validación-focalizada-offline-y-procedimiento-de-adquisición).

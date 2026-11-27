@@ -4121,3 +4121,48 @@ No indispensables:
   procesable por el pipeline.
 
 Pendiente: la aprobación del lote antes de cualquier descarga.
+
+
+### Herramientas de validación focalizada (offline) y procedimiento de adquisición
+
+`eureka_nacional_targeted_documents.py` (`cc70841`) tiene tres pasos:
+
+- `plan`, offline: resuelve los documentos desde los inventarios
+  guardados, exige el hash aprobado y crea un directorio propio con
+  la cola SECOP I.
+- `acquire-secop2`, real: una descarga directa por documento y, sólo
+  ante un 403 y sólo para documentos del plan, el Streaming
+  validado. Registra un intento exclusivo y un recibo, y respeta el
+  marcador preventivo.
+- `analyze`, offline: extrae todos los documentos disponibles de
+  cada candidato y traduce la salida del clasificador, sin cambios,
+  a lecturas explícitas: exigida, exigida sin conclusión formal,
+  ausencia explícita, ausencia pendiente de corroboración, silencio
+  con cobertura suficiente o evidencia insuficiente.
+
+Los formatos no procesables quedan como dependencia no resuelta.
+Pruebas: 17 nuevas; 527 de la suite nacional y 30 de laboratorio.
+
+`plan` se ejecutó sin peticiones sobre en01-uc9h1l8y y reprodujo el
+hash aprobado
+`aaed35635bbbd6d124332102a4191b120983e7773b80317aa82e95f9883598f9`.
+La cola SECOP I derivada (en01-target_uc9h1l8y) tiene 1 documento:
+el estudio previo de Betéitiva, con hash
+`892d8ebc2cbbdec12674a65012db8b5dad1c03b3d1fcb911f4fb72a2cd482734`.
+
+Procedimiento de la única adquisición real (pendiente de
+autorización):
+
+1. Verificaciones previas.
+2. SECOP II: `acquire-secop2`, con una petición directa y, sólo si
+   hay 403, un Streaming, desde la pestaña habitual de Contratos.
+3. SECOP I: `eureka_nacional_secop1_acquire.py en01-target_uc9h1l8y`,
+   con login, infoexpress, preflight, confirmación del hash
+   `892d8ebc…` y 1 POST.
+4. Verificación de recibos y parada antes del análisis.
+
+Límites: 10 MiB y 12 s por documento, sin reintentos.
+
+Riesgos: los «FORMATOS» de FONAM no son procesables y su lectura
+quedará como mucho en evidencia insuficiente. El tamaño del estudio
+previo y anexos de FONAM es desconocido y podría superar el límite.
