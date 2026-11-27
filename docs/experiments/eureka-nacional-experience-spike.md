@@ -3207,3 +3207,28 @@ reglas del veredicto, el reconocimiento del aviso, la
 comparación categórica del perfil, la clasificación de
 solicitudes y la verificación del Edge dedicado. No se
 ejecutó la sonda real.
+
+
+### Corrida real del preflight v2, sin adquisición
+
+Se verificaron antes de empezar el Edge dedicado del puerto 9232,
+la rama experimental y la ausencia de un marcador previo. La sonda
+corrió en modo preflight_only, sin `--acquire` y sin
+confirmed-post.flag. El titular inició sesión y abrió Contratos
+desde la UI del contexto desechable.
+
+Veredicto: la sesión fue válida y la navegación fue por la UI. La
+guarda bloqueó un get-info/MP. Hubo cero errores del proveedor
+no atribuibles a la guarda, cero inventarios, cero solicitudes
+oficiales y cero POST. En el momento de la captura no había aviso
+de URL visible. El perfil resultó `multiple` con fuente `query`:
+la aplicación pidió el feed para más de un perfil a la vez. No se
+registró si el ID configurado estaba entre ellos, así que el
+perfil infoexpress no quedó confirmado. ready_for_acquisition fue
+false, con razón profile_multiple.
+
+El contexto cerró y quedó verificado. Las pestañas habituales no
+se tocaron. Un defecto de la sonda local hizo que el retorno
+anticipado omitiera closure.json, y el marcador propio quedó
+presente. Se retiró después de comprobar su contenido, el cierre
+verificado y la salida 0 del trabajador.

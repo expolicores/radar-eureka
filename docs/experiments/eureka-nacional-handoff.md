@@ -877,3 +877,14 @@ puede verificar en la próxima sesión real a partir del
 get-info bloqueado. Una única prueba real de SECOP I
 requiere autorización explícita.
 [Detalle del preflight](eureka-nacional-experience-spike.md#preflight-pasivo-de-secop-i).
+
+
+### Preflight v2 real: sesión válida, perfil no confirmado
+
+La sesión del contexto desechable fue válida y todos los errores
+observados se atribuyen al feed bloqueado por la guarda. El
+get-info/MP de la aplicación llevaba varios perfiles, por lo que
+infoexpress no quedó confirmado y la sonda no quedó lista para
+adquirir. No hubo descargas, inventarios ni POST. Repetir la
+prueba requiere una nueva autorización.
+[Detalle](eureka-nacional-experience-spike.md#corrida-real-del-preflight-v2-sin-adquisición).
