@@ -146,7 +146,7 @@ def parse_secop1_page(body, constancia):
     return documents, issues, body.get("cantidad")
 
 
-def fetch_secop1_inventory(client, process):
+def fetch_secop1_inventory(client, process, *, max_pages=MAX_INVENTORY_PAGES):
     """One inventory per process through the existing endpoint; paginates like SECOP II
     but stops as soon as the provider's declared count is reached."""
     constancia = constancia_of(process)
@@ -155,7 +155,7 @@ def fetch_secop1_inventory(client, process):
     keys = process["inventory_keys"]
     payload = {key: keys.get(key) for key in ("idContrato", "id_fuente_contract", "idUltimaFase")}
     documents, issues, signatures = {}, [], set()
-    for page in range(1, MAX_INVENTORY_PAGES + 1):
+    for page in range(1, max_pages + 1):
         rows, page_issues, declared = parse_secop1_page(
             client.post(DOCUMENT_ENDPOINT, {**payload, "page": page}), constancia
         )
@@ -170,6 +170,8 @@ def fetch_secop1_inventory(client, process):
             documents[document["document_id"]] = document
         if isinstance(declared, int) and len(documents) + len(issues) >= declared:
             return list(documents.values()), issues, declared
+    if max_pages < MAX_INVENTORY_PAGES:
+        raise SpikeError("secop1_inventory_page_budget")
     raise SpikeError("Limite de paginas SECOP I; inventario incompleto.")
 
 
@@ -190,9 +192,9 @@ def inventory_digest(documents):
     return hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
-def analyze_secop1_inventory(client, process, metrics, documents):
+def analyze_secop1_inventory(client, process, metrics, documents, *, max_pages=MAX_INVENTORY_PAGES):
     """Stage 1 for one SECOP I process: inventory and at most one queued governing PDF."""
-    found, issues, declared = fetch_secop1_inventory(client, process)
+    found, issues, declared = fetch_secop1_inventory(client, process, max_pages=max_pages)
     metrics["secop1_inventories"] += 1
     documents.extend(found)
     for document in found:
@@ -265,6 +267,101 @@ def load_queue(output):
         ):
             raise SpikeError("Identidad documental SECOP I invalida en la cola.")
     return queue
+
+
+# ---------------------------------------------------------------- stage 1 recovery
+
+RECOVERY_PREFIX = "en01-secop1inv_"
+
+
+def recover_secop1_inventories(client, source, output, constancias, *, is_fatal):
+    """Inventory only SECOP I processes already selected in `source`, limited to an explicit
+    allowlist of constancias. No feed, no discovery, no commercial re-filtering, no downloads.
+
+    The caller bounds `client` to one request per constancia; pagination beyond that budget
+    stops the recovery. `is_fatal(error)` decides budget/session errors that stop the loop.
+    """
+    raw = (source / "processes.json").read_bytes()
+    discovery = json.loads(raw.decode("utf-8"))
+    selected = [
+        p
+        for p in discovery["processes"]
+        if p.get("source") == "secop1" and p.get("sampled") and p.get("excluded_reason") is None
+    ]
+    by_constancia = {constancia_of(p): p for p in selected}
+    if len(set(constancias)) != len(constancias) or any(
+        c not in by_constancia for c in constancias
+    ):
+        raise SpikeError("Constancias fuera de la seleccion persistida.")
+    processes = [by_constancia[c] for c in constancias]
+    metrics = {"secop1_inventories": 0, "secop1_queued": 0}
+    inventories, errors, items, outcomes = [], [], [], []
+    stopped = None
+    for process in processes:
+        reference = process["process_reference"]
+        documents, process_errors = [], []
+        if stopped is not None:
+            stop = f"not_attempted_after_{stopped}"
+        else:
+            try:
+                # One inventory request per authorized process; never another's credit.
+                stop, item, issues = analyze_secop1_inventory(
+                    client, process, metrics, documents, max_pages=1
+                )
+                process_errors.extend(issues)
+                if item:
+                    items.append(item)
+            except SpikeError as error:
+                code = getattr(error, "code", None) or str(error)
+                if is_fatal(error):
+                    stopped = code
+                    stop = code
+                else:
+                    stop = "inventory_failed"
+                process_errors.append({"stage": "inventory", "code": code})
+        inventories.append({"process_reference": reference, "documents": documents})
+        outcomes.append(
+            {
+                "process_reference": reference,
+                "constancia": constancia_of(process),
+                "entity_name": process.get("entity_name"),
+                "department": process.get("department"),
+                "inventory_documents": len(documents),
+                "queued": any(i["process_reference"] == reference for i in items),
+                "stop_reason": stop,
+            }
+        )
+        errors.extend({"process_reference": reference, **e} for e in process_errors)
+    queue = write_queue(output, items, output.name)
+    summary = {
+        "run_id": output.name,
+        "scope": "secop1_inventory_recovery",
+        "recovered_from": source.name,
+        "source_processes_sha256": hashlib.sha256(raw).hexdigest(),
+        "authorized_constancias": list(constancias),
+        "request_credits_used": client.requests,
+        "request_credit_limit": client.request_limit,
+        "feed_requests": 0,
+        "downloads": 0,
+        "posts": 0,
+        "stopped_by": stopped,
+        **metrics,
+        "batch_sha256": queue["batch_sha256"],
+        "processes": outcomes,
+    }
+    recovered = {
+        "scope": "secop1_inventory_recovery",
+        "recovered_from": source.name,
+        "processes": processes,
+    }
+    for name, data in (
+        ("processes.json", recovered),
+        ("documents.json", inventories),
+        ("errors.json", errors),
+        ("metrics.json", summary),
+    ):
+        (output / name).write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    return summary
 
 
 # ---------------------------------------------------------------- OCR plan (stage 3)

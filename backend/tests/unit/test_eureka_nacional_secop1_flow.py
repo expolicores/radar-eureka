@@ -695,3 +695,288 @@ def test_stage3_cli_refuses_to_overwrite_an_existing_resume(tmp_path, monkeypatc
     (done / "metrics.json").write_text("{}", encoding="utf-8")
 
     assert flow.main(["en01-abc"]) == 1
+
+
+# ---------------------------------------------------------------- A: decoupled circuit
+
+
+def run_with_failing_secop2(tmp_path, monkeypatch, *, include):
+    secop2_rows = [row(n, dept) for n, dept in ((1, "Boyacá"), (2, "Bogotá"), (3, "Valle"))]
+    secop1_rows = [secop1_discovery_row(91, "Santander", "26-13-11111111")]
+    data = [*secop2_rows, *secop1_rows]
+    calls = []
+
+    def post(path, payload):
+        calls.append((path, payload))
+        if path != DOCUMENT_ENDPOINT:
+            return {"count": len(data), "data": data}
+        identifier = str(payload["idContrato"])
+        if identifier == "91":
+            path91 = doc_path("INVMC", 1, "26-13-11111111")
+            return inventory_body([secop1_row("Invitación", path91)])
+        if payload["page"] == 2:
+            return {"status": 1, "documentos": []}
+        return {
+            "status": 1,
+            "documentos": {
+                "encabezados": ["Item", "Nombre", "Tipo", "Documento"],
+                "campos": [
+                    table(f"{identifier}1", "Invitación.pdf"),
+                    table(f"{identifier}2", "Estudios previos.pdf"),
+                ],
+            },
+        }
+
+    def refuse(*_args, **_kwargs):
+        raise en01.AcquisitionError("http_error", "403")
+
+    monkeypatch.setattr(en01, "check_session", Mock())
+    monkeypatch.setattr(en01.spike, "download_document", refuse)
+    client = SimpleNamespace(
+        post=post, profile_id=EXAMPLE_PROFILE, deadline=time.monotonic() + 360, requests=0
+    )
+    args = SimpleNamespace(discovery_pages=1, documents=10, processes=3, recent_days=30)
+    if include:
+        args.include_secop1, args.secop1_processes = True, 5
+    output = tmp_path / ("on" if include else "off")
+    output.mkdir()
+    code = en01.run(client, args, None, output, now=CUTOFF)
+    return code, output, calls
+
+
+def test_secop2_download_circuit_does_not_block_secop1_inventory(tmp_path, monkeypatch):
+    # Arrange / Act
+    code, output, calls = run_with_failing_secop2(tmp_path, monkeypatch, include=True)
+
+    # Assert: the circuit still stops SECOP II and the run, but after SECOP I inventories.
+    errors = report(output, "errors.json")
+    assert code == 2
+    assert {"stage": "budget", "code": "download_circuit_open"} in errors
+    assert [p["idContrato"] for path, p in calls if path == DOCUMENT_ENDPOINT][-1] == 91
+    assert [i["constancia"] for i in flow.load_queue(output)["items"]] == ["26-13-11111111"]
+    metrics = report(output, "metrics.json")
+    assert metrics["secop1_inventories"] == 1
+    assert metrics["status"] == "partial"
+
+
+def test_without_secop1_the_circuit_stops_exactly_as_before(tmp_path, monkeypatch):
+    code, output, calls = run_with_failing_secop2(tmp_path, monkeypatch, include=False)
+
+    assert code == 2
+    assert {"stage": "budget", "code": "download_circuit_open"} in report(output, "errors.json")
+    assert all(p["idContrato"] != 91 for path, p in calls if path == DOCUMENT_ENDPOINT)
+    assert not (output / flow.QUEUE_FILE).exists()
+
+
+@pytest.mark.parametrize("code", ["duration_budget", "request_budget", "download_close_unverified"])
+def test_other_budget_stops_are_never_deferred(code):
+    assert en01.is_download_circuit(en01.BudgetReached(code)) is False
+    assert en01.is_download_circuit(en01.BudgetReached("download_circuit_open")) is True
+
+
+# ---------------------------------------------------------------- B: inventory recovery
+
+SELECTED = ["26-13-11111111", "26-13-22222222", "26-13-33333333"]
+
+
+def persisted_run(tmp_path):
+    source = tmp_path / "en01-orig"
+    source.mkdir()
+    processes = [
+        {
+            **secop1_process(),
+            "process_reference": f"licitaciones_info:1:{n}",
+            "source_identity": f"secop1:{c}",
+            "sampled": True,
+            "excluded_reason": None,
+            "entity_name": f"Entidad {n}",
+            "department": "Boyacá",
+            "inventory_keys": {"idContrato": n, "id_fuente_contract": 4, "idUltimaFase": None},
+        }
+        for n, c in enumerate(SELECTED, 1)
+    ]
+    processes.append(
+        {
+            **processes[0],
+            "process_reference": "licitaciones_info:1:9",
+            "source_identity": "secop1:26-13-99999999",
+            "sampled": False,
+        }
+    )
+    processes.append(
+        {
+            **processes[0],
+            "process_reference": "licitaciones_info:1:8",
+            "source_identity": "secop1:26-13-88888888",
+            "excluded_reason": "outside_commercial_profile",
+        }
+    )
+    (source / "processes.json").write_text(json.dumps({"processes": processes}), "utf-8")
+    output = tmp_path / "en01-secop1inv_orig"
+    output.mkdir()
+    return source, output
+
+
+class BoundedClient:
+    """Raises the runner's own budget error once the authorized requests are spent."""
+
+    def __init__(self, limit, responses):
+        self.requests, self.request_limit, self.responses, self.calls = 0, limit, responses, []
+
+    def post(self, path, payload):
+        if self.requests + 1 > self.request_limit:
+            raise en01.BudgetReached("request_budget")
+        self.requests += 1
+        self.calls.append((path, payload))
+        return self.responses(payload)
+
+
+def inventory_for(payload):
+    constancia = SELECTED[int(payload["idContrato"]) - 1]
+    return inventory_body(
+        [
+            secop1_row("Invitación", doc_path("INVMC", 1, constancia)),
+            secop1_row("Estudios previos", doc_path("DA", 2, constancia)),
+        ]
+    )
+
+
+def test_recovery_uses_persisted_selection_and_one_request_per_constancia(tmp_path):
+    # Arrange
+    source, output = persisted_run(tmp_path)
+    client = BoundedClient(2, inventory_for)
+
+    # Act
+    summary = flow.recover_secop1_inventories(
+        client, source, output, SELECTED[:2], is_fatal=en01.is_recovery_fatal
+    )
+
+    # Assert
+    assert [path for path, _ in client.calls] == [DOCUMENT_ENDPOINT, DOCUMENT_ENDPOINT]
+    assert [p["idContrato"] for _, p in client.calls] == [1, 2]
+    assert all(p["idUltimaFase"] is None for _, p in client.calls)
+    assert summary["feed_requests"] == summary["downloads"] == summary["posts"] == 0
+    assert summary["request_credits_used"] == 2
+    queue = flow.load_queue(output)
+    assert [i["constancia"] for i in queue["items"]] == SELECTED[:2]
+    assert queue["batch_sha256"] == summary["batch_sha256"]
+    assert report(output, "processes.json")["recovered_from"] == "en01-orig"
+
+
+@pytest.mark.parametrize(
+    "constancias",
+    [["26-13-99999999"], ["26-13-88888888"], ["26-13-77777777"], [SELECTED[0], SELECTED[0]]],
+)
+def test_recovery_refuses_constancias_outside_the_persisted_selection(tmp_path, constancias):
+    source, output = persisted_run(tmp_path)
+    client = BoundedClient(5, inventory_for)
+
+    with pytest.raises(SpikeError, match="seleccion persistida"):
+        flow.recover_secop1_inventories(
+            client, source, output, constancias, is_fatal=en01.is_recovery_fatal
+        )
+    assert client.calls == []
+
+
+def test_process_needing_a_second_page_never_spends_another_process_credit(tmp_path):
+    source, output = persisted_run(tmp_path)
+
+    def paged(payload):
+        body = inventory_for(payload)
+        if payload["idContrato"] == 1:
+            body["cantidad"] = 9  # the provider declares more rows than one page
+        return body
+
+    client = BoundedClient(2, paged)
+
+    summary = flow.recover_secop1_inventories(
+        client, source, output, SELECTED[:2], is_fatal=en01.is_recovery_fatal
+    )
+
+    assert client.requests == 2
+    assert [p["page"] for _, p in client.calls] == [1, 1]
+    assert [p["stop_reason"] for p in summary["processes"]] == [
+        "inventory_failed",
+        "secop1_queued_for_acquisition",
+    ]
+    assert report(output, "errors.json")[0]["code"] == "secop1_inventory_page_budget"
+    assert [i["constancia"] for i in flow.load_queue(output)["items"]] == [SELECTED[1]]
+
+
+def test_exhausted_request_budget_stops_the_recovery(tmp_path):
+    source, output = persisted_run(tmp_path)
+    client = BoundedClient(1, inventory_for)
+
+    summary = flow.recover_secop1_inventories(
+        client, source, output, SELECTED, is_fatal=en01.is_recovery_fatal
+    )
+
+    assert client.requests == 1
+    assert summary["stopped_by"] == "request_budget"
+    assert [p["stop_reason"] for p in summary["processes"]] == [
+        "secop1_queued_for_acquisition",
+        "request_budget",
+        "not_attempted_after_request_budget",
+    ]
+
+
+def test_isolated_inventory_failure_is_recorded_and_recovery_continues(tmp_path):
+    source, output = persisted_run(tmp_path)
+
+    def flaky(payload):
+        if payload["idContrato"] == 1:
+            return {"status": 0}
+        return inventory_for(payload)
+
+    summary = flow.recover_secop1_inventories(
+        BoundedClient(2, flaky), source, output, SELECTED[:2], is_fatal=en01.is_recovery_fatal
+    )
+
+    assert [p["stop_reason"] for p in summary["processes"]] == [
+        "inventory_failed",
+        "secop1_queued_for_acquisition",
+    ]
+    assert len(report(output, "errors.json")) == 1
+
+
+SIX = [arg for n in range(6) for arg in ("--secop1-constancia", f"26-13-1111111{n}")]
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--secop1-inventory-from", "en01-abc"],
+        ["--secop1-constancia", "26-13-11111111"],
+        ["--secop1-inventory-from", "en01-abc", "--secop1-constancia", "26-13-1x"],
+        [
+            "--secop1-inventory-from",
+            "en01-abc",
+            "--include-secop1",
+            "--secop1-constancia",
+            "26-13-11111111",
+        ],
+        ["--secop1-inventory-from", "en01-abc", *SIX],
+    ],
+)
+def test_recovery_cli_validation(argv):
+    with pytest.raises(SystemExit) as exit_info:
+        en01.main(argv)
+
+    assert exit_info.value.code == 2
+
+
+def test_recovery_cli_refuses_existing_queue_and_preventive_marker(tmp_path, monkeypatch):
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    (tmp_path / "en01-abc").mkdir()
+    args = SimpleNamespace(
+        secop1_inventory_from="en01-abc",
+        secop1_constancia=[SELECTED[0]],
+        cdp_url="http://127.0.0.1:9232",
+    )
+    (tmp_path / en01.streaming.MARKER_NAME).write_text("x", encoding="utf-8")
+    assert en01.recover_secop1_main(args, EXAMPLE_PROFILE) == 1
+    (tmp_path / en01.streaming.MARKER_NAME).unlink()
+    done = tmp_path / "en01-secop1inv_abc"
+    done.mkdir()
+    (done / flow.QUEUE_FILE).write_text("{}", encoding="utf-8")
+    assert en01.recover_secop1_main(args, EXAMPLE_PROFILE) == 1

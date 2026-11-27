@@ -974,6 +974,10 @@ def metrics_summary(discovery, results, metrics, client, started, profile):
     }
 
 
+def is_download_circuit(error):
+    return isinstance(error, BudgetReached) and str(error) == "download_circuit_open"
+
+
 def analyze_secop1_sample(client, sample, output, metrics, results, inventories, errors, items):
     """Stage 1 for SECOP I: inventory and queue only. A single process failure is recorded
     and the run continues; budget, session or tab failures stop it."""
@@ -1102,6 +1106,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     exit_code = 1
     include_secop1 = getattr(args, "include_secop1", False)
     secop1_items = []
+    deferred_stop = None
     try:
         if (output.parent / streaming.MARKER_NAME).exists():
             raise BudgetReached("download_close_unverified")
@@ -1226,6 +1231,11 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             )
             errors.extend({"process_reference": reference, **error} for error in process_errors)
             if stop:
+                if include_secop1 and is_download_circuit(stop):
+                    # Only SECOP II downloads stop here. SECOP I inventories are a different
+                    # operation; the circuit is re-raised right after them.
+                    deferred_stop = stop
+                    break
                 raise stop
         if include_secop1:
             analyze_secop1_sample(
@@ -1238,6 +1248,8 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 errors,
                 secop1_items,
             )
+        if deferred_stop is not None:
+            raise deferred_stop
         complete = (
             len(sample) == args.processes
             and discovery["stop_reason"] != "provider_repeated_page"
@@ -1375,6 +1387,51 @@ def load_resume_snapshot(source):
     )
 
 
+def is_recovery_fatal(error):
+    return isinstance(error, BudgetReached) or (
+        isinstance(error, CandidateError) and error.code in {"session_expired", "invalid_tab"}
+    )
+
+
+def recover_secop1_main(args, profile_id):
+    """Inventory-only recovery: no session probe (it queries the feed), no discovery."""
+    from playwright.sync_api import sync_playwright
+
+    source = OUTPUT_ROOT / secop1.run_dir_name(args.secop1_inventory_from)
+    output = OUTPUT_ROOT / f"{secop1.RECOVERY_PREFIX}{args.secop1_inventory_from[5:]}"
+    for path in (source, output):
+        if path.resolve() != path or path.parent != OUTPUT_ROOT:
+            raise ValueError("Ruta fuera del almacenamiento experimental.")
+    if (output / secop1.QUEUE_FILE).exists():
+        print("EN-01 SECOP I: la recuperacion ya existe; no se repite.")
+        return 1
+    if (OUTPUT_ROOT / streaming.MARKER_NAME).exists():
+        print("EN-01 SECOP I: marcador preventivo presente; no se continua.")
+        return 1
+    output.mkdir(exist_ok=True)
+    print(json.dumps({"output": str(output)}), flush=True)
+    with sync_playwright() as playwright:
+        browser = connect_browser(playwright, args.cdp_url)
+        client = SmokeClient(
+            find_page(browser),
+            profile_id,
+            time.monotonic() + DURATION_SECONDS,
+            request_limit=len(args.secop1_constancia),
+        )
+        summary = secop1.recover_secop1_inventories(
+            client, source, output, args.secop1_constancia, is_fatal=is_recovery_fatal
+        )
+    keys = (
+        "batch_sha256",
+        "secop1_inventories",
+        "secop1_queued",
+        "request_credits_used",
+        "stopped_by",
+    )
+    print(json.dumps({key: summary[key] for key in keys}), flush=True)
+    return 0 if summary["stopped_by"] is None else 2
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
@@ -1434,6 +1491,18 @@ def main(argv=None):
         choices=range(1, secop1.MAX_SECOP1_PROCESSES + 1),
         help="Máximo de procesos SECOP I (no es un cupo a completar).",
     )
+    parser.add_argument(
+        "--secop1-inventory-from",
+        metavar="CORRIDA",
+        help="Recuperar solo inventarios SECOP I ya seleccionados, sin consultar el feed.",
+    )
+    parser.add_argument(
+        "--secop1-constancia",
+        action="append",
+        default=[],
+        metavar="CONSTANCIA",
+        help="Constancia autorizada para la recuperacion. Repetible, maximo 5.",
+    )
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
@@ -1453,6 +1522,15 @@ def main(argv=None):
                 f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
             )
         setattr(args, name, value)
+    if args.secop1_inventory_from or args.secop1_constancia:
+        if not args.secop1_inventory_from or not (
+            1 <= len(args.secop1_constancia) <= secop1.MAX_SECOP1_PROCESSES
+        ):
+            parser.error("La recuperacion SECOP I requiere corrida y de 1 a 5 constancias.")
+        if not all(secop1.CONSTANCIA.fullmatch(c) for c in args.secop1_constancia):
+            parser.error("Constancia SECOP I invalida.")
+        if args.include_secop1 or args.resume_inventory_from or args.exclude_analyzed_from:
+            parser.error("La recuperacion SECOP I no combina descubrimiento ni reanudacion.")
     if args.secop1_processes is not None and not args.include_secop1:
         parser.error("--secop1-processes requiere --include-secop1.")
     if args.include_secop1 and args.resume_inventory_from:
@@ -1485,6 +1563,8 @@ def main(argv=None):
                 raise spike.SpikeError("La corrida no contiene procesos pendientes verificables.")
         profile_id = resolve_profile_id(args.profile_id)
         validate_cdp_url(args.cdp_url)
+        if args.secop1_inventory_from:
+            return recover_secop1_main(args, profile_id)
         profile = load_commercial_profile(args.commercial_profile)
         locations = load_national_locations(args.geography)
         from playwright.sync_api import sync_playwright
