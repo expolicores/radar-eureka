@@ -1090,3 +1090,20 @@ selección por cuota e informe de embudo por fuente. Los dos
 resultados históricos de SECOP II que A y B podrían cambiar siguen
 sin reprocesar. La corrida real espera aprobación.
 [Detalle](eureka-nacional-experience-spike.md#preparación-de-la-exploración-ciega-en-boyacá-y-huila-offline).
+
+
+### Búsqueda ciega Boyacá + Huila, etapa 1
+
+Resultados: 236 procesos en el alcance; 30 elegibles (22 SECOP II
+y 8 SECOP I); 20 seleccionados; 10 fuera por cuota. Ningún
+favorable formal. El único silencio documental en invitación
+completa es el de DTAO-FONAM.
+
+Cuellos de botella:
+
+- Las 8 páginas sólo cubrieron unos dos días de la ventana.
+- El cortacircuitos de SECOP II dejó 6 procesos sin analizar.
+
+Lote SECOP I `a2f83173…` con 4 rectores, uno de ellos (Jericó) con
+un recibo previo verificado. La etapa 2 está pendiente de revisión.
+[Detalle](eureka-nacional-experience-spike.md#exploración-ciega-boyacá--huila-etapa-1-en01-uc9h1l8y).

@@ -3867,3 +3867,56 @@ Sin las opciones nuevas, la salida es idéntica al código anterior.
 Nota vigente: los ajustes A y B del clasificador compartido podrían
 cambiar dos resultados históricos de SECOP II (en01-le73ddhz y
 en01-manual_hsxjhqpg). No se reprocesan.
+
+
+### Exploración ciega Boyacá + Huila, etapa 1 (en01-uc9h1l8y)
+
+La geografía se verificó contra el JSON de ubicaciones de
+Licitaciones.info aportado por el titular: departamento 40060 con
+123 códigos de 8 dígitos y departamento 40170 con 37 códigos de 7
+dígitos. Coincidió exactamente con el archivo versionado.
+
+Parámetros: `--exploratory --processes 15 --documents 24
+--discovery-pages 8 --recent-days 30 --edge-stream-fallback
+--include-secop1 --secop1-processes 5 --ocr-pages 2` y la
+geografía de Boyacá y Huila. Se usaron 84 de 200 créditos en 127 s
+y la corrida terminó como parcial.
+
+Cobertura: se leyeron 240 avisos en 8 páginas y el proveedor seguía
+reportando más. Los avisos leídos se publicaron entre el 24-11 a
+las 16:06 y el 26-11 a las 18:25, es decir, unos dos días de la
+ventana de 30. Cuatro filas eran de otros departamentos o de
+alcance nacional y se excluyeron como `outside_geography_scope`.
+
+| Fuente / departamento | Descubiertos | Elegibles | Seleccionados | No seleccionados por cuota |
+| --- | --- | --- | --- | --- |
+| SECOP II Boyacá | 132 | 13 | 10 | 3 |
+| SECOP II Huila | 44 | 9 | 5 | 4 |
+| SECOP I Boyacá | 55 | 8 | 5 | 3 |
+| SECOP I Huila | 4 | 0 | 0 | 0 |
+
+Las principales exclusiones fueron fuera del perfil comercial (140)
+y servicio principal (58).
+
+SECOP II: el 403 directo fue generalizado. Edge recuperó 4 PDF y
+rechazó un rector de 11,3 MB. Después se abrió el cortacircuitos y
+quedaron 6 seleccionados sin analizar. Resultados de los 9
+analizados:
+
+- 7 not_resolved.
+- El Cocuy, experience_ambiguous por cláusulas de proponentes
+  plurales sobre la «experiencia solicitada».
+- DTAO-FONAM (Huila, ferretería), not_resolved por silencio
+  documental. La invitación de 18 páginas está completa y no tiene
+  ninguna mención de experiencia; quedan pendientes los formatos y
+  el estudio previo.
+
+SECOP I: 5 inventarios y 4 rectores en cola (Jericó, Panqueba y dos
+de Betéitiva). Sutatenza quedó excluido por tamaño mostrado. Hash
+del lote:
+`a2f83173735c7dbf894d738095dcbc8aa99111cac5e77db5895a3c16fa66f156`.
+La invitación de Jericó ya tiene un recibo verificado en
+en01-secop1inv_xgcp5mgp, pero la etapa 2 no reutiliza recibos de
+otras corridas: queda pendiente de revisión.
+
+Sin favorables formales. No hubo POST SECOP I ni etapa 2.
