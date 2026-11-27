@@ -3232,3 +3232,37 @@ se tocaron. Un defecto de la sonda local hizo que el retorno
 anticipado omitiera closure.json, y el marcador propio quedó
 presente. Se retiró después de comprobar su contenido, el cierre
 verificado y la salida 0 del trabajador.
+
+
+### Correcciones offline: cierre seguro y diagnóstico de perfiles
+
+El preflight distingue ahora cuatro situaciones del perfil enviado
+por la aplicación en el get-info/MP bloqueado:
+
+- only_configured: sólo el perfil configurado.
+- configured_with_others: el configurado junto con otros.
+- without_configured: uno o varios perfiles, sin el configurado.
+- absent o undetermined_no_feed_request.
+
+Sólo salen la categoría, el número de perfiles distintos, si la
+selección cambió y la fuente (query o body). Nunca salen IDs, URLs
+ni cuerpos. Se evalúa la última solicitud, que corresponde a la
+selección vigente en la UI. La adquisición sigue exigiendo
+only_configured: exactamente un perfil y que coincida con
+`LICITACIONES_PROFILE_ID`. La corrida real anterior corresponde a
+configured_with_others o a without_configured; no se reclasificó.
+
+Cierre: la sonda local escribe la evidencia de cierre en su
+finally más externo, también cuando ready_for_acquisition es false
+y ante excepciones. La evidencia sólo marca como verdaderos los
+hechos verificados: marcador propio, contexto cerrado según la
+comprobación CDP de la guarda y desconexión de CDP sin error. El
+padre borra closure.json antes de lanzar al trabajador, para que
+una evidencia antigua nunca autorice la liberación. Retira el
+marcador preventivo sólo si la evidencia es completa, el
+trabajador salió con 0 y el contenido es el de la guarda. Los
+flags de operador se consumen al cerrar. La decisión de liberación
+es una función pura versionada con pruebas offline. Un arnés
+temporal con dobles en memoria ejercitó la sonda local en cinco
+escenarios de cierre, sin navegador ni red. No hubo login, feed,
+inventario, POST ni descargas.

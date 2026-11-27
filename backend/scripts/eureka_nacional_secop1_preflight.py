@@ -127,30 +127,44 @@ def _parse_body(post_data):
         return None
 
 
+# Only these categories (and a count) leave the module; never the identifiers.
+ONLY_CONFIGURED = "only_configured"
+CONFIGURED_WITH_OTHERS = "configured_with_others"
+WITHOUT_CONFIGURED = "without_configured"
+ABSENT = "absent"
+NO_FEED_REQUEST = "undetermined_no_feed_request"
+
+
 def _category(ids, expected_profile_id):
-    if not ids:
-        return "absent"
-    if len(ids) > 1:
-        return "multiple"
-    return "match" if ids[0] == str(expected_profile_id).strip() else "mismatch"
+    """Return (category, distinct profile count); duplicates count as one profile."""
+    distinct = set(ids)
+    if not distinct:
+        return ABSENT, 0
+    if str(expected_profile_id).strip() not in distinct:
+        return WITHOUT_CONFIGURED, len(distinct)
+    if len(distinct) == 1:
+        return ONLY_CONFIGURED, 1
+    return CONFIGURED_WITH_OTHERS, len(distinct)
 
 
 def profile_match(url, expected_profile_id, post_data=None):
     """Compare the app's own blocked feed request with the configured profile.
 
     The query is checked first; only if it has no `perfiles` is the body parsed in memory.
-    Returns (category, source); the identifier and the body never leave this function.
+    Returns (category, source, distinct_count); identifiers and body never leave it.
     """
     if urlsplit(url).path.rstrip("/") != PROFILE_FEED_PATH:
         return None
     ids = _ids_from_values(parse_qs(urlsplit(url).query).get("perfiles", []))
     if ids:
-        return _category(ids, expected_profile_id), "query"
+        category, count = _category(ids, expected_profile_id)
+        return category, "query", count
     body = _parse_body(post_data)
     if body is None:
-        return "absent", None
+        return ABSENT, None, 0
     ids = _ids_from_values(_body_profile_values(body))
-    return _category(ids, expected_profile_id), "body" if ids else None
+    category, count = _category(ids, expected_profile_id)
+    return category, "body" if ids else None, count
 
 
 @dataclass
@@ -187,8 +201,9 @@ class PassivePreflight:
             self.feed_blocked += 1
             check = profile_match(url, self.expected_profile_id, post_data)
             if check is not None:
-                self.profile_checks.append(check[0])
-                self.profile_sources.append(check[1])
+                category, source, count = check
+                self.profile_checks.append((category, count))
+                self.profile_sources.append(source)
         return decision
 
     def observe_response(self, url, *, method, resource_type, status, json=None):
@@ -267,14 +282,12 @@ class PassivePreflight:
         return "valid", None
 
     def _profile(self):
+        """Last observed request = current UI selection; earlier ones only flag a change."""
         if not self.profile_checks:
-            return "undetermined_no_feed_request"
-        last = self.profile_checks[-1]
-        if last == "match" and all(c == "match" for c in self.profile_checks):
-            return "match"
-        if last == "match":
-            return "match_after_change"
-        return last
+            return NO_FEED_REQUEST, 0, False
+        category, count = self.profile_checks[-1]
+        changed = len(set(self.profile_checks)) > 1
+        return category, count, changed
 
     def _notice(self):
         state = self.page_state
@@ -287,12 +300,13 @@ class PassivePreflight:
     def verdict(self):
         navigation, navigation_ok = self._navigation()
         session, session_reason = self._session()
-        profile = self._profile()
+        profile, profile_count, profile_changed = self._profile()
         notice = self._notice()
         reasons = [r for r in (session_reason,) if r]
         if not navigation_ok:
             reasons.append(navigation)
-        if profile not in ("match", "match_after_change"):
+        # Acquisition requires exactly one profile and it must be the configured one.
+        if profile != ONLY_CONFIGURED:
             reasons.append(f"profile_{profile}")
         if notice == "unexplained":
             reasons.append("url_notice_unexplained")
@@ -306,6 +320,8 @@ class PassivePreflight:
             "feed": {"blocked": self.feed_blocked, "state": "blocked_by_guard"},
             "url_notice": notice,
             "profile": profile,
+            "profile_count": profile_count,
+            "profile_changed": profile_changed,
             "profile_source": sorted({src or "none" for src in self.profile_sources}),
             "official_blocked": self.official_blocked,
             "inventory_blocked": self.inventory_blocked,
@@ -313,3 +329,38 @@ class PassivePreflight:
             "ready_for_acquisition": not reasons,
             "reasons": reasons,
         }
+
+
+# Closure evidence. The worker writes it in its outermost `finally`, whatever the verdict.
+# The parent releases the preventive marker only on complete evidence of a safe closure.
+MARKER_TEXT = "secop1-disposable-context"
+
+
+def closure_record(*, marker_owned, context_closed, disconnected):
+    """Facts verified by the worker; anything not verified is recorded as False."""
+    return {
+        "marker_owned": marker_owned is True,
+        "context_closed": context_closed is True,
+        "disconnected": disconnected is True,
+    }
+
+
+def read_closure(path):
+    """Closure written by this worker run, or None if missing or unreadable."""
+    try:
+        data = json.loads(path.read_text(encoding="utf8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def marker_release_allowed(closure, *, worker_exit_code, marker_text):
+    return (
+        isinstance(closure, dict)
+        and closure.get("marker_owned") is True
+        and closure.get("context_closed") is True
+        and closure.get("disconnected") is True
+        and worker_exit_code == 0
+        and isinstance(marker_text, str)
+        and marker_text.strip() == MARKER_TEXT
+    )

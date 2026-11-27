@@ -888,3 +888,15 @@ infoexpress no quedó confirmado y la sonda no quedó lista para
 adquirir. No hubo descargas, inventarios ni POST. Repetir la
 prueba requiere una nueva autorización.
 [Detalle](eureka-nacional-experience-spike.md#corrida-real-del-preflight-v2-sin-adquisición).
+
+
+### Cierre seguro y perfiles diferenciados (offline)
+
+El preflight reporta only_configured, configured_with_others,
+without_configured o absent/undetermined, sin identificadores. La
+adquisición exige only_configured. La sonda local registra el
+cierre en cualquier desenlace y sólo libera el marcador con
+evidencia completa de cierre seguro. La próxima corrida real debe
+hacerse con sólo infoexpress seleccionado en la UI y requiere
+autorización.
+[Detalle](eureka-nacional-experience-spike.md#correcciones-offline-cierre-seguro-y-diagnóstico-de-perfiles).

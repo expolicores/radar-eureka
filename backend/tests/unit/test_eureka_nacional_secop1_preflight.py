@@ -1,5 +1,6 @@
 """Offline tests for the passive SECOP I preflight. Synthetic URLs and IDs only."""
 
+import json
 import sys
 from pathlib import Path
 
@@ -9,10 +10,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from eureka_nacional_secop1_preflight import (
     LANDING,
+    MARKER_TEXT,
     PassivePreflight,
     classify_request,
+    closure_record,
     dedicated_browser_checks,
+    marker_release_allowed,
     profile_match,
+    read_closure,
     url_notice_visible,
 )
 
@@ -116,7 +121,9 @@ def test_observed_boot_with_blocked_feed_is_valid_session_and_ready():
     assert verdict["navigation"] == "ui_navigation"
     assert verdict["feed"] == {"blocked": 1, "state": "blocked_by_guard"}
     assert verdict["url_notice"] == "attributed_to_feed_block"
-    assert verdict["profile"] == "match"
+    assert verdict["profile"] == "only_configured"
+    assert verdict["profile_count"] == 1
+    assert verdict["profile_changed"] is False
     assert verdict["ready_for_acquisition"] is True
     assert verdict["reasons"] == []
 
@@ -224,19 +231,65 @@ def test_contracts_with_query_is_rejected():
 
 
 @pytest.mark.parametrize(
-    ("feed", "expected"),
+    ("feed", "profile", "count", "ready"),
     [
-        ([], "undetermined_no_feed_request"),
-        ([FEED + "999"], "mismatch"),
-        ([FEED + PROFILE + ",999"], "multiple"),
-        (["https://col.licitaciones.info/cliente/contratos/get-info/MP"], "absent"),
-        ([FEED + "999", FEED + PROFILE], "match_after_change"),
+        # Only the configured profile: the single acquisition-eligible case.
+        ([FEED + PROFILE], "only_configured", 1, True),
+        ([FEED + PROFILE + "," + PROFILE], "only_configured", 1, True),
+        # Configured profile together with others (the 2026-11-26 real run).
+        ([FEED + PROFILE + ",999"], "configured_with_others", 2, False),
+        ([FEED + "999&perfiles=" + PROFILE], "configured_with_others", 2, False),
+        # One or several profiles, none of them the configured one.
+        ([FEED + "999"], "without_configured", 1, False),
+        ([FEED + "999,888"], "without_configured", 2, False),
+        # Absent or undetermined.
+        (["https://col.licitaciones.info/cliente/contratos/get-info/MP"], "absent", 0, False),
+        ([FEED], "absent", 0, False),
+        ([], "undetermined_no_feed_request", 0, False),
     ],
 )
-def test_profile_result_is_categorical(feed, expected):
-    verdict = PreflightBuilder().with_feed(*feed).build().verdict()
+def test_profile_situations_are_distinguished(feed, profile, count, ready):
+    # Arrange
+    builder = PreflightBuilder().with_feed(*feed)
 
-    assert verdict["profile"] == expected
+    # Act
+    verdict = builder.build().verdict()
+
+    # Assert
+    assert verdict["profile"] == profile
+    assert verdict["profile_count"] == count
+    assert verdict["ready_for_acquisition"] is ready
+    assert (f"profile_{profile}" in verdict["reasons"]) is not ready
+
+
+def test_last_feed_request_is_the_current_selection_and_change_is_flagged():
+    builder = PreflightBuilder().with_feed(FEED + PROFILE + ",999", FEED + PROFILE)
+
+    verdict = builder.build().verdict()
+
+    assert verdict["profile"] == "only_configured"
+    assert verdict["profile_changed"] is True
+    assert verdict["ready_for_acquisition"] is True
+
+
+def test_switching_away_from_configured_profile_blocks_acquisition():
+    verdict = PreflightBuilder().with_feed(FEED + PROFILE, FEED + "999").build().verdict()
+
+    assert verdict["profile"] == "without_configured"
+    assert verdict["ready_for_acquisition"] is False
+
+
+def test_profile_verdict_leaks_no_ids_urls_or_bodies():
+    builder = PreflightBuilder().with_feed(FEED + PROFILE + ",987654")
+    builder.preflight.observe_request(
+        "https://col.licitaciones.info/cliente/contratos/get-info/MP",
+        '{"perfiles": "555111", "query": {"Objeto": "secreto"}}',
+    )
+
+    text = repr(builder.build().verdict())
+
+    for leaked in (PROFILE, "987654", "555111", "secreto", "perfiles=", "get-info", "https://"):
+        assert leaked not in text
 
 
 def test_undetermined_profile_blocks_acquisition_without_inventing_a_match():
@@ -352,15 +405,15 @@ BARE_FEED = "https://col.licitaciones.info/cliente/contratos/get-info/MP"
 @pytest.mark.parametrize(
     ("body", "expected"),
     [
-        ('{"query": {}, "perfiles": "1234"}', ("match", "body")),
-        ('{"query": {"perfil_id": 1234}, "limit": 30}', ("match", "body")),
-        ('{"perfiles": [1234]}', ("match", "body")),
-        ('{"perfiles": "999"}', ("mismatch", "body")),
-        ('{"perfiles": "1234,999"}', ("multiple", "body")),
-        ("perfiles=1234&page=1", ("match", "body")),
-        ('{"query": {}, "limit": 30}', ("absent", None)),
-        ("not a body", ("absent", None)),
-        (None, ("absent", None)),
+        ('{"query": {}, "perfiles": "1234"}', ("only_configured", "body", 1)),
+        ('{"query": {"perfil_id": 1234}, "limit": 30}', ("only_configured", "body", 1)),
+        ('{"perfiles": [1234]}', ("only_configured", "body", 1)),
+        ('{"perfiles": "999"}', ("without_configured", "body", 1)),
+        ('{"perfiles": "1234,999"}', ("configured_with_others", "body", 2)),
+        ("perfiles=1234&page=1", ("only_configured", "body", 1)),
+        ('{"query": {}, "limit": 30}', ("absent", None, 0)),
+        ("not a body", ("absent", None, 0)),
+        (None, ("absent", None, 0)),
     ],
 )
 def test_profile_in_body_is_checked_only_when_query_lacks_it(body, expected):
@@ -374,7 +427,7 @@ def test_profile_in_body_is_checked_only_when_query_lacks_it(body, expected):
 def test_query_profile_takes_precedence_over_body():
     result = profile_match(FEED + PROFILE, PROFILE, '{"perfiles": "999"}')
 
-    assert result == ("match", "query")
+    assert result == ("only_configured", "query", 1)
 
 
 def test_body_profile_reaches_verdict_with_source_and_without_identifier():
@@ -387,7 +440,7 @@ def test_body_profile_reaches_verdict_with_source_and_without_identifier():
     verdict = builder.build().verdict()
 
     # Assert
-    assert verdict["profile"] == "match"
+    assert verdict["profile"] == "only_configured"
     assert verdict["profile_source"] == ["body"]
     assert verdict["ready_for_acquisition"] is True
     assert "secreto" not in repr(verdict)
@@ -397,4 +450,77 @@ def test_body_profile_reaches_verdict_with_source_and_without_identifier():
 def test_oversized_body_is_not_parsed():
     body = '{"perfiles": "1234", "pad": "' + "x" * 70000 + '"}'
 
-    assert profile_match(BARE_FEED, PROFILE, body) == ("absent", None)
+    assert profile_match(BARE_FEED, PROFILE, body) == ("absent", None, 0)
+
+
+def safe_closure(**changes):
+    verified = closure_record(marker_owned=True, context_closed=True, disconnected=True)
+    return {**verified, **changes}
+
+
+def test_closure_record_is_false_unless_each_fact_is_verified_true():
+    # Arrange / Act
+    record = closure_record(marker_owned=None, context_closed="yes", disconnected=1)
+
+    # Assert
+    assert record == {"marker_owned": False, "context_closed": False, "disconnected": False}
+
+
+def test_marker_released_only_with_complete_safe_closure_evidence():
+    released = marker_release_allowed(
+        safe_closure(), worker_exit_code=0, marker_text=MARKER_TEXT + "\n"
+    )
+
+    assert released is True
+
+
+@pytest.mark.parametrize(
+    ("closure", "exit_code", "marker_text"),
+    [
+        (None, 0, MARKER_TEXT),  # no closure evidence written by this run
+        (safe_closure(context_closed=False), 0, MARKER_TEXT),  # context not verified closed
+        (safe_closure(disconnected=False), 0, MARKER_TEXT),  # CDP disconnect not verified
+        (safe_closure(marker_owned=False), 0, MARKER_TEXT),  # marker of another attempt
+        (safe_closure(), 1, MARKER_TEXT),  # worker did not exit cleanly
+        (safe_closure(), 0, "other-attempt"),  # foreign marker content
+        (safe_closure(), 0, None),
+        ({"context_closed": True}, 0, MARKER_TEXT),  # legacy partial evidence
+        ([], 0, MARKER_TEXT),
+    ],
+)
+def test_marker_kept_without_safe_closure_evidence(closure, exit_code, marker_text):
+    released = marker_release_allowed(closure, worker_exit_code=exit_code, marker_text=marker_text)
+
+    assert released is False
+
+
+def test_not_ready_verdict_still_yields_releasable_closure(tmp_path):
+    # Arrange: the 2026-11-26 case, a not-ready preflight followed by a verified closure.
+    verdict = PreflightBuilder().with_feed(FEED + PROFILE + ",999").build().verdict()
+    path = tmp_path / "closure.json"
+    evidence = closure_record(marker_owned=True, context_closed=True, disconnected=True)
+    path.write_text(json.dumps(evidence), encoding="utf8")
+
+    # Act
+    released = marker_release_allowed(
+        read_closure(path), worker_exit_code=0, marker_text=MARKER_TEXT
+    )
+
+    # Assert
+    assert verdict["ready_for_acquisition"] is False
+    assert released is True
+
+
+@pytest.mark.parametrize("content", [None, "", "{not json", "[1, 2]"])
+def test_unreadable_or_missing_closure_is_no_evidence(tmp_path, content):
+    path = tmp_path / "closure.json"
+    if content is not None:
+        path.write_text(content, encoding="utf8")
+
+    assert read_closure(path) is None
+
+
+def test_marker_text_matches_the_guard_reservation():
+    source = Path(__file__).resolve().parents[2] / "scripts" / "eureka_nacional_secop1_popup.py"
+
+    assert f'lock.write("{MARKER_TEXT}\\n")' in source.read_text(encoding="utf8")
