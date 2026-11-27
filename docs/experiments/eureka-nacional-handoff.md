@@ -1303,3 +1303,10 @@ streaming no arrancó porque no había una pestaña en
 `/cliente/contratos`. Los intentos quedaron consumidos; un nuevo
 intento requiere autorización.
 [Detalle](eureka-nacional-experience-spike.md#adquisición-focalizada-de-co1ntc11293222-lote-f38de50d-sin-documentos).
+
+Segundo intento: estudio previo guardado por streaming (9,2 MB, SHA
+`82045440…`). Las condiciones generales se rechazaron por superar
+10 MiB. El estudio es escaneado y con OCR de 2 páginas cubre 2 de
+17. CO1.NTC.11293222 sigue `not_resolved` y con incertidumbre.
+Pendiente de decisión: OCR offline del resto y un tope mayor para
+el rector.

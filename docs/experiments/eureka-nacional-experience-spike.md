@@ -5113,3 +5113,45 @@ nativo.
 - Un nuevo intento requiere autorización expresa: archivar los
   registros conservando la evidencia y hacer un intento por
   documento con la pestaña de contratos abierta.
+
+#### Segundo intento autorizado del lote f38de50d
+
+- Los dos registros consumidos se archivaron en
+  `targeted_attempts.consumed-20261127-tab-unavailable/` y se
+  conservan como evidencia.
+- Con una sola pestaña en `/cliente/contratos`: perfil
+  `only_configured`, `profile_count: 1`, sesión válida y sin
+  marcador. Se ejecutó una vez.
+
+| DocumentId | Documento | Directa | Edge | Resultado |
+|---|---|---|---|---|
+| 899021135 | CONDICIONES GENERALES DE PARTICIPACION_0001 | 403 | `declared_size_limit`: tamaño declarado mayor de 10 MiB; no se descargó | sin documento |
+| 899021138 | ESTUDIOS PREVIOS_0001 | 403 | streaming, 8,4 s | guardado: 9.181.375 bytes, SHA-256 `82045440115053bb2a8d2d331b17997117a6d4edfc4c7fd60673b0db0be8240e` |
+
+Sin marcador al terminar y sin reintentos.
+
+Análisis offline (`validation_results.json`), con el clasificador y
+la capa de hallazgos sin cambios:
+
+- El estudio previo tiene 17 páginas sin texto nativo. Con el OCR
+  vigente de 2 páginas por documento de soporte se leyeron sólo las
+  páginas 1 y 2; quedan pendientes las páginas 3 a 17.
+- Ninguna cláusula de experiencia, exigencia, ausencia ni
+  dependencia en lo leído.
+- Estado formal: `not_resolved` (`governing_documents_incomplete`).
+  Lectura: evidencia insuficiente.
+- Hallazgo: con incertidumbre, visible (`no_closed_habilitating_list`,
+  esfuerzo «documento pendiente»).
+- Falta verificar: las condiciones generales (no descargadas, más
+  de 10 MiB), el estudio de mercado y las páginas 3 a 17 del
+  estudio previo.
+- El inventario guardado de la etapa 1 conserva el rol anterior
+  («desconocido») de las condiciones generales; no se reescribe.
+
+Opciones, pendientes de decisión:
+
+1. OCR offline del resto del estudio previo ya guardado (15
+   páginas, Tesseract local, sin red). Supera el tope de OCR de
+   soporte.
+2. Una descarga de las condiciones generales con un tope mayor
+   para documentos rectores.
