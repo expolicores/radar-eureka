@@ -8,8 +8,8 @@
     "4017": "Huila"
   },
   "code_evidence": {
-    "4006": "Igual a los 123 identificadores de Boyacá capturados para Eureka Regional.",
-    "4017": "Inferido: 37 identificadores (37 municipios de Huila) y posición 17 en el orden alfabético de los 32 departamentos. Se verifica en cada corrida contra TextoDepartamento; las filas de otro departamento se excluyen y se cuentan."
+    "4006": "Igual a los 123 identificadores de Boyacá capturados para Eureka Regional y confirmado con el JSON de ubicaciones de Licitaciones.info: departamento 40060, 123 municipios.",
+    "4017": "Confirmado con el JSON de ubicaciones de Licitaciones.info aportado por el titular: departamento 40170, 37 municipios, códigos de 7 dígitos con prefijo 4017. Además se verifica en cada corrida contra TextoDepartamento."
   },
   "expected_departments": [
     "Boyacá",
