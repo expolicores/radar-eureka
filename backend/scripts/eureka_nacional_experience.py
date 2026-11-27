@@ -69,6 +69,14 @@ DEPENDENCY = re.compile(
     r"(?:segun|conforme al|vease|consultar|remite a|se detallan en|establecidos en)"
     r".{0,40}\b(?:anexo|archivo|documento|numeral)\b)"
 )
+# A bare "reglamento interno" mention only governs the proponent's requirements when the
+# clause is about them or names a contracting regime. Administrative mentions (spending
+# authority, functions, delegation, supervision) are not documentary dependencies.
+REGULATION_TOPIC = re.compile(
+    r"\b(?:(?:reglamento interno|manual|estatuto)(?: interno)? de contratacion|se rige|"
+    r"regid[oa]s? por|regimen (?:especial|propio)|requisitos?|"
+    r"seleccion (?:del|de) contratista|proceso de seleccion|modalidad de seleccion)\b"
+)
 NUMBERED_SECTION = re.compile(r"^\d+(?:[.-]\d+)*[.\s_):–-]+")
 GENERAL_EXPERIENCE_SECTION = re.compile(
     r"^experiencia (?:general|especifica|habilitante)(?: del (?:proponente|oferente))?"
@@ -309,7 +317,9 @@ def assertion(
         return (OTHER, "other_subject_or_criterion") if experience else None
     dependency = DEPENDENCY.search(text)
     if dependency and (
-        experience or "reglamento interno" in dependency.group() or "habilitante" in text
+        experience
+        or "habilitante" in text
+        or ("reglamento interno" in dependency.group() and REGULATION_TOPIC.search(text))
     ):
         return CONDITIONAL, "document_dependency"
     scoped_waiver = heading == "experience" and immediate and SHORT_NEGATIVE.fullmatch(text)
