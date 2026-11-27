@@ -859,3 +859,21 @@ se ejecutaron extracción o clasificación. Se mantiene
 not_resolved. El
 [detalle del preflight](eureka-nacional-experience-spike.md#sonda-final-secop-i-detenida-en-el-preflight-de-sesión)
 quedó en el informe.
+
+
+### Preflight pasivo de SECOP I listo, sin sonda real
+
+El diagnóstico pasivo descartó la construcción de URL y
+la sesión como causa. En el contexto desechable, la
+propia aplicación recibió 200 de get-config-user y de
+todo el arranque. El aviso «No encuentro URL» proviene
+del get-info bloqueado por la guarda. El 404 anterior
+queda sin reproducir.
+
+El preflight ya no hace peticiones propias, y la sonda
+local v2 conecta al Edge dedicado del puerto 9232. Está
+pendiente confirmar el perfil infoexpress, que sólo se
+puede verificar en la próxima sesión real a partir del
+get-info bloqueado. Una única prueba real de SECOP I
+requiere autorización explícita.
+[Detalle del preflight](eureka-nacional-experience-spike.md#preflight-pasivo-de-secop-i).

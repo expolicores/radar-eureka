@@ -3128,3 +3128,82 @@ La compatibilidad del formulario permanece demostrada
 con la sesión sintética. En la sesión real, el bloqueo
 observado fue anterior a la adquisición, al verificar
 el acceso autenticado en el contexto desechable.
+
+
+### Diagnóstico pasivo del 404 de get-config-user
+
+Se ejecutó una única corrida autorizada sin adquisición.
+Antes de conectar se verificó en el sistema operativo
+que el puerto 9232 pertenecía a un único Edge, sólo en
+loopback, con el perfil dedicado de Eureka Nacional y
+sin bandera de automatización. El contexto desechable
+se creó dentro de ese Edge con la guarda existente,
+descargas nativas denegadas, el feed bloqueado y los
+hosts oficiales de SECOP bloqueados. Se registraron
+sólo estado, origen y ruta.
+
+Observado tras el login manual y la entrada a Contratos
+desde la UI: la propia aplicación pidió get-config-user
+y recibió 200, igual que get-contadores,
+get-contadores-perfiles-nuevos, fuentes-contratos,
+get-estados-proceso, colores y broadcasting. No hubo
+ninguna respuesta 404. Los únicos fallos fueron cuatro
+get-info/MP abortados por la guarda. window.axios no
+tiene baseURL y la URL efectiva coincide con la que
+respondió 200. navigator.webdriver fue false. El
+titular vio el aviso «No encuentro URL».
+
+Conclusión: se descartan la construcción de URL y el
+estado de sesión. El aviso corresponde a la
+inicialización incompleta por el feed bloqueado, no a
+un fallo de autenticación. El 404 de la llamada propia
+anterior queda sin reproducir, porque ese diagnóstico
+no conservó la URL final y no se repitió la llamada.
+El perfil no pudo compararse: el parámetro perfiles no
+se registró por diseño. En ese momento el Edge dedicado
+no tenía una pestaña de Contratos para comparar. Hubo
+cero POST, cero inventarios, cero descargas y cero
+consultas voluntarias al feed. El contexto se cerró y
+se verificó.
+
+
+### Preflight pasivo de SECOP I
+
+El módulo `eureka_nacional_secop1_preflight.py`
+sustituye la llamada propia a get-config-user por la
+clasificación de lo que ya hizo la aplicación en el
+contexto desechable. Para declarar la sesión válida
+exige:
+
+- Una pestaña desktop de Contratos sin query.
+- La petición de arranque de get-config-user, posterior
+  al documento de Contratos, con 200 JSON en el host de
+  Contratos.
+- La ausencia de formulario de login y de respuestas
+  401 o 419.
+- El cliente del portal disponible.
+
+La navegación vale como legítima sólo si el script
+abrió nada más que la portada pública. El perfil se
+compara en memoria con `LICITACIONES_PROFILE_ID` a
+partir del get-info/MP que la aplicación intenta y la
+guarda bloquea. Sólo se registra match, mismatch,
+absent, multiple o undetermined, nunca el ID. Un
+perfil no confirmado impide la adquisición. El aviso
+reconoce «No existe URL» y «No encuentro URL». Si
+coincide con el feed bloqueado sin otros errores del
+proveedor, se atribuye al bloqueo y no a la sesión. En
+cualquier otro caso queda inexplicado y detiene la
+sonda.
+
+La sonda local v2 conecta al Edge dedicado por CDP,
+nunca cierra el navegador y por omisión sólo ejecuta el
+preflight. La adquisición exige `--acquire`, un
+veredicto listo y la confirmación del titular. El
+bloqueo de hosts oficiales sólo se retira en ese punto.
+Fuera del bloque de sesión, la adquisición es idéntica
+a la validada offline. Las pruebas offline cubren las
+reglas del veredicto, el reconocimiento del aviso, la
+comparación categórica del perfil, la clasificación de
+solicitudes y la verificación del Edge dedicado. No se
+ejecutó la sonda real.
