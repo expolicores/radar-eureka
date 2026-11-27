@@ -4612,3 +4612,194 @@ Comprobaciones:
 4. Revisar con el titular si los 12 casos de «Experiencia exigida»
    sin conclusión formal deben presentarse como tales o con
    incertidumbre.
+
+### Indicios de experiencia y presentación del embudo
+
+Commit `fe9a2c3`, método `en01-findings-v2`. Todo offline: ninguna
+consulta, descarga ni POST. No cambian la regla formal, los
+filtros, MPNE ni los controles de adquisición.
+
+#### Decisión sobre los procesos sin conclusión formal
+
+- «Experiencia exigida» queda reservada al estado formal
+  `experience_required`.
+- La nueva categoría visible es **«Indicios de experiencia exigida
+  — requiere revisión»**. Se usa cuando hay una señal documental de
+  exigencia y no hay una ausencia explícita que la contradiga.
+  Cuentan como señal:
+  - una cláusula EXIGENCIA;
+  - una revisión `explicit_requirement` sin conclusión formal;
+  - términos de experiencia contractual dentro de una lista
+    habilitante (experiencia, contratos ejecutados, celebrados o
+    similares, certificaciones de contratos).
+- Los términos que sólo hablan de capacidad financiera, indicadores
+  o RUP mantienen la incertidumbre (`habilitating_list_mentions_capacity`).
+- Un conflicto entre exigencia y ausencia explícita también queda
+  con incertidumbre.
+- Cada indicio conserva:
+  - el estado formal original (`formal_status`, `formal_reason`);
+  - las cláusulas (`requirement_indications`: documento, página,
+    base, alcance, extracto);
+  - la cobertura;
+  - por qué no hubo conclusión formal (`why_not_formal`);
+  - las acciones documentales;
+  - la revisión humana como anotación aparte.
+- Orden de categorías:
+  1. confirmado;
+  2. prioritario;
+  3. incertidumbre;
+  4. indicios;
+  5. exigida formal.
+
+#### Informe ciego enriquecido
+
+- `eureka_nacional_findings_recompute.py`:
+  - vuelve a extraer los binarios ya guardados, abriéndolos con
+    verificación SHA-256, con el mismo plan OCR selectivo de la etapa
+    3 y OCR local;
+  - superpone los inventarios en capas: etapa 1, después etapa 3
+    SECOP I, después la corrida focalizada;
+  - escribe `findings_recomputed.json` sin sobrescribir nunca un
+    archivo existente.
+  - Si no hay recibo, usa sólo la ruta direccionada por el SHA-256,
+    y únicamente si el binario existe. `relative_path` es la ruta del
+    proveedor y no se usa como almacenamiento.
+- `eureka_nacional_blind_report.py`:
+  - si existe el recálculo, escribe `blind_report_findings.json/.md`
+    aparte y conserva el informe original;
+  - ordena por categoría, después por prioridad A/B/C y después por
+    esfuerzo de revisión: lectura humana, documento pendiente,
+    formato no soportado;
+  - incluye la tabla de atención humana y lista los elegibles sin
+    análisis documental.
+- Las acciones documentales listan primero los documentos rectores
+  y de soporte (hasta 5) y resumen el resto con un conteo.
+
+Corrida `en01-uc9h1l8y`, con la etapa 3 SECOP I y la capa
+focalizada. Los 13 estados formales recalculados coinciden con los
+guardados.
+
+| Categoría | Procesos |
+|---|---|
+| Hallazgo confirmado | 0 |
+| Hallazgo prioritario para revisión | 1 |
+| Hallazgo con incertidumbre | 10 |
+| Indicios de experiencia exigida — requiere revisión | 2 |
+| Experiencia exigida | 0 |
+
+| Visibilidad | Valor |
+|---|---|
+| Analizados y visibles | 13 de 13 |
+| Requieren atención humana | 13: 1 de lectura humana, 10 con documento pendiente y 2 con formato no soportado |
+| Elegibles sin análisis documental (siguen listados) | 17: 7 por cupo SECOP II, 3 por cupo SECOP I y 7 seleccionados que la corrida no llegó a analizar |
+| Excluidos por motivos no documentales | 5 por geografía y 10 por cupo |
+| Excluidos por categoría documental | 0 |
+
+Procesos que requieren atención humana (todos con prioridad
+comercial A):
+
+| Proceso | Hallazgo | Qué encuentra Eureka | Completos / faltan | Por qué | Acción documental |
+|---|---|---|---|---|---|
+| Betéitiva 26-13-14851414 | Prioritario | Lista «2.9» en páginas 6 a 8, 14 ítems, cerrada, sin experiencia | Invitación y estudio completos; faltan sólo auxiliares (CDP, análisis del sector) | Lista cerrada sin experiencia y cobertura completa; formal no_decisive_clause | Revisión confirmatoria y comprobar adendas. Revisión humana aparte: sin requisito |
+| FONAM CO1.NTC.11284005 | Incertidumbre | Lista «A.» en páginas 14 a 16, 15 ítems, cerrada, sin experiencia | Invitación y estudio completos; falta FORMATOS (ZIP no procesable) | Lista cerrada con un documento no verificado por el sistema | Revisión manual de FORMATOS. Revisión humana aparte: sin anexo ni requisito; el ZIP no está validado por el sistema |
+| ITBOY CO1.NTC.11287125 | Indicios | «18 REQUISITOS HABILITANTES» en páginas 27 a 32; exigencia en la página 33 de la invitación | Invitación completa; falta el estudio previo y 7 documentos más | Exigencia sin corroborar (`requirement_requires_corroboration`) | Obtener el estudio previo y confirmar que aplica a todo proponente |
+| Jericó 26-13-14853212 | Indicios | «3. REQUISITOS HABILITANTES TÉCNICOS» en la página 17 menciona experiencia, contratos celebrados y capacidad técnica | Invitación completa; faltan el estudio previo y FORMATOS | Términos de experiencia en la lista, sin cláusula formal | Obtener el estudio previo y FORMATOS |
+| El Cocuy CO1.NTC.11282085 | Incertidumbre | Formal `experience_ambiguous` (aplicabilidad limitada) | Invitación completa; falta el estudio previo | Ambigüedad formal sin señal general de exigencia | Obtener el estudio previo |
+| Palestina CO1.NTC.11286025 | Incertidumbre | Sin sección detectada | Invitación incompleta; faltan el estudio, el anexo y 4 documentos más | Rector incompleto | Completar el OCR de la invitación y obtener el estudio previo |
+| Tasco CO1.NTC.11280628, Chitaraque CO1.NTC.11288255, Panqueba 26-13-14852082, Sutatenza 26-13-14853244, Betéitiva 26-13-14851419 | Incertidumbre | Sin sección detectada, o una sección sin ítems (Panqueba) | Falta la invitación o está incompleta, y falta el estudio previo | Rector no descargado o incompleto | Obtener la invitación y el estudio previo |
+| Neiva CO1.NTC.11276610 | Incertidumbre | Sin sección detectada | Faltan el estudio previo y las «Condiciones generales de participación» (rol desconocido) | Rector no identificado | Obtener las condiciones generales y el estudio previo |
+| Rama Judicial CO1.NTC.11277142 | Incertidumbre | Sin sección detectada | Ningún documento completo; faltan 23 (5 en formato no soportado, entre ellos «15Formato3Experiencia») | Inventario sin rector reconocido | Obtener la invitación y revisar el formato de experiencia |
+
+Controles: Betéitiva sigue prioritario y `not_resolved`. FONAM
+sigue visible, con su revisión humana aparte y sin cambio formal.
+
+#### Regresión histórica con v2
+
+Resultado en `.local/eureka-nacional-spike/findings-regression-kuldfu9q`:
+74 PDF, sólo texto nativo, 85 instancias y 60 procesos únicos.
+
+| Procesos únicos | v1 | v2 |
+|---|---|---|
+| Prioritarios | 1 | 1 |
+| Con incertidumbre | 39 | 19 |
+| Indicios de experiencia exigida | — | 32 |
+| Experiencia exigida (formal) | 20 (8 formales + 12 por revisión) | 8 |
+
+- Los 32 indicios son 20 `not_resolved` y 12 `experience_ambiguous`.
+  Por base:
+  - 14 por una cláusula de exigencia;
+  - 12 por una revisión `explicit_requirement`;
+  - 6 por términos de experiencia en la lista.
+- Ningún proceso se pierde, ningún estado formal cambia y las
+  ablaciones siguen igual: 3 de 3 bajan a incertidumbre.
+
+#### Riesgo de saturación y cómo ordenar sin excluir
+
+- En la corrida ciega, los 13 procesos analizados requieren atención
+  humana, y 10 de ellos sólo por documentos rectores sin descargar.
+  En el histórico la proporción es 52 de 60. El cuello de botella es
+  la cobertura documental, no la clasificación.
+- Propuesta de cola de revisión, sin filtros excluyentes:
+  1. Tanda corta: prioritarios y procesos de lectura humana. Hoy es
+     sólo Betéitiva.
+  2. Indicios de prioridad A: una lectura rápida confirma o descarta
+     la exigencia. Si se confirma, el proceso baja de foco pero sigue
+     en el informe.
+  3. Incertidumbre con documento pendiente: no se revisa a mano uno
+     por uno. Se agrupa como lote de adquisición rectora (invitación
+     y estudio previo) que requiere autorización.
+  4. Formatos no soportados: revisión manual puntual o soporte
+     futuro.
+- Tamaño de las tandas: proponemos 5 procesos por sesión. Los demás
+  quedan en el informe con su posición; nada se oculta.
+- La prioridad comercial A/B/C se usa sólo dentro de cada categoría.
+
+#### Riesgos
+
+- Clasificar como indicio una sección habilitante con «experiencia»
+  que en realidad la excluye o la menciona en otro sentido. Una
+  ausencia explícita detectada lo evita; una redacción indirecta no.
+- Rol desconocido para documentos rectores con nombres atípicos
+  (Neiva, Rama Judicial). Aparecen como faltantes y no como rector
+  incompleto.
+- El recálculo usa el OCR local actual. Si cambia la herramienta,
+  la cobertura puede diferir de la original, y eso se señala con
+  `formal_status_differs_from_stored`.
+
+#### Propuesta concreta para la siguiente validación real (no ejecutada)
+
+Lote focalizado de documentos rectores para los procesos de
+prioridad A que hoy tienen incertidumbre o indicios por cobertura:
+
+| Proceso | Documentos |
+|---|---|
+| Tasco CO1.NTC.11280628 | Invitación pública y estudio previo |
+| Chitaraque CO1.NTC.11288255 | Invitación pública y estudio previo |
+| Neiva CO1.NTC.11276610 | Condiciones generales de participación y estudio previo |
+| El Cocuy CO1.NTC.11282085 | Estudio previo |
+| ITBOY CO1.NTC.11287125 | Estudio previo y análisis del sector (un solo documento) |
+| Panqueba 26-13-14852082 | Invitación pública y estudio previo |
+| Sutatenza 26-13-14853244 | Invitación y estudio previo |
+| Betéitiva 26-13-14851419 | Estudio previo |
+| Jericó 26-13-14853212 | Estudio previo |
+
+- Volumen: 14 documentos.
+- Procedimiento: el plan y la adquisición focalizados existentes:
+  - plan offline con hash;
+  - confirmación «perfil infoexpress / Confirmo el lote …»;
+  - SECOP I con preflight, un POST por documento y streaming
+    acotado;
+  - SECOP II directo, con streaming sólo ante un 403.
+- Fuera del lote:
+  - Palestina, que necesita OCR adicional sobre la invitación ya
+    descargada;
+  - Rama Judicial, que requiere identificar su rector primero;
+  - los 7 procesos seleccionados que la corrida no analizó, que
+    corresponden a una reanudación aparte.
+- Métrica de éxito: cuántos de los 11 procesos inciertos o con
+  indicios pasan a una categoría más informativa (prioritario,
+  indicios confirmados o exigida formal), y si el detector produce
+  algún prioritario que la revisión humana rechace (falso
+  prioritario).
+
+Requiere autorización explícita. Me detengo aquí.

@@ -1235,3 +1235,25 @@ peticiones.
   formal de ausencia.
 
 [Detalle](eureka-nacional-experience-spike.md#evolución-de-hallazgos-alta-sensibilidad-y-revisión-humana).
+
+
+### Indicios de experiencia e informe ciego enriquecido
+
+- «Experiencia exigida» sólo con estado formal. Las señales sin
+  conclusión formal pasan a «Indicios de experiencia exigida —
+  requiere revisión», con cláusulas, páginas, cobertura y motivo
+  (`fe9a2c3`).
+- Informe ciego enriquecido (`blind_report_findings.md`):
+  - 13 analizados y visibles: 1 prioritario (Betéitiva), 10 con
+    incertidumbre y 2 con indicios (ITBOY, Jericó);
+  - 17 elegibles sin análisis siguen listados;
+  - 0 excluidos por categoría documental.
+- Histórico (60 procesos únicos): 1 prioritario, 19 con
+  incertidumbre, 32 con indicios y 8 con exigencia formal.
+- Saturación: 13 de 13 requieren atención, 10 de ellos por
+  documentos rectores sin descargar. Propuesta: revisar en tandas y
+  agrupar la cobertura como lote de adquisición.
+- Siguiente validación real propuesta, sin ejecutar: un lote de 14
+  documentos rectores para 9 procesos de prioridad A.
+
+[Detalle](eureka-nacional-experience-spike.md#indicios-de-experiencia-y-presentación-del-embudo).
