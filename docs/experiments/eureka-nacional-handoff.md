@@ -1370,3 +1370,15 @@ Pendiente de autorización.
 - La muestra no deja hallazgos prioritarios. Próximo lote sugerido:
   tanda 2 (`4de12c43…`); después, una nueva corrida de descubrimiento
   cuando el histórico del perfil esté disponible.
+
+### Lector de inventarios y «Convocatoria» (offline)
+
+- Inventarios: los fallos de página conservan los documentos previos
+  y quedan como incompletos, con un diagnóstico estructural seguro.
+  Prueba mínima de ITBOY preparada (`a9b9b6e6…`, 4 créditos),
+  pendiente de autorización.
+- «Convocatoria»: es una pista de rector que sólo se confirma por
+  contenido; los avisos quedan fuera.
+  - Regresión: 0 cambios de estado formal.
+  - El Limonar: la convocatoria queda confirmada como rector y el
+    proceso sigue en `not_resolved` con indicios.

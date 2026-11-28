@@ -5644,3 +5644,126 @@ dos sin inventario.
    actualizado cuando el proveedor complete el histórico. Es la
    fuente más probable de oportunidades nuevas: esta muestra no
    dejó ninguna sin exigencia de experiencia.
+
+### Lector de inventarios SECOP II y «Convocatoria» como rector (offline)
+
+Todo offline: ninguna petición, POST ni descarga. No cambian los
+filtros, MPNE ni las reglas formales de experiencia.
+
+#### 1. Lector de inventarios (`7181767`)
+
+Diagnóstico de ITBOY y La Plata:
+
+- En los dos intentos de cada proceso, `fetch_inventory` interpretó la
+  página 1 y falló en la 2: `parse_document_page` lanzó «Contrato de
+  tabla documental desconocido».
+- Eso ocurre cuando `documentos` no es la lista vacía documentada
+  ni una tabla con encabezados exactos Item, Nombre, Tipo y
+  Documento. Por ejemplo: objeto vacío, nulo, otro encabezado, u
+  objeto sin `campos`.
+- El primer lote no guardó el mensaje y el lector descartaba el
+  inventario completo, así que no hay más evidencia offline.
+- Lo único seguro: es determinista para esos dos procesos y depende
+  de la forma de la segunda página.
+
+Corrección generalizable:
+
+- `fetch_inventory` lanza ahora `InventoryIncomplete` (subclase de
+  `SpikeError`) cuando una página no se puede interpretar, se repite
+  o se alcanza el tope de 10 páginas. La excepción conserva:
+  - los documentos de las páginas anteriores;
+  - la página fallida y las páginas leídas;
+  - el motivo;
+  - para páginas ilegibles, la forma estructural.
+- `document_page_shape` registra sólo claves, tipos, encabezados de
+  columna, anchos de fila y tipos de celda. Nunca nombres, enlaces ni
+  valores.
+- Una estructura desconocida nunca se interpreta como fin de
+  paginación, ni se piden más páginas tras el fallo.
+- Runner: conserva los documentos parciales, registra
+  `inventory_incomplete` con el diagnóstico y clasifica con
+  `inventory_complete=False`. Así nunca puede concluir una ausencia
+  explícita.
+- Lote de inventarios:
+  - resultado `incomplete` con los documentos parciales y
+    `inventory_complete: false`;
+  - un inventario parcial no impide planificar después uno
+    completo.
+- Pruebas: 13 del lector y 1 del lote. Cubren página 2 con objeto
+  vacío, nulo, otro encabezado, fila inválida o estado 0; página
+  repetida; tope de páginas; ausencia de contenido en el
+  diagnóstico; y conservación en el runner.
+
+Prueba mínima para conocer la estructura real, pendiente de
+autorización:
+
+- Plan `en01-inv_k94ws3so_r2`, hash
+  `a9b9b6e62128c5dceb8fc216035bfd76bc99718c04fc6439c9a15d9d784ae2c4`.
+- Sólo ITBOY (CO1.NTC.11286624).
+- Límite de 4 créditos y 60 s; se esperan 3: bootstrap, página 1 y
+  página 2.
+- Con el lector corregido conservaría los documentos de la página 1
+  y registraría la forma de la página 2.
+- La Plata quedaría para después, si la forma confirma una variante
+  generalizable.
+
+#### 2. «Convocatoria» como rector (`886c5fc`)
+
+Sigue el patrón ya validado para las invitaciones con nombre
+truncado:
+
+- El título da sólo una pista de rector: se selecciona antes que los
+  estudios, pero nunca cuenta como completo ni decisivo.
+- `confirm_governing_by_content` promueve el documento a rector sólo
+  si el texto leído fija requisitos habilitantes, documentos o
+  contenido de la oferta, condiciones de participación o de
+  presentación de ofertas. Registra `role_source: content_confirmed`,
+  la página y la frase.
+- Se aplica en el runner, en el plan OCR (tras cada pase) y en el
+  análisis focalizado. En este último, los documentos con pista
+  reciben el OCR de rector.
+
+Protecciones:
+
+- Todo título con «aviso» queda fuera, igual que «aviso de
+  convocatoria» en portada, que ya se excluía.
+- Estudios, adendas e invitaciones conservan su rol.
+- Sin pista, el contenido nunca promueve un documento.
+
+Pruebas: 15 nuevas. Suite nacional y del lector compartido: 933
+pasan y 11 se omiten, con código de salida 0.
+
+Regresión sobre documentos históricos
+(`.local/eureka-nacional-spike/convocatoria-regression-ya7qea7d`):
+
+- 138 inventarios y 94 procesos clasificados con 81 PDF, sólo texto
+  nativo.
+- 0 cambios de estado formal.
+- Pista nueva sólo para «CONVOCATORIA 20 DE 2026» de El Limonar, en
+  dos corridas; pasa a seleccionarse antes que el estudio.
+- 1 confirmación por contenido de una invitación con nombre truncado
+  («InvitacionPublica_», `en01-jocj50yr`). Antes nunca podía quedar
+  completa. Ahora sigue en `not_resolved`, pero la razón pasa de
+  «documentos rectores incompletos» a «sin cláusula decisiva» y la
+  revisión de evidencia insuficiente a silencio documental.
+
+El Limonar con OCR completo
+(`validation_results_limonar_convocatoria.json`):
+
+- La convocatoria queda confirmada como rector y completa (9 de 9
+  páginas).
+- El estado formal sigue en `not_resolved`: la cláusula de la página
+  6, «Certificación de la experiencia… (Debe acreditar experiencia
+  relacionada con el objeto del contrato)», no nombra al proponente
+  y el clasificador la registra como condicional.
+- La exigencia formal está en el estudio de soporte.
+- El hallazgo sigue en «Indicios de experiencia exigida». No se
+  forzó ninguna conclusión.
+
+#### Pendiente de validación real
+
+- La forma de la segunda página de inventario de ITBOY y La Plata
+  (prueba mínima `a9b9b6e6`).
+- El comportamiento de la confirmación por contenido sobre
+  convocatorias nuevas en una próxima búsqueda. Es la preparación
+  para la corrida con el histórico de Vila Frontier.
