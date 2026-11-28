@@ -1382,3 +1382,14 @@ Pendiente de autorización.
   - Regresión: 0 cambios de estado formal.
   - El Limonar: la convocatoria queda confirmada como rector y el
     proceso sigue en `not_resolved` con indicios.
+
+### Prueba de inventario ITBOY
+
+- 3 créditos. Se conservaron 22 documentos, incluido el pliego
+  definitivo y el estudio previo; el inventario queda como
+  incompleto.
+- La página 2 es una tabla vacía con forma de objeto (encabezados y
+  filas vacíos). Se propone aceptarla como fin de inventario
+  cotejando `cantidad`; no implementado.
+- La regresión de «InvitacionPublica_» queda respaldada por
+  cobertura completa y sin falso prioritario.

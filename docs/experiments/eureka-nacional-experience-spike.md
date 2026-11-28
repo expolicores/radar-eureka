@@ -5767,3 +5767,79 @@ El Limonar con OCR completo
 - El comportamiento de la confirmación por contenido sobre
   convocatorias nuevas en una próxima búsqueda. Es la preparación
   para la corrida con el histórico de Vila Frontier.
+
+### Prueba mínima de inventario ITBOY (plan a9b9b6e6)
+
+#### Controles y consumo
+
+- Controles previos:
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - plan íntegro, con sólo CO1.NTC.11286624, 4 créditos y 60 s;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Consumo: 3 créditos (bootstrap, página 1 y página 2). Sin feed ni
+  descargas. No habrá más reintentos.
+
+#### Resultado
+
+- Resultado: `incomplete`, con 22 documentos conservados de la
+  página 1 y `inventory_complete: false`.
+- Documentos rectores y de soporte disponibles:
+  - «14- Pliegos de condiciones definitivos SA-ITBOY-06-2026» (rector);
+  - «5. ESTUDIOS PREVIOS MOTO GRUA BASCULA ACTUALIZADO» (soporte);
+  - «7. FICHA TECNICA» (soporte).
+- El resto son presupuesto, viabilidad, BPIN, PAA, CDP, matriz de
+  riesgos, resolución de apertura, aviso de convocatoria (sin pista,
+  por «aviso»), cotizaciones y proyecto de pliego (ambos excluidos).
+
+Estructura de la página 2 (diagnóstico seguro, sin contenido):
+
+| Campo | Valor |
+|---|---|
+| Claves del cuerpo | agrupacion_id, cantidad, documentos, fuente, requiere_actualizacion, status |
+| `status` | 1 |
+| `documentos` | objeto con claves agregar_checkbox_seleccion, before_table, campos, encabezados, vermas |
+| `encabezados` | lista vacía |
+| `campos` | lista vacía (0 filas) |
+
+#### Diagnóstico y corrección recomendada (no implementada)
+
+- La segunda página es una tabla vacía con forma de objeto:
+  encabezados y filas vacíos. El lector sólo reconocía la lista vacía
+  `[]` como fin de inventario.
+- Probablemente aparece en inventarios con más documentos que una
+  página (aquí 22 en la primera). Explica de forma determinista los
+  fallos de ITBOY y, muy probablemente, de La Plata.
+- Propuesta general, con evidencia de una sola observación:
+  - aceptar como fin de inventario la tabla con `status` 1,
+    `encabezados == []` y `campos == []`;
+  - registrar además el valor numérico de `cantidad`, sin ningún
+    otro contenido;
+  - si `cantidad` es un entero distinto de los documentos leídos, el
+    inventario seguiría incompleto;
+  - cualquier otra forma seguiría siendo incompleta.
+- Requiere pruebas de regresión y que se valide en el próximo
+  inventario real (La Plata u otro).
+
+#### Regresión «InvitacionPublica_» (offline)
+
+Caso CO1.NTC.11268989, I. E. John F. Kennedy (Soledad), corrida
+`en01-jocj50yr`:
+
+- Cobertura actual: invitación 6 de 6 páginas y estudios previos
+  30 de 30, ambos completos. Falta verificar dos documentos de
+  disponibilidad presupuestal (`cdisponibilidad_`, `sdisponibilidad_`).
+- Hoy la invitación ya se confirma como rector por la portada, una
+  regla anterior a este cambio. El cambio registrado en la regresión
+  refleja que el arnés sólo comparaba los nombres; no es un efecto
+  nuevo del runner.
+- Clasificación: `not_resolved`, `no_decisive_clause`,
+  `documentary_silence`. Sólo hay cláusulas condicionales (páginas
+  4, 14, 18 y 22).
+- Hallazgo: con incertidumbre (`no_closed_habilitating_list`), con
+  documentos sin verificar y cláusulas condicionales. No se detecta
+  lista habilitante cerrada.
+- El silencio documental está respaldado por cobertura completa de
+  invitación y estudio, y no produce un hallazgo prioritario ni
+  confirmado.
