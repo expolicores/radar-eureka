@@ -5281,7 +5281,7 @@ Condiciones para ejecutarlo:
 
 #### Lote de inventarios (plan, no ejecutado)
 
-Commit `b39a6b1`.
+Commit `80dcf3b`.
 
 `eureka_nacional_inventory_batch.py`:
 
