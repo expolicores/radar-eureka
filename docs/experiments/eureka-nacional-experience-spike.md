@@ -7376,3 +7376,87 @@ publicados en `main`, así que retirarlo del historial público requiere
 una decisión en Regional. No se modificaron.
 
 Suite: 1042 pruebas aprobadas y 11 omitidas.
+
+### Lotes documentales nacionales: SECOP II (6739ec02) y Chitaraque (eb7bf69b)
+
+Ejecución del 28-11-2026, con una autorización independiente por lote.
+
+Controles previos, antes de cada lote:
+
+- Rama nacional en `dc9f77a`, árbol limpio.
+- Plan y hash recalculados con `load_plan`; identidades exactas.
+- Sin intentos previos en planes dirigidos.
+- Una sola pestaña, en Contratos, y sin marcador preventivo.
+- Preflight: sesión válida, `only_configured`, `profile_count: 1`,
+  sin cambio de perfil y pestaña habitual intacta.
+
+Verificación offline previa de la excepción de 11 MiB:
+
+- El streaming admite límites de 10 a 16 MiB (`stream_limit`).
+- El tamaño declarado se rechaza en las cabeceras, antes de leer el
+  cuerpo.
+- La lectura se corta en el límite y el almacenamiento vuelve a
+  comprobar el máximo.
+- El plazo de 12 s (`DEADLINE`, `document_timeout_seconds`) no cambia.
+- Las comprobaciones de cierre (`io_closed`, `navigation_abort_ack`,
+  `target_closed`) y el marcador no dependen del límite.
+- La excepción sólo se aplica a ese documento.
+- Pruebas existentes de techos: 40 aprobadas.
+
+#### Adquisición
+
+| Documento | Proceso | Resultado | Bytes | Segundos | Mecanismo |
+|---|---|---|---|---|---|
+| 898469633 solicitud de cotización | CO1.NTC.11288865 radios | Guardado, SHA-256 `04f47467…` | 482.470 | 6,3 | 403 directo → Edge |
+| 898426048 invitación | CO1.NTC.11288633 papelería | Guardado, `8da9e5f7…` | 1.594.155 | 5,4 | 403 → Edge |
+| 898381314 condiciones de participación | CO1.NTC.11288302 Huila | **Rechazado en cabeceras**: declara 14.540.989 bytes (13,87 MiB) | 0 | 4,8 | 403 → Edge |
+| 898503982 invitación pública | CO1.NTC.11289436 Boavita | Guardado, `0d091f86…` | 7.498.895 | 6,8 | 403 → Edge |
+| 899041327 complemento de invitación | CO1.NTC.11293531 Valle | Guardado, `647106ca…` | 601.469 | 4,9 | 403 → Edge |
+| 898897174 invitación pública | CO1.NTC.11292238 impresora | Guardado, `471ddca2…` | 208.110 | 5,0 | 403 → Edge |
+| 899110330 invitación 2026 | CO1.NTC.11293957 Manzanares | Guardado, `209c2f2d…` | 573.890 | 5,4 | 403 → Edge |
+| 898449869 invitación | CO1.NTC.11288789 calendarios | **Rechazado en cabeceras**: declara 18.046.511 bytes (17,21 MiB) | 0 | 5,5 | 403 → Edge |
+| 898378672 invitación (techo de 11 MiB) | CO1.NTC.11288255 Chitaraque | Guardado, `7278ddd7…` | 11.335.060 (= declarado) | 7,4 | 403 → Edge |
+| 898378673 estudios previos | CO1.NTC.11288255 Chitaraque | Guardado, `e2364e92…` | 8.388.939 | 6,3 | 403 → Edge |
+
+- Resultado: 8 guardados de 10, todos con tamaño igual al declarado,
+  firma PDF, SHA-256 y recibo verificados.
+- Sin reintentos, sin descargas nativas y sin feed.
+- El marcador nunca quedó activo.
+- Los dos rechazados (Huila y calendarios) quedan pendientes por
+  tamaño. No se amplió ningún límite.
+
+#### Análisis offline
+
+Se usaron el clasificador y la capa de hallazgos vigentes, sin
+cambiar reglas, sin IA y sin red.
+
+| Proceso | Objeto, departamento y cierre | Documento leído y función real | Cobertura | Cláusula y página | Estado formal | Hallazgo y prioridad v3 | Revisión |
+|---|---|---|---|---|---|---|---|
+| **CO1.NTC.11292238** | Impresora multifuncional, Concejo de Durania (Norte de Santander), 01-12 17:00 | Invitación pública (rectora) | 6 de 6 páginas, texto nativo | **p. 2: «No se exigen experiencia, capacidad financiera ni Registro Único de Proponentes.»**, seguida de la lista de documentos de la persona natural | `not_resolved` (`no_decisive_clause`) | Incierto; A, revisable | **Declaración explícita de que no se exige experiencia.** El clasificador no la reconoce (concordancia «se exigen experiencia»). Falta el estudio previo (no descargado) para corroborar. Revisión humana prioritaria |
+| CO1.NTC.11293957 | Elementos tecnológicos y utilitarios (biblioteca), Manzanares (Caldas), 01-12 17:00 | «Invitación biblioteca 2026» (rectora); el estudio previo 2025 no se usó | 18 de 18, nativo | p. 6, en la sección «9) Requisitos mínimos habilitantes» (pp. 5-6): «El proponente deberá acreditar una experiencia mínima de un (01) contrato ejecutado y liquidado…» | `experience_required` | Experiencia exigida; A, revisable | No aplica la oportunidad |
+| CO1.NTC.11288633 | Papelería y tóner, Villagómez (Cundinamarca), 01-12 08:10 | Invitación (rectora) | 83 de 83 (2 por OCR) | p. 22: «El proponente podrá acreditar la experiencia con mínimo dos (2) y máximo cuatro (4) certificaciones… igual o superior al… (100%) del valor del presupuesto oficial», bajo «Características de los contratos presentados para acreditar la experiencia exigida»; 75 % diferencial para mipymes | `experience_ambiguous` (`limited_applicability`) | Incierto; A, bienes | Indicios fuertes de experiencia exigida («podrá» frente a «exigida»). Revisión humana |
+| CO1.NTC.11293531 | Dotación de calzado y vestido, Contraloría Distrital de Buenaventura (Valle del Cauca), 01-12 15:00 | **Complemento de invitación**; no hay invitación base en el inventario | 15 de 15, nativo | p. 12: «El proponente deberá acreditar una experiencia mínima de dos (2) años… máximo dos (2) certificaciones… igual o superior al 100 % del presupuesto oficial»; p. 10: tabla «Experiencia Mínima – Habilitado / No habilitado» | `not_resolved` (`no_decisive_clause`) | Incierto; A, bienes | Indicios fuertes de experiencia exigida. Limitación: es un complemento; las condiciones base pueden estar en el formulario de SECOP II. Revisión humana |
+| CO1.NTC.11288865 | Radios portátiles, Escuela de Policía Antonio Nariño (Atlántico), 30-11 18:00 | **Solicitud de cotización** (único documento); no consta como invitación definitiva | 14 de 14, nativo | p. 10: «El contratista debe garantizar que cuenta con el personal idóneo y con la experiencia para la ejecución… para lo cual deberá certificar» | `not_resolved` | Incierto; B, bienes | Obligación del contratista de alcance incierto, sin lista habilitante. No se puede concluir nada. Lectura humana |
+| CO1.NTC.11289436 | Paquetes alimentarios, Boavita (Boyacá), 01-12 14:00 | Invitación pública; rol confirmado por contenido («requisitos habilitantes», p. 7) | 12 de 47 por OCR; quedan las pp. 13-47 | pp. 10-11: tiempo de constitución de personas jurídicas «o con la experiencia de que alguno de los socios…» (no es la exigencia al proponente) | `not_resolved` | Incierto; B, bienes | Cobertura incompleta; la sección habilitante sigue. Pendiente de leer |
+| CO1.NTC.11288255 | Aseo, dotación y equipos tecnológicos para el INPEC, Chitaraque (Boyacá), 01-12 10:30 | Invitación (rectora) y estudios previos | Invitación 12 de 34 por OCR; estudio previo 2 de 24 | p. 6: marco legal genérico de mínima cuantía («verifique la idoneidad o experiencia requerida») | `not_resolved` | Incierto; A, bienes | Cobertura incompleta. Pendiente de leer |
+| CO1.NTC.11288302 | Dotación, Instituto Financiero para el Desarrollo del Huila, 01-12 10:00 | Sin documento: rector de 13,87 MiB | 0 | — | `not_resolved` | Incierto; A, bienes | Pendiente por tamaño |
+| CO1.NTC.11288789 | Calendarios institucionales, Norcasia (Caldas), 01-12 18:00 | Sin documento: rector de 17,21 MiB | 0 | — | `not_resolved` | Incierto; A, bienes | Pendiente por tamaño. Hay además un aviso de limitación a mipymes (comercial) |
+
+Lectura:
+
+- Ningún silencio documental se convirtió en ausencia. El único
+  indicio favorable es una declaración explícita en el rector (la
+  impresora de Durania). Sigue sin corroboración formal del sistema y
+  sin el estudio previo.
+- Limitaciones registradas según lo pedido:
+  - **radios**: sólo hay una solicitud de cotización;
+  - **Valle**: sólo hay un complemento de invitación;
+  - **Manzanares**: el estudio previo está rotulado con 2025 y no se
+    usó. La exigencia proviene de la invitación 2026.
+- Posibles mejoras generales del clasificador, no aplicadas porque
+  requieren autorización:
+  - reconocer «no se exigen experiencia» (falta de concordancia);
+  - reconocer «el proponente deberá acreditar una experiencia mínima»
+    cuando la frase sigue a un rótulo de anexo.
+- La lectura OCR de Boavita y Chitaraque se detuvo en el presupuesto
+  vigente de páginas. No se amplió.
