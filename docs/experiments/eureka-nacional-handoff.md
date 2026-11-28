@@ -1330,3 +1330,17 @@ comercial reducida; el lote `b7fe9e15` no se autorizó. Plan
 prioridad A y 1 B), unos 17 créditos esperados, límite duro de 30
 créditos y 360 s. Sin feed ni descargas. Después, tandas
 documentales por cierre y prioridad.
+
+### Inventarios de 8 procesos: 6 recuperados
+
+- 17 créditos, sin feed ni descargas. Los cambios del perfil
+  posteriores al descubrimiento quedan registrados y las muestras
+  no se mezclan.
+- 6 inventarios recuperados. ITBOY y La Plata fallaron con
+  `SpikeError`; el mensaje se registrará desde `be14829`.
+- San Joaquín ya tiene evaluación publicada.
+- Tandas propuestas:
+  - tanda 1, 7 documentos de prioridad A, hash `5815a222…`;
+  - tanda 2, 1 estudio previo de prioridad B, hash `4de12c43…`.
+
+Pendiente de autorización.

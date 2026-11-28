@@ -5352,3 +5352,96 @@ previo. CDP, PAA, BPIN, documentos presupuestales y análisis del
 sector nunca se eligen. Descarga directa y, sólo ante 403, streaming
 autorizado. El proceso con cierre el 02-12 aconseja no demorar la
 primera tanda.
+
+### Lote de inventarios en01-inv_k94ws3so (bbf82b71): ejecutado
+
+#### Trazabilidad de la configuración del perfil
+
+- Antes de ejecutar, el titular cambió Licitaciones.info:
+  - eliminó el segundo perfil (Litart);
+  - concentró las actividades de Vila Frontier en suministro de
+    bienes y eventos;
+  - pidió al proveedor recuperar las publicaciones desde el 20 de
+    noviembre.
+- Los 240 avisos y los 8 elegibles provienen de la configuración
+  anterior del perfil y siguen siendo resultados válidos de esa
+  configuración.
+- Este lote sólo inventaría esos 8 procesos. Sus métricas no se
+  mezclan con una corrida nueva, cuyo universo será distinto.
+- `/get-info/ALL` no se usa.
+
+#### Controles previos
+
+- Una sola pestaña, en `/cliente/contratos`; ninguna pestaña de
+  administración de perfiles.
+- Sin marcador preventivo.
+- Plan íntegro: hash `bbf82b71…`; las 8 identidades y claves
+  coinciden con la corrida almacenada; ninguna inventariada antes;
+  sin intentos previos.
+- Preflight pasivo: sesión válida, `only_configured`,
+  `profile_count: 1`, `profile_changed: false` y feed bloqueado.
+
+#### Resultado
+
+- 17 créditos de 30, sin parada por presupuesto.
+- Sin feed, descargas, streaming ni POST a SECOP.
+
+| Proceso | Prioridad | Inventario | Documentos | Rector disponible | Estudio previo |
+|---|---|---|---|---|---|
+| CO1.NTC.11247014 Puerto Boyacá | A | sí | 7 | sólo «05. Proyecto Pliego», excluido por ser borrador; aún sin pliego definitivo | «01. EP SASI 023» (EP = estudio previo; no reconocido automáticamente) |
+| CO1.NTC.11257086 I. E. José Miguel Montalvo | A | sí | 4 | INVITACION 23 | ESTUDIO PREVIO |
+| CO1.NTC.11250835 I. E. El Limonar | A | sí | 3 | «CONVOCATORIA 20 DE 2026» (rol desconocido) | ESTUDIO PREVIO 20 DE 2026 |
+| CO1.NTC.11249056 I. E. San Joaquín | A | sí | 5 | 4. INVITACION 2026 | 1. ESTUDIO PREVIO |
+| CO1.NTC.11243868 I. E. Buenos Aires | A | sí | 5 | 05 INVITACIÓN | 04 ESTUDIOS PREVIOS |
+| CO1.NTC.11259162 Puerto Boyacá | B | sí | 11 | sólo proyecto de pliego (excluido); hay aviso | ESTUDIO PREVIO – elementos tecnológicos SIJIN |
+| CO1.NTC.11286624 ITBOY | A | **falló** (2 créditos) | — | — | — |
+| CO1.NTC.11293769 La Plata | A | **falló** (2 créditos) | — | — | — |
+
+- Tamaños: el inventario de SECOP II no publica tamaño, así que se
+  desconocen. Se comprobarán con el tamaño declarado al adquirir
+  (techo de 10 MiB).
+- ITBOY y La Plata dieron `SpikeError` después de 2 páginas. El
+  mensaje no quedó registrado; ya se corrigió en `be14829`. Las
+  causas posibles con 2 créditos son una página documental repetida
+  o un error al leer la segunda página. No se reintentó: un nuevo
+  intento requiere autorización.
+- San Joaquín ya tiene publicados «5. Evaluacion de Propuestas» y
+  el acta de cierre: el plazo de ofertas parece vencido. Sigue
+  visible, pero no se propone adquirir sus documentos.
+
+#### Tandas de adquisición propuestas (no ejecutadas)
+
+La selección automática no reconoce «EP» como estudio previo y, sin
+rector, elige una ficha técnica. Por eso la tanda 1 se armó a mano:
+rector y estudio previo de cada proceso, sin reglas por entidad.
+
+Tanda 1, prioridad A, hash
+`5815a2222abd3990272d5b1c2de7f612577e84f3bdd79074df2f899ffdcdc5cb`:
+
+| Proceso | DocumentId | Documento |
+|---|---|---|
+| CO1.NTC.11247014 | 893104119 | 01. EP SASI 023 DE 2026 |
+| CO1.NTC.11257086 | 894405688 | INVITACION 23 |
+| CO1.NTC.11257086 | 894405686 | ESTUDIO PREVIO |
+| CO1.NTC.11243868 | 892789470 | 05 INVITACIÓN |
+| CO1.NTC.11243868 | 892789469 | 04 ESTUDIOS PREVIOS |
+| CO1.NTC.11250835 | 893588771 | CONVOCATORIA 20 DE 2026 |
+| CO1.NTC.11250835 | 893588770 | ESTUDIO PREVIO 20 DE 2026 |
+
+Tanda 2, prioridad B, hash
+`4de12c43f2e6c81c369e0d9920e619f03b63b1aa4358875467898112c3a58433`:
+CO1.NTC.11259162, documento 894608317, estudio previo.
+
+Procedimiento por tanda:
+
+- plan focalizado desde `en01-inv_k94ws3so`;
+- una descarga directa por documento y, sólo ante 403, un streaming
+  por Edge con 10 MiB y 12 s;
+- después, análisis offline con el clasificador y la capa de
+  hallazgos sin cambios.
+
+Pendientes:
+
+- los pliegos definitivos de los dos procesos de Puerto Boyacá, que
+  requerirán un nuevo inventario cuando se publiquen;
+- un posible reintento de inventario de ITBOY y La Plata.
