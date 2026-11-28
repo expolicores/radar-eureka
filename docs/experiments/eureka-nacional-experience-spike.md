@@ -6178,3 +6178,89 @@ permanentes.
   descarga, y descarga del rector de Chitaraque si se quiere
   resolverlo.
 - Antes de cualquier descarga, plan y hash propios por tanda.
+
+### Inventarios de oportunidades recientes (plan 81e84048) y lotes siguientes
+
+#### Inventarios
+
+- Controles previos:
+  - las 5 identidades y sus claves coinciden con `en01-1u44f6p7`;
+  - ninguna estaba inventariada;
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Consumo: 11 créditos de 15. Sin feed, descargas, streaming ni POST
+  documentales.
+- Los 5 inventarios quedan completos: la segunda página es la lista
+  vacía documentada.
+
+| Proceso | Prioridad | Cierre | Documentos | Rector | Estudio previo | Observación |
+|---|---|---|---|---|---|---|
+| CO1.NTC.11266200 I. E. Municipal Windsor | A | — | 15 | INVITACION CONT 16 | ESTUDIOS PREVIOS CONT 16 | **Ya adjudicado**: acta de cierre, adjudicación, contrato y acta de inicio publicados. No es una oportunidad abierta |
+| CO1.NTC.11278746 I. E. Anacleto García | A | desconocido | 4 | «2 Proyecto Invitacion Pública 11 Papelería» (borrador) | Estudios previos 10 | Sólo hay proyecto de invitación |
+| CO1.NTC.11281640 Yaguará | B | 30-11 10:00 | 8 | INVITACION 032 MOBILIARIO | ESTUDIO PREVIO | — |
+| CO1.NTC.11285436 Ramiriquí | B | 30-11 15:30 | 4 | MRAM-MC-075-2026 INVITACIÓN | MRAM-MC-075-2026 ESTUDIOS PREVIOS | — |
+| CO1.NTC.11288021 Briceño | B | 30-11 17:30 | 4 | MB-CS-INV-061-2026 INVITACIÓN PÚBLICA | ESTUDIOS PREVIOS Y ANÁLISIS DEL SECTOR | — |
+
+Evidencia sobre `cantidad`:
+
+- En los 5 inventarios completos, `cantidad` en la página 1 coincide
+  exactamente con las filas devueltas: 15, 4, 8, 4 y 4.
+- Con La Plata (53 declarados frente a 29 devueltos, cerrado por
+  tabla vacía), esto apoya que `cantidad` es el total de documentos
+  del proceso y que el inventario de La Plata está truncado.
+- Son 5 coincidencias y 1 discrepancia. `CANTIDAD_IS_DOCUMENT_TOTAL`
+  sigue en `False` hasta que el titular decida. La Plata sigue
+  incompleta.
+
+#### Lote documental propuesto (no ejecutado)
+
+Plan `en01-target_inv_1u44f6p7`, hash
+`660b69c3c4a5af049568575bdd7550371fd638b54e1e22ff96e414a0ef15c98e`.
+Sin recibos ni intentos previos.
+
+| Proceso | DocumentId | Documento |
+|---|---|---|
+| Yaguará CO1.NTC.11281640 (cierre 30-11 10:00) | 897462296 | INVITACION 032 MOBILIARIO |
+| | 897462295 | ESTUDIO PREVIO |
+| Ramiriquí CO1.NTC.11285436 (cierre 30-11 15:30) | 898004720 | MRAM-MC-075-2026 INVITACIÓN |
+| | 898004719 | MRAM-MC-075-2026 ESTUDIOS PREVIOS |
+| Briceño CO1.NTC.11288021 (cierre 30-11 17:30) | 898354025 | MB-CS-INV-061-2026 INVITACIÓN PÚBLICA |
+| | 898354024 | ESTUDIOS PREVIOS Y ANALISIS DEL SECTOR |
+| Anacleto García CO1.NTC.11278746 (A) | 897029857 | 2 Proyecto Invitacion Pùblica 11 Papelería (borrador) |
+| | 897029855 | Estudios previos 10 |
+
+- Windsor queda fuera porque ya está adjudicado.
+- El orden atiende el cierre del 30-11 y la prioridad A.
+- En Anacleto García, la invitación es un proyecto: sus conclusiones
+  serán provisionales.
+- Mecanismo validado: descarga directa y, sólo ante 403, un streaming
+  por Edge con 10 MiB y 12 s, sin reintentos. Después, análisis
+  offline.
+
+#### Plan SECOP I de Elías (no ejecutado)
+
+- Proceso `licitaciones_info:1086005:12363176`, constancia
+  26-13-14853466, Alcaldía de Elías (Huila).
+- Objeto: menaje para alimentación escolar y equipos tecnológicos.
+- Prioridad B (gastronomía); abierto; cierre 30-11 10:30.
+- Ya está seleccionado en `en01-1u44f6p7`.
+- Mecanismo existente, la recuperación SECOP I sólo de inventario:
+
+  ```
+  eureka_nacional_en01.py --secop1-inventory-from en01-1u44f6p7 \
+    --secop1-constancia 26-13-14853466
+  ```
+
+  - sin sondeo de sesión ni feed;
+  - una sola petición de inventario al proveedor (límite de 1
+    crédito);
+  - salida en `en01-secop1inv_1u44f6p7`;
+  - no repetible;
+  - sin POST a SECOP I.
+- Genera, si procede, una cola SECOP I con su hash. La adquisición
+  posterior por `VerDocumento` requiere otra autorización, con
+  preflight del contexto desechable y confirmación del lote.
+- Controles previos: los mismos (pestaña única, perfil único,
+  sesión y marcador).

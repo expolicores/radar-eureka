@@ -1433,3 +1433,15 @@ inventarios ni descargas; 30 créditos. Corrida de Boyacá y Huila con
 - Plan de 5 inventarios SECOP II: `81e84048…`, 15 créditos. Pendiente
   de autorización.
 - Boyacá y Huila son sólo una muestra; el alcance es Colombia.
+
+### Inventarios recientes y lotes propuestos
+
+- 5 inventarios completos con 11 créditos. Windsor ya está
+  adjudicado. `cantidad` coincide con las filas en los 5, lo que
+  apoya que La Plata está truncada.
+- Lote documental `660b69c3…`: 8 documentos (Yaguará, Ramiriquí y
+  Briceño cierran el 30-11; Anacleto García sólo tiene borrador).
+- Elías (SECOP I): recuperación de inventario con 1 crédito,
+  preparada.
+
+Todo pendiente de autorización.
