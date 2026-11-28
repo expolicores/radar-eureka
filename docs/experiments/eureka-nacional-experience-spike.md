@@ -5531,3 +5531,116 @@ Plan `en01-inv_k94ws3so_r1`, hash
   descargas.
 - Si el error es determinista, se repetirá con el mismo coste y quedará
   registrado su mensaje exacto.
+
+### Reintento de inventarios y OCR completo de El Limonar
+
+#### ITBOY y La Plata: reintento autorizado (plan c5c77f96)
+
+- Controles previos:
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - identidades y claves exactas;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Resultado: 5 de 10 créditos, sin feed ni descargas. Los dos
+  procesos fallaron de nuevo de la misma forma:
+  `SpikeError: «Contrato de tabla documental desconocido.»`, con 2
+  créditos cada uno.
+- Diagnóstico: el fallo es determinista. La primera página del
+  inventario se interpreta, pero la segunda devuelve una tabla
+  documental con una estructura que el lector no reconoce:
+  encabezados distintos de Item, Nombre, Tipo y Documento, o
+  `documentos` que no es ni tabla ni lista vacía.
+- Como el lector descarta el inventario completo, también se pierden
+  los documentos de la primera página.
+- No hay más intentos. ITBOY y La Plata siguen sin documentos
+  disponibles.
+- Opciones, pendientes de decisión:
+  - registrar sólo la forma estructural de la página rechazada
+    (tipos, claves y encabezados, sin contenido) en un nuevo intento
+    autorizado;
+  - aceptar como fin de inventario la variante vacía que se
+    identifique.
+
+  Ambas tocan el lector compartido de inventarios.
+
+#### El Limonar: OCR completo offline (autorizado)
+
+- Tope excepcional sólo para este proceso: 25 páginas y 900 s.
+  Tesseract local, sin red.
+- Resultado en
+  `en01-target_inv_k94ws3so/validation_results_limonar_full_ocr.json`.
+- Cobertura: convocatoria 9 de 9 y estudio previo 16 de 16 páginas,
+  completos.
+
+Cláusulas de experiencia:
+
+- Convocatoria, página 6, en la lista de documentos de la oferta:
+  «Certificación de la experiencia, con los soportes respectivos.
+  (Debe acreditar experiencia relacionada con el objeto del
+  contrato)».
+- Estudio previo, página 12: la misma exigencia, clasificada como
+  EXIGENCIA.
+- Estudio previo, página 13:
+  - «Acreditar su experiencia o conocimiento derivado de su
+    participación previa en actividades iguales o similares…,
+    certificaciones de contratos con entidades públicas o
+    privadas»;
+  - «No se tendrán en cuenta contratos en ejecución ni serán
+    admitidas las certificaciones expedidas por el mismo
+    oferente…».
+
+Estado:
+
+- Formal: `not_resolved` (`requirement_requires_corroboration`).
+  La exigencia formal está en el estudio de soporte; la convocatoria
+  tiene rol desconocido.
+- Hallazgo: pasa a **«Indicios de experiencia exigida — requiere
+  revisión»**.
+
+¿Debe reconocerse «Convocatoria» como rector? Se recomienda como
+mejora general, no implementada:
+
+- En régimen especial (fondos de servicios educativos), la
+  «convocatoria» cumple la función de la invitación: fija los
+  requisitos y los documentos de la oferta, y aquí contiene la
+  exigencia de experiencia.
+- La regla propuesta sería reconocer «convocatoria (pública)» como
+  rector, excluyendo «aviso de convocatoria», que en selección
+  abreviada es un aviso y no el pliego.
+- Con la convocatoria como rector, este caso probablemente llegaría
+  a `experience_required`.
+- Requiere una regresión como la de «condiciones generales de
+  participación».
+
+#### Situación de los procesos de la muestra de 10 días
+
+| Proceso | Hallazgo | Situación |
+|---|---|---|
+| CO1.NTC.11293222 INFIHUILA | Indicios de experiencia | Exigencia en el estudio; prioridad reducida |
+| CO1.NTC.11243868 Buenos Aires | Indicios de experiencia | Exigencia en la invitación; sin más adquisiciones |
+| CO1.NTC.11257086 José Miguel Montalvo | Con incertidumbre | Exigencia textual en la invitación, registrada como condicional; sin más adquisiciones |
+| CO1.NTC.11250835 El Limonar | Indicios de experiencia | Exigencia en la convocatoria y el estudio |
+| CO1.NTC.11249056 San Joaquín | Sin análisis | Evaluación publicada; plazo de ofertas aparentemente vencido |
+| CO1.NTC.11247014 Puerto Boyacá | Con incertidumbre | Estudio de 29,1 MiB fuera de los techos; sin pliego definitivo |
+| CO1.NTC.11259162 Puerto Boyacá (B) | Sin análisis | Tanda 2 preparada (`4de12c43`), sin ejecutar |
+| CO1.NTC.11286624 ITBOY | Sin inventario | Fallo determinista del lector en la página 2 |
+| CO1.NTC.11293769 La Plata | Sin inventario | Fallo determinista del lector en la página 2 |
+
+No queda en esta muestra ningún hallazgo prioritario ni confirmado.
+Siguen visibles y con incertidumbre: los dos de Puerto Boyacá y los
+dos sin inventario.
+
+#### Siguiente lote propuesto (no ejecutado)
+
+1. Tanda 2, ya preparada: CO1.NTC.11259162, estudio previo
+   894608317, hash `4de12c43…`. Es la única adquisición con evidencia
+   nueva posible hoy dentro de los techos vigentes.
+2. Re-inventario de Puerto Boyacá (CO1.NTC.11247014 y 11259162)
+   cuando se publiquen los pliegos definitivos.
+3. ITBOY y La Plata sólo después de decidir sobre el lector de
+   inventarios.
+4. Nueva corrida de descubrimiento con el perfil Vila Frontier
+   actualizado cuando el proveedor complete el histórico. Es la
+   fuente más probable de oportunidades nuevas: esta muestra no
+   dejó ninguna sin exigencia de experiencia.

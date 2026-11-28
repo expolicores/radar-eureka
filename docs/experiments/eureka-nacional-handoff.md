@@ -1357,3 +1357,16 @@ Pendiente de autorización.
 - Plan de reintento de inventarios de ITBOY y La Plata:
   `en01-inv_k94ws3so_r1`, hash `c5c77f96…`, 10 créditos y 120 s.
   Pendiente de autorización.
+
+### Reintento de inventarios y El Limonar
+
+- ITBOY y La Plata fallan de forma determinista en la página 2 del
+  inventario («Contrato de tabla documental desconocido»). 5
+  créditos; no hay más intentos.
+- El Limonar, con OCR completo: exige certificación de experiencia
+  en la convocatoria y en el estudio. Pasa a indicios.
+- Se recomienda reconocer «convocatoria» como rector como mejora
+  general (no implementada).
+- La muestra no deja hallazgos prioritarios. Próximo lote sugerido:
+  tanda 2 (`4de12c43…`); después, una nueva corrida de descubrimiento
+  cuando el histórico del perfil esté disponible.
