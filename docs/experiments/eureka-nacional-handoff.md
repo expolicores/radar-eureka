@@ -1344,3 +1344,16 @@ documentales por cierre y prioridad.
   - tanda 2, 1 estudio previo de prioridad B, hash `4de12c43…`.
 
 Pendiente de autorización.
+
+### Tanda 1: 6 de 7 documentos
+
+- Los 6 documentos guardados entraron por streaming tras 403. El
+  estudio previo de Puerto Boyacá (29,1 MiB) se rechazó.
+- Buenos Aires: indicios de experiencia (al menos dos contratos en
+  la invitación).
+- José Miguel Montalvo: la misma exigencia textual, pero queda con
+  incertidumbre por un límite de la capa.
+- El Limonar: cobertura insuficiente.
+- Plan de reintento de inventarios de ITBOY y La Plata:
+  `en01-inv_k94ws3so_r1`, hash `c5c77f96…`, 10 créditos y 120 s.
+  Pendiente de autorización.

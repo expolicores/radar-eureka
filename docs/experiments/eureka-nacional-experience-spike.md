@@ -5445,3 +5445,89 @@ Pendientes:
 - los pliegos definitivos de los dos procesos de Puerto Boyacá, que
   requerirán un nuevo inventario cuando se publiquen;
 - un posible reintento de inventario de ITBOY y La Plata.
+
+### Tanda 1 (5815a222): adquisición y análisis offline
+
+#### Controles previos
+
+- Plan `en01-target_inv_k94ws3so`, verificado contra el hash exacto.
+- No había recibos ni intentos previos de los 7 documentos.
+- Una sola pestaña, en `/cliente/contratos`; sin marcador.
+- Preflight pasivo: sesión válida, `only_configured`,
+  `profile_count: 1` y sin cambio de perfil.
+
+#### Adquisición
+
+Todos dieron 403 en la descarga directa. Sin reintentos ni descargas
+nativas, y sin marcador al terminar.
+
+| Proceso | DocumentId | Documento | Resultado | Bytes declarados / recibidos | SHA-256 |
+|---|---|---|---|---|---|
+| CO1.NTC.11247014 Puerto Boyacá | 893104119 | 01. EP SASI 023 | **rechazado**: `declared_size_limit` | 30.522.733 declarados (29,1 MiB) | — |
+| CO1.NTC.11257086 José Miguel Montalvo | 894405688 | INVITACION 23 | guardado por streaming | 723.779 | `dfedd84c…` |
+| CO1.NTC.11257086 | 894405686 | ESTUDIO PREVIO | guardado por streaming | 621.337 | `3fdeae1b…` |
+| CO1.NTC.11243868 Buenos Aires | 892789470 | 05 INVITACIÓN | guardado por streaming | 1.909.875 | `4e6ede75…` |
+| CO1.NTC.11243868 | 892789469 | 04 ESTUDIOS PREVIOS | guardado por streaming | 3.879.548 | `810bbfba…` |
+| CO1.NTC.11250835 El Limonar | 893588771 | CONVOCATORIA 20 DE 2026 | guardado por streaming | 3.905.783 | `7e8c0197…` |
+| CO1.NTC.11250835 | 893588770 | ESTUDIO PREVIO 20 DE 2026 | guardado por streaming | 7.912.475 | `70f403dd…` |
+
+En los 6 guardados, lo recibido coincide con lo declarado.
+
+#### Análisis offline
+
+Clasificador y capa de hallazgos sin cambios; OCR vigente: 12
+páginas por rector y 2 por soporte. Todos los PDF son escaneados.
+
+| Proceso | Cobertura | Estado formal | Hallazgo | Evidencia |
+|---|---|---|---|---|
+| Buenos Aires | Invitación 8 de 8; estudio 2 de 15 | `not_resolved` (`no_decisive_clause`) | **Indicios de experiencia exigida** | Invitación, «8. REQUISITOS HABILITANTES», páginas 5 y 6, 12 ítems, lista cerrada. Ítem i): «Acreditar experiencia en la ejecución de contratos (por lo menos dos) cuyo objeto esté relacionado con el de la presente convocatoria». El clasificador la registra como condicional, no como exigencia formal |
+| José Miguel Montalvo | Invitación 11 de 11; estudio 2 de 8 | `not_resolved` (`no_decisive_clause`) | Con incertidumbre | Invitación, página 2: «Personas naturales o jurídicas… con experiencia en ejecución de por lo menos dos (2) contratos… cuyo objeto esté relacionado…; el proponente adjuntará copia de contratos o certificado…». También clasificada como condicional y fuera de una sección habilitante detectada; la capa no la cuenta como indicio |
+| El Limonar | Convocatoria 2 de 9 (rol desconocido); estudio 2 de 16 | `not_resolved` (`governing_documents_incomplete`) | Con incertidumbre | Sin cláusulas pertinentes en lo leído. El único condicional es una cita legal sobre el consejo directivo |
+| Puerto Boyacá (11247014) | ningún documento | `not_resolved` | Con incertidumbre | El estudio previo supera los techos de 10 y 16 MiB y no hay pliego definitivo. Cualquier conclusión será incompleta hasta tener el pliego definitivo y un estudio legible |
+
+Revisión humana recomendada:
+
+- **Buenos Aires y José Miguel Montalvo**: la lectura textual muestra
+  una exigencia de al menos dos contratos en la invitación. Si se
+  confirma, ambos bajan de prioridad comercial como
+  CO1.NTC.11293222.
+  - Límite observado en José Miguel Montalvo: una exigencia redactada
+    como requisito de participación («con experiencia en…») queda
+    como condicional y, fuera de una lista habilitante, la capa no la
+    eleva a indicio. Corregirlo requiere decidir sobre las reglas;
+    no se tocó.
+- **El Limonar**: cobertura insuficiente. «Convocatoria» no se
+  reconoce como rector, así que sólo recibe OCR de soporte (2
+  páginas). Haría falta OCR offline adicional o una decisión sobre
+  ese rol.
+- **Puerto Boyacá**: esperar al pliego definitivo; el estudio previo
+  de 29,1 MiB queda fuera de los techos autorizados.
+
+#### ITBOY y La Plata: revisión y plan de reintento (no ejecutado)
+
+- Los dos fallos costaron 2 créditos. La primera página se leyó y
+  el error ocurrió en la segunda.
+- En ese punto las causas posibles son:
+  - página repetida;
+  - estado del proveedor distinto de 1;
+  - tabla, fila, enlace o formato documental no reconocidos.
+
+  Casi todas son deterministas y dependen del contenido de la
+  segunda página. El mensaje no quedó registrado en el primer lote.
+- No hay bloqueo conocido, pero tampoco puede descartarse offline un
+  error determinista de paginación.
+- El lote original no admite repetición, así que el reintento
+  requiere un plan nuevo (`7f4ef1c`). Lleva sus propios límites,
+  ligados al hash, y lista los intentos previos. Desde `be14829` se
+  registra el mensaje completo del error.
+
+Plan `en01-inv_k94ws3so_r1`, hash
+`c5c77f969a6e9a33eb9175080a936885dd3ea7d7f9d45c6e9a01694618f4d216`:
+
+- CO1.NTC.11286624 (ITBOY) y CO1.NTC.11293769 (La Plata), con las
+  mismas claves de inventario.
+- Límite de 10 créditos y 120 s; unos 5 esperados: 1 de bootstrap y
+  unos 2 por proceso. Un único intento por proceso, sin feed ni
+  descargas.
+- Si el error es determinista, se repetirá con el mismo coste y quedará
+  registrado su mensaje exacto.
