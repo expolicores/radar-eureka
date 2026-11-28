@@ -163,7 +163,7 @@ class BudgetReachedError(Exception):
 
 
 def fake_fetch(pages_by_identity):
-    def fetch(client, keys):
+    def fetch(client, keys, trail=None):
         pages = pages_by_identity[keys["idUltimaFase"]]
         if client.requests + pages > client.limit:
             raise BudgetReachedError("request_budget")
@@ -245,7 +245,7 @@ def test_tranches_prefer_governing_documents_and_skip_administrative_support(tmp
 def test_inventory_failures_keep_the_reason_and_the_batch_continues(tmp_path):
     target, plan = planned_target(tmp_path)
 
-    def fetch(client, keys):
+    def fetch(client, keys, trail=None):
         client.requests += 2
         if keys["idUltimaFase"] == "CO1.NTC.1":
             raise ValueError("Pagina documental repetida; inventario incompleto.")
@@ -263,7 +263,7 @@ def test_retry_plan_has_its_own_limits_name_and_prior_attempts(tmp_path):
     # Arrange: a first batch where CO1.NTC.1 failed.
     target, plan = planned_target(tmp_path)
 
-    def fetch(client, keys):
+    def fetch(client, keys, trail=None):
         client.requests += 2
         if keys["idUltimaFase"] == "CO1.NTC.1":
             raise ValueError("Fila documental invalida.")
@@ -313,7 +313,7 @@ def test_partial_inventory_is_kept_marked_incomplete_and_does_not_block_a_new_pl
     target, plan = planned_target(tmp_path)
     full = fake_fetch({"CO1.NTC.1": 2, "CO1.NTC.2": 2})
 
-    def fetch(client, keys):
+    def fetch(client, keys, trail=None):
         documents = full(client, keys)
         if keys["idUltimaFase"] == "CO1.NTC.1":
             raise Incomplete(documents[:1])

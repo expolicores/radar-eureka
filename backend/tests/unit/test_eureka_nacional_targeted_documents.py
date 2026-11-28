@@ -560,3 +560,20 @@ def test_declared_size_is_checked_against_the_document_ceiling():
 def test_stream_ceiling_outside_the_allowed_range_is_rejected(limit):
     with pytest.raises(streaming.RejectionError, match="invalid_size_limit"):
         streaming.stream_limit(limit)
+
+
+def test_plan_carries_an_incomplete_inventory_flag(tmp_path):
+    run, _s1, _s2 = source_run(tmp_path)
+    cases = json.loads((run / "documents.json").read_text("utf-8"))
+    for case in cases:
+        if case["process_reference"] == "p2":
+            case["inventory_complete"] = False
+    (run / "documents.json").write_text(json.dumps(cases), "utf-8")
+    target = tmp_path / "en01-target_blind"
+
+    targeted.build_plan(
+        run, target, ["12"], targeted.batch_digest([["secop2", "CO1.NTC.9", "12", SECOP + "12"]])
+    )
+
+    [case] = json.loads((target / "documents.json").read_text("utf-8"))
+    assert case["inventory_complete"] is False

@@ -65,6 +65,15 @@ def _inventories(run, stage3=None):
     return found
 
 
+def _inventory_complete(run, stage3=None):
+    """Completeness recorded with each inventory; absent means complete (older runs)."""
+    found = {}
+    for path in filter(None, (stage3 and stage3 / "documents.json", run / "documents.json")):
+        for case in read_json(path, []):
+            found.setdefault(case["process_reference"], case.get("inventory_complete", True))
+    return found
+
+
 # ---------------------------------------------------------------- plan (offline)
 
 
@@ -115,6 +124,7 @@ def build_plan(
         p["process_reference"]: p for p in read_json(source / "processes.json")["processes"]
     }
     inventories = _inventories(source, stage3)
+    completeness = _inventory_complete(source, stage3)
     items = []
     for wanted in document_ids:
         matches = [
@@ -186,7 +196,14 @@ def build_plan(
     )
     write_json(
         target / "documents.json",
-        [{"process_reference": r, "documents": inventories[r]} for r in sorted(references)],
+        [
+            {
+                "process_reference": r,
+                "documents": inventories[r],
+                "inventory_complete": completeness.get(r, True) is not False,
+            }
+            for r in sorted(references)
+        ],
     )
     queue_items = [
         {
@@ -395,8 +412,11 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
     root = target.parent
     source = root / plan["source_run"]
     receipts = _held_receipts(plan, source, target)
-    inventories = {
-        c["process_reference"]: c["documents"] for c in read_json(target / "documents.json")
+    cases = read_json(target / "documents.json")
+    inventories = {c["process_reference"]: c["documents"] for c in cases}
+    # An inventory recorded as incomplete stays incomplete in the analysis.
+    inventory_complete = {
+        c["process_reference"]: c.get("inventory_complete", True) is not False for c in cases
     }
     processes = {
         p["process_reference"]: p for p in read_json(target / "processes.json")["processes"]
@@ -463,7 +483,9 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
             document["receipt_run"] = run.name
             if not document["complete"]:
                 document["validation_gap"] = "cobertura_incompleta"
-        classification = classify_experience(documents, inventory_complete=True)
+        classification = classify_experience(
+            documents, inventory_complete=inventory_complete[reference]
+        )
         reading, unresolved = validation_reading(classification, documents)
         finding = assess_finding(
             classification,

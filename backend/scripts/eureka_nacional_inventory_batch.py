@@ -255,10 +255,10 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
         attempts["items"][reference] = record
         write_json(target / ATTEMPTS_FILE, attempts)
         before = client.requests
-        incomplete = None
+        incomplete, trail = None, []
         try:
             try:
-                documents = fetch_inventory(client, item["keys"])
+                documents = fetch_inventory(client, item["keys"], trail=trail)
             except Exception as error:
                 if not callable(getattr(error, "diagnostic", None)):
                     raise
@@ -281,6 +281,7 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
             if code in BUDGET_STOPS | SESSION_STOPS:
                 stop = code
         record["credits"] = client.requests - before
+        record["page_trail"] = trail
         processes.append({**stored[reference], "sampled": True, "inventory_batch": True})
         inventories.append(
             {

@@ -610,6 +610,13 @@ def document_page_shape(body):
     shape["status"] = (
         status if isinstance(status, int | bool) or status is None else _type_name(status)
     )
+    cantidad = body.get("cantidad")
+    if "cantidad" in body:
+        shape["cantidad"] = (
+            cantidad
+            if isinstance(cantidad, int) and not isinstance(cantidad, bool)
+            else _type_name(cantidad)
+        )
     table = body.get("documentos")
     shape["documentos_type"] = _type_name(table)
     if isinstance(table, list):
@@ -657,10 +664,38 @@ class InventoryIncomplete(SpikeError):  # noqa: N818 -- an outcome, kept beside 
         }
 
 
-def fetch_inventory(client, process):
+# Observed in a real inventory (page after a full first page): an empty table object.
+# It ends pagination, but completeness needs proof of what `cantidad` counts; until that
+# semantics is validated with evidence, such an inventory stays explicitly incomplete.
+CANTIDAD_IS_DOCUMENT_TOTAL = False
+
+
+def is_empty_table_page(body):
+    table = body.get("documentos") if isinstance(body, dict) else None
+    return (
+        isinstance(body, dict)
+        and body.get("status") == 1
+        and isinstance(table, dict)
+        and table.get("encabezados") == []
+        and table.get("campos") == []
+    )
+
+
+def _page_trail(body, rows):
+    cantidad = body.get("cantidad") if isinstance(body, dict) else None
+    return {
+        "rows": rows,
+        "cantidad": cantidad
+        if isinstance(cantidad, int) and not isinstance(cantidad, bool)
+        else None,
+    }
+
+
+def fetch_inventory(client, process, *, trail=None):
     """Paginated inventory. An unreadable or repeated page, or the page ceiling, raises
     InventoryIncomplete with the documents already read; an unknown structure is never
-    taken as the end of pagination."""
+    taken as the end of pagination. `trail`, when given, receives per page only the row
+    count and the numeric `cantidad`, as evidence for validating its meaning."""
     documents, signatures = {}, set()
     payload = {
         key: process.get(key) for key in ("idContrato", "id_fuente_contract", "idUltimaFase")
@@ -669,6 +704,19 @@ def fetch_inventory(client, process):
         raise SpikeError("Faltan identificadores documentales.")
     for page in range(1, 11):
         body = client.post(DOCUMENT_ENDPOINT, {**payload, "page": page})
+        if is_empty_table_page(body):
+            if trail is not None:
+                trail.append({"page": page, **_page_trail(body, 0), "form": "empty_table"})
+            cantidad = _page_trail(body, 0)["cantidad"]
+            if CANTIDAD_IS_DOCUMENT_TOTAL and cantidad == len(documents):
+                return list(documents.values())
+            raise InventoryIncomplete(
+                "Fin de paginacion con tabla vacia; cobertura no demostrada.",
+                documents=list(documents.values()),
+                failed_page=page,
+                reason="empty_table_unverified_total",
+                shape=document_page_shape(body),
+            )
         try:
             parsed = parse_document_page(body)
         except InventoryIncomplete:
@@ -681,6 +729,14 @@ def fetch_inventory(client, process):
                 reason="unreadable_page",
                 shape=document_page_shape(body),
             ) from None
+        if trail is not None:
+            trail.append(
+                {
+                    "page": page,
+                    **_page_trail(body, len(parsed)),
+                    "form": "table" if parsed else "empty_list",
+                }
+            )
         if not parsed:
             return list(documents.values())
         signature = tuple(doc.document_id for doc in parsed)

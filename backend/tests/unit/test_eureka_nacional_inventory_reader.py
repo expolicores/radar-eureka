@@ -176,3 +176,97 @@ def test_runner_keeps_partial_inventory_and_records_it_as_incomplete(monkeypatch
     assert error["code"] == "inventory_incomplete"
     assert error["failed_page"] == 2
     assert error["documents_kept"] == 1
+
+
+def empty_table(cantidad=None):
+    body = {
+        "status": 1,
+        "documentos": {
+            "encabezados": [],
+            "campos": [],
+            "vermas": None,
+            "before_table": None,
+            "agregar_checkbox_seleccion": False,
+        },
+    }
+    if cantidad is not None:
+        body["cantidad"] = cantidad
+    return body
+
+
+def test_empty_table_ends_pagination_but_coverage_stays_unproven():
+    # Arrange: the form observed in a real inventory after a full first page.
+    client = Client([page(row("1"), row("2")), empty_table(cantidad=2)])
+
+    # Act
+    with pytest.raises(runtime.InventoryIncomplete) as raised:
+        runtime.fetch_inventory(client, KEYS)
+
+    # Assert
+    error = raised.value
+    assert error.reason == "empty_table_unverified_total"
+    assert [d.document_id for d in error.documents] == ["1", "2"]
+    assert error.shape["cantidad"] == 2
+    assert error.shape["encabezados"] == []
+    assert client.calls == [1, 2]  # pagination ended; no further page requested
+
+
+def test_empty_table_is_complete_only_once_cantidad_is_validated_and_matches(monkeypatch):
+    monkeypatch.setattr(runtime, "CANTIDAD_IS_DOCUMENT_TOTAL", True)
+
+    documents = runtime.fetch_inventory(
+        Client([page(row("1"), row("2")), empty_table(cantidad=2)]), KEYS
+    )
+
+    assert [d.document_id for d in documents] == ["1", "2"]
+
+
+@pytest.mark.parametrize("cantidad", [3, None, "2"])
+def test_cantidad_mismatch_or_absence_keeps_the_inventory_incomplete(monkeypatch, cantidad):
+    monkeypatch.setattr(runtime, "CANTIDAD_IS_DOCUMENT_TOTAL", True)
+    body = empty_table()
+    if cantidad is not None:
+        body["cantidad"] = cantidad
+
+    with pytest.raises(runtime.InventoryIncomplete) as raised:
+        runtime.fetch_inventory(Client([page(row("1"), row("2")), body]), KEYS)
+
+    assert raised.value.reason == "empty_table_unverified_total"
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [
+        {"status": 0, "documentos": {"encabezados": [], "campos": []}},
+        {"status": 1, "documentos": {"encabezados": [], "campos": [["x"]]}},
+        {"status": 1, "documentos": {"encabezados": ["Item"], "campos": []}},
+        {"status": 1, "documentos": {"campos": []}},
+    ],
+)
+def test_near_empty_tables_are_not_taken_as_the_end(variant):
+    with pytest.raises(runtime.InventoryIncomplete) as raised:
+        runtime.fetch_inventory(Client([page(row("1")), variant]), KEYS)
+
+    assert raised.value.reason == "unreadable_page"
+
+
+def test_trail_records_only_row_counts_and_numeric_cantidad():
+    first = {**page(row("1"), row("2")), "cantidad": 2}
+    trail = []
+
+    with pytest.raises(runtime.InventoryIncomplete):
+        runtime.fetch_inventory(Client([first, empty_table(cantidad=2)]), KEYS, trail=trail)
+
+    assert trail == [
+        {"page": 1, "rows": 2, "cantidad": 2, "form": "table"},
+        {"page": 2, "rows": 0, "cantidad": 2, "form": "empty_table"},
+    ]
+
+
+def test_documented_empty_list_still_completes_and_is_traced():
+    trail = []
+
+    documents = runtime.fetch_inventory(Client([page(row("1")), EMPTY]), KEYS, trail=trail)
+
+    assert [d.document_id for d in documents] == ["1"]
+    assert trail[-1] == {"page": 2, "rows": 0, "cantidad": None, "form": "empty_list"}
