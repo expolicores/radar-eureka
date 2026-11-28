@@ -1569,34 +1569,105 @@ def is_recovery_fatal(error):
     )
 
 
-def secop1_recovery_digest(source, constancias):
-    """Digest bound to the source selection (exact processes.json) and the constancia list.
-    Refuses offline the constancias that the source run did not select."""
-    raw = (source / "processes.json").read_bytes()
-    selected = {
-        secop1.constancia_of(p)
-        for p in json.loads(raw.decode("utf-8"))["processes"]
-        if p.get("source") == "secop1" and p.get("sampled") and p.get("excluded_reason") is None
+SECOP1_QUEUE_FILE = "candidate_queue.json"
+
+
+def secop1_queue_eligible(source, root):
+    """Constancias of SECOP I candidates in the stored queue of `source` that may be
+    inventoried: each must be a stored, eligible SECOP I notice of that same run (same
+    reference and identity, inventory keys present) and not already inventoried in any run.
+    Returns ({constancia: reason}, queue bytes); the reason is None when allowed."""
+    from eureka_nacional_candidate_queue import history
+
+    raw = (source / SECOP1_QUEUE_FILE).read_bytes()
+    queue = json.loads(raw.decode("utf-8"))
+    if queue.get("run") != source.name:
+        raise spike.SpikeError("La cola de candidatos no corresponde a la corrida.")
+    stored = {
+        p["process_reference"]: p
+        for p in json.loads((source / "processes.json").read_text(encoding="utf-8"))["processes"]
     }
-    if len(set(constancias)) != len(constancias) or not set(constancias) <= selected:
-        raise spike.SpikeError("Constancias fuera de la seleccion persistida.")
+    known = history(root)
+    verdicts = {}
+    for entry in queue.get("queue", []):
+        if entry.get("source") != "secop1":
+            continue
+        process = stored.get(entry.get("process_reference"))
+        constancia = secop1.constancia_of(process or {})
+        if constancia is None or process.get("source_identity") != entry.get("source_identity"):
+            continue  # not a stored SECOP I notice of this run: never eligible
+        if process.get("source") != "secop1" or not (process.get("inventory_keys") or {}).get(
+            "idContrato"
+        ):
+            reason = "sin_claves_de_inventario"
+        elif known.get(entry["source_identity"], {}).get("inventory"):
+            reason = "ya_inventariado"
+        elif entry.get("validity_status") == "closed":
+            reason = "cerrado"
+        else:
+            reason = None
+        verdicts.setdefault(constancia, reason)
+    return verdicts, raw
+
+
+def secop1_recovery_digest(source, constancias, *, from_queue=False, root=None):
+    """Digest bound to the source selection (exact processes.json) and the constancia list.
+    Refuses offline the constancias that the source run did not select or, with
+    `from_queue`, that the stored candidate queue does not allow."""
+    raw = (source / "processes.json").read_bytes()
+    if len(set(constancias)) != len(constancias):
+        raise spike.SpikeError("Constancias duplicadas en el lote.")
+    extra = {}
+    if from_queue:
+        verdicts, queue_raw = secop1_queue_eligible(source, root or source.parent)
+        refused = {c: verdicts.get(c, "fuera_de_la_cola") for c in constancias if verdicts.get(c)}
+        refused |= {c: "fuera_de_la_cola" for c in constancias if c not in verdicts}
+        if refused:
+            raise spike.SpikeError(f"Constancias no admitidas desde la cola: {refused}")
+        extra = {
+            "selection": "candidate_queue",
+            "candidate_queue_sha256": hashlib.sha256(queue_raw).hexdigest(),
+        }
+    else:
+        selected = {
+            secop1.constancia_of(p)
+            for p in json.loads(raw.decode("utf-8"))["processes"]
+            if p.get("source") == "secop1" and p.get("sampled") and p.get("excluded_reason") is None
+        }
+        if not set(constancias) <= selected:
+            raise spike.SpikeError("Constancias fuera de la seleccion persistida.")
     core = {
         "source_run": source.name,
         "source_processes_sha256": hashlib.sha256(raw).hexdigest(),
         "constancias": sorted(constancias),
         "request_credit_limit": len(constancias),
+        **extra,
     }
     return hashlib.sha256(json.dumps(core, sort_keys=True).encode()).hexdigest(), core
 
 
+def secop1_recovery_output(source_name, from_queue):
+    base = f"{secop1.RECOVERY_PREFIX}{source_name[5:]}"
+    if not from_queue:
+        return OUTPUT_ROOT / base
+    # Each queue lot gets its own directory; earlier lots stay visible to deduplication.
+    number = 1
+    while (OUTPUT_ROOT / f"{base}_q{number}" / secop1.QUEUE_FILE).exists():
+        number += 1
+    return OUTPUT_ROOT / f"{base}_q{number}"
+
+
 def recover_secop1_main(args, profile_id):
     """Inventory-only recovery: no session probe (it queries the feed), no discovery."""
+    from_queue = getattr(args, "secop1_from_queue", False)
     source = OUTPUT_ROOT / secop1.run_dir_name(args.secop1_inventory_from)
-    output = OUTPUT_ROOT / f"{secop1.RECOVERY_PREFIX}{args.secop1_inventory_from[5:]}"
+    output = secop1_recovery_output(args.secop1_inventory_from, from_queue)
     for path in (source, output):
         if path.resolve() != path or path.parent != OUTPUT_ROOT:
             raise ValueError("Ruta fuera del almacenamiento experimental.")
-    digest, core = secop1_recovery_digest(source, args.secop1_constancia)
+    digest, core = secop1_recovery_digest(
+        source, args.secop1_constancia, from_queue=from_queue, root=OUTPUT_ROOT
+    )
     if getattr(args, "secop1_plan_only", False):
         print(json.dumps({"batch_sha256": digest, **core}), flush=True)
         return 0
@@ -1623,7 +1694,12 @@ def recover_secop1_main(args, profile_id):
             request_limit=len(args.secop1_constancia),
         )
         summary = secop1.recover_secop1_inventories(
-            client, source, output, args.secop1_constancia, is_fatal=is_recovery_fatal
+            client,
+            source,
+            output,
+            args.secop1_constancia,
+            is_fatal=is_recovery_fatal,
+            eligible=set(args.secop1_constancia) if from_queue else None,
         )
     keys = (
         "batch_sha256",
@@ -1718,6 +1794,12 @@ def main(argv=None):
         help="Calcular offline el hash del lote de recuperacion SECOP I, sin conectar.",
     )
     parser.add_argument(
+        "--secop1-from-queue",
+        action="store_true",
+        help="Admitir constancias elegibles de candidate_queue.json de la corrida, "
+        "aunque no estuvieran entre las seleccionadas.",
+    )
+    parser.add_argument(
         "--secop1-expect-sha256",
         help="Hash aprobado del lote de recuperacion SECOP I; si difiere, no se ejecuta.",
     )
@@ -1741,8 +1823,12 @@ def main(argv=None):
                 f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
             )
         setattr(args, name, value)
-    if (args.secop1_plan_only or args.secop1_expect_sha256) and not args.secop1_inventory_from:
+    if (
+        args.secop1_plan_only or args.secop1_expect_sha256 or args.secop1_from_queue
+    ) and not args.secop1_inventory_from:
         parser.error("El plan y el hash SECOP I requieren --secop1-inventory-from.")
+    if args.secop1_from_queue and not (args.secop1_plan_only or args.secop1_expect_sha256):
+        parser.error("La recuperacion desde la cola requiere un hash aprobado.")
     if args.secop1_expect_sha256 and not re.fullmatch(r"[0-9a-f]{64}", args.secop1_expect_sha256):
         parser.error("Hash SECOP I invalido.")
     if args.secop1_inventory_from or args.secop1_constancia:

@@ -297,10 +297,12 @@ def load_queue(output):
 RECOVERY_PREFIX = "en01-secop1inv_"
 
 
-def recover_secop1_inventories(client, source, output, constancias, *, is_fatal):
+def recover_secop1_inventories(client, source, output, constancias, *, is_fatal, eligible=None):
     """Inventory only SECOP I processes already selected in `source`, limited to an explicit
     allowlist of constancias. No feed, no discovery, no commercial re-filtering, no downloads.
 
+    `eligible` (optional) replaces the original selection with constancias validated by the
+    caller against the stored candidate queue; they must still be stored SECOP I notices.
     The caller bounds `client` to one request per constancia; pagination beyond that budget
     stops the recovery. `is_fatal(error)` decides budget/session errors that stop the loop.
     """
@@ -309,7 +311,12 @@ def recover_secop1_inventories(client, source, output, constancias, *, is_fatal)
     selected = [
         p
         for p in discovery["processes"]
-        if p.get("source") == "secop1" and p.get("sampled") and p.get("excluded_reason") is None
+        if p.get("source") == "secop1"
+        and (
+            constancia_of(p) in eligible
+            if eligible is not None
+            else p.get("sampled") and p.get("excluded_reason") is None
+        )
     ]
     by_constancia = {constancia_of(p): p for p in selected}
     if len(set(constancias)) != len(constancias) or any(

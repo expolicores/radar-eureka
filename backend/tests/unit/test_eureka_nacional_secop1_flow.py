@@ -1403,3 +1403,168 @@ def test_recovery_hash_cli_validation(argv):
         en01.main(argv)
 
     assert exit_info.value.code == 2
+
+
+# ---------------------------------------------------------------- recovery from the candidate queue
+
+PENDING = "26-13-99999999"  # stored, eligible, not selected by quota
+EXCLUDED = "26-13-88888888"  # stored, commercially excluded
+
+
+def write_candidate_queue(source, entries, run=None):
+    queue = {"run": run or source.name, "network_requests": 0, "queue": entries}
+    (source / "candidate_queue.json").write_text(json.dumps(queue), "utf-8")
+
+
+def queue_entry(constancia, reference, **changes):
+    entry = {
+        "source": "secop1",
+        "source_identity": f"secop1:{constancia}",
+        "process_reference": reference,
+        "validity_status": "open",
+        "inventory": "none",
+    }
+    return {**entry, **changes}
+
+
+def queued_run(tmp_path):
+    source, output = persisted_run(tmp_path)
+    write_candidate_queue(source, [queue_entry(PENDING, "licitaciones_info:1:9")])
+    return source, output
+
+
+def test_queue_mode_admits_a_stored_eligible_constancia_outside_the_selection(tmp_path):
+    # Arrange
+    source, _output = queued_run(tmp_path)
+
+    # Act
+    _digest, core = en01.secop1_recovery_digest(source, [PENDING], from_queue=True, root=tmp_path)
+
+    # Assert
+    assert core["selection"] == "candidate_queue"
+    assert core["constancias"] == [PENDING]
+    assert core["request_credit_limit"] == 1
+    with pytest.raises(SpikeError, match="seleccion persistida"):
+        en01.secop1_recovery_digest(source, [PENDING])  # the original mode is unchanged
+
+
+def test_queue_hash_is_bound_to_the_queue_contents(tmp_path):
+    source, _output = queued_run(tmp_path)
+    before, _ = en01.secop1_recovery_digest(source, [PENDING], from_queue=True, root=tmp_path)
+    write_candidate_queue(
+        source, [queue_entry(PENDING, "licitaciones_info:1:9", validity_status="unknown")]
+    )
+
+    after, _ = en01.secop1_recovery_digest(source, [PENDING], from_queue=True, root=tmp_path)
+
+    assert before != after
+
+
+@pytest.mark.parametrize(
+    ("entries", "constancias", "reason"),
+    [
+        ([queue_entry(PENDING, "licitaciones_info:1:9")], [EXCLUDED], "fuera_de_la_cola"),
+        # the queue claims an identity that the stored notice does not have
+        ([queue_entry(EXCLUDED, "licitaciones_info:1:9")], [EXCLUDED], "fuera_de_la_cola"),
+        ([queue_entry(PENDING, "licitaciones_info:1:404")], [PENDING], "fuera_de_la_cola"),
+        (
+            [queue_entry(PENDING, "licitaciones_info:1:9", validity_status="closed")],
+            [PENDING],
+            "cerrado",
+        ),
+        ([queue_entry(PENDING, "licitaciones_info:1:9")], [PENDING, PENDING], "duplicadas"),
+    ],
+)
+def test_queue_mode_refuses_unverifiable_constancias(tmp_path, entries, constancias, reason):
+    source, _output = persisted_run(tmp_path)
+    write_candidate_queue(source, entries)
+
+    with pytest.raises(SpikeError, match=reason):
+        en01.secop1_recovery_digest(source, constancias, from_queue=True, root=tmp_path)
+
+
+def test_queue_mode_refuses_constancias_already_inventoried_in_any_run(tmp_path):
+    # Arrange: an earlier recovery already holds the inventory of the pending notice.
+    source, _output = queued_run(tmp_path)
+    stored = json.loads((source / "processes.json").read_text(encoding="utf-8"))["processes"]
+    pending = next(p for p in stored if p["source_identity"] == f"secop1:{PENDING}")
+    earlier = tmp_path / "en01-secop1inv_orig_q1"
+    earlier.mkdir()
+    (earlier / "processes.json").write_text(json.dumps({"processes": [pending]}), "utf-8")
+    (earlier / "documents.json").write_text(
+        json.dumps([{"process_reference": pending["process_reference"], "documents": [{}]}]),
+        "utf-8",
+    )
+
+    # Act / Assert
+    with pytest.raises(SpikeError, match="ya_inventariado"):
+        en01.secop1_recovery_digest(source, [PENDING], from_queue=True, root=tmp_path)
+
+
+def test_queue_for_another_run_is_refused(tmp_path):
+    source, _output = persisted_run(tmp_path)
+    write_candidate_queue(source, [queue_entry(PENDING, "licitaciones_info:1:9")], "en01-otra")
+
+    with pytest.raises(SpikeError, match="no corresponde"):
+        en01.secop1_recovery_digest(source, [PENDING], from_queue=True, root=tmp_path)
+
+
+def test_queue_recovery_inventories_only_the_admitted_constancia(tmp_path):
+    # Arrange
+    source, output = queued_run(tmp_path)
+
+    def responses(payload):
+        assert payload["idContrato"] == 1  # the pending notice reuses the first keys
+        return inventory_body([secop1_row("Invitación", doc_path("INVMC", 1, PENDING))])
+
+    client = BoundedClient(1, responses)
+
+    # Act
+    summary = flow.recover_secop1_inventories(
+        client, source, output, [PENDING], is_fatal=en01.is_recovery_fatal, eligible={PENDING}
+    )
+
+    # Assert
+    assert client.requests == 1
+    assert summary["feed_requests"] == summary["downloads"] == summary["posts"] == 0
+    assert [p["constancia"] for p in summary["processes"]] == [PENDING]
+    with pytest.raises(SpikeError, match="seleccion persistida"):
+        flow.recover_secop1_inventories(
+            BoundedClient(1, responses),
+            source,
+            output,
+            [EXCLUDED],
+            is_fatal=en01.is_recovery_fatal,
+            eligible={PENDING},
+        )
+
+
+def test_queue_lots_get_their_own_output_directory(tmp_path, monkeypatch):
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    first = en01.secop1_recovery_output("en01-orig", True)
+    first.mkdir()
+    (first / flow.QUEUE_FILE).write_text("{}", encoding="utf-8")
+
+    assert first.name == "en01-secop1inv_orig_q1"
+    assert en01.secop1_recovery_output("en01-orig", True).name == "en01-secop1inv_orig_q2"
+    assert en01.secop1_recovery_output("en01-orig", False).name == "en01-secop1inv_orig"
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--secop1-from-queue"],
+        [
+            "--secop1-inventory-from",
+            "en01-abc",
+            "--secop1-constancia",
+            "26-13-11111111",
+            "--secop1-from-queue",
+        ],
+    ],
+)
+def test_queue_recovery_cli_requires_source_and_approved_hash(argv):
+    with pytest.raises(SystemExit) as exit_info:
+        en01.main(argv)
+
+    assert exit_info.value.code == 2
