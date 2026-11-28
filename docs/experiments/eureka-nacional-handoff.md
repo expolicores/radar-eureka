@@ -1501,3 +1501,21 @@ No hace falta el estudio previo.
 - Escala nacional: la geografía ya es un parámetro (nacional por
   defecto). El límite es de 8 páginas por corrida. Ensayo nacional de
   sólo descubrimiento propuesto, de unos 10 créditos.
+
+
+### Perfil comercial v2 y piloto nacional
+
+- Perfil v2 (`ee14950`): sinónimos, categorías de alimentación y
+  eventos, y objetos mixtos como candidatos revisables, sin aceptar
+  servicios ajenos. Offline: 66 descartes recuperados (26 bienes
+  claros y 40 revisables), 0 perdidos.
+- Piloto nacional `en01-2fxt0cm7`, sólo descubrimiento: 10 créditos;
+  240 avisos que cubren unas 26 horas (del 26-11 hacia las 16:00 al
+  27-11 a las 18:25). La ventana de 2 días no queda cubierta.
+- 76 elegibles (52 de SECOP II y 24 de SECOP I), 20 seleccionados y
+  56 fuera de cuota. 56 de los elegibles son nuevos. Unos 6 posibles
+  falsos positivos identificados.
+- Estimación: unas 8 a 9 páginas por día hábil y 16 a 18 para 48
+  horas.
+- Propuesta: corregir los falsos positivos offline y luego un tope
+  de 18 páginas sólo para descubrimiento, con autorización.

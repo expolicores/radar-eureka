@@ -6711,3 +6711,207 @@ Ensayo propuesto (no ejecutado):
      A/B/C y cierre próximo;
    - techo de créditos por lote;
    - sin descartar procesos por distancia.
+
+### Perfil comercial v2 y primer piloto nacional de sólo descubrimiento (en01-2fxt0cm7)
+
+#### 1. Perfil comercial v2 (`ee14950`)
+
+Archivo nuevo `eureka_nacional_commercial.v2.json`, ahora el
+predeterminado. El v1 se conserva sin cambios y cada corrida registra
+la versión y la huella del perfil usado.
+
+Sinónimos nuevos en categorías existentes:
+
+- Tecnología: equipos y elementos tecnológicos, equipos de cómputo.
+- Papelería: elementos y suministros de oficina, útiles de
+  escritorio, consumibles de impresión, cartuchos de tóner.
+- Dotación: calzado y vestido (de labor), prendas de vestir,
+  dotación de vestuario o de ley.
+- Educación: elementos y recursos didácticos, material educativo y
+  lúdico.
+
+Categorías nuevas (prioridad B):
+
+- **Alimentación**: alimentos, refrigerios, desayunos, almuerzos,
+  raciones, paquetes alimentarios, mercados, hidratación. Excluye el
+  alimento concentrado y para animales, y los proyectos de seguridad
+  alimentaria.
+- **Eventos**: apoyo logístico, logística y organización de eventos
+  institucionales, elementos para eventos.
+
+Otros cambios:
+
+- La exclusión `perecederos_animales` queda sólo para animales vivos
+  y ganado en pie.
+- Objetos mixtos (`commercial_confidence: mixed_review`):
+  - Cuando un objeto tiene una categoría comercial y, además,
+    redacción de servicio («servicio», «logístico») o ningún verbo de
+    suministro, queda como candidato revisable. Es elegible, pero se
+    ordena detrás de los bienes claros de la misma prioridad y nunca
+    se presenta como oportunidad confirmada.
+  - Nunca se aceptan servicios ajenos al negocio (`hard_service_pattern`):
+    consultoría, interventoría, asesoría, auditoría, servicios
+    profesionales, capacitación, vigilancia, transporte,
+    arrendamiento, obra o construcción, salud y mantenimiento de
+    equipos.
+- Trazabilidad: cada aviso conserva la categoría y las expresiones
+  exactas que lo incluyeron (`category_matches[].object_terms`).
+- Pruebas: 28 nuevas. Suite nacional: 993 pasan y 11 se omiten, con
+  código de salida 0.
+
+Validación offline sobre los 240 avisos de `en01-1u44f6p7`:
+
+- Comparación v1 frente a v2 sobre el objeto (la descripción no se
+  guarda). Primero se comprobó que el v1 aplicado sólo al objeto
+  reproduce los 240 resultados guardados.
+- **66 descartes recuperados y 0 perdidos**: 26 bienes claros y 40
+  revisables.
+- Por categoría: eventos 23 (todos revisables), alimentación 12,
+  dotación 12, tecnología 10, papelería 3, educación 2, mobiliario 2,
+  aseo 1, dotación institucional 1.
+- 14 abiertos o con vigencia desconocida.
+- Antes de cerrar la validación se corrigieron dos fuentes de falsos
+  positivos:
+  - el mantenimiento de equipos se recuperaba como revisable;
+  - «operativa» marcaba como mixtos bienes claros.
+- Revisión manual de los 26 bienes claros: 24 legítimos y 2 dudosos
+  («alimentación y hospedaje», «alimentación para detenidos»).
+- Siguen fuera 125: 100 fuera del perfil, 23 por servicio principal,
+  1 por categoría excluida y 1 por servicio digital.
+- Resultado en `en01-1u44f6p7/commercial_v2_comparison.json`.
+
+#### 2. Piloto nacional
+
+- Controles previos:
+  - rama nacional limpia;
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Parámetros: `--exploratory --discovery-only --include-secop1
+  --processes 15 --discovery-pages 8 --recent-days 2`, sin
+  `--geography` (1.130 ubicaciones nacionales), perfil comercial v2.
+- Resultado: `discovery_completed`, **10 créditos de 30 en 22 s**.
+- Sin inventarios, descargas, streaming, POST documentales ni cola
+  SECOP I.
+
+Cobertura temporal:
+
+- 240 avisos en 8 páginas. El proveedor seguía reportando más.
+- La primera página empieza en el aviso más reciente disponible
+  (27-11 a las 18:25). No hubo publicaciones posteriores hasta el
+  corte (28-11 a las 10:06).
+- Las páginas llegan hasta el 26-11 hacia las 16:00. Además hay 2
+  avisos con fecha 26-11 a las 00:00, probablemente sin hora.
+- **La ventana de 2 días no quedó cubierta.** Empieza el 26-11 a las
+  10:06 y faltan al menos las 6 horas previas a las 16:00. Lo leído
+  equivale a unas 26 horas de publicaciones.
+- Densidad observada: unos 170 avisos el 27-11 entre las 08:00 y las
+  18:25, y unos 78 el 26-11 entre las 16:00 y las 23:59.
+
+Estimación (aproximada, basada sólo en esta densidad):
+
+- 24 horas de un día hábil: unos 240 a 260 avisos, es decir 8 a 9
+  páginas.
+- 48 horas hábiles: unas 16 a 18 páginas.
+- Los fines de semana y las noches la densidad baja. Los días de
+  mayor publicación pueden requerir más.
+
+Distribución:
+
+| Fuente | Avisos | Elegibles |
+|---|---|---|
+| SECOP II | 159 | 52 |
+| SECOP I | 55 | 24 |
+| Otros portales | 25 | 0 |
+| Universidad | 1 | 0 |
+
+- Departamentos con más avisos: Cundinamarca 79; Santander 17;
+  Antioquia 17; Caldas 14; Boyacá 14; Valle del Cauca 11; Magdalena
+  10; Norte de Santander 8; Tolima 7; Córdoba 7.
+- Hay avisos de 29 departamentos.
+- Exclusiones:
+  - 125 fuera del perfil comercial;
+  - 32 por servicio principal;
+  - 3 cerrados;
+  - 2 sin inventario disponible para su fuente;
+  - 2 fuera de la ventana.
+- Ninguna exclusión por distancia.
+
+Elegibles: **76**.
+
+| Categoría / confianza | Elegibles |
+|---|---|
+| Eventos (revisables) | 23 |
+| Tecnología | 10 bienes claros y 3 revisables |
+| Papelería | 8 |
+| Alimentación | 5 bienes claros y 4 revisables |
+| Ferretería | 4 bienes claros y 1 revisable |
+| Educación | 4 |
+| Dotación | 3 bienes claros y 1 revisable |
+| Música | 1 bien claro y 2 revisables |
+| Otros (aseo, eléctricos, audiovisuales, mobiliario, repuestos, deportes) | 8 |
+
+- Cuotas: seleccionados 20 (15 de SECOP II y 5 de SECOP I). **Quedan
+  56 elegibles fuera de cuota**, todos registrados con
+  `not_selected_reason`: 37 de SECOP II y 19 de SECOP I.
+- Nuevos frente a conocidos: 51 de los 240 avisos ya aparecían en
+  corridas anteriores, la mayoría de Boyacá y Huila. De los 76
+  elegibles, 20 son conocidos y 56 nuevos.
+
+Oportunidades abiertas con cierre próximo (prioridad A, bienes
+claros):
+
+- 30-11:
+  - secop1:26-13-14853902, Norte de Santander, prendas de vestir y
+    calzado;
+  - CO1.NTC.11288865, Atlántico, radios de comunicación portátiles.
+- 01-12:
+  - CO1.NTC.11288633, Cundinamarca, papelería y tóner;
+  - CO1.NTC.11293531, Valle, dotación de calzado y vestido;
+  - secop1:26-13-14853757, Antioquia, mobiliario, tecnología y
+    papelería;
+  - CO1.NTC.11288302, Huila, dotación;
+  - CO1.NTC.11288255, Boyacá (Chitaraque).
+- 02-12:
+  - CO1.NTC.11293716, Antioquia, equipos tecnológicos;
+  - CO1.NTC.11287783 y CO1.NTC.11292386, Antioquia, computadores;
+  - secop1:26-13-14853220, Vaupés, tecnología y papelería.
+- Las B de cierre el 30-11 y el 01-12 son sobre todo apoyo logístico
+  de eventos (revisables) y alimentación.
+
+Posibles falsos positivos (unos 6 de 76; no se corrigieron):
+
+- «portátil» clasifica como tecnología una motobomba centrífuga
+  portátil (CO1.NTC.11289417) y radios portátiles (CO1.NTC.11288865,
+  que sí es relevante, pero de la categoría comunicaciones).
+- «Alimentos para los animales de granja» (CO1.NTC.11289165): la
+  exclusión no cubre el artículo «los».
+- «MANTENIMENTO de instrumentos musicales», con errata
+  (CO1.NTC.11291622): elude el patrón de mantenimiento.
+- Individuos arbóreos y fertilizantes (CO1.NTC.11288882), como
+  ferretería revisable.
+- Apoyo a capacidades operativas de la fuerza pública
+  (secop1:26-13-14853319), como evento revisable.
+- Calendarios institucionales (CO1.NTC.11288789), relevantes como
+  material institucional, pero clasificados en alimentación.
+
+Candidatos inciertos conservados: 37 revisables entre los 76. No se
+equiparan a oportunidades confirmadas.
+
+#### 3. Siguiente paso propuesto (sin ejecutar)
+
+1. Correcciones offline de los falsos positivos, con regresión:
+   - «portátil» sólo en contexto de cómputo;
+   - artículos en las exclusiones de alimento animal;
+   - tolerancia a la errata «mantenimento»;
+   - exclusión de material vegetal y fertilizantes.
+2. Descubrimiento nacional con más páginas sólo para descubrimiento:
+   un tope de 18 páginas para cubrir unas 48 horas hábiles (unos 20
+   créditos). Requiere un cambio de código acotado y autorización
+   expresa, porque hoy el máximo es 8.
+3. Con la cobertura en régimen, cuotas de inventario por lote
+   ordenadas por prioridad A/B, cierre próximo y confianza (bienes
+   claros antes que revisables), con techo de créditos por lote. Los
+   56 elegibles fuera de cuota de este piloto ya están registrados
+   para esa cola.
