@@ -1403,3 +1403,14 @@ Pendiente de autorización.
   - inventario de La Plata, `48d3a440…`, 4 créditos;
   - adquisición de ITBOY (pliego definitivo y estudio previo),
     `be3cff2c…`. Cierra el 03-12 a las 11:00.
+
+### ITBOY analizado y La Plata inventariada
+
+- ITBOY: pliego y estudio guardados por streaming. El pliego (página
+  42) exige 1 a 3 contratos en el RUP por el 100 % del presupuesto.
+  Estado `experience_ambiguous` por una cláusula de grupos; hallazgo
+  con indicios.
+- La Plata: 29 documentos, incluido el pliego definitivo. `cantidad`
+  es 53, así que la cobertura no está demostrada y el inventario
+  sigue incompleto.
+- La muestra no deja oportunidades sin exigencia de experiencia.

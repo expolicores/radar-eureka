@@ -5910,3 +5910,99 @@ Commit `5139227`. Todo offline; ninguna petición.
   por Edge con 10 MiB y 12 s; sin reintentos.
 - Después, análisis offline con el inventario marcado como
   incompleto.
+
+### ITBOY: adquisición y análisis; La Plata: inventario controlado
+
+#### ITBOY (plan be3cff2c)
+
+- Controles previos:
+  - plan e identidades exactas;
+  - sin recibos ni intentos previos;
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+
+| DocumentId | Documento | Resultado | Bytes (declarados = recibidos) | SHA-256 |
+|---|---|---|---|---|
+| 898151260 | Pliegos de condiciones definitivos SA-ITBOY-06-2026 | 403 directo y luego streaming: guardado | 3.071.736 | `548c5916…` |
+| 898151253 | Estudios previos moto grúa báscula actualizado | 403 directo y luego streaming: guardado | 3.538.815 | `1ac24e01…` |
+
+Sin reintentos ni descargas nativas, y sin marcador al terminar.
+
+Análisis offline (clasificador y capa de hallazgos sin cambios;
+inventario marcado como incompleto):
+
+- Cobertura:
+  - pliego definitivo: 120 de 121 páginas de texto nativo (falta la
+    página 121);
+  - estudio previo: 80 de 80 páginas, completo.
+- Evidencia:
+  - **Pliego, página 42, EXIGENCIA**: «El proponente deberá presentar
+    copia de mínimo uno (1) y máximo tres (3) contratos ejecutados y
+    liquidados, celebrados con entidades públicas o privadas,
+    debidamente registrados en el Registro Único de Proponentes
+    (RUP), cuyo valor acumulado sea igual o superior al cien por
+    ciento (100 %) del presupuesto…». La misma cláusula figura en el
+    estudio previo, página 54.
+  - Pliego, página 61, causal de rechazo: «Cuando no se cumpla con la
+    experiencia solicitada para el proponente».
+  - Pliego, página 43: acreditación «por cada uno de los grupos» en
+    el Formato de Experiencia (RUP). El clasificador la marca como
+    aplicabilidad limitada.
+- Estado formal: `experience_ambiguous` (`limited_applicability`).
+  No se concluye `experience_required` porque esa cláusula por grupos
+  limita el alcance, el pliego tiene una página pendiente y el
+  inventario está incompleto.
+- Hallazgo: **«Indicios de experiencia exigida — requiere
+  revisión»**. La lectura textual muestra una exigencia general de
+  contratos registrados en el RUP por el 100 % del presupuesto.
+  Comercialmente equivale a exigir experiencia.
+
+#### La Plata (plan 48d3a440)
+
+- Mismos controles previos. 3 créditos de 4; sin feed ni descargas.
+- Resultado: `incomplete` (`empty_table_unverified_total`), con 29
+  documentos conservados.
+- Disponibles:
+  - «PLIEGO DE CONDICIONES DEFINITIVO» (rector);
+  - «1. EP IPOCONSUMO VF FIRMADO», estudio previo abreviado como EP;
+  - 12 anexos, entre ellos «ANEXO INFORMACION CONTRATOS CERTIFICADOS
+    EN EL RUP», que sugiere una exigencia de experiencia;
+  - respuestas a observaciones;
+  - proyecto de pliego y cotizaciones, ambos excluidos.
+
+Evidencia sobre `cantidad`:
+
+| Página | Filas | `cantidad` | Forma |
+|---|---|---|---|
+| 1 | 29 | 53 | tabla |
+| 2 | 0 | 53 | tabla vacía (con clave `vermas`) |
+
+- `cantidad` (53) no coincide con los documentos devueltos (29).
+- O bien cuenta otra cosa, o la paginación no entrega todos los
+  documentos y la clave `vermas` sugiere «ver más».
+- En ambos casos la cobertura no está demostrada. El inventario sigue
+  incompleto y `CANTIDAD_IS_DOCUMENT_TOTAL` sigue en `False`.
+- Validar la semántica requeriría comparar con la vista del portal,
+  donde un humano puede contar los documentos del proceso.
+
+#### Revisión humana y bloqueos
+
+- ITBOY: exigencia de 1 a 3 contratos registrados en el RUP por el
+  100 % del presupuesto. Se recomienda confirmarla y bajar su
+  prioridad comercial, como en los demás casos con exigencia.
+- La Plata: sin análisis documental. Inventario posiblemente
+  truncado (53 frente a 29). El anexo de contratos en el RUP anticipa
+  una exigencia.
+- Bloqueos:
+  - qué significa `cantidad` y si el inventario de SECOP II pagina
+    más allá de la tabla vacía;
+  - estudio de Puerto Boyacá de 29,1 MiB y pliegos definitivos
+    pendientes;
+  - límite de la capa con exigencias redactadas como requisito de
+    participación (José Miguel Montalvo).
+
+Estado de la muestra de 10 días: ningún hallazgo confirmado ni
+prioritario. Con indicios de experiencia: INFIHUILA, Buenos Aires,
+El Limonar e ITBOY.
