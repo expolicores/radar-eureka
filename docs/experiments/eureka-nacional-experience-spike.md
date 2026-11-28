@@ -6347,3 +6347,82 @@ Restricciones y documentos pendientes:
 - Opcional: un plan focalizado SECOP I con invitación y estudio
   previo (2 POST) si se quiere también el estudio. Requiere plan y
   hash propios.
+
+### Elías (cola 52cd4e7a): sin POST y marcador retenido; Ramiriquí con OCR completo
+
+#### Elías, SECOP I
+
+- Verificación previa:
+  - cola con el hash exacto, 1 documento (la invitación, 582 KB);
+  - sin intentos registrados ni recibos;
+  - sin marcador;
+  - Edge dedicado verificado.
+- El trabajador abrió el contexto desechable (descargas nativas
+  bloqueadas, 0 POST) y el titular inició sesión manualmente.
+- Preflight: sesión válida, `only_configured`, `profile_count: 1`,
+  sin cambio de perfil, feed bloqueado y
+  `ready_for_acquisition: true`.
+- **Error de operación**: se señaló «sesión lista» sin haber escrito
+  antes `confirmed-batch.flag` con el hash. El trabajador comprueba
+  la confirmación inmediatamente después del preflight y terminó
+  con `batch_confirmation_missing_or_mismatch`.
+  - **0 POST.**
+  - Contexto cerrado y pestaña habitual intacta.
+  - No se registró ningún intento: la cola sigue disponible.
+- **Marcador retenido**: `cdp-stream-live-uncertain.lock` contiene
+  `secop1-disposable-context`.
+  - La evidencia de cierre registró `marker_owned: true`,
+    `context_closed: true`, `disconnected: false`.
+  - Causa: en `worker()`, los `return` tempranos (preflight no listo
+    o confirmación ausente) están dentro del bloque `async with
+    async_playwright()`. La línea que fija `disconnected = True` sólo
+    se alcanza cuando el lote se ejecuta.
+  - Al salir del bloque, Playwright sí se desconectó: el proceso
+    terminó con código 0. Pero la evidencia no lo registra, así que
+    el marcador no se libera, por diseño conservador.
+- Pendiente de autorización:
+  1. archivar el marcador conservando la evidencia;
+  2. corregir el registro de desconexión en las salidas tempranas,
+     con pruebas offline;
+  3. nuevo inicio de sesión manual, escribiendo la confirmación del
+     hash antes de la señal de sesión lista.
+
+#### Ramiriquí (CO1.NTC.11285436): OCR completo de la invitación
+
+- OCR local con tope excepcional de 29 páginas por rector, 30
+  páginas en total y 900 s.
+- Cobertura: 28 de 29 páginas; la 29 quedó pendiente.
+- El estudio previo no fue necesario: la invitación basta.
+
+Evidencia, página 10 de la invitación:
+
+- «…se tendrá en cuenta como requisito habilitante la experiencia.»
+- «…el municipio solicita que el oferente acredite la experiencia
+  como se indica a continuación: **El proponente deberá adjuntar la
+  fotocopia de tres contratos terminados, junto con el acta de
+  liquidación y/o recibo final, suscrito con entidades públicas y/o
+  privadas, cuyo objeto sea la adquisición y/o suministro de bienes
+  o elementos para oficinas, cuyo valor ejecutado…**».
+- Página 11: si las certificaciones no cumplen, «no se tendrán en
+  cuenta para efecto de verificar la experiencia mínima del
+  proponente». También fija la regla de proporcionalidad para
+  consorcios.
+
+Conclusión, separando lo formal de lo comercial:
+
+- Estado formal: `not_resolved` (`governing_documents_incomplete`).
+  El clasificador registra las cláusulas como condicionales y la
+  invitación tiene una página pendiente. Hallazgo: con
+  incertidumbre. No se modificó el clasificador.
+- Valoración comercial: la experiencia es una obligación efectiva
+  del proponente. Es requisito habilitante, con tres contratos
+  terminados de suministro de elementos de oficina. Prioridad
+  comercial reducida.
+
+#### Otros procesos
+
+- Yaguará y Anacleto García: prioridad de revisión reducida por sus
+  exigencias de experiencia; estados formales sin cambios.
+- Briceño: sigue visible como oportunidad bloqueada por tamaño
+  (invitación de 29,7 MiB y estudio de 17,1 MiB). No se autorizan
+  nuevos intentos.

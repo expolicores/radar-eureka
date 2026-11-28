@@ -1456,3 +1456,14 @@ Todo pendiente de autorización.
   cláusulas de experiencia mínima; Briceño sin evidencia.
 - Elías: inventario de 3 documentos con 1 crédito. Cola de la
   invitación `52cd4e7a…` preparada, pendiente de autorización.
+
+### Elías bloqueado por marcador; Ramiriquí exige experiencia
+
+- Elías: preflight correcto, pero sin POST porque la confirmación no
+  se escribió antes de la señal de sesión. El marcador quedó retenido
+  por un defecto: las salidas tempranas del trabajador no registran
+  la desconexión. Pendiente: archivar el marcador, corregir el
+  defecto y repetir el inicio de sesión.
+- Ramiriquí: la invitación (28 de 29 páginas) exige como requisito
+  habilitante tres contratos de suministro de elementos de oficina.
+  Formal `not_resolved`; prioridad comercial reducida.
