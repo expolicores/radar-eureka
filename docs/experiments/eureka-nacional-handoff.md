@@ -1563,3 +1563,28 @@ No hace falta el estudio previo.
 - Pendiente de autorización: pruebas heredadas con un identificador
   de perfil literal.
 - Detalle en el [informe](eureka-nacional-experience-spike.md#aprovechamiento-de-los-76-candidatos-nacionales-offline-sin-consultas).
+
+### Inventarios nacionales autorizados (28-11)
+
+- Controles superados antes de cada lote: rama, pestaña única,
+  ausencia de marcador, preflight `only_configured` con
+  `profile_count: 1` y hash recalculado.
+- SECOP I `c5a6d8e8`: 3 inventarios, 3 créditos y 8,5 s. Cola de
+  adquisición `cf513087` con las invitaciones de 26-13-14853757 y
+  26-13-14853776. Ábrego (26-13-14853902) queda fuera por tamaño
+  (19,83 MB) y su objeto son bonos de dotación «vigencia 2025».
+- SECOP II `78cf1d7f`: 8 de 8 completos, 17 créditos de 25 y 38 s.
+  Rectores identificados en los 8. Confianza baja en radios (sólo una
+  solicitud de cotización) y media en Valle (sólo un complemento) y en
+  la biblioteca de Caldas (estudio previo 2025).
+- Lotes documentales preparados, sin ejecutar:
+  - SECOP II `6739ec02…663f`: 8 rectores, 10 MiB cada uno.
+  - Chitaraque `eb7bf69b…86ae`: invitación con techo de 11 MiB (ya
+    declaró 10,81 MiB) y estudio previo.
+  - Cola SECOP I `cf513087…72ff`: 2 POST.
+- Ampliación `--secop1-from-queue` (`43aa7e7`), offline y probada: 16
+  constancias SECOP I admisibles y las ya inventariadas rechazadas.
+- Cola de 71 regenerada: 17 con inventario.
+- Los 9 archivos de pruebas con el identificador de perfil son
+  compartidos con `main` (Regional); no se tocaron.
+- Detalle en el [informe](eureka-nacional-experience-spike.md#inventarios-nacionales-autorizados-lote-secop-i-c5a6d8e8-y-lote-secop-ii-78cf1d7f).

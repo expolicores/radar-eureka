@@ -7208,3 +7208,171 @@ logísticos.
   identificador de perfil literal. No se tocaron porque son anteriores
   a esta rama. Se recomienda sustituirlo por un valor de ejemplo con
   autorización.
+
+### Inventarios nacionales autorizados: lote SECOP I (c5a6d8e8) y lote SECOP II (78cf1d7f)
+
+Ejecución del 28-11-2026. Cada lote tuvo su propia autorización y su
+propio presupuesto; los créditos sobrantes no se trasladaron.
+
+Controles previos, antes de cada lote:
+
+- Repositorio `EUREKA NACIONAL`, rama `experiment/eureka-nacional` en
+  `bb79849`, árbol limpio.
+- Una sola pestaña de página, en `/cliente/contratos`.
+- Sin el marcador preventivo `cdp-stream-live-uncertain.lock`. El
+  archivo `cdp-stream-pilot-361248a.lock` es la guarda de un solo uso
+  del piloto del 24-11 y no es el marcador.
+- Preflight pasivo con sesión válida, `only_configured`,
+  `profile_count: 1`, sin cambio de perfil, feed bloqueado por la
+  guarda y pestaña habitual intacta.
+- Hash recalculado offline antes de ejecutar. Sin recuperaciones ni
+  intentos previos para esos lotes.
+
+#### Lote SECOP I (c5a6d8e8…f9d1)
+
+- Resultado: 3 inventarios, 3 créditos de 3, 8,5 s, sin errores ni
+  parada. Sin feed, sin POST a VerDocumento y sin descargas.
+- Salida: `en01-secop1inv_2fxt0cm7`. Cola de adquisición SECOP I con
+  hash `cf513087a98779cb64d014dfa81031b4ec3b7f214b6917e4ca4664b725e172ff`
+  (2 documentos, máximo 2 POST).
+
+| Constancia | Cierre | Documentos | Rector | Observación |
+|---|---|---|---|---|
+| 26-13-14853902 (Ábrego, Norte de Santander) | 30-11 15:30 | Invitación (19,83 MB), Disponibilidad | Invitación | Supera el tamaño admitido; no entra en la cola. El objeto es la adquisición de **bonos de dotación o tarjetas canjeables** «de la vigencia 2025»: conviene revisar si encaja con el negocio |
+| 26-13-14853757 (Antioquia) | 01-12 14:31 | Invitación (517 KB), Estudios previos (313 KB), Análisis del sector (342 KB), CDP (524 KB) | Invitación | En cola |
+| 26-13-14853776 (Nariño) | 01-12 18:00 | Invitación (2,93 MB), Estudios previos (2,32 MB) | Invitación | En cola |
+
+#### Lote SECOP II (78cf1d7f…217b5)
+
+- Resultado: 8 inventarios completos, 0 fallidos, 0 parciales y 0
+  pendientes. 17 créditos de 25, 38 s. Sin descargas, streaming,
+  adquisiciones ni feed.
+- Salida: `en01-inv_2fxt0cm7`.
+
+| Proceso | Cierre | Rector identificado | Otros documentos | Confianza documental |
+|---|---|---|---|---|
+| CO1.NTC.11288865, radios (Atlántico) | 30-11 18:00 | «SOLICITUD DE COTIZACION COMPRA RADIOS ESANA» (único documento; rol no reconocido) | — | Baja: puede ser una solicitud de cotización y no la invitación. Es el único documento disponible |
+| CO1.NTC.11288633, papelería y tóner (Cundinamarca) | 01-12 08:10 | «INVITACION PAPELERIA MC 056» | Estudios previos, análisis del sector, PAA, BP, CDP, cotizaciones, un escaneo sin título | Alta |
+| CO1.NTC.11288302, dotación (Huila) | 01-12 10:00 | «CONDICIONES GENERALES DE PARTICIPACION» | Estudios previos, estudio de mercado, CDP, cotizaciones | Alta |
+| CO1.NTC.11289436, paquetes alimentarios (Boyacá) | 01-12 14:00 | «INVITACIONPUBLICA-IPMC-066» (pista de rector) | Estudios previos, fichas de caracterización, BPIN, CDP, cotizaciones | Alta |
+| CO1.NTC.11293531, dotación (Valle del Cauca) | 01-12 15:00 | «COMPLEMENTO INVITACION DOTACIÓN FUNCIONARIOS 2026» | Estudios previos, ficha técnica, anexos editables (docx), solicitud de necesidad, CDP, cotizaciones | Media: sólo hay un «complemento»; las condiciones base pueden estar en el formulario de SECOP II |
+| CO1.NTC.11292238, impresora (Norte de Santander) | 01-12 17:00 | «Invitacion_Publica_CMD-MC-003-2026» | Estudios previos, estudio del sector, CDP | Alta |
+| CO1.NTC.11293957, elementos tecnológicos (Caldas) | 01-12 17:00 | «INVITACION BIBLIOTECA 2026» | «ESTUDIO PREVIO BIBLIOTECA 2025», CDP, 3 cotizaciones | Media: el estudio previo está rotulado con 2025 |
+| CO1.NTC.11288789, calendarios (Caldas) | 01-12 18:00 | «INVITACION» | Estudio previo, análisis, aviso a veedurías, BPIM/CDP, PAA, matriz de riesgos (xlsx), anexos, «LIMITACIÓN MIPYME» (publicado después) | Alta. La limitación a mipymes es relevante comercialmente, no para la experiencia |
+
+Definitivos y borradores:
+
+- Ningún nombre de documento indica borrador ni «proyecto de pliego».
+  Los rectores elegidos son invitaciones o condiciones de
+  participación definitivas.
+- Los únicos documentos de fecha dudosa son el estudio previo 2025 de
+  CO1.NTC.11293957 y el objeto «vigencia 2025» de Ábrego. Hay que
+  revisarlos al leerlos; no se descartan.
+- Los documentos inventariados se conservan íntegros en cada
+  `documents.json`.
+
+#### Lotes documentales preparados (no ejecutados)
+
+Orden por cierre, prioridad y confianza documental:
+
+1. **SECOP II, plan `en01-target_inv_2fxt0cm7`**, hash
+   `6739ec02b27e1a2688e6aa21a69ca651502dff4efba0b5bb2b377d7debc5663f`.
+   - Un rector por proceso, en orden de cierre:
+
+     | Documento | Proceso | Nombre |
+     |---|---|---|
+     | 898469633 | radios | solicitud de cotización |
+     | 898426048 | papelería | invitación |
+     | 898381314 | Huila | condiciones de participación |
+     | 898503982 | paquetes alimentarios | invitación pública |
+     | 899041327 | Valle | complemento de invitación |
+     | 898897174 | impresora | invitación pública |
+     | 899110330 | biblioteca | invitación 2026 |
+     | 898449869 | calendarios | invitación |
+
+   - Tamaño: el inventario SECOP II no muestra tamaños. Se aplica el
+     techo por defecto de 10 MiB por documento, es decir, como mucho
+     80 MiB en total.
+   - Presupuesto: un intento por documento, 8 descargas directas como
+     máximo y 0 créditos de Licitaciones.info. Sin intentos previos.
+   - `acquire-secop2` sólo usa el streaming de Edge tras un HTTP 403
+     directo. La autorización debe decir si ese respaldo se permite.
+2. **SECOP II Chitaraque, plan `en01-target_xgcp5mgp`**, hash
+   `eb7bf69b683939a55e7ea345583cecbeba5e37c36e61489e318948db567b86ae`.
+   - Documentos:
+     - 898378672, invitación pública, con un techo excepcional de
+       11 MiB porque declaró 11.335.060 bytes (10,81 MiB);
+     - 898378673, estudios previos, con 10 MiB.
+   - Antecedentes: dos intentos en corridas exploratorias
+     (`en01-uc9h1l8y`, `en01-xgcp5mgp`), ambos rechazados por tamaño
+     declarado tras un 403 directo y el respaldo de Edge. Ninguno en
+     planes dirigidos.
+   - Cierra el 01-12 a las 10:30.
+3. **SECOP I, cola `en01-secop1inv_2fxt0cm7`**, hash
+   `cf513087a98779cb64d014dfa81031b4ec3b7f214b6917e4ca4664b725e172ff`.
+   - Documentos:
+     - invitación de 26-13-14853757 (517 KB);
+     - invitación de 26-13-14853776 (2,93 MB).
+   - Presupuesto: 2 POST a VerDocumento, unos 3,4 MB.
+   - Flujo del trabajador: contexto desechable, inicio de sesión
+     manual y confirmación del lote por hash.
+
+Ábrego (26-13-14853902) no tiene un lote posible con el techo vigente
+(19,83 MB). Queda en la cola con el motivo de tamaño.
+
+#### Ampliación de la recuperación SECOP I a la cola (offline)
+
+- Commit `43aa7e7`. Nueva opción `--secop1-from-queue`, junto a
+  `--secop1-inventory-from`. Exige siempre un hash aprobado o
+  `--secop1-plan-only`.
+- Cada constancia debe cumplir todo lo siguiente:
+  - figurar en `candidate_queue.json` de la misma corrida;
+  - corresponder a un aviso SECOP I almacenado con la misma referencia
+    e identidad;
+  - tener claves de inventario;
+  - no estar cerrada;
+  - no estar ya inventariada en ninguna corrida (historial en vivo,
+    no el campo guardado de la cola);
+  - no repetirse dentro del lote.
+- El hash incluye el contenido de la cola. Cada lote escribe en su
+  propio directorio (`…_q1`, `…_q2`), visible para la deduplicación.
+- El modo original, limitado a los seleccionados, no cambia y conserva
+  su hash.
+- 13 pruebas de regresión nuevas.
+- Lectura offline sobre `en01-2fxt0cm7`: 16 constancias admisibles y
+  7 rechazadas por estar ya inventariadas, incluidas las 3 de hoy.
+  Entre las admisibles:
+  - 26-13-14853436, mobiliario, 01-12 09:00;
+  - 26-13-14853320, aseo, prioridad A, 02-12;
+  - 26-13-14853872, luminarias, 04-12;
+  - 13 revisables de eventos o alimentación.
+- No se usó para ninguna consulta real.
+
+#### Cola y trazabilidad
+
+- `candidate_queue.json` regenerado offline: se conservan los 71
+  candidatos, con la misma conciliación de 76 (20 + 51 + 5). Ahora 17
+  tienen inventario completo y 54 ninguno. Siguen los revisables y
+  los de vigencia desconocida.
+
+#### Pruebas heredadas con identificador de perfil
+
+Hay 9 archivos de pruebas con el identificador literal. Los 9 existen
+en `main` y son idénticos en esta rama, así que son compartidos con
+Eureka Regional; ninguno es exclusivo de Nacional:
+
+- `tests/unit/eureka/test_review_consolidation.py`
+- `test_eureka_licitaciones_cdp.py`
+- `test_licitaciones_aggregator.py`
+- `test_licitaciones_candidate.py`
+- `test_licitaciones_cdp.py`
+- `test_licitaciones_freshness.py`
+- `test_licitaciones_operations.py`
+- `test_licitaciones_search_plan.py`
+- `test_licitaciones_validity.py`
+
+Cambiarlos sólo aquí haría divergir la rama de `main`. Ya están
+publicados en `main`, así que retirarlo del historial público requiere
+una decisión en Regional. No se modificaron.
+
+Suite: 1042 pruebas aprobadas y 11 omitidas.
