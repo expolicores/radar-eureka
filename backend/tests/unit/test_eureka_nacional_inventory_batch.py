@@ -240,3 +240,20 @@ def test_tranches_prefer_governing_documents_and_skip_administrative_support(tmp
         "CONDICIONES GENERALES DE PARTICIPACION",
         "ESTUDIOS PREVIOS",
     ]
+
+
+def test_inventory_failures_keep_the_reason_and_the_batch_continues(tmp_path):
+    target, plan = planned_target(tmp_path)
+
+    def fetch(client, keys):
+        client.requests += 2
+        if keys["idUltimaFase"] == "CO1.NTC.1":
+            raise ValueError("Pagina documental repetida; inventario incompleto.")
+        return []
+
+    summary = batch.run_inventories(target, plan["batch_sha256"], FakeClient(), fetch)
+
+    attempts = json.loads((target / batch.ATTEMPTS_FILE).read_text("utf-8"))["items"]
+    assert attempts["r1"]["error_detail"].startswith("Pagina documental repetida")
+    assert summary["failed"] == 1
+    assert summary["inventoried"] == 1

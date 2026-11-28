@@ -220,7 +220,8 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
             # Budget errors carry their reason as message; session errors carry a code.
             budget = str(error) if str(error) in BUDGET_STOPS else None
             code = budget or getattr(error, "code", None) or type(error).__name__
-            record.update(outcome="failed", error=code)
+            # Our own inventory messages (repeated page, page limit, missing keys) are safe.
+            record.update(outcome="failed", error=code, error_detail=str(error)[:200])
             entries = []
             if code in BUDGET_STOPS | SESSION_STOPS:
                 stop = code
