@@ -11,7 +11,10 @@
       "recorded_on": "2026-11-27",
       "reviewer": "operador EN-01",
       "observation": "no_experience_requirement_found",
-      "documents_reviewed": ["Invitación", "ESTUDIOS PREVIOS"],
+      "documents_reviewed": [
+        "Invitación",
+        "ESTUDIOS PREVIOS"
+      ],
       "note": "Revisión humana de la invitación y el estudio previo: no se encontró requisito de experiencia. Los requisitos habilitantes (2.9.2 a–j) son de capacidad jurídica.",
       "system_verified": false
     },
@@ -23,8 +26,24 @@
       "recorded_on": "2026-11-27",
       "reviewer": "operador EN-01",
       "observation": "no_experience_requirement_found",
-      "documents_reviewed": ["FORMATOS (dentro de un ZIP, revisión manual)"],
+      "documents_reviewed": [
+        "FORMATOS (dentro de un ZIP, revisión manual)"
+      ],
       "note": "Revisión manual de FORMATOS: no se encontró anexo ni requisito de experiencia. El ZIP no fue procesado ni validado por el sistema; el estado formal no cambia.",
+      "system_verified": false
+    },
+    {
+      "identifiers": [
+        "secop1:26-13-14853466",
+        "26-13-14853466"
+      ],
+      "recorded_on": "2026-11-28",
+      "reviewer": "operador EN-01",
+      "observation": "experience_requirement_found",
+      "documents_reviewed": [
+        "Invitación (página 24)"
+      ],
+      "note": "El titular dio el proceso por resuelto comercialmente: la invitación, página 24, exige anexar un contrato o certificado de experiencia específica en suministro de equipos tecnológicos por más del 100 % del presupuesto. El sistema no lo concluye formalmente: esa cláusula es un imperativo sin sujeto fuera de una sección detectada.",
       "system_verified": false
     }
   ]

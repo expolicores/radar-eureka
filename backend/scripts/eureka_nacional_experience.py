@@ -39,8 +39,12 @@ OTHER_CONTEXT = re.compile(
     r"puntajes?|puntuacion|ponderacion|evaluad[ao] con puntos|"
     r"factor de calificacion|criterio de evaluacion)\b"
 )
+# Statutory tie-break criteria (Ley 2069 de 2020, art. 35): a protected member of a plural
+# bidder must contribute a share of the accredited experience. That share is a tie-break
+# condition, never a habilitating requirement of the bidder.
 PREFERENCE_SHARE = re.compile(
-    r"\b(?:mipymes?|cooperativa|asociacion mutual)\b.{0,250}"
+    r"\b(?:mipymes?|cooperativa|asociacion mutual|madre cabeza de familia|"
+    r"reincorporacion|reintegracion|discapacidad|victimas? de violencia)\b.{0,250}"
     r"\baport[a-z ]{1,35}.{0,110}\bde la experiencia\b.{0,45}\bacreditada en la oferta\b"
 )
 NEGATIVE = re.compile(
