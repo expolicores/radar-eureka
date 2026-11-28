@@ -257,3 +257,44 @@ def test_inventory_failures_keep_the_reason_and_the_batch_continues(tmp_path):
     assert attempts["r1"]["error_detail"].startswith("Pagina documental repetida")
     assert summary["failed"] == 1
     assert summary["inventoried"] == 1
+
+
+def test_retry_plan_has_its_own_limits_name_and_prior_attempts(tmp_path):
+    # Arrange: a first batch where CO1.NTC.1 failed.
+    target, plan = planned_target(tmp_path)
+
+    def fetch(client, keys):
+        client.requests += 2
+        if keys["idUltimaFase"] == "CO1.NTC.1":
+            raise ValueError("Fila documental invalida.")
+        return []
+
+    batch.run_inventories(target, plan["batch_sha256"], FakeClient(), fetch)
+
+    # Act
+    retry = batch.build_plan(
+        tmp_path, "en01-src", 10, ["CO1.NTC.1"], credit_limit=10, duration_seconds=120, suffix="r1"
+    )
+    retry_target = batch.write_plan(tmp_path, retry)
+
+    # Assert
+    assert retry_target.name == "en01-inv_src_r1"
+    assert retry["limits"]["credit_limit"] == 10
+    assert retry["limits"]["duration_seconds"] == 120
+    [attempt] = retry["prior_attempts"]["CO1.NTC.1"]
+    assert attempt["outcome"] == "failed"
+    assert attempt["error_detail"] == "Fila documental invalida."
+    assert (
+        retry["batch_sha256"]
+        != batch.build_plan(tmp_path, "en01-src", 10, ["CO1.NTC.1"])["batch_sha256"]
+    )
+
+
+@pytest.mark.parametrize(("credits", "seconds"), [(31, 120), (10, 361), (0, 120)])
+def test_retry_limits_never_exceed_the_authorized_maximum(tmp_path, credits, seconds):
+    two_process_run(tmp_path)
+
+    with pytest.raises(ValueError, match="Limites"):
+        batch.build_plan(
+            tmp_path, "en01-src", 10, ["CO1.NTC.1"], credit_limit=credits, duration_seconds=seconds
+        )

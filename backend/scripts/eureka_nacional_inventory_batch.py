@@ -76,7 +76,42 @@ def inventoried_identities(root, *, exclude=()):
     return found
 
 
-def build_plan(root, source_run, recent_days, identities):
+def prior_inventory_attempts(root, identity):
+    """Attempts recorded for this identity in earlier inventory batches."""
+    found = []
+    for plan_path in sorted(root.glob(f"{PREFIX}*/{PLAN_FILE}")):
+        plan = read_json(plan_path) or {}
+        attempts = (read_json(plan_path.parent / ATTEMPTS_FILE) or {}).get("items", {})
+        for item in plan.get("items", []):
+            record = attempts.get(item["process_reference"])
+            if item["source_identity"] == identity and record is not None:
+                found.append(
+                    {
+                        "run": plan_path.parent.name,
+                        "batch_sha256": plan.get("batch_sha256"),
+                        **{
+                            k: record.get(k)
+                            for k in ("outcome", "error", "error_detail", "credits")
+                        },
+                    }
+                )
+    return found
+
+
+def build_plan(
+    root,
+    source_run,
+    recent_days,
+    identities,
+    *,
+    credit_limit=CREDIT_LIMIT,
+    duration_seconds=DURATION_SECONDS,
+    suffix=None,
+):
+    if not 1 <= credit_limit <= CREDIT_LIMIT or not 30 <= duration_seconds <= DURATION_SECONDS:
+        raise ValueError("Limites fuera del maximo autorizado (30 creditos, 360 s).")
+    if suffix is not None and not (suffix.isalnum() and suffix == suffix.lower()):
+        raise ValueError("Sufijo invalido.")
     source = root / source_run
     evaluation = read_json(source / f"window_reevaluation_{recent_days}d.json")
     if evaluation is None:
@@ -119,8 +154,8 @@ def build_plan(root, source_run, recent_days, identities):
         "recent_days": recent_days,
         "limits": {
             "processes": len(items),
-            "credit_limit": CREDIT_LIMIT,
-            "duration_seconds": DURATION_SECONDS,
+            "credit_limit": credit_limit,
+            "duration_seconds": duration_seconds,
             "inventory_pages_per_process": INVENTORY_PAGE_LIMIT,
             "bootstrap_requests": 1,
             "downloads": 0,
@@ -129,11 +164,13 @@ def build_plan(root, source_run, recent_days, identities):
         "items": items,
         "network_requests": 0,
     }
+    plan["suffix"] = suffix
+    plan["prior_attempts"] = {i: prior_inventory_attempts(root, i) for i in identities}
     plan["batch_sha256"] = digest(plan)
     plan["budget"] = {
         "expected_credits": 1 + 2 * len(items),
         "worst_case_credits": 1 + INVENTORY_PAGE_LIMIT * len(items),
-        "hard_credit_limit": CREDIT_LIMIT,
+        "hard_credit_limit": credit_limit,
         "note": "Cada pagina del inventario cuesta un credito; un inventario corto usa dos "
         "(la pagina con documentos y la pagina vacia que lo cierra). El limite duro corta la "
         "corrida antes del peor caso y deja los procesos restantes registrados como pendientes.",
@@ -142,7 +179,10 @@ def build_plan(root, source_run, recent_days, identities):
 
 
 def write_plan(root, plan):
-    target = root / f"{PREFIX}{plan['source_run'][5:]}"
+    name = f"{PREFIX}{plan['source_run'][5:]}" + (
+        f"_{plan['suffix']}" if plan.get("suffix") else ""
+    )
+    target = root / name
     target.mkdir(exist_ok=False)
     write_json(target / PLAN_FILE, {**plan, "created_at": datetime.now(UTC).isoformat()})
     return target
@@ -299,6 +339,9 @@ def main(argv=None):
     p_plan.add_argument("source_run")
     p_plan.add_argument("--recent-days", type=int, required=True)
     p_plan.add_argument("--identity", action="append", required=True)
+    p_plan.add_argument("--credit-limit", type=int, default=CREDIT_LIMIT)
+    p_plan.add_argument("--duration-seconds", type=int, default=DURATION_SECONDS)
+    p_plan.add_argument("--suffix")
     p_pre = sub.add_parser("preflight")
     p_pre.add_argument("target_run")
     p_run = sub.add_parser("run")
@@ -308,7 +351,15 @@ def main(argv=None):
     root = runner.OUTPUT_ROOT
     try:
         if args.command == "plan":
-            plan = build_plan(root, args.source_run, args.recent_days, args.identity)
+            plan = build_plan(
+                root,
+                args.source_run,
+                args.recent_days,
+                args.identity,
+                credit_limit=args.credit_limit,
+                duration_seconds=args.duration_seconds,
+                suffix=args.suffix,
+            )
             target = write_plan(root, plan)
             print(
                 json.dumps(
@@ -337,11 +388,15 @@ def main(argv=None):
         from playwright.sync_api import sync_playwright
 
         profile_id = runner.resolve_profile_id(None)
-        deadline = time.monotonic() + DURATION_SECONDS
+        limits = load_plan(target, args.expect_sha256)["limits"]
+        deadline = time.monotonic() + limits["duration_seconds"]
         with sync_playwright() as playwright:
             browser = runner.connect_browser(playwright, "http://127.0.0.1:9232")
             client = runner.SmokeClient(
-                runner.find_page(browser), profile_id, deadline, request_limit=CREDIT_LIMIT
+                runner.find_page(browser),
+                profile_id,
+                deadline,
+                request_limit=limits["credit_limit"],
             )
             summary = run_inventories(
                 target,
