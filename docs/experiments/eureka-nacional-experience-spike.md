@@ -5843,3 +5843,70 @@ Caso CO1.NTC.11268989, I. E. John F. Kennedy (Soledad), corrida
 - El silencio documental está respaldado por cobertura completa de
   invitación y estudio, y no produce un hallazgo prioritario ni
   confirmado.
+
+### Fin de inventario con tabla vacía y planes de La Plata e ITBOY
+
+Commit `5139227`. Todo offline; ninguna petición.
+
+#### Corrección del lector
+
+- La tabla vacía observada en ITBOY se reconoce como fin de
+  paginación: `status` 1, `documentos` como objeto, `encabezados`
+  vacíos y `campos` vacíos. No se piden más páginas.
+- Semántica de `cantidad`: no verificable offline. El diagnóstico de
+  ITBOY sólo registró que la clave existe, y no se guardan cuerpos de
+  páginas válidas. No se asume que sea el total de documentos.
+  - `CANTIDAD_IS_DOCUMENT_TOTAL = False`.
+  - Con la tabla vacía, el inventario queda incompleto
+    (`empty_table_unverified_total`) y conserva sus documentos.
+  - Si un día se valida esa semántica, sólo un `cantidad` entero igual
+    a los documentos leídos daría el inventario por completo.
+- Para reunir esa evidencia sin contenido sensible, cada página
+  registra sólo su número de filas, el valor numérico de `cantidad`
+  y su forma (tabla, lista vacía o tabla vacía). El diagnóstico de
+  forma incluye también `cantidad`.
+- Las variantes cercanas (estado 0, filas presentes, encabezados no
+  vacíos, objeto sin encabezados) siguen siendo «página ilegible».
+- Corrección adicional: el análisis focalizado asumía siempre un
+  inventario completo. Ahora los planes heredan `inventory_complete`
+  y el análisis lo respeta. Un inventario parcial nunca permite
+  concluir una ausencia explícita.
+- Pruebas: 12 nuevas. Suite nacional y del lector compartido: 945
+  pasan y 11 se omiten, con código de salida 0.
+
+#### Estado documental de ITBOY (CO1.NTC.11286624)
+
+- El inventario sigue incompleto: lo registró el lector anterior,
+  por página ilegible.
+- Se conservan 22 documentos, entre ellos el pliego definitivo, el
+  estudio previo actualizado y la ficha técnica.
+- No se afirma que el inventario esté completo.
+- Cierre: 03-12 a las 11:00.
+
+#### Plan 1: inventario de La Plata (no ejecutado)
+
+- Plan `en01-inv_k94ws3so_r3`, hash
+  `48d3a440a3b24b7cb6727406779049ff97ce7a5a46e0eb20eb110774cd25cdc0`.
+- Sólo CO1.NTC.11293769. Límite de 4 créditos y 60 s; se esperan 3.
+- El plan lista los dos intentos fallidos anteriores. ITBOY no se
+  repite.
+- Si aparece la tabla vacía, el inventario queda incompleto con sus
+  documentos. El registro de páginas aportará la primera evidencia
+  sobre qué cuenta `cantidad`.
+
+#### Plan 2: adquisición de ITBOY (no ejecutado)
+
+- Plan `en01-target_inv_k94ws3so_r2`, hash
+  `be3cff2c6bb2e889c5d16e71b227c3b006e295b3016b58a044f479678d5355c8`.
+- Hereda `inventory_complete: false`.
+
+| DocumentId | Documento | Rol |
+|---|---|---|
+| 898151260 | 14- Pliegos de condiciones definitivos SA-ITBOY-06-2026_ | rector |
+| 898151253 | 5. ESTUDIOS PREVIOS MOTO GRUA BASCULA ACTUALIZADO | soporte |
+
+- No había recibos ni intentos previos.
+- Mecanismo validado: descarga directa y, sólo ante 403, un streaming
+  por Edge con 10 MiB y 12 s; sin reintentos.
+- Después, análisis offline con el inventario marcado como
+  incompleto.

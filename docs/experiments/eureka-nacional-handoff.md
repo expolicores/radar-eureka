@@ -1393,3 +1393,13 @@ Pendiente de autorización.
   cotejando `cantidad`; no implementado.
 - La regresión de «InvitacionPublica_» queda respaldada por
   cobertura completa y sin falso prioritario.
+
+### Tabla vacía e ITBOY
+
+- La tabla vacía cierra la paginación, pero el inventario sigue
+  incompleto mientras no se valide qué cuenta `cantidad`. Ahora se
+  registran filas y `cantidad` por página (`5139227`).
+- Planes pendientes de autorización:
+  - inventario de La Plata, `48d3a440…`, 4 créditos;
+  - adquisición de ITBOY (pliego definitivo y estudio previo),
+    `be3cff2c…`. Cierra el 03-12 a las 11:00.
