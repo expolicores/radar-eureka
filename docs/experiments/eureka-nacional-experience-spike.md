@@ -5267,3 +5267,88 @@ Condiciones para ejecutarlo:
 - 12 s como máximo;
 - después, análisis conjunto offline con el estudio previo ya
   guardado.
+
+### Cierre comercial de CO1.NTC.11293222 y lote de inventarios de 8 procesos
+
+#### CO1.NTC.11293222
+
+- El titular no autorizó el lote `b7fe9e15`. La cláusula de la página
+  10 del estudio previo basta para bajar su prioridad comercial.
+- El proceso conserva su estado formal (`not_resolved`), la categoría
+  «Indicios de experiencia exigida — requiere revisión», la
+  evidencia textual y el rector pendiente.
+- No se declara descartado.
+
+#### Lote de inventarios (plan, no ejecutado)
+
+Commit `b39a6b1`.
+
+`eureka_nacional_inventory_batch.py`:
+
+- `plan`, offline. Toma identidades nombradas de la reevaluación de
+  10 días de `en01-k94ws3so` y comprueba que:
+  - sean elegibles y de SECOP II;
+  - sean únicas en la corrida;
+  - tengan las claves de inventario completas;
+  - no se hayan inventariado nunca en ninguna corrida.
+
+  Liga identidades, claves y presupuesto a un hash.
+- `preflight`, pasivo, en `eureka_nacional_profile_preflight.py`.
+  Es el arnés usado hasta ahora, ya versionado: pestaña temporal del
+  Edge dedicado, feed bloqueado y sólo categorías.
+- `run`, real y pendiente de autorización:
+  - exige el hash aprobado y un preflight de menos de 15 minutos con
+    sesión válida, `only_configured` y `profile_count: 1`;
+  - hace un bootstrap (`GET get-config-user`) y la paginación
+    existente del inventario por proceso;
+  - no consulta el feed, no descarga, no usa streaming ni hace POST
+    a SECOP;
+  - no se repite;
+  - ante presupuesto o sesión, se detiene y deja pendientes los
+    procesos restantes.
+- El resultado tiene la forma de una corrida del runner, para que el
+  plan focalizado elija después los rectores.
+
+Pruebas: 14 nuevas. Suite nacional: 667 pasan y 11 se omiten, con
+código de salida 0.
+
+Plan `en01-inv_k94ws3so`, hash
+`bbf82b716468f4edb71ded582cb0bc07db89ba173a3e083d44b77a97e42e5b4b`.
+
+| Proceso | Prioridad | Vigencia (cierre) | Departamento | idContrato | Entidad |
+|---|---|---|---|---|---|
+| CO1.NTC.11286624 | A | abierto, 03-12 11:00 | Boyacá | 12327950 | ITBOY |
+| CO1.NTC.11293769 | A | abierto, 03-12 18:00 | Huila | 12329084 | Municipio de La Plata |
+| CO1.NTC.11247014 | A | abierto, 02-12 18:00 | Boyacá | 12329343 | Alcaldía de Puerto Boyacá |
+| CO1.NTC.11257086 | A | desconocida | Huila | 12337153 | I. E. José Miguel Montalvo |
+| CO1.NTC.11250835 | A | desconocida | Huila | 12332301 | I. E. El Limonar |
+| CO1.NTC.11249056 | A | desconocida | Huila | 12331145 | I. E. San Joaquín |
+| CO1.NTC.11243868 | A | desconocida | Huila | 12327504 | I. E. Buenos Aires |
+| CO1.NTC.11259162 | B | abierto, 02-12 18:00 | Boyacá | 12338283 | Alcaldía de Puerto Boyacá |
+
+En todos: `id_fuente_contract` 3 e `idUltimaFase` igual a la
+identidad. Ninguno estaba inventariado antes.
+
+Presupuesto:
+
+- Esperado: 17 créditos. Son 1 de bootstrap y unos 2 por inventario:
+  la página con documentos y la página vacía que la cierra.
+- Peor caso teórico: 81, con 10 páginas por proceso.
+- Límite duro: 30 créditos y 360 s. Si se alcanza, la corrida se
+  detiene y los procesos restantes quedan registrados como
+  pendientes.
+
+Propuesta de adquisición documental por tandas, después del
+inventario y con plan y hash propios para cada tanda:
+
+1. Prioridad A abiertos con cierre más próximo: ITBOY (03-12 11:00),
+   Puerto Boyacá (02-12) y La Plata (03-12).
+2. Prioridad A de régimen especial sin cierre conocido: las cuatro
+   instituciones educativas.
+3. Prioridad B: Puerto Boyacá (CO1.NTC.11259162, 02-12).
+
+En cada proceso se elegirían hasta 2 documentos: rector y estudio
+previo. CDP, PAA, BPIN, documentos presupuestales y análisis del
+sector nunca se eligen. Descarga directa y, sólo ante 403, streaming
+autorizado. El proceso con cierre el 02-12 aconseja no demorar la
+primera tanda.

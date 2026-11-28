@@ -1321,3 +1321,12 @@ el rector.
   con techo de 16 MiB ligado al hash
   `b7fe9e15b7c20203ef8d388930a71cc6e7038bf1d65d16ee8f7b5cf2f3fabaad`.
   No ejecutado; sólo sirve para la corroboración formal.
+
+### Lote de inventarios de 8 procesos (pendiente de autorización)
+
+CO1.NTC.11293222 queda con indicios de experiencia y prioridad
+comercial reducida; el lote `b7fe9e15` no se autorizó. Plan
+`en01-inv_k94ws3so`, hash `bbf82b71…`: 8 inventarios SECOP II (7 de
+prioridad A y 1 B), unos 17 créditos esperados, límite duro de 30
+créditos y 360 s. Sin feed ni descargas. Después, tandas
+documentales por cierre y prioridad.
