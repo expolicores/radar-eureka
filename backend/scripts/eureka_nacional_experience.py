@@ -189,6 +189,19 @@ ADMINISTRATIVE_TITLE = re.compile(
     r"registro presupuestal|paa|plan anual de adquisiciones|bpin|banco de proyectos|"
     r"(?:analisis|estudios?) (?:del|de) (?:el )?sector)\b"
 )
+# A «convocatoria» may be the governing call of special-regime purchases, but the word
+# alone never makes a document governing: the name only gives a hint, which is confirmed
+# when the read text sets habilitating requirements or how offers are submitted.
+CONVOCATORIA_TITLE = re.compile(r"\bconvocatoria\b")
+NOTICE_TITLE = re.compile(r"\baviso\b")
+PARTICIPATION_CONTENT = re.compile(
+    r"\b(?:requisitos? (?:minimos )?habilitantes?|"
+    r"documentos? (?:de|que debe(?:ra)? contener|que deben acompanar|para) "
+    r"(?:la |las )?(?:ofertas?|propuestas?)|"
+    r"contenido de (?:la |las )?(?:ofertas?|propuestas?)|"
+    r"condiciones (?:generales )?(?:de|para)(?: la)? participacion|"
+    r"presentacion de (?:la |las )?(?:ofertas?|propuestas?))\b"
+)
 MANDATE_BASES = {"bidder_experience_mandate", "ocr_corroborated_bidder_mandate"}
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
@@ -221,12 +234,37 @@ def document_role(name):
 
 
 def document_role_hint(name, role):
+    title = document_title(name)
     # The portal can truncate the title while retaining the reference/filename.
     if role == "unknown" and re.match(
-        r"^(?:invitacionpublica|invitacio|invitac|inv\.? public[ao]?)\b", document_title(name)
+        r"^(?:invitacionpublica|invitacio|invitac|inv\.? public[ao]?)\b", title
     ):
         return "primary"
+    # A call («convocatoria») may govern participation; a notice («aviso») never does.
+    if role == "unknown" and CONVOCATORIA_TITLE.search(title) and not NOTICE_TITLE.search(title):
+        return "primary"
     return None
+
+
+def confirm_governing_by_content(entry, fragments):
+    """Promote a hinted document to governing only when its read text sets habilitating
+    requirements or offer-submission conditions. Records the page and phrase found."""
+    if entry.get("role") != "unknown" or entry.get("role_hint") != "primary":
+        return False
+    for fragment in fragments:
+        match = PARTICIPATION_CONTENT.search(" ".join(normalized(fragment.text).split()))
+        if match:
+            entry.update(
+                role="primary",
+                role_hint=None,
+                role_source="content_confirmed",
+                role_evidence={
+                    "page": fragment.source_locator.get("page_number"),
+                    "phrase": match.group(),
+                },
+            )
+            return True
+    return False
 
 
 def document_priority(name, role, role_hint=None):

@@ -447,6 +447,7 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
             per_document = (
                 secop1.GOVERNING_OCR_PAGES
                 if document.get("role") in {"primary", "amendment"}
+                or document.get("role_hint") == "primary"
                 else SUPPORT_OCR_PAGES
             )
             secop1.extract_with_ocr_plan(
@@ -497,6 +498,8 @@ def analyze(target, expected_sha256, *, runner, settings, budget):
                             "receipt_run",
                             "validation_gap",
                             "stored_role",
+                            "role_source",
+                            "role_evidence",
                         )
                     }
                     for d in documents

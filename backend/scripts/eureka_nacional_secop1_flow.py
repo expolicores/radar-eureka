@@ -18,6 +18,7 @@ from pathlib import Path
 from eureka_nacional_cdp_stream import DOCUMENT_BYTES
 from eureka_nacional_experience import (
     classify_experience,
+    confirm_governing_by_content,
     document_priority,
     normalized,
 )
@@ -781,6 +782,8 @@ def extract_with_ocr_plan(
     pending = sorted(set(range(1, total + 1)) - merged["seen"])
     complete = bool(total) and not pending and not (first or {}).get("error_code")
     entry.update(first or {})
+    # Later OCR passes may reveal the participation conditions of a hinted document.
+    confirm_governing_by_content(entry, merged["fragments"])
     entry.update(
         fragments=merged["fragments"],
         pages_seen=sorted(merged["seen"]),

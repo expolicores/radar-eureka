@@ -30,6 +30,7 @@ from eureka_nacional_experience import (
     REQ,
     STATUSES,
     classify_experience,
+    confirm_governing_by_content,
     document_cover_metadata,
     document_priority,
     document_role,
@@ -535,6 +536,7 @@ def extract_document(
         or (cover_role == "support" and entry["role"] == "primary")
     ):
         entry.update(role=cover_role, role_source="cover", role_hint=None)
+    confirm_governing_by_content(entry, fragments)
     if is_docx:
         docx_fragments = sum(
             f.source_locator.get("kind") in {"docx_paragraph", "docx_table_cell"} for f in fragments
