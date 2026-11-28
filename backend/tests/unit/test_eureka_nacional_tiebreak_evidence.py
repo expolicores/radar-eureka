@@ -72,3 +72,26 @@ def test_tiebreak_clause_alone_never_concludes_experience_required():
     result = rules.classify_experience([document])
 
     assert result["status"] != "experience_required"
+
+
+@pytest.mark.parametrize(
+    "clause",
+    [
+        "Sillas blancas sin brazo. Estructura ergonómica que proporciona una cómoda experiencia "
+        "de asiento, adaptándose a la forma del cuerpo.",
+        "Su soporte lumbar evita tensiones en la espalda, mientras que los apoyabrazos aseguran "
+        "una experiencia de trabajo más cómoda.",
+        "Pantalla de alta resolución para una mejor experiencia de usuario.",
+    ],
+)
+def test_product_descriptions_are_not_about_experience(clause):
+    assert rules.assertion(clause) is None
+
+
+def test_a_product_description_never_hides_a_real_requirement():
+    clause = (
+        "Silla con una cómoda experiencia de asiento. El proponente deberá acreditar "
+        "experiencia en dos contratos ejecutados de suministro de mobiliario."
+    )
+
+    assert rules.assertion(clause)[0] == rules.REQ

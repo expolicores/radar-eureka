@@ -25,6 +25,14 @@ EXCLUDED = re.compile(
     r"cotizaciones?\b|cotizacion\b|proforma\b)"
 )
 EXPERIENCE = re.compile(r"\bexperiencia\b")
+# Product descriptions («una cómoda experiencia de asiento») use the word without any
+# obligation of the bidder; such mentions alone never make a clause about experience.
+PRODUCT_EXPERIENCE = re.compile(
+    r"\buna (?:comoda|agradable|optima|excelente|placentera) experiencia\b|"
+    r"\bexperiencia de (?:asiento|uso|usuario|navegacion|juego|visualizacion|escritura|"
+    r"sonido|audio|lectura)\b|"
+    r"\buna experiencia de [a-z]+ mas (?:comoda|agradable|fluida|placentera)\b"
+)
 EXPERIENCE_HEADING = re.compile(
     r"^(?:requisito(?:s)?(?: habilitante)? de |acreditacion de (?:la )?)?experiencia"
     r"(?: (?:contractual|minima|requerida|habilitante|del (?:oferente|proponente)))*$"
@@ -351,7 +359,7 @@ def assertion(
     clause, *, heading=None, section=None, immediate=False, method=None, bidder_checklist=False
 ):
     text = normalized_for_matching(clause, method)
-    experience = bool(EXPERIENCE.search(text))
+    experience = bool(EXPERIENCE.search(PRODUCT_EXPERIENCE.sub(" ", text)))
     section_text = normalized_for_matching(section or "", method)
     if (
         heading == "differential_experience_table"
