@@ -1445,3 +1445,14 @@ inventarios ni descargas; 30 créditos. Corrida de Boyacá y Huila con
   preparada.
 
 Todo pendiente de autorización.
+
+### Lote 660b69c3 y Elías
+
+- 5 de 8 documentos guardados. Superaron 10 MiB el estudio de
+  Yaguará y los dos documentos de Briceño.
+- Exigencias explícitas de experiencia: Yaguará (hasta 3 contratos
+  de mobiliario) y Anacleto García (1 contrato del 100 %,
+  provisional por ser borrador). Ramiriquí, con incertidumbre, con
+  cláusulas de experiencia mínima; Briceño sin evidencia.
+- Elías: inventario de 3 documentos con 1 crédito. Cola de la
+  invitación `52cd4e7a…` preparada, pendiente de autorización.

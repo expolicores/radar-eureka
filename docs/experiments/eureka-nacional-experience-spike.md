@@ -6264,3 +6264,86 @@ Sin recibos ni intentos previos.
   preflight del contexto desechable y confirmación del lote.
 - Controles previos: los mismos (pestaña única, perfil único,
   sesión y marcador).
+
+### Lote documental 660b69c3 y SECOP I de Elías
+
+#### Adquisición
+
+- Controles previos:
+  - hash e identidades exactas;
+  - sin recibos ni intentos previos;
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Orden: Yaguará, Ramiriquí, Briceño y Anacleto García.
+- Todos dieron 403 en la descarga directa. Sin reintentos ni
+  descargas nativas, y sin marcador al terminar.
+
+| Proceso | Documento | Resultado | Bytes declarados (= recibidos si se guardó) | SHA-256 |
+|---|---|---|---|---|
+| Yaguará | INVITACION 032 MOBILIARIO | guardado por streaming | 9.205.465 | `3b48c32f…` |
+| Yaguará | ESTUDIO PREVIO | **rechazado**: supera 10 MiB | 13.950.560 (13,3 MiB) | — |
+| Ramiriquí | MRAM-MC-075-2026 INVITACIÓN | guardado por streaming | 7.696.941 | `0606877a…` |
+| Ramiriquí | MRAM-MC-075-2026 ESTUDIOS PREVIOS | guardado por streaming | 7.513.503 | `3f30bf7e…` |
+| Briceño | MB-CS-INV-061-2026 INVITACIÓN PÚBLICA | **rechazado**: supera 10 MiB | 31.108.986 (29,7 MiB) | — |
+| Briceño | ESTUDIOS PREVIOS Y ANÁLISIS DEL SECTOR | **rechazado**: supera 10 MiB | 17.880.615 (17,1 MiB) | — |
+| Anacleto García | 2 Proyecto Invitación Pública 11 Papelería | guardado por streaming | 869.058 | `dd1ec6af…` |
+| Anacleto García | Estudios previos 10 | guardado por streaming | 7.801.411 | `49ca49b1…` |
+
+#### Análisis offline
+
+Clasificador y capa de hallazgos sin cambios; OCR vigente: 12
+páginas por rector y 2 por soporte.
+
+| Proceso | Cobertura | Evidencia | Estado formal | Hallazgo |
+|---|---|---|---|---|
+| Anacleto García (A) | Proyecto de invitación 17 de 17 (texto nativo); estudio 2 de 13 | Página 14, EXIGENCIA general: «El proponente deberá acreditar la experiencia específica mediante la presentación de máximo un (1) contrato con entidades públicas… cuya cuantía sea igual o superior al 100 % del presupuesto oficial» | `not_resolved` (`requirement_requires_corroboration`; revisión `explicit_requirement`) | Indicios de experiencia exigida. **Provisional**: el único rector es un proyecto; no hay cobertura rectora definitiva |
+| Yaguará (B) | Invitación 12 de 12 (OCR); estudio no descargado (13,3 MiB) | Página 5, EXIGENCIA: «El proponente deberá acreditar, mediante MÁXIMO TRES (3) CONTRATOS celebrados y ejecutados antes del cierre, experiencia en venta y/o suministro de mobiliario…, cuya sumatoria sea igual o superior al…». Para MiPymes, hasta 4 contratos que sumen el 100 % del presupuesto | `not_resolved` (`requirement_requires_corroboration`) | Indicios de experiencia exigida |
+| Ramiriquí (B) | Invitación 12 de 29 (tope de OCR); estudio 2 de 27 | Páginas 10 y 11 de la invitación: acreditación de experiencia mediante certificaciones o actas, «experiencia mínima», regla de proporcionalidad para consorcios; remite al estudio previo. Todo registrado como condicional | `not_resolved` (`governing_documents_incomplete`) | Con incertidumbre. La lectura humana sugiere exigencia de experiencia mínima |
+| Briceño (B) | Ninguno (los dos documentos superan 10 MiB) | — | `not_resolved` | Con incertidumbre; sin evidencia |
+
+Revisión humana recomendada:
+
+- Yaguará y Anacleto García: confirmar las exigencias citadas. La de
+  Anacleto García es provisional por ser un borrador.
+- Ramiriquí: leer las páginas 10 y 11 de la invitación. Completarla
+  requeriría OCR offline adicional (29 páginas).
+- Ninguno de los cuatro resulta prioritario ni confirmado.
+
+Restricciones y documentos pendientes:
+
+- Tres documentos superan 10 MiB: el estudio de Yaguará (13,3 MiB),
+  la invitación de Briceño (29,7 MiB) y su estudio (17,1 MiB).
+  - El techo excepcional de 16 MiB sólo cubriría el estudio de
+    Yaguará, que no es rector, así que no aplica.
+  - Para Briceño, ni siquiera 16 MiB alcanza.
+- Coberturas parciales de Ramiriquí y del estudio de Anacleto García
+  por el tope de OCR.
+- Windsor sigue fuera de nuevos lotes por estar adjudicado.
+
+#### SECOP I de Elías (constancia 26-13-14853466)
+
+- Recuperación de inventario sobre `en01-1u44f6p7`: 1 crédito de 1.
+  Sin feed, descargas ni POST. Salida en `en01-secop1inv_1u44f6p7`.
+- Inventario de 3 documentos, todos con tamaño publicado:
+
+| Documento | Rol | Tamaño mostrado |
+|---|---|---|
+| Invitación | rector | 582 KB |
+| ESTUDIOS PREVIOS | soporte | 396 KB |
+| CDP | no identificado | 243 KB |
+
+- Cola SECOP I generada (no ejecutada): hash
+  `52cd4e7acb898ada58ce0af1a496a875061b9dafe59d0099d269681131a6c7cf`,
+  máximo 1 POST, sólo con la invitación.
+- Propuesta: adquirir la invitación con el trabajador existente
+  (`eureka_nacional_secop1_acquire.py`). Requisitos:
+  - inicio de sesión manual en el contexto desechable;
+  - preflight pasivo del perfil;
+  - confirmación del lote por hash;
+  - un POST a `VerDocumento`;
+  - lectura acotada de 10 MiB y 12 s.
+- Opcional: un plan focalizado SECOP I con invitación y estudio
+  previo (2 POST) si se quiere también el estudio. Requiere plan y
+  hash propios.
