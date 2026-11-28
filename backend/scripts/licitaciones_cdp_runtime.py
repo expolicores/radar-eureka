@@ -592,24 +592,114 @@ def parse_document_page(body):
     return parse_document_rows(converted)
 
 
-def fetch_inventory(client, process):
-    documents, signatures = {}, set()
-    for page in range(1, 11):
-        payload = {
-            key: process.get(key) for key in ("idContrato", "id_fuente_contract", "idUltimaFase")
+def _type_name(value):
+    return type(value).__name__
+
+
+def document_page_shape(body):
+    """Structural summary of a document page: keys, types, headers and row widths only.
+
+    Never names, links, cell values or any other content; header labels are the public
+    column titles of the provider table and are kept to identify contract changes.
+    """
+    shape = {"body_type": _type_name(body)}
+    if not isinstance(body, dict):
+        return shape
+    shape["keys"] = sorted(str(key) for key in body)[:20]
+    status = body.get("status")
+    shape["status"] = (
+        status if isinstance(status, int | bool) or status is None else _type_name(status)
+    )
+    table = body.get("documentos")
+    shape["documentos_type"] = _type_name(table)
+    if isinstance(table, list):
+        shape["documentos_length"] = len(table)
+    if isinstance(table, dict):
+        shape["documentos_keys"] = sorted(str(key) for key in table)[:20]
+        headers = table.get("encabezados")
+        shape["encabezados"] = (
+            [str(h)[:40] for h in headers[:12]]
+            if isinstance(headers, list)
+            else _type_name(headers)
+        )
+        rows = table.get("campos")
+        shape["campos_type"] = _type_name(rows)
+        if isinstance(rows, list):
+            shape["campos_length"] = len(rows)
+            shape["row_widths"] = sorted({len(r) if isinstance(r, list) else -1 for r in rows})[:10]
+            shape["cell_types"] = (
+                [_type_name(cell) for cell in rows[0]]
+                if rows and isinstance(rows[0], list)
+                else None
+            )
+    return shape
+
+
+class InventoryIncomplete(SpikeError):  # noqa: N818 -- an outcome, kept beside SpikeError
+    """Inventory interrupted: documents of earlier pages are kept, never read as complete."""
+
+    def __init__(self, message, *, documents, failed_page, reason, shape=None):
+        super().__init__(message)
+        self.documents = documents
+        self.failed_page = failed_page
+        self.pages_read = failed_page - 1
+        self.reason = reason
+        self.shape = shape
+
+    def diagnostic(self):
+        return {
+            "reason": self.reason,
+            "message": str(self),
+            "failed_page": self.failed_page,
+            "pages_read": self.pages_read,
+            "documents_kept": len(self.documents),
+            "shape": self.shape,
         }
-        if any(value is None for value in payload.values()):
-            raise SpikeError("Faltan identificadores documentales.")
-        parsed = parse_document_page(client.post(DOCUMENT_ENDPOINT, {**payload, "page": page}))
+
+
+def fetch_inventory(client, process):
+    """Paginated inventory. An unreadable or repeated page, or the page ceiling, raises
+    InventoryIncomplete with the documents already read; an unknown structure is never
+    taken as the end of pagination."""
+    documents, signatures = {}, set()
+    payload = {
+        key: process.get(key) for key in ("idContrato", "id_fuente_contract", "idUltimaFase")
+    }
+    if any(value is None for value in payload.values()):
+        raise SpikeError("Faltan identificadores documentales.")
+    for page in range(1, 11):
+        body = client.post(DOCUMENT_ENDPOINT, {**payload, "page": page})
+        try:
+            parsed = parse_document_page(body)
+        except InventoryIncomplete:
+            raise
+        except SpikeError as error:
+            raise InventoryIncomplete(
+                str(error),
+                documents=list(documents.values()),
+                failed_page=page,
+                reason="unreadable_page",
+                shape=document_page_shape(body),
+            ) from None
         if not parsed:
             return list(documents.values())
         signature = tuple(doc.document_id for doc in parsed)
         if signature in signatures:
-            raise SpikeError("Pagina documental repetida; inventario incompleto.")
+            raise InventoryIncomplete(
+                "Pagina documental repetida; inventario incompleto.",
+                documents=list(documents.values()),
+                failed_page=page,
+                reason="repeated_page",
+            )
         signatures.add(signature)
         for document in parsed:
             documents[document.document_id] = document
-    raise SpikeError("Limite de diez paginas; inventario incompleto.")
+    raise InventoryIncomplete(
+        "Limite de diez paginas; inventario incompleto.",
+        documents=list(documents.values()),
+        failed_page=11,
+        reason="page_limit",
+    )
 
 
 def coverage(detail):

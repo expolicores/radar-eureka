@@ -68,7 +68,12 @@ def inventoried_identities(root, *, exclude=()):
     for path in sorted(root.glob("en01-*/documents.json")):
         if path.parent.name in exclude:
             continue
-        references = {c["process_reference"] for c in read_json(path, []) if c.get("documents")}
+        # A partial inventory (explicitly incomplete) does not block a later complete one.
+        references = {
+            c["process_reference"]
+            for c in read_json(path, [])
+            if c.get("documents") and c.get("inventory_complete", True)
+        }
         processes = read_json(path.parent / "processes.json", {}) or {}
         for process in processes.get("processes", []):
             if process["process_reference"] in references and process.get("source_identity"):
@@ -250,12 +255,22 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
         attempts["items"][reference] = record
         write_json(target / ATTEMPTS_FILE, attempts)
         before = client.requests
+        incomplete = None
         try:
-            documents = fetch_inventory(client, item["keys"])
+            try:
+                documents = fetch_inventory(client, item["keys"])
+            except Exception as error:
+                if not callable(getattr(error, "diagnostic", None)):
+                    raise
+                # Earlier pages are kept and the inventory is marked incomplete.
+                documents, incomplete = error.documents, error.diagnostic()
             entries = [document_entry(d) for d in documents]
             for entry in entries:
                 entry["url"] = safe_url(entry["url"])
-            record.update(outcome="inventoried", documents=len(entries))
+            if incomplete is None:
+                record.update(outcome="inventoried", documents=len(entries))
+            else:
+                record.update(outcome="incomplete", documents=len(entries), diagnostic=incomplete)
         except Exception as error:
             # Budget errors carry their reason as message; session errors carry a code.
             budget = str(error) if str(error) in BUDGET_STOPS else None
@@ -267,7 +282,13 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
                 stop = code
         record["credits"] = client.requests - before
         processes.append({**stored[reference], "sampled": True, "inventory_batch": True})
-        inventories.append({"process_reference": reference, "documents": entries})
+        inventories.append(
+            {
+                "process_reference": reference,
+                "documents": entries,
+                "inventory_complete": record.get("outcome") == "inventoried",
+            }
+        )
         write_json(target / ATTEMPTS_FILE, attempts)
         if stop:
             break
@@ -287,6 +308,7 @@ def run_inventories(target, expected_sha256, client, fetch_inventory, *, safe_ur
         "stop_reason": stop,
         "inventoried": sum(r.get("outcome") == "inventoried" for r in attempts["items"].values()),
         "failed": sum(r.get("outcome") == "failed" for r in attempts["items"].values()),
+        "incomplete": sum(r.get("outcome") == "incomplete" for r in attempts["items"].values()),
         "pending": pending,
         "downloads": 0,
         "feed_requests": 0,

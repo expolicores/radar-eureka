@@ -298,3 +298,36 @@ def test_retry_limits_never_exceed_the_authorized_maximum(tmp_path, credits, sec
         batch.build_plan(
             tmp_path, "en01-src", 10, ["CO1.NTC.1"], credit_limit=credits, duration_seconds=seconds
         )
+
+
+class Incomplete(Exception):  # noqa: N818 -- mirrors runtime.InventoryIncomplete
+    def __init__(self, documents):
+        super().__init__("Contrato de tabla documental desconocido.")
+        self.documents = documents
+
+    def diagnostic(self):
+        return {"reason": "unreadable_page", "failed_page": 2, "shape": {"documentos_type": "dict"}}
+
+
+def test_partial_inventory_is_kept_marked_incomplete_and_does_not_block_a_new_plan(tmp_path):
+    target, plan = planned_target(tmp_path)
+    full = fake_fetch({"CO1.NTC.1": 2, "CO1.NTC.2": 2})
+
+    def fetch(client, keys):
+        documents = full(client, keys)
+        if keys["idUltimaFase"] == "CO1.NTC.1":
+            raise Incomplete(documents[:1])
+        return documents
+
+    summary = batch.run_inventories(target, plan["batch_sha256"], FakeClient(), fetch)
+
+    attempts = json.loads((target / batch.ATTEMPTS_FILE).read_text("utf-8"))["items"]
+    assert attempts["r1"]["outcome"] == "incomplete"
+    assert attempts["r1"]["diagnostic"]["failed_page"] == 2
+    cases = {c["process_reference"]: c for c in json.loads((target / "documents.json").read_text())}
+    assert cases["r1"]["inventory_complete"] is False
+    assert len(cases["r1"]["documents"]) == 1
+    assert cases["r2"]["inventory_complete"] is True
+    assert summary["incomplete"] == 1
+    assert "CO1.NTC.1" not in batch.inventoried_identities(tmp_path)
+    assert "CO1.NTC.2" in batch.inventoried_identities(tmp_path)

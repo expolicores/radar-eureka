@@ -39,6 +39,7 @@ from eureka_nacional_findings import assess_finding, load_human_reviews
 from licitaciones_candidate_contracts import CandidateProcess
 from licitaciones_cdp_runtime import (
     CandidateError,
+    InventoryIncomplete,
     PageClient,
     check_session,
     connect_browser,
@@ -773,9 +774,15 @@ def analyze_documents(
 ):
     if download_state and download_state.stream_marker.exists():
         raise BudgetReached("download_close_unverified")
-    inventory = fetch_inventory(client, process["inventory_keys"])
+    incomplete = None
+    try:
+        inventory = fetch_inventory(client, process["inventory_keys"])
+    except InventoryIncomplete as error:
+        # Keep what earlier pages listed; the inventory stays explicitly incomplete.
+        inventory, incomplete = error.documents, error.diagnostic()
+        errors.append({"stage": "inventory", "code": "inventory_incomplete", **incomplete})
     if not inventory:
-        return "empty_inventory"
+        return "inventory_incomplete" if incomplete else "empty_inventory"
     metrics["with_inventory"] += 1
     all_documents = {}
     for document in inventory:
@@ -1289,7 +1296,10 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
                 )
             if allowance == 0:
                 process_errors.append({"stage": "selection", "code": "document_budget"})
-            classification = classify_experience(documents, inventory_complete=bool(documents))
+            inventory_complete = bool(documents) and not any(
+                error.get("code") == "inventory_incomplete" for error in process_errors
+            )
+            classification = classify_experience(documents, inventory_complete=inventory_complete)
             if resume is not None and classification["status"] in {
                 "experience_required",
                 "no_experience_required",
