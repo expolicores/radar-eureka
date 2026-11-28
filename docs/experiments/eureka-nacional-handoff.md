@@ -1467,3 +1467,11 @@ Todo pendiente de autorización.
 - Ramiriquí: la invitación (28 de 29 páginas) exige como requisito
   habilitante tres contratos de suministro de elementos de oficina.
   Formal `not_resolved`; prioridad comercial reducida.
+
+### Trabajador SECOP I corregido y marcador archivado
+
+Las salidas tempranas ya registran la desconexión verificada, y la
+confirmación se espera sólo después de un preflight listo
+(`57e2332`, 7 pruebas nuevas). El marcador se archivó tras comprobar
+que no quedaba ningún trabajador, CDP ni Edge activo. Elías queda
+listo para retomarse con el Edge abierto e inicio de sesión manual.

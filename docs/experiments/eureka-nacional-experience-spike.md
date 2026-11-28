@@ -6426,3 +6426,67 @@ Conclusión, separando lo formal de lo comercial:
 - Briceño: sigue visible como oportunidad bloqueada por tamaño
   (invitación de 29,7 MiB y estudio de 17,1 MiB). No se autorizan
   nuevos intentos.
+
+### Corrección del cierre del trabajador SECOP I y recuperación del marcador
+
+#### Causa exacta
+
+- En `worker()`, las salidas tempranas eran `return` dentro del
+  bloque `async with async_playwright()`: sesión detenida, preflight
+  no listo o confirmación ausente.
+- Al salir así, Playwright se desconectaba, pero la línea que fija
+  `state["disconnected"] = True` estaba después del bloque y nunca se
+  ejecutaba.
+- La evidencia quedaba en `disconnected: false` y
+  `marker_release_allowed` retenía el marcador. Sólo una corrida con
+  lote completo registraba la desconexión.
+- La prueba existente de confirmación ausente no comprobaba ese
+  campo.
+
+#### Corrección (`57e2332`)
+
+- Las salidas tempranas abandonan el bloque con `_EarlyStop`
+  (`BaseException`, para no confundirse con los diagnósticos de
+  `except Exception`). La desconexión se registra sólo si el
+  gestor de contexto sale sin error.
+- Si la desconexión falla, `disconnected` sigue en `false` y el
+  marcador se retiene.
+- Confirmación tardía segura, sin invertir el orden de las señales:
+  - después de un preflight listo, el trabajador pasa a
+    `awaiting_batch_confirmation` y espera hasta 600 s la
+    confirmación ligada al hash;
+  - termina sin ningún POST ante un hash distinto (`mismatch`),
+    `stop.flag` (`stopped`) o el fin del plazo (`timeout`);
+  - ningún lote puede ejecutarse antes de verificar la sesión, y la
+    confirmación nunca habilita un lote si el preflight falló.
+- Pruebas: 7 nuevas. Cubren la terminación anticipada con
+  desconexión registrada y marcador liberable, el preflight no listo,
+  la confirmación tardía, la confirmación con preflight fallido, el
+  hash distinto, la parada durante la espera y la desconexión
+  fallida que retiene el marcador.
+- Suite nacional: 953 pasan y 11 se omiten, con código de salida 0.
+  Laboratorio (`RUN_EN01_POPUP_LAB=1`): 37 de 37.
+
+#### Recuperación del marcador
+
+- Comprobación inmediatamente anterior:
+  - 0 procesos de Python del trabajador o del streaming;
+  - 0 escuchas en el puerto 9232;
+  - 0 procesos del Edge dedicado: el navegador estaba cerrado.
+- Evidencia del trabajador: código de salida 0, `posts_forwarded: 0`,
+  contexto cerrado y sin intentos SECOP I registrados.
+- Archivado en
+  `marker-archive/20261128-elias-early-stop/` con `closure.json`,
+  `result.json`, `preflight.json` y `release_evidence.json`. Sin
+  marcador activo.
+
+#### Elías
+
+- La cola `52cd4e7a…` sigue intacta, sin intentos.
+- Para retomarla: abrir el Edge dedicado e iniciar sesión manual
+  con Vila Frontier. Después:
+  - preflight listo;
+  - confirmación humana ligada al hash, escrita después del
+    preflight;
+  - un único POST;
+  - 10 MiB y 12 s como máximo.
