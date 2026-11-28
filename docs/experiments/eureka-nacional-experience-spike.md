@@ -6006,3 +6006,60 @@ Evidencia sobre `cantidad`:
 Estado de la muestra de 10 días: ningún hallazgo confirmado ni
 prioritario. Con indicios de experiencia: INFIHUILA, Buenos Aires,
 El Limonar e ITBOY.
+
+### Modalidad de sólo descubrimiento (preparada, no ejecutada)
+
+Se cierra la tanda de validación documental. ITBOY y La Plata
+conservan sus estados, evidencias y limitaciones.
+
+El runner no separaba el descubrimiento de las adquisiciones: en
+modo exploratorio exige al menos un intento documental por proceso
+y, tras descubrir, inventaría y descarga. Por eso se añadió
+`--discovery-only` (`d88aee8`), validado offline.
+
+#### Qué hace
+
+- Hace el sondeo de sesión (bootstrap y consulta de salud) y lee las
+  páginas del feed con el perfil configurado y la geografía
+  indicada.
+- Aplica la selección completa: ventana, vigencia, geografía,
+  filtros comerciales y cuotas.
+- Con `--include-secop1`, SECOP I se evalúa sólo para la selección;
+  nunca se inventaría.
+- Registra `mode: discovery_only` y termina como
+  `discovery_completed`.
+- No hace inventarios ni descargas, ni usa streaming o
+  adquisiciones SECOP I.
+- Presupuesto: 30 créditos y 360 s. Se esperan unos 10: 2 de sesión
+  y 8 páginas.
+- Se rechaza combinado con reanudación, recuperación SECOP I,
+  páginas adicionales o respaldo de descargas por Edge.
+
+Pruebas: 1 nueva, que verifica cero peticiones al inventario, cero
+descargas, sin cola SECOP I y el presupuesto propio. Suite nacional
+y del lector compartido: 946 pasan y 11 se omiten, con código de
+salida 0.
+
+#### Corrida propuesta, pendiente de autorización
+
+```
+eureka_nacional_en01.py --exploratory --discovery-only --include-secop1 \
+  --processes 15 --discovery-pages 8 --recent-days 10 \
+  --geography "eureka_nacional_geography_boyaca_huila(from_licitaciones_info).v1.json"
+```
+
+- Antes de ejecutar:
+  - rama nacional;
+  - una sola pestaña, en `/cliente/contratos`;
+  - preflight pasivo con sesión válida, `only_configured` y
+    `profile_count: 1`;
+  - sin marcador.
+- Después, offline:
+  - fechas realmente cubiertas, señalando si aparecen las del 21 al
+    26 de noviembre;
+  - separación entre procesos nuevos y conocidos;
+  - distribución por fuente y departamento;
+  - exclusiones por cuota y por cobertura;
+  - propuesta de inventarios.
+- La ventana de 10 días sólo se declarará cubierta si la paginación
+  llega a su inicio.

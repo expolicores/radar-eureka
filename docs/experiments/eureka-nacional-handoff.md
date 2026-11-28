@@ -1414,3 +1414,9 @@ Pendiente de autorización.
   es 53, así que la cobertura no está demostrada y el inventario
   sigue incompleto.
 - La muestra no deja oportunidades sin exigencia de experiencia.
+
+### Sólo descubrimiento preparado
+
+`--discovery-only` (`d88aee8`): sesión, feed y selección; sin
+inventarios ni descargas; 30 créditos. Corrida de Boyacá y Huila con
+8 páginas y 10 días preparada, pendiente de autorización.
