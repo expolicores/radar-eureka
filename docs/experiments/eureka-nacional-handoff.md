@@ -1519,3 +1519,47 @@ No hace falta el estudio previo.
   horas.
 - Propuesta: corregir los falsos positivos offline y luego un tope
   de 18 páginas sólo para descubrimiento, con autorización.
+
+
+### Aprovechamiento de los 76 candidatos nacionales (offline)
+
+- Perfil comercial v3 por defecto (`c9b28e8`); v1 y v2 se conservan.
+  Corrige con reglas generales los 6 falsos positivos:
+  - «portátil» sólo en cómputo;
+  - alimento animal;
+  - erratas de mantenimiento;
+  - árboles y fertilizantes;
+  - eventos sin contexto de evento;
+  - calendarios como papelería.
+
+  Toda exclusión lleva motivo explícito. Regresión: Boyacá–Huila
+  recupera 68 y pierde 0.
+- Conciliación de los 76: 20 seleccionados, 51 en la cola pendiente y
+  5 excluidos por v3 con causa verificable. Cola de 71 en
+  `en01-2fxt0cm7/candidate_queue.json`: 61 abiertos y 10 con vigencia
+  desconocida, 37 bienes claros y 34 revisables. La experiencia queda
+  indeterminada hasta leer los documentos.
+- «66 de 177» frente a «125»: 66 + 125 = 191, las exclusiones
+  comerciales v1 sobre los 240 avisos. 177 es el subconjunto de la
+  auditoría, y dentro de él v2 recupera 57 y 120 siguen fuera.
+- Lote SECOP II `78cf1d7f…217b5`: 8 identidades que cierran el 30-11
+  y el 01-12, unos 17 créditos esperados, 25 como máximo y 300 s.
+- Lote SECOP I `c5a6d8e8…f9d1`: 26-13-14853902, 26-13-14853757 y
+  26-13-14853776; 3 créditos y 360 s. Nuevas opciones
+  `--secop1-plan-only` y `--secop1-expect-sha256`.
+- Secuencia propuesta, con una autorización por paso:
+  1. Lote SECOP I.
+  2. Lote SECOP II.
+  3. Rectores de los inventarios completos, por cierre (incluye
+     Chitaraque, 01-12 10:30).
+  4. El resto de la cola.
+- Limitación: los SECOP I pendientes de la cola no se pueden
+  recuperar con la herramienta actual; habría que ampliarla.
+- Descubrimiento de 18 páginas preparado (`936035e`), sólo con
+  `--discovery-only`: 30 créditos, 360 s y parada
+  `window_start_reached` (90 % de al menos 10 fechas válidas
+  anteriores a la ventana). No ejecutado.
+- Pruebas: 1029 aprobadas y 11 omitidas.
+- Pendiente de autorización: pruebas heredadas con un identificador
+  de perfil literal.
+- Detalle en el [informe](eureka-nacional-experience-spike.md#aprovechamiento-de-los-76-candidatos-nacionales-offline-sin-consultas).

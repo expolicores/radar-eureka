@@ -6915,3 +6915,296 @@ equiparan a oportunidades confirmadas.
    claros antes que revisables), con techo de créditos por lote. Los
    56 elegibles fuera de cuota de este piloto ya están registrados
    para esa cola.
+
+### Aprovechamiento de los 76 candidatos nacionales (offline, sin consultas)
+
+Todo este trabajo fue offline: cero consultas al feed, cero
+inventarios, cero descargas y cero IA. No se modificaron MPNE, el
+clasificador de experiencia, el perfil de Licitaciones.info ni Eureka
+Regional.
+
+#### 1. Perfil comercial v3: corrección de los 6 falsos positivos
+
+- Nueva versión `eureka-nacional-commercial-v3` (`c9b28e8`), ya por
+  defecto. v1 y v2 siguen cargables y con sus pruebas, así que toda
+  corrida sigue siendo trazable a la versión con que se evaluó.
+- Reglas generales y contextuales, sin reglas por entidad, municipio
+  ni proceso:
+
+| Patrón | Regla v3 | Resultado |
+|---|---|---|
+| «portátil» en equipos que no son de cómputo | «portátil» deja de ser palabra clave de tecnología; cuentan «computador portátil» y «portátil de cómputo» | La motobomba portátil sale del perfil (`outside_commercial_profile`). Los radios portátiles pasan a comunicaciones. Los computadores portátiles siguen en tecnología |
+| Alimento animal | Exclusiones «animales» y «concentrado» en alimentación | `category_excluded` con la frase «animales». La alimentación para personas (refrigerios, raciones, fuerza pública) se mantiene |
+| Erratas de mantenimiento | El patrón de servicio tolera «mantenimento», «mantenmiento» y variantes | Un servicio ajeno sin verbo de suministro y antes de cualquier producto es `primary_service`. Una mención posterior («para el mantenimiento de las redes») no excluye un suministro |
+| Árboles y fertilizantes como ferretería | Exclusiones «individuos arbóreos» y «compensación forestal» | `category_excluded`. Las herramientas para un vivero siguen en ferretería. Se descartó «material vegetal» porque excluía suministros legítimos |
+| Apoyo operativo a la fuerza pública como evento | La categoría eventos exige un contexto de evento (evento, celebración, jornada, festival, encuentro, foro, campeonato, taller, semana, final, copa, etc.) | Sin contexto la coincidencia se descarta explícitamente (`category_excluded`, frase `sin_contexto`). La logística de eventos sigue revisable |
+| Calendarios como alimentación | Sinónimos de papelería: «calendarios», «agendas institucionales», «material institucional impreso» | Categoría principal papelería; la coincidencia de alimentación (refrigerios) se conserva como secundaria |
+
+- Ningún descarte es silencioso: toda exclusión nueva lleva un motivo
+  (`primary_service`, `outside_commercial_profile` o
+  `category_excluded`) y, cuando aplica, la frase que la produjo en
+  `category_exclusions`. Los casos ambiguos (bienes y servicios)
+  siguen como `mixed_review`, revisables.
+- Pruebas: 20 de regresión v3 (`test_eureka_nacional_commercial_v3.py`)
+  y las 28 de v2.
+
+Regresión sobre datos guardados:
+
+- Piloto nacional `en01-2fxt0cm7`: de 76 elegibles quedan 71. Salen
+  los 5 falsos positivos con motivo verificable (ver la conciliación).
+  El de calendarios (CO1.NTC.11288789) sigue elegible, ahora como
+  papelería. Los radios (CO1.NTC.11288865) siguen elegibles, como
+  comunicaciones. Ningún elegible nuevo.
+- Corrida Boyacá–Huila `en01-1u44f6p7` (240 avisos): v3 recupera 68
+  descartes de v1 (v2 recuperaba 66) y no pierde ninguno. Se
+  recuperan agendas y una mezcla de papelería, aseo y tecnología
+  (revisable). Los juegos didácticos pasan a educación. Algunos
+  servicios puros cambian de motivo, de «fuera del perfil» a
+  «servicio principal».
+
+#### 2. Conciliación «66 recuperados de 177» frente a «125 siguen fuera»
+
+Las dos cifras salen de la misma corrida (`en01-1u44f6p7`, 240
+avisos), pero con denominadores distintos:
+
+- **191** = avisos que v1 excluyó comercialmente, contados sobre los
+  240 (`commercial_exclusion`): 143 fuera del perfil, 38 de servicio
+  principal, 8 de objeto no claro, 1 de perecederos o animales y 1 de
+  servicio digital.
+- **177** = universo de la auditoría de descartes: sólo los avisos
+  cuyo motivo final (`excluded_reason`) fue «fuera del perfil» (141) o
+  «servicio principal» (36). Es un subconjunto de los 191. Faltan 14:
+  - 7 de objeto no claro;
+  - 1 de perecederos o animales;
+  - 1 de servicio digital;
+  - 5 cuyo motivo final fue la geografía, aunque v1 también los
+    excluyera comercialmente.
+- v1 → v2 sobre los 191: **66 recuperados + 125 siguen fuera = 191**,
+  y 0 perdidos (los 49 elegibles de v1 siguen elegibles).
+- Dentro del universo de 177: 57 recuperados y 120 siguen fuera. Los
+  otros 9 recuperados (7 de objeto no claro, 1 de perecederos y 1 de
+  geografía) estaban fuera de los 177.
+
+Conclusión: «66 de 177» mezclaba un numerador de 191 con un
+denominador de 177. Las parejas consistentes son 66 de 191 (sobre los
+240) y 57 de 177 (sobre la auditoría). Con v3: 68 de 191 recuperados y
+123 siguen fuera.
+
+#### 3. Conciliación de los 76 elegibles del piloto nacional
+
+Herramienta nueva `eureka_nacional_candidate_queue.py`. Reevalúa
+offline la corrida con el perfil vigente, sólo sobre el objeto. Es
+fiel porque el feed no trajo descripciones: v2 aplicado sólo al
+objeto reproduce los 240 resultados guardados. Escribe
+`candidate_queue.json` en la corrida.
+
+| Destino | Procesos |
+|---|---|
+| Seleccionados en la corrida original | 20 |
+| Cola pendiente (fuera de cuota) | 51 |
+| Excluidos por v3, con causa verificable | 5 |
+| **Total** | **76** |
+
+Excluidos por v3:
+
+| Proceso | Motivo | Evidencia |
+|---|---|---|
+| CO1.NTC.11291622 | `primary_service` | «mantenimento de instrumentos musicales» (errata) |
+| secop1:26-13-14853319 | `category_excluded` | eventos sin contexto (`sin_contexto`): apoyo operativo a la fuerza pública |
+| CO1.NTC.11289417 | `outside_commercial_profile` | motobomba portátil |
+| CO1.NTC.11289165 | `category_excluded` | alimentación, frase «animales» |
+| CO1.NTC.11288882 | `category_excluded` | ferretería, frase «individuos arbóreos» |
+
+Cola de 71 candidatos:
+
+- Vigencia: 61 abiertos y 10 con vigencia desconocida (sin fecha de
+  cierre en el feed). Ningún candidato se pierde por la cuota ni por
+  la incertidumbre.
+- Confianza: 37 bienes claros y 34 revisables. Prioridad: 36 A y
+  35 B.
+- Fuente: 48 SECOP II y 23 SECOP I.
+- Inventario: 6 con inventario completo de corridas anteriores y 65
+  sin inventario.
+- Categorías: eventos 22, tecnología 11, papelería 9, alimentación 7,
+  uniformes y EPP 4, ferretería 4, educación 4, y otras.
+- Cierres: 28-11 (1), 30-11 (8), 01-12 (19), 02-12 (19), 03-12 (9),
+  04-12 (4), 07-12 (1) y 10 sin fecha.
+- Orden: abiertos con fecha de cierre primero, por cierre, luego A
+  antes que B, bienes claros antes que revisables. Siguen los de
+  vigencia desconocida.
+- Cada entrada lleva fuente, categoría y expresiones que coincidieron,
+  confianza, estado de inventario, análisis previo, anotación humana y
+  `experience: undetermined_until_documents_are_read`. La
+  elegibilidad comercial no implica ausencia de experiencia exigida.
+
+Procesos ya conocidos dentro de la cola:
+
+- secop1:26-13-14853212 (Boyacá, equipo de cómputo, cierra el 28-11
+  a las 17:55): ya analizado, `not_resolved`.
+- secop1:26-13-14853466 (Elías): `experience_required` guardado y
+  anotación humana de exigencia encontrada.
+- CO1.NTC.11288255 (Chitaraque, cierra el 01-12 a las 10:30):
+  inventario completo, rector sin descargar.
+- CO1.NTC.11288021 (instrumentos musicales, 30-11 a las 17:30):
+  inventariado, `uncertain`.
+- secop1:26-13-14853220 (Vaupés) y CO1.NTC.11287783 (Peque): ya
+  analizados, `not_resolved`.
+
+Cierres del 30-11 y del 01-12 (orden de la cola):
+
+| Cierre | Proceso | Prioridad y confianza | Departamento | Objeto | Estado |
+|---|---|---|---|---|---|
+| 30-11 08:00 | secop1:26-13-14853263 | B revisable | Chocó | Servicios logísticos para un evento | Pendiente |
+| 30-11 10:30 | secop1:26-13-14853466 | A revisable | Huila | Menaje y equipos tecnológicos (Elías) | Analizado |
+| 30-11 15:30 | secop1:26-13-14853902 | A bienes | Norte de Santander | Prendas de vestir y calzado | Lote SECOP I |
+| 30-11 16:00 | secop1:26-13-14853512 | B revisable | Nariño | Apoyo logístico, jornada cultural | Pendiente |
+| 30-11 17:00 | secop1:26-13-14853210 | B revisable | Cundinamarca | Apoyo logístico, integración cultural | Pendiente |
+| 30-11 17:00 | secop1:26-13-14853864 | B revisable | Nariño | Apoyo logístico, celebración | Pendiente |
+| 30-11 17:30 | CO1.NTC.11288021 | B bienes | Boyacá | Instrumentos musicales | Inventariado, incierto |
+| 30-11 18:00 | CO1.NTC.11288865 | B bienes | Atlántico | Radios de comunicación portátiles | Lote SECOP II |
+| 01-12 08:10 | CO1.NTC.11288633 | A bienes | Cundinamarca | Papelería y tóner | Lote SECOP II |
+| 01-12 08:30 | CO1.NTC.11288464 | B revisable | Santander | Servicios logísticos | Pendiente |
+| 01-12 09:00 | secop1:26-13-14853436 | B bienes | Santander | Mobiliario e implementos institucionales | Pendiente (ver limitación) |
+| 01-12 10:00 | CO1.NTC.11288302 | A bienes | Huila | Dotación de calzado y vestido | Lote SECOP II |
+| 01-12 10:00 | secop1:26-13-14853196 | B revisable | Cundinamarca | Apoyo logístico | Pendiente |
+| 01-12 10:30 | CO1.NTC.11288255 | A bienes | Boyacá | Aseo, dotación y equipos tecnológicos (Chitaraque) | Inventariado; rector pendiente |
+| 01-12 14:00 | CO1.NTC.11289436 | B bienes | Boyacá | Paquetes alimentarios | Lote SECOP II |
+| 01-12 14:31 | secop1:26-13-14853757 | A bienes | Antioquia | Mobiliario, tecnología y papelería | Lote SECOP I |
+| 01-12 15:00 | CO1.NTC.11293531 | A bienes | Valle del Cauca | Dotación de calzado y vestido | Lote SECOP II |
+| 01-12 15:00 | CO1.NTC.11290209 | B revisable | Caquetá | Servicios logísticos | Pendiente |
+| 01-12 15:00 | CO1.NTC.11292400 | B revisable | Valle del Cauca | Apoyo logístico, festival | Pendiente |
+| 01-12 17:00 | CO1.NTC.11292238 | A revisable | Norte de Santander | Impresora multifuncional | Lote SECOP II |
+| 01-12 17:00 | CO1.NTC.11293957 | A revisable | Caldas | Elementos tecnológicos y utilitarios | Lote SECOP II |
+| 01-12 17:00 | CO1.NTC.11292459 | B revisable | Caldas | Alimentación, refrigerios, material institucional | Pendiente |
+| 01-12 17:00 | secop1:26-13-14853480 | B revisable | Norte de Santander | Apoyo logístico, olimpiada | Pendiente |
+| 01-12 17:40 | CO1.NTC.11293767 | B revisable | Valle del Cauca | Apoyo logístico | Pendiente |
+| 01-12 18:00 | CO1.NTC.11288789 | A bienes | Caldas | Calendarios institucionales y refrigerios | Lote SECOP II |
+| 01-12 18:00 | secop1:26-13-14853776 | A bienes | Nariño | Ferretería e instalación de decoración navideña | Lote SECOP I |
+| 01-12 18:00 | secop1:26-13-14853727 | B revisable | Antioquia | Servicios logísticos, foro | Pendiente |
+
+#### 4. Lotes preparados (no ejecutados)
+
+Lote SECOP II, plan `en01-inv_2fxt0cm7/inventory_plan.json`:
+
+- Hash `78cf1d7fca974ec83c99eb84b2526f8f26f2c6802c6219868c08ccef481217b5`.
+- 8 identidades, por cierre:
+  - CO1.NTC.11288865;
+  - CO1.NTC.11288633;
+  - CO1.NTC.11288302;
+  - CO1.NTC.11289436;
+  - CO1.NTC.11293531;
+  - CO1.NTC.11292238;
+  - CO1.NTC.11293957;
+  - CO1.NTC.11288789.
+- Presupuesto:
+  - unos 17 créditos esperados (2 por inventario corto más el
+    arranque);
+  - límite duro de 25 créditos;
+  - 300 s como máximo;
+  - hasta 10 páginas por proceso.
+- Sin feed, sin descargas y sin intentos previos. Si se alcanza el
+  límite, los procesos restantes quedan registrados como pendientes.
+
+Lote SECOP I, recuperación de inventarios desde `en01-2fxt0cm7`:
+
+- Hash `c5a6d8e8d9e5fb52ca8757d8b37dc6785a5b67fc45e84d163a4d9f51e440f9d1`.
+- Hash del `processes.json` fuente:
+  `4dafc1ae55239744950dcf8b0235de7d6010decf82e2e39dc6ff51625d2f2947`.
+- 3 constancias:
+  - 26-13-14853902 (30-11 15:30);
+  - 26-13-14853757 (01-12 14:31);
+  - 26-13-14853776 (01-12 18:00).
+- Presupuesto:
+  - 3 créditos: uno por constancia, sin una segunda página;
+  - 360 s como máximo.
+- Controles:
+  - sólo constancias seleccionadas en la corrida fuente, validado
+    también offline al calcular el hash;
+  - sin feed ni descubrimiento;
+  - sin POST a SECOP ni descargas;
+  - se rechaza con marcador preventivo presente o con una
+    recuperación previa;
+  - el hash cubre la corrida, el contenido exacto de su
+    `processes.json`, las constancias y el límite de créditos.
+- Nuevas opciones: `--secop1-plan-only` calcula el hash sin conectar,
+  y `--secop1-expect-sha256` rechaza cualquier lote distinto antes de
+  abrir el navegador.
+- Comando de ejecución, que requiere autorización:
+
+  `eureka_nacional_en01.py --secop1-inventory-from en01-2fxt0cm7
+  --secop1-constancia 26-13-14853902 --secop1-constancia
+  26-13-14853757 --secop1-constancia 26-13-14853776
+  --secop1-expect-sha256 c5a6d8e8…f9d1`
+
+- La adquisición posterior de documentos SECOP I sigue el flujo del
+  trabajador (inicio de sesión manual y confirmación del lote por
+  hash) y requiere una autorización aparte.
+
+Secuencia propuesta, por cierre y con una autorización por paso:
+
+1. Lote SECOP I (3 créditos). Incluye el cierre más cercano con
+   bienes claros sin analizar (26-13-14853902, 30-11 15:30).
+2. Lote SECOP II (hasta 25 créditos), con el cierre del 30-11 a las
+   18:00 y siete del 01-12.
+3. Planes documentales dirigidos sólo para los procesos con
+   inventario completo, en orden de cierre. Chitaraque
+   (CO1.NTC.11288255, 01-12 10:30) ya tiene inventario completo y sólo
+   le falta el rector.
+4. Luego, los pendientes del 02-12 al 04-12 y los de vigencia
+   desconocida, desde la cola.
+
+Limitación: la recuperación SECOP I sólo admite procesos
+seleccionados en la corrida fuente. Los SECOP I pendientes de la cola
+(por ejemplo 26-13-14853436, mobiliario, 01-12 09:00, y 26-13-14853320,
+aseo, 02-12) necesitarían ampliar la herramienta para aceptar la cola
+como fuente. Es un cambio acotado que requiere autorización y no se
+hizo.
+
+Las 12 entradas revisables de prioridad B con cierre del 30-11 y del
+01-12 (11 de eventos y 1 de alimentación) quedan en la cola. No se
+incluyeron en los lotes porque son principalmente servicios
+logísticos.
+
+#### 5. Descubrimiento de hasta 18 páginas (preparado, no ejecutado)
+
+- `DISCOVERY_ONLY_MAX_PAGES = 18`, aceptado sólo con `--exploratory
+  --discovery-only`. Fuera de ese modo el tope sigue en 8, y en modo
+  normal en 6.
+- Presupuesto: 30 créditos y 360 s, los mismos del modo de sólo
+  descubrimiento (sondeo de sesión más 18 páginas = 19 créditos como
+  máximo). Sin inventarios, descargas, streaming ni cola SECOP I.
+- Parada temprana `window_start_reached`:
+  - se aplica cuando una página ya está antes del inicio de la ventana
+    pedida (corte menos `--recent-days`);
+  - exige al menos 10 fechas válidas en la página y que el 90 % de
+    ellas sean anteriores a la ventana;
+  - las filas sin fecha válida nunca cuentan como antiguas;
+  - pocas filas anómalas (fechas sin hora a las 00:00, correcciones
+    tardías) no detienen la búsqueda;
+  - cada página registra `window` (fechadas, anteriores a la ventana y
+    decisión).
+- Otras paradas que se conservan: `provider_end`,
+  `provider_repeated_page` y `page_budget`.
+- Pruebas: parada al llegar al inicio de la ventana, tolerancia a
+  filas anómalas, páginas con pocas fechas, tope de 18 sólo con
+  `--discovery-only`, y rechazo de 9 páginas sin ese modo y de 19 con
+  él.
+- Comando propuesto, que requiere autorización aparte:
+
+  `eureka_nacional_en01.py --exploratory --discovery-only
+  --include-secop1 --processes 15 --discovery-pages 18 --recent-days 2`
+
+#### 6. Código y pruebas
+
+- `936035e`:
+  - cola de candidatos;
+  - reevaluación de ventana con `--recompute-commercial`;
+  - hash del lote de recuperación SECOP I;
+  - tope de 18 páginas con parada temprana.
+- Suite: 1029 pruebas aprobadas y 11 omitidas; ruff limpio en los
+  archivos tocados.
+- Hallazgo no corregido: varias pruebas heredadas del historial común
+  (por ejemplo `test_licitaciones_cdp.py`, de octubre) contienen un
+  identificador de perfil literal. No se tocaron porque son anteriores
+  a esta rama. Se recomienda sustituirlo por un valor de ejemplo con
+  autorización.
