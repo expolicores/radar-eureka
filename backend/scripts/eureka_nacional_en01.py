@@ -70,6 +70,10 @@ OCR_PER_DOCUMENT = 2
 REQUEST_CREDITS = 60
 DURATION_SECONDS = 360
 EXPLORATORY_PROCESSES = 15
+# Discovery-only: session probe and feed pages, then selection; never inventories,
+# documents, streaming or SECOP I acquisition.
+DISCOVERY_ONLY_CREDITS = 30
+DISCOVERY_ONLY_SECONDS = 360
 EXPLORATORY_DISCOVERY_PAGES = 8
 EXPLORATORY_DOCUMENTS = 24
 EXPLORATORY_PER_PROCESS = 3
@@ -1216,7 +1220,9 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
     hashes = set()
     status = "failed"
     exit_code = 1
-    include_secop1 = getattr(args, "include_secop1", False)
+    discovery_only = getattr(args, "discovery_only", False)
+    # In discovery-only mode SECOP I is evaluated for selection but never inventoried.
+    include_secop1 = getattr(args, "include_secop1", False) and not discovery_only
     secop1_items = []
     deferred_stop = None
     try:
@@ -1226,6 +1232,9 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
         if resume is None:
             check_session(client, client.profile_id, aggregator=True)
             sample = discover(client, args, now, discovery, profile, locations)
+            if discovery_only:
+                discovery["mode"] = "discovery_only"
+                sample = []  # selection is recorded; nothing is inventoried or downloaded
         else:
             sample = [{**row, "sampled": True} for row in resume[: args.processes]]
             discovery.update(
@@ -1373,11 +1382,13 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
         if deferred_stop is not None:
             raise deferred_stop
         complete = (
-            len(sample) == args.processes
+            (discovery_only or len(sample) == args.processes)
             and discovery["stop_reason"] != "provider_repeated_page"
             and not errors
         )
         status, exit_code = ("completed", 0) if complete else ("partial", 2)
+        if discovery_only and complete:
+            status = "discovery_completed"
     except BudgetReached as error:
         status, exit_code = "partial", 2
         errors.append({"stage": "budget", "code": str(error)})
@@ -1419,8 +1430,17 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "ocr_pages_per_pdf": getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
             "ocr_pages_per_run_upper_bound": args.documents
             * getattr(args, "ocr_pages", OCR_PER_DOCUMENT),
-            "request_credits": EXPLORATORY_REQUEST_CREDITS if exploratory else REQUEST_CREDITS,
-            "duration_seconds": EXPLORATORY_DURATION_SECONDS if exploratory else DURATION_SECONDS,
+            "request_credits": DISCOVERY_ONLY_CREDITS
+            if discovery_only
+            else EXPLORATORY_REQUEST_CREDITS
+            if exploratory
+            else REQUEST_CREDITS,
+            "duration_seconds": DISCOVERY_ONLY_SECONDS
+            if discovery_only
+            else EXPLORATORY_DURATION_SECONDS
+            if exploratory
+            else DURATION_SECONDS,
+            "discovery_only": discovery_only,
             "ai_calls": 0,
         }
         if include_secop1:
@@ -1436,7 +1456,7 @@ def run(client, args, settings, output, *, now=None, profile=None, locations=Non
             "parent_cpu_seconds": round(time.process_time() - parent_cpu, 3),
             **metrics_summary(discovery, results, metrics, client, started, profile),
         }
-        if include_secop1:
+        if include_secop1 or discovery_only:
             summary["by_source"] = metrics_by_source(discovery, results, secop1_items)
         for filename, data in (
             ("processes.json", discovery),
@@ -1558,6 +1578,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exploratory", action="store_true", help="Presupuesto EN-01.4.")
     parser.add_argument(
+        "--discovery-only",
+        action="store_true",
+        help="Solo sesion, feed y seleccion (30 creditos); sin inventarios ni descargas.",
+    )
+    parser.add_argument(
         "--edge-stream-fallback",
         "--edge-download-fallback",
         action="store_true",
@@ -1653,6 +1678,13 @@ def main(argv=None):
             parser.error("Constancia SECOP I invalida.")
         if args.include_secop1 or args.resume_inventory_from or args.exclude_analyzed_from:
             parser.error("La recuperacion SECOP I no combina descubrimiento ni reanudacion.")
+    if args.discovery_only and (
+        args.resume_inventory_from
+        or args.secop1_inventory_from
+        or args.edge_stream_fallback
+        or args.conditional_extra_feed_pages
+    ):
+        parser.error("--discovery-only no combina reanudacion, recuperacion ni descargas.")
     if args.secop1_processes is not None and not args.include_secop1:
         parser.error("--secop1-processes requiere --include-secop1.")
     if args.include_secop1 and args.resume_inventory_from:
@@ -1713,6 +1745,8 @@ def main(argv=None):
         print(json.dumps({"output": str(output)}), flush=True)
         duration = EXPLORATORY_DURATION_SECONDS if args.exploratory else DURATION_SECONDS
         credits = EXPLORATORY_REQUEST_CREDITS if args.exploratory else REQUEST_CREDITS
+        if args.discovery_only:
+            duration, credits = DISCOVERY_ONLY_SECONDS, DISCOVERY_ONLY_CREDITS
         deadline = time.monotonic() + duration
         settings = settings_for_run(output, args.tesseract, args.tessdata, args.ocr_pages)
         with sync_playwright() as playwright:

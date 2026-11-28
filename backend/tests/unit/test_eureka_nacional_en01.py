@@ -1985,3 +1985,51 @@ def test_national_stream_reuses_verified_pdf_and_stops_when_close_is_uncertain(
     with pytest.raises(en01.BudgetReached, match="download_close_unverified"):
         analyze(Counter(), [])
     inventory.assert_not_called()
+
+
+def test_discovery_only_reads_the_feed_and_selects_without_any_document_request(
+    tmp_path, monkeypatch
+):
+    # Arrange
+    calls = []
+    data = [row(1, "Boyacá"), row(2, "Nariño"), row(3, "Nariño", "Servicio de aseo")]
+
+    def post(path, payload):
+        calls.append(path)
+        if path == DOCUMENT_ENDPOINT:
+            raise AssertionError("discovery-only must not request inventories")
+        return {"count": 3, "data": data}
+
+    monkeypatch.setattr(en01, "check_session", Mock())
+    monkeypatch.setattr(
+        en01.spike, "download_document", Mock(side_effect=AssertionError("no download"))
+    )
+    client = SimpleNamespace(
+        post=post, profile_id=EXAMPLE_PROFILE, deadline=time.monotonic() + 360, requests=2
+    )
+    args = SimpleNamespace(
+        discovery_pages=4,
+        documents=5,
+        processes=5,
+        recent_days=30,
+        discovery_only=True,
+        include_secop1=True,
+        secop1_processes=5,
+    )
+
+    # Act
+    assert en01.run(client, args, None, tmp_path, now=CUTOFF) == 0
+
+    # Assert
+    assert calls
+    assert all(path != DOCUMENT_ENDPOINT for path in calls)
+    assert report(tmp_path, "metrics.json")["status"] == "discovery_completed"
+    discovery = report(tmp_path, "processes.json")
+    assert discovery["mode"] == "discovery_only"
+    assert any(p.get("sampled") for p in discovery["processes"])
+    metrics = report(tmp_path, "metrics.json")
+    assert metrics["limits"]["discovery_only"] is True
+    assert metrics["limits"]["request_credits"] == en01.DISCOVERY_ONLY_CREDITS
+    assert metrics["documents_downloaded"] == 0
+    assert report(tmp_path, "documents.json") == []
+    assert not (tmp_path / "secop1_queue.json").exists()
