@@ -1484,3 +1484,20 @@ tecnológicos por más del 100 % del presupuesto (página 24). Estado
 `experience_required`, apoyado en una cláusula de desempate (página
 29); es un posible punto de mejora del clasificador, no modificado.
 No hace falta el estudio previo.
+
+
+### Auditorías offline
+
+- Evidencia: las cuotas de experiencia de los criterios legales de
+  desempate y las menciones de producto ya no cuentan como exigencia
+  (`5f93f5f`, `dbc3dcc`). Regresión: sólo Elías pasa de
+  `experience_required` (basado en el desempate) a `not_resolved`; su
+  exigencia real queda como anotación humana.
+- Descartes: de 177, unos 55 son categorías del perfil no
+  reconocidas (sinónimos insuficientes), 18 de alimentación y 12 de
+  eventos mixtos merecen segunda evaluación; unos 91 están
+  correctamente excluidos y 1 tiene información insuficiente.
+  Filtros sin cambios.
+- Escala nacional: la geografía ya es un parámetro (nacional por
+  defecto). El límite es de 8 páginas por corrida. Ensayo nacional de
+  sólo descubrimiento propuesto, de unos 10 créditos.

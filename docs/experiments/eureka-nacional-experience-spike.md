@@ -6554,3 +6554,160 @@ Todos los procesos analizados tras la búsqueda con Vila Frontier
 exigen experiencia o tienen indicios de exigirla: Yaguará, Anacleto
 García (provisional), Ramiriquí y Elías. Briceño sigue bloqueado por
 tamaño y Windsor está adjudicado.
+
+### Auditorías offline: calidad de la evidencia, descartes comerciales y escala nacional
+
+Todo offline: ningún feed, inventario, descarga ni POST. Elías queda
+resuelto comercialmente; no se adquiere su estudio previo.
+
+#### 1. Calidad de la evidencia de experiencia
+
+Causa en Elías:
+
+- El lector de cláusulas unió en una sola cláusula el final de un
+  requisito («deberá presentar certificación expedida por la ARN…»)
+  con el criterio legal de desempate de la Ley 2069 de 2020, art. 35:
+  «la madre cabeza de familia, la persona en proceso de
+  reincorporación o reintegración… aporte mínimo el veinticinco por
+  ciento (25%) de la experiencia acreditada en la oferta».
+- «deberá presentar» más «experiencia» activó la regla de exigencia
+  explícita del proponente.
+- La regla existente para cuotas de desempate (`PREFERENCE_SHARE`)
+  sólo cubría MIPYME, cooperativas y asociaciones mutuales.
+- El requisito habilitante real de la página 24 («Anexar un (01)
+  Contratos y/o certificados de experiencia especifica…») es un
+  imperativo sin sujeto, fuera de una sección detectada. Por eso queda
+  como condicional.
+
+Patrón en el histórico:
+
+- Exigencias con marcadores de desempate: 2 procesos. Elías, y uno de
+  `en01-hb4_beb5`, que ya era `experience_ambiguous` por otras
+  razones.
+- Menciones de experiencia en fichas de producto («una cómoda
+  experiencia de asiento», «una experiencia de trabajo más cómoda»):
+  Elías y Ramiriquí. Se registraban como condicionales y bloqueaban la
+  prioridad.
+
+Correcciones generales (sin reglas por entidad):
+
+- `5f93f5f`: `PREFERENCE_SHARE` cubre todos los sujetos del criterio
+  legal de desempate (madre cabeza de familia, reincorporación o
+  reintegración, discapacidad, mujeres víctimas de violencia, además
+  de MIPYME, cooperativas y asociaciones mutuales). Esa cuota de
+  experiencia es un criterio de desempate y nunca un requisito
+  habilitante.
+- `dbc3dcc`: las menciones de producto no convierten una cláusula en
+  una cláusula de experiencia si no queda otra mención.
+- Pruebas: 12 nuevas. Incluyen que una exigencia real del proponente
+  sigue siendo EXIGENCIA aunque aparezca un sujeto protegido o una
+  descripción de producto.
+- Suite nacional: 961 pasan y 11 se omiten, con código de salida 0.
+
+Regresiones sobre los PDF guardados (89 PDF, 104 instancias de
+proceso, sólo texto nativo):
+
+- Desempate (`tiebreak-regression-lti3p7vq`): sólo cambia Elías (dos
+  instancias), que pasa de `experience_required`
+  (`explicit_bidder_requirement`) a `not_resolved`
+  (`no_decisive_clause`). Las dependencias se mantienen en 15.
+- Producto (`product-regression-cnjn3j2h`): 0 cambios de estado,
+  razón, revisión o dependencias.
+
+Elías tras la corrección:
+
+- La conclusión formal anterior se apoyaba en la cláusula equivocada.
+  Ahora se conserva la incertidumbre.
+- La exigencia real (página 24) queda registrada como anotación
+  humana separada en `eureka_nacional_human_reviews.v1.json`, con
+  `system_verified: false`. Esto refleja la decisión comercial del
+  titular y no cambia la categoría ni el estado formal.
+
+Propuesta, no implementada (la evidencia aún no basta):
+
+- Tratar como EXIGENCIA los imperativos de acreditación sin sujeto
+  («Anexar / Adjuntar / Aportar … contratos o certificados de
+  experiencia…») sólo cuando estén dentro de una sección habilitante
+  detectada.
+- En Elías no se detectó la sección, así que no cambiaría el caso.
+  Primero habría que mejorar la detección de secciones en
+  invitaciones de SECOP I.
+
+#### 2. Auditoría de descartes comerciales (`en01-1u44f6p7`)
+
+- Universo: 177 descartes (141 fuera del perfil comercial y 36 de
+  servicio principal).
+- Clasificación heurística (`commercial_exclusion_audit*.json` en la
+  corrida), aproximada y sin modificar filtros:
+
+| Grupo | Descartes | Abiertos | Lectura |
+|---|---|---|---|
+| Categoría del perfil no reconocida | 55 (50 fuera del perfil, 5 de servicio) | 12 | Segunda evaluación: dotación de calzado y vestido, elementos de oficina, equipos y elementos tecnológicos, consumibles de impresión, elementos didácticos y deportivos, alumbrado e iluminación |
+| Alimentación | 18 | 6 | Segunda evaluación si el negocio la incluye: paquetes alimentarios, refrigerios, raciones, mercados. El perfil comercial no tiene una categoría de alimentos |
+| Eventos y logística mixtos | 12 | 1 | Segunda evaluación sólo cuando predomina el suministro de bienes |
+| Otros bienes fuera del perfil | 38 | 14 | Correctamente excluidos en su mayoría (combustible, recebo, bovinos, parques infantiles, maquinaria); unos pocos son dudosos |
+| Servicios o fuera de alcance | 53 | 14 | Correctamente excluidos: obra, consultoría, mantenimiento, capacitación, convenios |
+| Información insuficiente | 1 | 0 | «suministro de arepas» |
+
+Causa principal de los falsos descartes en categorías del perfil:
+
+- Estos avisos no traen códigos UNSPSC, así que la clasificación
+  depende sólo de palabras clave y sinónimos.
+- Las listas no cubren expresiones habituales:
+  - «equipos tecnológicos» (Tecnología sólo reconoce «computador»,
+    «portátil», «equipo de cómputo»…);
+  - «calzado y vestido de labor» (Dotación reconoce «uniforme» y
+    «calzado de seguridad»);
+  - «elementos de oficina» (Papelería reconoce «útiles de oficina» y
+    «materiales de oficina»);
+  - «consumibles de impresión», «elementos didácticos».
+- Ejemplos abiertos:
+  - CO1.NTC.11285010, equipos tecnológicos;
+  - CO1.NTC.11288302, dotación de calzado y vestido;
+  - secop1:26-13-14852992, consumibles de impresión;
+  - CO1.NTC.11281694, dispositivos móviles y comunicaciones;
+  - CO1.NTC.11290740, elementos didácticos.
+
+Recomendación, sin aplicar:
+
+- Revisar con el titular una ampliación de sinónimos por categoría,
+  con regresión sobre los 240 avisos guardados de cada corrida.
+- Decidir si alimentación y logística de eventos forman parte del
+  negocio: hoy no existen como categorías. Si se incorporan, hacerlo
+  como categorías propias, con exclusiones para servicios puros, y no
+  aceptando servicios en general.
+
+#### 3. Preparación para la escala nacional
+
+- La geografía es un parámetro. Por defecto, EN-01 usa la captura
+  nacional `eureka_nacional_geography(from_licitaciones_info).v1.json`
+  (1.130 ubicaciones). Boyacá y Huila son un subconjunto derivado y
+  validado contra esa captura, que sólo se aplica con `--geography`.
+- El perfil comercial declara `geography: nacional`.
+- No hay exclusión por distancia: la selección es por cuotas,
+  vigencia, modalidad y prioridad comercial, nunca por lejanía.
+- Dependencias fijas de Boyacá: sólo en módulos heredados del radar
+  regional dentro de `licitaciones_cdp_runtime.py` (`IDS_FILE`,
+  `outside_boyaca`) y `licitaciones_search_plan.py`. EN-01 no los
+  usa.
+- Límite técnico: el modo exploratorio admite como máximo 8 páginas
+  de feed (`EXPLORATORY_DISCOVERY_PAGES`). Con 1.130 ubicaciones, 240
+  avisos cubrirán sólo unas horas de publicaciones nacionales.
+
+Ensayo propuesto (no ejecutado):
+
+1. Sólo descubrimiento, nacional (sin `--geography`):
+   `--exploratory --discovery-only --include-secop1 --processes 15
+   --discovery-pages 8 --recent-days 2`. Unos 10 créditos (límite de
+   30) y 360 s.
+   - Mide la densidad nacional, el intervalo cubierto por 8 páginas,
+     la distribución por departamento y fuente, y los elegibles.
+   - No inventaría ni descarga.
+2. Según la densidad medida, proponer con evidencia un tope mayor de
+   páginas sólo para descubrimiento (por ejemplo 20 páginas y 30
+   créditos). Requiere autorización y un cambio de código acotado.
+3. Control de costos nacional:
+   - inventarios por lotes con hash, ordenados por prioridad comercial
+     A/B/C y cierre próximo;
+   - techo de créditos por lote;
+   - sin descartar procesos por distancia.
