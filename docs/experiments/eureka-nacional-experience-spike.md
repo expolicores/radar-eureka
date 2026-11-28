@@ -6241,7 +6241,7 @@ Sin recibos ni intentos previos.
 
 #### Plan SECOP I de Elías (no ejecutado)
 
-- Proceso `licitaciones_info:1086005:12363176`, constancia
+- Proceso SECOP I (contrato del proveedor 12363176), constancia
   26-13-14853466, Alcaldía de Elías (Huila).
 - Objeto: menaje para alimentación escolar y equipos tecnológicos.
 - Prioridad B (gastronomía); abierto; cierre 30-11 10:30.
