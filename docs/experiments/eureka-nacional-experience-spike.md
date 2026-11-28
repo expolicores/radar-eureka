@@ -6490,3 +6490,67 @@ Conclusión, separando lo formal de lo comercial:
     preflight;
   - un único POST;
   - 10 MiB y 12 s como máximo.
+
+### Elías (SECOP I 26-13-14853466): invitación adquirida y analizada
+
+#### Adquisición (cola 52cd4e7a)
+
+- Controles previos:
+  - Edge dedicado verificado;
+  - una sola pestaña, en `/cliente/contratos`;
+  - preflight de perfil único con sesión válida;
+  - sin marcador ni intentos previos.
+- Trabajador con la corrección `57e2332`:
+  1. contexto desechable con descargas nativas bloqueadas;
+  2. inicio de sesión manual del titular;
+  3. preflight listo: sesión válida, `only_configured`,
+     `profile_count: 1`, sin cambio de perfil y feed bloqueado;
+  4. espera de confirmación (`awaiting_batch_confirmation`);
+  5. confirmación del titular, escrita con el hash completo.
+- Resultado:
+  - **1 POST**, HTTP 200;
+  - 596.153 bytes, con firma `%PDF-` y marca `%%EOF`;
+  - `size_origin: received_undeclared`; el inventario mostraba 582 KB;
+  - SHA-256 `17f89b4900319cab33de6f3c8a974bb07675bf5f5ac141adb8589d598890f30d`,
+    verificado de nuevo sobre el archivo guardado;
+  - recibo registrado.
+- Cierre: contexto cerrado, `disconnected: true` y marcador liberado
+  automáticamente; pestaña habitual intacta.
+
+#### Análisis offline (`en01-secop1_secop1inv_1u44f6p7`)
+
+- Cobertura: invitación de 48 de 48 páginas de texto nativo,
+  completa. El estudio previo y el CDP no se descargaron.
+- Evidencia:
+  - **Página 24** (requisito habilitante): «Anexar un (01) Contratos
+    y/o certificados de experiencia especifica en los que se acredite
+    el suministro de equipos tecnológicos, con particular o entidad
+    pública ejecutado en las últimas dos vigencias, que el valor del
+    contrato sea superior al 100% del…». Además: «cada uno de los
+    integrantes deberá acreditar la experiencia general requerida».
+  - Páginas 25 y 26: liquidación o factura electrónica,
+    proporcionalidad para consorcios y certificación de facturación
+    entre particulares.
+- Estado formal: **`experience_required`**
+  (`explicit_bidder_requirement`). Hallazgo: «Experiencia exigida».
+- Matiz para revisión humana:
+  - La cláusula que el clasificador tomó como EXIGENCIA decisiva está
+    en la página 29 y pertenece a los factores de desempate (aporte
+    del 25 % de la experiencia por una persona en condición
+    especial). No es el requisito habilitante.
+  - El requisito habilitante real (página 24) quedó como condicional.
+  - La conclusión de fondo es correcta, pero se apoya en la cláusula
+    equivocada. Es un posible punto de mejora del clasificador; no se
+    modificó.
+- El estudio previo (396 KB) no es necesario: la invitación completa
+  basta. No se prepara su adquisición.
+- Valoración comercial: exige experiencia específica (1 contrato de
+  equipos tecnológicos por más del 100 % del presupuesto). Prioridad
+  reducida.
+
+#### Situación de la tanda
+
+Todos los procesos analizados tras la búsqueda con Vila Frontier
+exigen experiencia o tienen indicios de exigirla: Yaguará, Anacleto
+García (provisional), Ramiriquí y Elías. Briceño sigue bloqueado por
+tamaño y Windsor está adjudicado.

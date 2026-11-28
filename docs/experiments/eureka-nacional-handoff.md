@@ -1475,3 +1475,12 @@ confirmación se espera sólo después de un preflight listo
 (`57e2332`, 7 pruebas nuevas). El marcador se archivó tras comprobar
 que no quedaba ningún trabajador, CDP ni Edge activo. Elías queda
 listo para retomarse con el Edge abierto e inicio de sesión manual.
+
+### Elías adquirido y analizado
+
+1 POST con cierre seguro y marcador liberado automáticamente. La
+invitación, completa (48 páginas), exige 1 contrato de equipos
+tecnológicos por más del 100 % del presupuesto (página 24). Estado
+`experience_required`, apoyado en una cláusula de desempate (página
+29); es un posible punto de mejora del clasificador, no modificado.
+No hace falta el estudio previo.
