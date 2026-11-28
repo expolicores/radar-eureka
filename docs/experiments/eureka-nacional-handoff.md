@@ -1619,3 +1619,27 @@ No hace falta el estudio previo.
   revisión humana de los casos con indicios. Sin más adquisiciones por
   ahora.
 - Detalle en el [informe](eureka-nacional-experience-spike.md#lotes-documentales-nacionales-secop-ii-6739ec02-y-chitaraque-eb7bf69b).
+
+### Cierre del refinamiento (28-11)
+
+- Durania (CO1.NTC.11292238): revisión humana favorable del titular,
+  candidata a control positivo MPNE. El estado formal se conserva
+  aparte. Sin más análisis.
+- Reglas generales v4 (`5d0cdf8`):
+  - negación en plural («no se exigen experiencia»);
+  - una negación posterior ya no anula una exigencia;
+  - «deberá anexar contratos» cuenta como exigencia;
+  - las cuotas de desempate del 25 % son otro criterio.
+- Regresión en 98 PDF: cambian 4 procesos, todos verificados; ninguna
+  exigencia perdida.
+- Una renuncia explícita se muestra como prioritaria para revisión
+  aunque falten documentos.
+- Suite: 1064 pruebas aprobadas.
+- Pendientes imprescindibles:
+  1. Panel nacional consolidado.
+  2. Registro de revisiones por comando.
+  3. Propuesta automática del siguiente lote.
+  4. Una corrida autorizada de descubrimiento de 18 páginas para fijar
+     la cadencia.
+  5. Decisión sobre rectores de más de 10 MiB.
+- Detalle en el [informe](eureka-nacional-experience-spike.md#cierre-del-refinamiento-reglas-generales-v4-y-flujo-nacional).

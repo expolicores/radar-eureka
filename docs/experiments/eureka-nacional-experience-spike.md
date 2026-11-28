@@ -7517,3 +7517,96 @@ Ninguno de los dos declara que no se exija experiencia.
     Chitaraque;
   - 2 pendientes por tamaño: Huila y Norcasia.
 - La cola de 71 candidatos se regeneró offline con estos resultados.
+
+### Cierre del refinamiento: reglas generales v4 y flujo nacional
+
+#### Durania: revisión humana favorable
+
+- CO1.NTC.11292238 (impresora, Concejo de Durania): el titular
+  confirma que no exige experiencia contractual.
+- Se registró en `eureka_nacional_human_reviews.v1.json`:
+  - `observation: no_experience_requirement_found`;
+  - `system_verified: false`;
+  - candidato a control positivo MPNE con los atributos de la fuente:
+    concejo municipal (inferido), Norte de Santander, 5.500.000 COP,
+    mínima cuantía, tecnología.
+- El estado formal del clasificador se conserva aparte. No se
+  descargó el estudio previo ni se hizo más análisis.
+
+#### Reglas generales v4 (`5d0cdf8`, `en01-contextual-v4`)
+
+| Regla | Antes | Ahora | Salvaguarda |
+|---|---|---|---|
+| Negación explícita en plural | «No se exigen experiencia, …» quedaba incierta | Renuncia explícita (`explicit_waiver`) | «No se exige experiencia mínima adicional…» sigue sin ser renuncia |
+| Negación alrededor de una exigencia | Cualquier «no» de la cláusula anulaba la exigencia («…no sea inferior…», «No se aceptarán copias») | Sólo anula una negación anterior a la exigencia | «No es obligatorio que el proponente deba acreditar…» no es exigencia |
+| Anexar contratos | «El proponente deberá anexar copia de contratos…» quedaba incierta | Exigencia `bidder_contract_submission`, sólo donde antes quedaba incierta | Opcional («podrá»), limitado (consorcios) o de otro actor (contratista, personal): no |
+| Cuotas de desempate | El 25 % de la experiencia de un integrante (Ley 2069) se leía como alcance incierto o restricción | Otro criterio, también dentro de secciones de proponentes plurales | Otras cuotas plurales (40 %, 10 %) no cambian |
+
+- Presentación: una renuncia explícita pendiente de corroboración pasa
+  a «Hallazgo prioritario para revisión» aunque haya documentos sin
+  verificar (queda como advertencia). Antes se mostraba como
+  incertidumbre. Los estados formales no cambian.
+- Se conservan las cinco categorías: confirmado, prioritario para
+  revisión, con incertidumbre, indicios de experiencia exigida y
+  experiencia exigida. Ningún candidato se oculta.
+- Pruebas: 22 de regresión nuevas
+  (`test_eureka_nacional_rules_v4.py`). Suite: 1064 aprobadas y 11
+  omitidas.
+- Regresión offline sobre 98 PDF guardados (123 procesos), con texto
+  nativo y sin red. Cambia la revisión de 4 procesos, todos
+  verificados contra su cláusula:
+  - Durania: `documentary_silence` → `explicit_favorable` (p. 2);
+  - Buenaventura: `documentary_silence` → `explicit_requirement`
+    (p. 12, dos años de experiencia);
+  - Villagómez: deja de ser ambiguo por restricción (eran cuotas de
+    desempate) y queda incierto («podrá acreditar»);
+  - un proceso histórico (`en01-xgcp5mgp`): exigencia en la p. 17,
+    «El proponente debe acreditar experiencia en el desarrollo de
+    actividades relacionadas…».
+- Ninguna exigencia se pierde y no aparece otra renuncia que la
+  explícita. No se ajustó nada a Durania y no se tocaron MPNE,
+  filtros ni presupuestos.
+
+#### Pendientes imprescindibles para cerrar el flujo inicial nacional
+
+El flujo ya cubre descubrir (sólo descubrimiento, nacional), priorizar
+(cola de candidatos), inventariar y adquirir por lotes con hash,
+analizar y presentar hallazgos con revisión humana separada. Falta:
+
+1. **Panel nacional consolidado (offline).** Un solo listado
+   deduplicado por identidad que una todas las corridas. Por proceso:
+   - categoría de hallazgo (recalculada con v4);
+   - cierre y vigencia;
+   - prioridad y confianza comercial;
+   - estado documental;
+   - enlace público SECOP;
+   - revisión humana.
+
+   Orden: favorables y prioritarios primero, luego por cierre. Los
+   cerrados pasan al histórico. Hoy esa información está repartida
+   entre `candidate_queue.json`, `validation_results.json` y
+   `experience_requirements.json` de cada corrida.
+2. **Registro de revisiones humanas por comando.** Agregar y listar
+   revisiones con validación: identidad SECOP, observaciones
+   permitidas, marca de control MPNE opcional, `system_verified:
+   false` y sin identificadores de perfil. Así se deja de editar el
+   JSON a mano.
+3. **Del panel al siguiente lote con un comando.** Proponer los lotes
+   de inventario SECOP II y SECOP I (desde la cola) por cierre y
+   prioridad, con presupuesto y hash, para autorizarlos sin armar
+   identidades a mano. Las herramientas de ejecución ya existen.
+4. **Una corrida autorizada de descubrimiento de 18 páginas.** Sirve
+   para validar la cobertura de 48 horas y la parada
+   `window_start_reached`, y fijar la cadencia recurrente (por ejemplo,
+   un descubrimiento por día hábil, unos 20 créditos).
+5. **Decisión del titular sobre los rectores de más de 10 MiB.** En
+   este ciclo fueron 3 de 12 (13,9, 17,2 y 19,8 MiB). Mientras no se
+   decida, se muestran en el panel como «pendiente por tamaño» con su
+   enlace público, para revisión manual. No se pierden.
+
+Fuera del alcance del cierre:
+
+- investigar procesos ya revisados por el titular;
+- nuevas adquisiciones;
+- ampliar el OCR;
+- más ajustes del clasificador.
