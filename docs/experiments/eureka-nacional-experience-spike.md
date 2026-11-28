@@ -7460,3 +7460,60 @@ Lectura:
     cuando la frase sigue a un rótulo de anexo.
 - La lectura OCR de Boavita y Chitaraque se detuvo en el presupuesto
   vigente de páginas. No se amplió.
+
+#### Lote SECOP I (cf513087): adquisición y análisis
+
+Controles:
+
+- Cola exacta `cf513087…72ff`, con 2 documentos y `max_posts` 2.
+- Sin intentos ni recibos previos y sin marcador.
+- Una sola pestaña, en Contratos.
+- Inicio de sesión manual en un contexto desechable.
+- Preflight del trabajador listo: sesión válida, `only_configured`,
+  `profile_count: 1`, sin cambio de perfil, feed bloqueado y sin
+  errores.
+- La confirmación humana del hash se pidió después del preflight y
+  antes de cualquier POST.
+
+Resultado:
+
+- `batch_complete`, con 2 POST (uno por documento) y 2 guardados, sin
+  rechazos ni reintentos.
+
+| Constancia | Bytes | Segundos | SHA-256 | Verificación |
+|---|---|---|---|---|
+| 26-13-14853757 (invitación) | 529.826 | 1,1 | `8d490712…` | Firma y fin de PDF; sin Content-Length, streaming acotado a 10 MiB |
+| 26-13-14853776 (invitación) | 3.072.801 | 1,9 | `7f4bf91e…` | Firma y fin de PDF; sin Content-Length |
+
+- Cierre seguro: contexto cerrado, desconexión registrada, marcador
+  liberado, pestañas habituales intactas y salida 0.
+
+Análisis offline (`en01-secop1_secop1inv_2fxt0cm7`):
+
+- 65 de 65 páginas leídas con texto nativo, sin OCR.
+- Sin IA y sin cambiar reglas.
+
+| Proceso | Objeto, entidad y cierre | Documento y cobertura | Cláusula y página | Estado formal | Hallazgo y prioridad v3 | Revisión |
+|---|---|---|---|---|---|---|
+| 26-13-14853757 | Mobiliario, equipo tecnológico, papelería, gestión documental, material institucional y cafetería. Personería de Belmira (Antioquia), 01-12 14:31, 18.230.429 COP | Invitación (rectora), completa | p. 21, sección «9. Requisitos habilitantes» (pp. 19-21): «Los proponentes deberán acreditar experiencia mínima de once (3) contratos o certificaciones…» (sic); p. 22: «El proponente deberá acreditar 2 o más años de experiencia en el mercado…» | `experience_required` | Experiencia exigida; A, bienes | No aplica. Hay una incoherencia «once (3)» en el número de contratos, pero la exigencia es clara |
+| 26-13-14853776 | Suministro de ferretería e instalación de decoración navideña. Alcaldía de La Florida (Nariño), 01-12 18:00, 16.000.000 COP | Invitación (rectora), completa | p. 12, sección «6. Requisitos habilitantes» (pp. 12-16): «Experiencia específica… se considerará como requisito habilitante la experiencia del proponente… monto… mayor o igual al 100 % del presupuesto oficial», con hasta dos contratos; p. 13: 75 % de la experiencia para el integrante mayoritario | `experience_ambiguous` (`limited_applicability`) | Indicios de experiencia exigida; A, bienes | Revisión humana. La redacción indica una exigencia habilitante general; el sistema no la formaliza. Falta el estudio previo |
+
+Ninguno de los dos declara que no se exija experiencia.
+
+### Balance de los tres lotes documentales
+
+- 10 documentos adquiridos de 12 autorizados. Los 2 pendientes (Huila y
+  calendarios) se rechazaron en cabeceras por tamaño. No hubo
+  incidentes de seguridad ni cierres inciertos.
+- Por proceso:
+  - **1 con declaración explícita de que no se exige experiencia en
+    el rector**: la impresora del Concejo de Durania (CO1.NTC.11292238,
+    p. 2). Es incierta para el sistema y requiere revisión humana
+    prioritaria;
+  - 2 con experiencia exigida formal: Manzanares y Belmira;
+  - 3 con indicios fuertes de exigencia: Villagómez, Buenaventura y La
+    Florida;
+  - 3 inciertos por cobertura o tipo documental: radios, Boavita y
+    Chitaraque;
+  - 2 pendientes por tamaño: Huila y Norcasia.
+- La cola de 71 candidatos se regeneró offline con estos resultados.

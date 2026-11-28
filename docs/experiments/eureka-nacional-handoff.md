@@ -1588,3 +1588,34 @@ No hace falta el estudio previo.
 - Los 9 archivos de pruebas con el identificador de perfil son
   compartidos con `main` (Regional); no se tocaron.
 - Detalle en el [informe](eureka-nacional-experience-spike.md#inventarios-nacionales-autorizados-lote-secop-i-c5a6d8e8-y-lote-secop-ii-78cf1d7f).
+
+### Lotes documentales nacionales (28-11)
+
+- SECOP II `6739ec02`: 6 de 8 guardados por streaming de Edge tras un
+  403, en 5 a 7 s cada uno. Huila (13,87 MiB) y Norcasia (17,21 MiB)
+  se rechazaron en cabeceras y quedan pendientes por tamaño.
+- Chitaraque `eb7bf69b`: la excepción de 11 MiB se verificó offline.
+  Se guardaron la invitación (11.335.060 bytes, igual al declarado) y
+  el estudio previo.
+- SECOP I `cf513087`: 2 POST y 2 PDF (Belmira y La Florida), con
+  preflight válido, confirmación humana y cierre seguro con el
+  marcador liberado.
+- Destacado: **la impresora del Concejo de Durania (CO1.NTC.11292238)
+  declara en la p. 2 de la invitación «No se exigen experiencia,
+  capacidad financiera ni Registro Único de Proponentes»**, con
+  lectura completa. El clasificador no reconoce la frase y la deja en
+  `not_resolved`. Requiere revisión humana y el estudio previo.
+- Experiencia exigida: Manzanares (p. 6) y Belmira (p. 21).
+- Indicios fuertes de exigencia: Villagómez (p. 22), Buenaventura
+  (p. 12, sólo un complemento) y La Florida (p. 12).
+- Inciertos:
+  - radios: sólo hay una solicitud de cotización;
+  - Boavita: 12 de 47 páginas leídas por OCR;
+  - Chitaraque: 12 de 34 páginas leídas por OCR.
+- Mejoras generales posibles del clasificador, no aplicadas:
+  - «no se exigen experiencia»;
+  - «deberá acreditar una experiencia mínima» tras un rótulo de anexo.
+- Siguiente paso, con autorización: los estudios previos de Durania y
+  revisión humana de los casos con indicios. Sin más adquisiciones por
+  ahora.
+- Detalle en el [informe](eureka-nacional-experience-spike.md#lotes-documentales-nacionales-secop-ii-6739ec02-y-chitaraque-eb7bf69b).
