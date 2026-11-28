@@ -75,6 +75,11 @@ EXPLORATORY_PROCESSES = 15
 DISCOVERY_ONLY_CREDITS = 30
 DISCOVERY_ONLY_SECONDS = 360
 EXPLORATORY_DISCOVERY_PAGES = 8
+# Only --discovery-only may read up to 18 feed pages (probe + 18 <= 30 credits); it stops
+# early once a page lies past the start of the requested publication window.
+DISCOVERY_ONLY_MAX_PAGES = 18
+WINDOW_START_SHARE = 0.9
+WINDOW_START_MIN_DATED = 10
 EXPLORATORY_DOCUMENTS = 24
 EXPLORATORY_PER_PROCESS = 3
 EXPLORATORY_REQUEST_CREDITS = 200
@@ -209,6 +214,24 @@ def load_analyzed_secop_ids(root, run_names):
     return frozenset(ids)
 
 
+def page_window(page_dates, recent_days, now):
+    """Whether a feed page already lies past the start of the publication window.
+
+    Robust to isolated anomalies (date-only timestamps at 00:00, late corrections): it needs
+    at least WINDOW_START_MIN_DATED valid dates and WINDOW_START_SHARE of them older than the
+    window. Rows without a valid date never count as old.
+    """
+    annotated, _metrics, _warnings = apply_freshness(page_dates, recent_days, now)
+    dated = [p for p in annotated if p["age_days"] is not None]
+    older = sum(p["age_days"] > recent_days for p in dated)
+    return {
+        "dated": len(dated),
+        "older_than_window": older,
+        "past_window_start": len(dated) >= WINDOW_START_MIN_DATED
+        and older >= WINDOW_START_SHARE * len(dated),
+    }
+
+
 def discover(client, args, now, discovery, profile, locations):
     location_filter = ",".join(locations)
     payload = spike.build_process_payload(location_filter, None, DISCOVERY_PAGE_SIZE)
@@ -249,9 +272,9 @@ def discover(client, args, now, discovery, profile, locations):
             )
             rows = validate_discovery(body, DISCOVERY_PAGE_SIZE, validate_dates=False)
             signature = frozenset(str(row["idContrato"]) for row in rows)
-            discovery["pages"].append(
-                {"page": page, "provider_count": int(body["count"]), "received": len(rows)}
-            )
+            page_entry = {"page": page, "provider_count": int(body["count"]), "received": len(rows)}
+            discovery["pages"].append(page_entry)
+            page_dates = []
             if signature in signatures:
                 discovery["duplicates"] += len(rows)
                 discovery["stop_reason"] = "provider_repeated_page"
@@ -260,6 +283,12 @@ def discover(client, args, now, discovery, profile, locations):
             for row in rows:
                 candidate = CandidateProcess.from_source(row, client.profile_id)
                 process = candidate.to_dict()
+                page_dates.append(
+                    {
+                        "process_reference": candidate.reference,
+                        "published_at": process["published_at"],
+                    }
+                )
                 kind = source_kind(process)
                 identity = process_identity(process)
                 key = identity or candidate.reference
@@ -317,6 +346,11 @@ def discover(client, args, now, discovery, profile, locations):
             if not rows or page * DISCOVERY_PAGE_SIZE >= int(body["count"]):
                 discovery["stop_reason"] = "provider_end"
                 break
+            if getattr(args, "discovery_only", False):
+                page_entry["window"] = page_window(page_dates, args.recent_days, now)
+                if page_entry["window"]["past_window_start"]:
+                    discovery["stop_reason"] = "window_start_reached"
+                    break
         else:
             discovery["stop_reason"] = "page_budget"
     finally:
@@ -1535,15 +1569,43 @@ def is_recovery_fatal(error):
     )
 
 
+def secop1_recovery_digest(source, constancias):
+    """Digest bound to the source selection (exact processes.json) and the constancia list.
+    Refuses offline the constancias that the source run did not select."""
+    raw = (source / "processes.json").read_bytes()
+    selected = {
+        secop1.constancia_of(p)
+        for p in json.loads(raw.decode("utf-8"))["processes"]
+        if p.get("source") == "secop1" and p.get("sampled") and p.get("excluded_reason") is None
+    }
+    if len(set(constancias)) != len(constancias) or not set(constancias) <= selected:
+        raise spike.SpikeError("Constancias fuera de la seleccion persistida.")
+    core = {
+        "source_run": source.name,
+        "source_processes_sha256": hashlib.sha256(raw).hexdigest(),
+        "constancias": sorted(constancias),
+        "request_credit_limit": len(constancias),
+    }
+    return hashlib.sha256(json.dumps(core, sort_keys=True).encode()).hexdigest(), core
+
+
 def recover_secop1_main(args, profile_id):
     """Inventory-only recovery: no session probe (it queries the feed), no discovery."""
-    from playwright.sync_api import sync_playwright
-
     source = OUTPUT_ROOT / secop1.run_dir_name(args.secop1_inventory_from)
     output = OUTPUT_ROOT / f"{secop1.RECOVERY_PREFIX}{args.secop1_inventory_from[5:]}"
     for path in (source, output):
         if path.resolve() != path or path.parent != OUTPUT_ROOT:
             raise ValueError("Ruta fuera del almacenamiento experimental.")
+    digest, core = secop1_recovery_digest(source, args.secop1_constancia)
+    if getattr(args, "secop1_plan_only", False):
+        print(json.dumps({"batch_sha256": digest, **core}), flush=True)
+        return 0
+    expected = getattr(args, "secop1_expect_sha256", None)
+    if expected is not None and expected != digest:
+        print("EN-01 SECOP I: el lote no coincide con el hash aprobado; no se ejecuta.")
+        return 1
+    from playwright.sync_api import sync_playwright
+
     if (output / secop1.QUEUE_FILE).exists():
         print("EN-01 SECOP I: la recuperacion ya existe; no se repite.")
         return 1
@@ -1650,12 +1712,22 @@ def main(argv=None):
         metavar="CONSTANCIA",
         help="Constancia autorizada para la recuperacion. Repetible, maximo 5.",
     )
+    parser.add_argument(
+        "--secop1-plan-only",
+        action="store_true",
+        help="Calcular offline el hash del lote de recuperacion SECOP I, sin conectar.",
+    )
+    parser.add_argument(
+        "--secop1-expect-sha256",
+        help="Hash aprobado del lote de recuperacion SECOP I; si difiere, no se ejecuta.",
+    )
     parser.add_argument("--commercial-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--geography", type=Path, default=DEFAULT_GEOGRAPHY)
     args = parser.parse_args(argv)
     if args.exploratory:
         defaults = (EXPLORATORY_PROCESSES, EXPLORATORY_DOCUMENTS, EXPLORATORY_DISCOVERY_PAGES)
-        limits = (range(1, defaults[0] + 1), range(1, defaults[1] + 1), range(1, defaults[2] + 1))
+        pages = DISCOVERY_ONLY_MAX_PAGES if args.discovery_only else defaults[2]
+        limits = (range(1, defaults[0] + 1), range(1, defaults[1] + 1), range(1, pages + 1))
     else:
         defaults = (5, 5, 4)
         limits = (range(5, 11), range(5, 8), range(1, 7))
@@ -1669,6 +1741,10 @@ def main(argv=None):
                 f"--{name.replace('_', '-')} debe estar entre {allowed.start} y {allowed.stop - 1}."
             )
         setattr(args, name, value)
+    if (args.secop1_plan_only or args.secop1_expect_sha256) and not args.secop1_inventory_from:
+        parser.error("El plan y el hash SECOP I requieren --secop1-inventory-from.")
+    if args.secop1_expect_sha256 and not re.fullmatch(r"[0-9a-f]{64}", args.secop1_expect_sha256):
+        parser.error("Hash SECOP I invalido.")
     if args.secop1_inventory_from or args.secop1_constancia:
         if not args.secop1_inventory_from or not (
             1 <= len(args.secop1_constancia) <= secop1.MAX_SECOP1_PROCESSES

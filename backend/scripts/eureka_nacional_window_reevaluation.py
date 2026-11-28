@@ -53,7 +53,13 @@ def known_identities(root, exclude):
     return known
 
 
-def reevaluate(run, recent_days, *, processes=15, secop1_processes=5, root=None):
+def reevaluate(
+    run, recent_days, *, processes=15, secop1_processes=5, root=None, replay_commercial=True
+):
+    """Replay the stored commercial assessment (default) or recompute it with the current
+    commercial profile from the stored object (`replay_commercial=False`). The stored rows
+    keep no provider description, so a recomputation is faithful only when the run had none
+    (`description_available` false), which is reported in the summary."""
     discovery = json.loads((run / "processes.json").read_text(encoding="utf-8"))
     now = datetime.fromisoformat(discovery["cutoff"])
     stored = discovery["processes"]
@@ -81,7 +87,8 @@ def reevaluate(run, recent_days, *, processes=15, secop1_processes=5, root=None)
     )
     selection = {}
     original = en01.assess_commercial
-    en01.assess_commercial = stored_commercial
+    if replay_commercial:
+        en01.assess_commercial = stored_commercial
     try:
         en01.select_processes(candidates, args, now, selection, en01.load_commercial_profile())
     finally:
@@ -109,7 +116,17 @@ def reevaluate(run, recent_days, *, processes=15, secop1_processes=5, root=None)
                     "excluded_reason",
                     "sampled",
                     "not_selected_reason",
+                    "process_reference",
+                    "deadline_at",
+                    "commercial_confidence",
+                    "category_exclusions",
                 )
+            }
+            | {
+                "category_terms": [
+                    {"category": match["category"], "terms": match["object_terms"]}
+                    for match in process.get("category_matches") or []
+                ]
             }
             | {"known_before": process.get("source_identity") in known}
         )
@@ -119,7 +136,11 @@ def reevaluate(run, recent_days, *, processes=15, secop1_processes=5, root=None)
         "recent_days": recent_days,
         "reference_clock": discovery["cutoff"],
         "network_requests": 0,
-        "commercial_assessment": "replayed_from_original_run",
+        "commercial_assessment": "replayed_from_original_run"
+        if replay_commercial
+        else "recomputed_with_current_profile_from_object",
+        "commercial_profile": None if replay_commercial else en01.load_commercial_profile().version,
+        "descriptions_stored": any(p.get("description_available") for p in stored),
         "discovered": len(rows),
         "excluded_by_reason": dict(
             Counter(r["excluded_reason"] for r in rows if r["excluded_reason"])
@@ -142,13 +163,18 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run")
     parser.add_argument("--recent-days", type=int, choices=range(1, 61), required=True)
+    parser.add_argument(
+        "--recompute-commercial",
+        action="store_true",
+        help="Reevaluar con el perfil comercial vigente en lugar de reproducir el guardado.",
+    )
     args = parser.parse_args(argv)
     root = en01.OUTPUT_ROOT
     run = root / args.run
     if not args.run.startswith("en01-") or run.resolve() != run or not run.is_dir():
         print("EN-01: corrida invalida.")
         return 1
-    result = reevaluate(run, args.recent_days)
+    result = reevaluate(run, args.recent_days, replay_commercial=not args.recompute_commercial)
     path = run / f"window_reevaluation_{args.recent_days}d.json"
     if path.exists():
         print(f"EN-01: {path.name} ya existe; no se sobrescribe.")

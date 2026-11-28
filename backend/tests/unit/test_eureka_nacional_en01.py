@@ -2033,3 +2033,123 @@ def test_discovery_only_reads_the_feed_and_selects_without_any_document_request(
     assert metrics["documents_downloaded"] == 0
     assert report(tmp_path, "documents.json") == []
     assert not (tmp_path / "secop1_queue.json").exists()
+
+
+# ---------------------------------------------------------------- discovery-only, 18 pages
+
+
+def dated_rows(page, published, count=30, offset=0):
+    return [
+        {**row(page * 100 + offset + n, "Boyacá"), "FechaPublicacion": published}
+        for n in range(count)
+    ]
+
+
+def discovery_args(**extra):
+    values = {
+        "discovery_pages": 18,
+        "documents": 5,
+        "processes": 5,
+        "recent_days": 2,
+        "discovery_only": True,
+        "include_secop1": False,
+        "secop1_processes": 0,
+    }
+    return SimpleNamespace(**(values | extra))
+
+
+def run_discovery(tmp_path, monkeypatch, pages, **extra):
+    calls = []
+
+    def post(path, payload):
+        if path == DOCUMENT_ENDPOINT:
+            raise AssertionError("discovery-only must not request inventories")
+        calls.append(payload["page"])
+        return {"count": 900, "data": pages(payload["page"])}
+
+    monkeypatch.setattr(en01, "check_session", Mock())
+    client = SimpleNamespace(
+        post=post, profile_id=EXAMPLE_PROFILE, deadline=time.monotonic() + 360, requests=1
+    )
+    assert en01.run(client, discovery_args(**extra), None, tmp_path, now=CUTOFF) == 0
+    return calls, report(tmp_path, "processes.json")
+
+
+def test_discovery_only_stops_once_a_page_lies_past_the_window_start(tmp_path, monkeypatch):
+    # Arrange: two-day window; page 3 is entirely five days old.
+    def pages(page):
+        return dated_rows(page, "2026-11-18 13:00:00" if page < 3 else "2026-11-14 10:00:00")
+
+    # Act
+    calls, discovery = run_discovery(tmp_path, monkeypatch, pages)
+
+    # Assert
+    assert calls == [1, 2, 3]
+    assert discovery["stop_reason"] == "window_start_reached"
+    assert discovery["pages"][-1]["window"] == {
+        "dated": 30,
+        "older_than_window": 30,
+        "past_window_start": True,
+    }
+
+
+def test_isolated_old_or_date_only_rows_do_not_stop_the_discovery(tmp_path, monkeypatch):
+    # Four date-only rows at 00:00 several days back on every page: not the window start.
+    def pages(page):
+        return dated_rows(page, "2026-11-18 13:00:00", 26) + dated_rows(
+            page, "2026-11-10", 4, offset=90
+        )
+
+    calls, discovery = run_discovery(tmp_path, monkeypatch, pages)
+
+    assert calls == list(range(1, 19))
+    assert discovery["stop_reason"] == "page_budget"
+
+
+def test_pages_with_few_valid_dates_never_trigger_the_window_stop(tmp_path, monkeypatch):
+    def pages(page):
+        return dated_rows(page, "2026-11-01 10:00:00", 9) + dated_rows(
+            page, "sin fecha", 21, offset=50
+        )
+
+    calls, discovery = run_discovery(tmp_path, monkeypatch, pages, discovery_pages=3)
+
+    assert calls == [1, 2, 3]
+    assert discovery["stop_reason"] == "page_budget"
+
+
+def test_page_window_and_eighteen_page_budget():
+    window = en01.page_window(
+        [{"process_reference": "r", "published_at": "2026-11-01T10:00:00"}] * 30, 2, CUTOFF
+    )
+
+    assert window["past_window_start"] is True
+    assert en01.DISCOVERY_ONLY_MAX_PAGES == 18
+    assert 1 + en01.DISCOVERY_ONLY_MAX_PAGES <= en01.DISCOVERY_ONLY_CREDITS
+
+
+def test_eighteen_pages_are_accepted_only_with_discovery_only(monkeypatch, tmp_path):
+    monkeypatch.setenv("LICITACIONES_PROFILE_ID", EXAMPLE_PROFILE)
+    monkeypatch.setitem(
+        sys.modules, "playwright.sync_api", SimpleNamespace(sync_playwright=nullcontext)
+    )
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path / "runs")
+    monkeypatch.setattr(en01, "settings_for_run", Mock())
+    monkeypatch.setattr(en01, "connect_browser", Mock())
+    monkeypatch.setattr(en01, "find_page", Mock())
+    run = Mock(return_value=0)
+    monkeypatch.setattr(en01, "run", run)
+
+    assert en01.main(["--exploratory", "--discovery-only", "--discovery-pages", "18"]) == 0
+    client, args, *_ = run.call_args.args
+    assert args.discovery_pages == 18
+    assert client.request_limit == en01.DISCOVERY_ONLY_CREDITS == 30
+    assert 350 < client.deadline - time.monotonic() <= en01.DISCOVERY_ONLY_SECONDS
+    for argv in (
+        ["--exploratory", "--discovery-pages", "9"],
+        ["--exploratory", "--discovery-only", "--discovery-pages", "19"],
+        ["--discovery-only", "--discovery-pages", "18"],
+    ):
+        with pytest.raises(SystemExit):
+            en01.main(argv)
+    assert run.call_count == 1

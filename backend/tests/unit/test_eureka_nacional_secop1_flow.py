@@ -969,7 +969,8 @@ def test_recovery_cli_validation(argv):
 
 def test_recovery_cli_refuses_existing_queue_and_preventive_marker(tmp_path, monkeypatch):
     monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
-    (tmp_path / "en01-abc").mkdir()
+    source, _output = persisted_run(tmp_path)
+    source.rename(tmp_path / "en01-abc")
     args = SimpleNamespace(
         secop1_inventory_from="en01-abc",
         secop1_constancia=[SELECTED[0]],
@@ -1319,3 +1320,86 @@ def test_resume_can_be_limited_to_one_queued_constancia(tmp_path):
             runner=runner,
             only=["26-13-99999999"],
         )
+
+
+# ---------------------------------------------------------------- recovery batch hash
+
+
+def recovery_args(**extra):
+    return SimpleNamespace(
+        secop1_inventory_from="en01-orig",
+        secop1_constancia=SELECTED[:2],
+        cdp_url="http://127.0.0.1:9232",
+        **extra,
+    )
+
+
+def test_recovery_plan_only_prints_a_stable_hash_without_connecting(tmp_path, monkeypatch, capsys):
+    # Arrange
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    persisted_run(tmp_path)
+    monkeypatch.setitem(sys.modules, "playwright.sync_api", None)  # any import would fail
+
+    # Act
+    code = en01.recover_secop1_main(recovery_args(secop1_plan_only=True), EXAMPLE_PROFILE)
+
+    # Assert
+    plan = json.loads(capsys.readouterr().out)
+    assert code == 0
+    assert plan["request_credit_limit"] == 2
+    assert plan["constancias"] == sorted(SELECTED[:2])
+    digest, _ = en01.secop1_recovery_digest(tmp_path / "en01-orig", list(reversed(SELECTED[:2])))
+    assert plan["batch_sha256"] == digest
+    assert not (tmp_path / "en01-secop1inv_orig" / flow.QUEUE_FILE).exists()
+
+
+def test_recovery_refuses_a_batch_that_differs_from_the_approved_hash(tmp_path, monkeypatch):
+    monkeypatch.setattr(en01, "OUTPUT_ROOT", tmp_path)
+    persisted_run(tmp_path)
+    monkeypatch.setitem(sys.modules, "playwright.sync_api", None)
+
+    args = recovery_args(secop1_expect_sha256="0" * 64)
+
+    assert en01.recover_secop1_main(args, EXAMPLE_PROFILE) == 1
+    assert not (tmp_path / "en01-secop1inv_orig" / flow.QUEUE_FILE).exists()
+
+
+def test_recovery_hash_changes_when_the_source_selection_changes(tmp_path):
+    source, _output = persisted_run(tmp_path)
+    before, _ = en01.secop1_recovery_digest(source, SELECTED[:2])
+    data = json.loads((source / "processes.json").read_text(encoding="utf-8"))
+    data["processes"][2]["object"] = "Otro objeto"
+    (source / "processes.json").write_text(json.dumps(data), encoding="utf-8")
+
+    after, _ = en01.secop1_recovery_digest(source, SELECTED[:2])
+
+    assert before != after
+
+
+def test_recovery_plan_refuses_constancias_outside_the_selection(tmp_path):
+    source, _output = persisted_run(tmp_path)
+
+    with pytest.raises(SpikeError, match="seleccion persistida"):
+        en01.secop1_recovery_digest(source, ["26-13-99999999"])
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--secop1-plan-only"],
+        ["--secop1-expect-sha256", "a" * 64],
+        [
+            "--secop1-inventory-from",
+            "en01-abc",
+            "--secop1-constancia",
+            "26-13-11111111",
+            "--secop1-expect-sha256",
+            "no-es-hash",
+        ],
+    ],
+)
+def test_recovery_hash_cli_validation(argv):
+    with pytest.raises(SystemExit) as exit_info:
+        en01.main(argv)
+
+    assert exit_info.value.code == 2
