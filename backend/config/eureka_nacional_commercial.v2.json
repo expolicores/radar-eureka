@@ -1,0 +1,1010 @@
+{
+  "version": "eureka-nacional-commercial-v2",
+  "geography": "nacional",
+  "catalog": {
+    "version": "UNv260801",
+    "release_date": "2025-03-18",
+    "url": "https://www.colombiacompra.gov.co/wp-content/uploads/2025/05/codigos-UNSPSC.zip",
+    "archive_sha256": "890fc7ed41e6acef904fed64811b270a99d0ad73818c211bbb511757d8b018eb"
+  },
+  "candidate_segments": [
+    "14",
+    "24",
+    "25",
+    "26",
+    "27",
+    "31",
+    "39",
+    "41",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "52",
+    "53",
+    "55",
+    "56",
+    "60"
+  ],
+  "preferred_modalities": [
+    "mínima cuantía",
+    "contratación mínima cuantía"
+  ],
+  "terminal_states": [
+    "adjudicado",
+    "cancelado",
+    "desierto",
+    "cerrado",
+    "terminado",
+    "finalizado"
+  ],
+  "supply_pattern": "\\b(?:suministro(?: e instalacion)?|adquisicion|compraventa|compra|dotacion|provision)\\s+(?:de|del|para)\\b",
+  "service_pattern": "\\b(?:prestacion (?:de|del) servicios?|servicios? (?:de (?:aseo|limpieza|vigilancia|mantenimiento|transporte|alimentacion|instalacion|alquiler|conectividad|consultoria|capacitacion)|profesionales?)|consultoria|interventoria|arrendamiento|alquiler|transporte (?:escolar|terrestre|de pasajeros|de carga)|mantenimiento (?:preventivo|correctivo)|obras? civiles?)\\b",
+  "exclusions": [
+    {
+      "id": "armamento",
+      "pattern": "\\b(?:compra|adquisicion|suministro|dotacion) (?:de|del) (?:armamento|armas de fuego|municiones|misiles|proteccion balistica)\\b|\\b(?:drones? militares?|drones? tacticos?|explosivos de uso militar)\\b"
+    },
+    {
+      "id": "vehiculos_completos",
+      "pattern": "\\b(?:comprar|compra|adquisicion|suministro|compraventa) (?:de |del )?(?:\\d+ )?(?:vehiculos? completos?|automovil(?:es)?|camionetas?|motocicletas?|ambulancias?|camion(?:es)?|autobus(?:es)?)\\b"
+    },
+    {
+      "id": "maquinaria_pesada",
+      "pattern": "\\b(?:compra|adquisicion|suministro|arrendamiento) de (?:maquinaria pesada|excavadoras|retroexcavadoras|motoniveladoras|bulldozers)\\b"
+    },
+    {
+      "id": "obra_civil",
+      "pattern": "\\b(?:ejecucion|construccion|contratacion|rehabilitacion) (?:de |del )?(?:las? )?(?:obras? civiles?|obras? publicas?|obras? de infraestructura|vias|puentes|edificaciones)\\b"
+    },
+    {
+      "id": "salud_compleja",
+      "pattern": "\\b(?:compra|adquisicion|suministro) de (?:medicamentos|productos farmaceuticos|equipos medicos complejos|equipos de resonancia magnetica|tomografos|ventiladores mecanicos)\\b"
+    },
+    {
+      "id": "combustibles_granel",
+      "pattern": "\\b(?:suministro|adquisicion|compra) de (?:combustibles?|gasolina|diesel) (?:a granel|por cisterna|por carrotanque)\\b"
+    },
+    {
+      "id": "perecederos_animales",
+      "pattern": "\\b(?:suministro|adquisicion|compra) de (?:animales vivos|ganado en pie)\\b"
+    },
+    {
+      "id": "software_medida",
+      "pattern": "\\b(?:desarrollo|diseno|implementacion|adquisicion|contratacion) (?:de |del )?(?:un )?(?:software a (?:la )?medida|software personalizado)\\b"
+    },
+    {
+      "id": "instalacion_industrial",
+      "pattern": "\\b(?:montaje|construccion|instalacion|implementacion) (?:de |del )?(?:una? )?(?:grandes instalaciones industriales|planta industrial|linea de produccion industrial)\\b"
+    },
+    {
+      "id": "servicio_digital",
+      "pattern": "\\b(?:adquisicion|compra|suministro|renovacion) de (?:licencias de software|suscripciones de software)\\b"
+    }
+  ],
+  "categories": [
+    {
+      "id": "informatica",
+      "name": "Tecnología, informática y periféricos",
+      "priority": "A",
+      "classes": {
+        "43211500": "Computadoras",
+        "43211600": "Accesorios para computadoras",
+        "43211700": "Dispositivos de entrada de datos informáticos",
+        "43212100": "Impresoras de computadora"
+      },
+      "products": {
+        "43211503": "Portátil",
+        "43212105": "Impresoras láser"
+      },
+      "context_classes": {},
+      "keywords": [
+        "computador",
+        "computadora",
+        "portátil",
+        "tableta",
+        "impresora",
+        "periférico",
+        "monitor"
+      ],
+      "synonyms": [
+        "laptop",
+        "tablet",
+        "pc de escritorio",
+        "equipo de cómputo",
+        "impresora láser",
+        "teclado",
+        "mouse",
+        "equipos tecnológicos",
+        "equipo tecnológico",
+        "elementos tecnológicos",
+        "equipos de cómputo",
+        "computadores portátiles"
+      ],
+      "exclusions": [
+        "alquiler de equipos",
+        "desarrollo de software"
+      ],
+      "rationale": "Equipos y periféricos adquiribles por canales de distribución.",
+      "segments": [
+        "43"
+      ],
+      "families": {
+        "43210000": "Equipos y accesorios informáticos"
+      }
+    },
+    {
+      "id": "audiovisuales",
+      "name": "Electrónica y audiovisuales",
+      "priority": "A",
+      "classes": {
+        "45111600": "Proyectores y suministros",
+        "45111700": "Equipos de presentación y composición de audio, hardware y controladores",
+        "52161500": "Equipo de audio y visual"
+      },
+      "products": {
+        "45111616": "Videoproyectores",
+        "52161505": "Televisores"
+      },
+      "context_classes": {},
+      "keywords": [
+        "televisor",
+        "proyector",
+        "pantalla",
+        "equipo de sonido",
+        "micrófono",
+        "parlante"
+      ],
+      "synonyms": [
+        "smart tv",
+        "tv",
+        "videoproyector",
+        "video beam",
+        "altavoz",
+        "amplificador de sonido"
+      ],
+      "exclusions": [
+        "producción audiovisual",
+        "servicio de sonido"
+      ],
+      "rationale": "Equipos físicos de presentación y sonido para instituciones.",
+      "segments": [
+        "45",
+        "52"
+      ],
+      "families": {
+        "45110000": "Equipo de presentación y composición de audio y visual",
+        "52160000": "Electrónica de consumo"
+      }
+    },
+    {
+      "id": "papeleria",
+      "name": "Papelería y suministros de oficina",
+      "priority": "A",
+      "classes": {
+        "14111500": "Papel de impresión y escritura",
+        "44121600": "Suministros de escritorio",
+        "44121700": "Instrumentos de escritura",
+        "44122000": "Carpetas, carpetas e índices",
+        "44122100": "Suministros de fijación",
+        "44103100": "Suministros para impresoras, facsímiles y fotocopiadoras"
+      },
+      "products": {
+        "14111507": "Papel para impresora o fotocopiadora",
+        "14111519": "Papeles de cartulina",
+        "44122018": "Inserciones de archivos o pestañas"
+      },
+      "context_classes": {},
+      "keywords": [
+        "papelería",
+        "resma",
+        "tóner",
+        "tinta",
+        "carpeta",
+        "lápiz",
+        "bolígrafo"
+      ],
+      "synonyms": [
+        "útiles de oficina",
+        "materiales de oficina",
+        "cartucho de tinta",
+        "papel bond",
+        "elementos de oficina",
+        "suministros de oficina",
+        "útiles de escritorio",
+        "consumibles de impresión",
+        "cartuchos de tóner",
+        "tintas para impresora"
+      ],
+      "exclusions": [
+        "servicio de fotocopiado",
+        "servicio de impresión"
+      ],
+      "rationale": "Consumo recurrente con distribución comercial amplia.",
+      "segments": [
+        "14",
+        "44"
+      ],
+      "families": {
+        "14110000": "Productos de papel",
+        "44100000": "Máquinas de oficina y sus suministros y accesorios",
+        "44120000": "Suministros de oficina"
+      }
+    },
+    {
+      "id": "ferreteria",
+      "name": "Ferretería y herramientas",
+      "priority": "A",
+      "classes": {
+        "27111700": "Llaves y controladores",
+        "27112700": "Herramientas eléctricas",
+        "27113200": "Kits de herramientas",
+        "31161500": "Tornillos",
+        "31211500": "Pinturas e imprimaciones",
+        "40141700": "Herrajes y accesorios"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "ferretería",
+        "herramienta",
+        "tornillo",
+        "taladro",
+        "pintura",
+        "tubería"
+      ],
+      "synonyms": [
+        "materiales de ferretería",
+        "herramienta manual",
+        "herramienta eléctrica",
+        "kit de herramientas"
+      ],
+      "exclusions": [
+        "instalación industrial llave en mano"
+      ],
+      "rationale": "Materiales discretos y herramientas de distribución local o nacional.",
+      "segments": [
+        "27",
+        "31",
+        "40"
+      ],
+      "families": {
+        "27110000": "Herramientas manuales",
+        "31160000": "Hardware",
+        "31210000": "Pinturas e imprimaciones y acabados",
+        "40140000": "Distribución de fluidos y gases"
+      }
+    },
+    {
+      "id": "educacion",
+      "name": "Material educativo, didáctico y escolar",
+      "priority": "A",
+      "classes": {
+        "60101000": "Kits de matemáticas",
+        "60101100": "Ayudas electrónicas para el aprendizaje",
+        "60101300": "Pegatinas y suministros educativos",
+        "60121500": "Herramientas de dibujo, suministros y accesorios",
+        "60141300": "Bloques para niños y sistemas de construcción"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "material didáctico",
+        "material escolar",
+        "útiles escolares",
+        "kit escolar",
+        "kit educativo",
+        "juego didáctico"
+      ],
+      "synonyms": [
+        "dotación escolar",
+        "recurso didáctico",
+        "material pedagógico",
+        "kit de matemáticas",
+        "elementos didácticos",
+        "material educativo",
+        "recursos didácticos",
+        "juegos didácticos",
+        "material lúdico"
+      ],
+      "exclusions": [
+        "servicio de capacitación",
+        "organización de eventos"
+      ],
+      "rationale": "Bienes escolares y material de aula disponibles en canal comercial.",
+      "segments": [
+        "60"
+      ],
+      "families": {
+        "60100000": "Ayudas didácticas profesionales y de desarrollo y materiales, accesorios y suministros",
+        "60120000": "Equipos y accesorios y suministros para artes y manualidades",
+        "60140000": "Juguetes y juegos"
+      }
+    },
+    {
+      "id": "robotica",
+      "name": "Robótica educativa",
+      "priority": "A",
+      "classes": {},
+      "products": {
+        "60106214": "Ayudas o materiales didácticos de robótica"
+      },
+      "context_classes": {
+        "60106200": "Materiales y ayudas didácticas tecnológicas"
+      },
+      "keywords": [
+        "robótica educativa",
+        "kit de robótica",
+        "robot educativo"
+      ],
+      "synonyms": [
+        "kit stem",
+        "kit steam",
+        "kit de programación educativa"
+      ],
+      "exclusions": [
+        "automatización industrial",
+        "robot industrial"
+      ],
+      "rationale": "Kits y ayudas educativas cuya especificación puede cotejarse por producto.",
+      "segments": [
+        "60"
+      ],
+      "families": {
+        "60100000": "Ayudas didácticas profesionales y de desarrollo y materiales, accesorios y suministros"
+      }
+    },
+    {
+      "id": "aseo",
+      "name": "Aseo y limpieza",
+      "priority": "A",
+      "classes": {
+        "47131500": "Trapos y paños de limpieza y toallitas",
+        "47131600": "Escobas y trapeadores y cepillos y accesorios",
+        "47131700": "Suministros para baños",
+        "47131800": "Soluciones de limpieza y desinfección"
+      },
+      "products": {
+        "14111705": "Servilletas o servilletas de papel"
+      },
+      "context_classes": {},
+      "keywords": [
+        "elementos de aseo",
+        "productos de aseo",
+        "insumos de limpieza",
+        "detergente",
+        "desinfectante",
+        "escoba",
+        "trapero",
+        "servilleta"
+      ],
+      "synonyms": [
+        "artículos de aseo",
+        "productos de limpieza",
+        "trapeador",
+        "kit de aseo"
+      ],
+      "exclusions": [
+        "servicio de aseo",
+        "limpieza hospitalaria especializada"
+      ],
+      "rationale": "Insumos físicos recurrentes y distribuibles.",
+      "segments": [
+        "14",
+        "47"
+      ],
+      "families": {
+        "14110000": "Productos de papel",
+        "47130000": "Suministros de limpieza y conserjería"
+      }
+    },
+    {
+      "id": "uniformes_epp",
+      "name": "Dotación personal, uniformes y protección personal",
+      "priority": "A",
+      "classes": {
+        "53102700": "Uniformes",
+        "53103000": "Camisetas",
+        "46181600": "Calzado de seguridad",
+        "46181800": "Protección visual y accesorios",
+        "46181900": "Protectores auditivos",
+        "46182000": "Protección respiratoria"
+      },
+      "products": {
+        "46181504": "Guantes de protección",
+        "46181701": "Cascos"
+      },
+      "context_classes": {},
+      "keywords": [
+        "uniforme",
+        "camiseta",
+        "dotación de uniformes",
+        "elementos de protección personal",
+        "botas de seguridad",
+        "gafas de seguridad"
+      ],
+      "synonyms": [
+        "epp",
+        "ropa de trabajo",
+        "calzado de seguridad",
+        "guante de seguridad",
+        "overol",
+        "casco de seguridad",
+        "calzado y vestido",
+        "vestido y calzado",
+        "vestido de labor",
+        "calzado de labor",
+        "prendas de vestir",
+        "dotación de calzado",
+        "dotación de vestuario",
+        "dotación de ley"
+      ],
+      "exclusions": [
+        "dotación militar",
+        "protección balística"
+      ],
+      "rationale": "Dotación civil y equipos de protección de compra habitual.",
+      "segments": [
+        "46",
+        "53"
+      ],
+      "families": {
+        "46180000": "Seguridad y protección personal",
+        "53100000": "Ropa"
+      }
+    },
+    {
+      "id": "deportes",
+      "name": "Implementos deportivos",
+      "priority": "A",
+      "classes": {
+        "49161500": "Equipamiento deportivo de campo",
+        "49161600": "Equipamiento deportivo para raquetas y pistas",
+        "49161700": "Material deportivo de pista",
+        "49221500": "Accesorios deportivos"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "implementos deportivos",
+        "material deportivo",
+        "balón",
+        "raqueta",
+        "colchoneta deportiva"
+      ],
+      "synonyms": [
+        "dotación deportiva",
+        "kit deportivo",
+        "equipamiento deportivo"
+      ],
+      "exclusions": [
+        "organización de torneos",
+        "servicio de entrenamiento"
+      ],
+      "rationale": "Equipamiento deportivo comercial separable de la operación de eventos.",
+      "segments": [
+        "49"
+      ],
+      "families": {
+        "49160000": "Equipamiento deportivo de campo y pista",
+        "49220000": "Equipamiento y accesorios deportivos"
+      }
+    },
+    {
+      "id": "drones",
+      "name": "Drones comerciales civiles",
+      "priority": "B",
+      "classes": {},
+      "products": {
+        "25132101": "Dron agrícola",
+        "25132103": "Dron recreativo",
+        "25132105": "Dron de reparto"
+      },
+      "context_classes": {
+        "25132100": "Vehículo aéreo no tripulado"
+      },
+      "keywords": [
+        "dron",
+        "drone",
+        "drones comerciales",
+        "drones civiles",
+        "vehículo aéreo no tripulado"
+      ],
+      "synonyms": [
+        "uav",
+        "rpas",
+        "cuadricóptero"
+      ],
+      "exclusions": [
+        "dron militar",
+        "drones militares",
+        "dron táctico",
+        "vigilancia policial"
+      ],
+      "rationale": "Confirmar especificación, soporte y disponibilidad del equipo civil antes de cotizar.",
+      "segments": [
+        "25"
+      ],
+      "families": {
+        "25130000": "Avión"
+      }
+    },
+    {
+      "id": "mobiliario",
+      "name": "Mobiliario institucional",
+      "priority": "B",
+      "classes": {
+        "56101700": "Mobiliario de oficina",
+        "56121700": "Unidades de almacenamiento general y de libros para las aulas"
+      },
+      "products": {
+        "56101504": "Sillas"
+      },
+      "context_classes": {
+        "56101500": "Mueble"
+      },
+      "keywords": [
+        "mobiliario",
+        "silla",
+        "escritorio",
+        "archivador",
+        "pupitre"
+      ],
+      "synonyms": [
+        "mueble de oficina",
+        "silla institucional",
+        "mobiliario escolar"
+      ],
+      "exclusions": [
+        "fabricación e instalación integral",
+        "mobiliario fijo a medida"
+      ],
+      "rationale": "Mobiliario estándar con logística y entrega evaluables.",
+      "segments": [
+        "56"
+      ],
+      "families": {
+        "56100000": "Mobiliario de alojamiento",
+        "56120000": "Mobiliario y accesorios para aulas e instituciones e instruccionales"
+      }
+    },
+    {
+      "id": "electrodomesticos",
+      "name": "Electrodomésticos",
+      "priority": "B",
+      "classes": {
+        "52141500": "Electrodomésticos de cocina",
+        "52141600": "Electrodomésticos y suministros de lavandería doméstica"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "electrodoméstico",
+        "nevera",
+        "lavadora",
+        "microondas",
+        "congelador",
+        "licuadora"
+      ],
+      "synonyms": [
+        "refrigerador doméstico",
+        "horno microondas",
+        "electrodoméstico menor"
+      ],
+      "exclusions": [
+        "cámara frigorífica industrial",
+        "cadena de frío industrial"
+      ],
+      "rationale": "Equipos comerciales con garantía y disponibilidad por confirmar.",
+      "segments": [
+        "52"
+      ],
+      "families": {
+        "52140000": "Electrodomésticos"
+      }
+    },
+    {
+      "id": "electricos",
+      "name": "Iluminación y suministros eléctricos",
+      "priority": "B",
+      "classes": {
+        "26121600": "Cable eléctrico y accesorios",
+        "39111500": "Accesorios y accesorios de iluminación interior",
+        "39111600": "Accesorios y accesorios de iluminación exterior",
+        "39121400": "Enchufes y conectores eléctricos",
+        "39121700": "Hardware y suministros eléctricos"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "luminaria",
+        "bombillo",
+        "cable eléctrico",
+        "interruptor",
+        "tomacorriente"
+      ],
+      "synonyms": [
+        "panel led",
+        "iluminación led",
+        "material eléctrico",
+        "suministro eléctrico",
+        "conector eléctrico"
+      ],
+      "exclusions": [
+        "planta de generación",
+        "subestación eléctrica"
+      ],
+      "rationale": "Insumos y luminarias comerciales separados de obras eléctricas mayores.",
+      "segments": [
+        "26",
+        "39"
+      ],
+      "families": {
+        "26120000": "Alambres y cables eléctricos y arneses",
+        "39110000": "Accesorios y accesorios de iluminación",
+        "39120000": "Equipos y componentes y suministros eléctricos"
+      }
+    },
+    {
+      "id": "videovigilancia",
+      "name": "Videovigilancia",
+      "priority": "B",
+      "classes": {},
+      "products": {
+        "46171610": "Cámaras de seguridad"
+      },
+      "context_classes": {
+        "46171600": "Equipos de vigilancia y detección"
+      },
+      "keywords": [
+        "cámara de seguridad",
+        "videovigilancia",
+        "cámara ip",
+        "grabador de video"
+      ],
+      "synonyms": [
+        "cctv",
+        "circuito cerrado de televisión",
+        "kit de videovigilancia",
+        "nvr"
+      ],
+      "exclusions": [
+        "servicio de vigilancia",
+        "central de monitoreo como servicio"
+      ],
+      "rationale": "Equipos de seguridad comercial con instalación accesoria evaluable.",
+      "segments": [
+        "46"
+      ],
+      "families": {
+        "46170000": "Vigilancia y detección de seguridad"
+      }
+    },
+    {
+      "id": "musica",
+      "name": "Instrumentos musicales",
+      "priority": "B",
+      "classes": {
+        "60131000": "Instrumentos de teclado",
+        "60131300": "Instrumentos de cuerda",
+        "60131400": "Instrumentos de percusión"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "instrumentos musicales",
+        "guitarra",
+        "teclado musical",
+        "instrumento de percusión"
+      ],
+      "synonyms": [
+        "instrumento de cuerda",
+        "piano digital",
+        "batería musical"
+      ],
+      "exclusions": [
+        "servicio artístico",
+        "presentación musical"
+      ],
+      "rationale": "Instrumentos de catálogo con oferta, garantía y soporte por verificar.",
+      "segments": [
+        "60"
+      ],
+      "families": {
+        "60130000": "Instrumentos musicales y piezas y accesorios"
+      }
+    },
+    {
+      "id": "medicion",
+      "name": "Instrumentación y equipos de medición",
+      "priority": "B",
+      "classes": {
+        "41111500": "Instrumentos de medición de peso",
+        "41111600": "Instrumentos de medición de longitud, espesor y distancia",
+        "41112200": "Instrumentos de medición de temperatura y calor",
+        "41113600": "Equipos y accesorios eléctricos de medición y prueba"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "instrumentos de medición",
+        "multímetro",
+        "termómetro",
+        "balanza",
+        "calibrador"
+      ],
+      "synonyms": [
+        "equipo de medición",
+        "instrumentación",
+        "pie de rey",
+        "báscula"
+      ],
+      "exclusions": [
+        "calibración como servicio",
+        "equipos médicos complejos"
+      ],
+      "rationale": "Instrumentos estándar con revisión de precisión, calibración o certificación.",
+      "segments": [
+        "41"
+      ],
+      "families": {
+        "41110000": "Instrumentos de medición, observación y ensayo"
+      }
+    },
+    {
+      "id": "gastronomia",
+      "name": "Utensilios y pequeños equipos gastronómicos",
+      "priority": "B",
+      "classes": {
+        "48101800": "Utensilios de cocina y utensilios de cocina",
+        "52151600": "Herramientas y utensilios de cocina domésticos",
+        "52151700": "Cubiertos y cubiertos domésticos",
+        "52152000": "Platos y vajillas domésticas y recipientes de almacenamiento"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "utensilios de cocina",
+        "menaje",
+        "vajilla",
+        "cubiertos",
+        "ollas",
+        "equipo gastronómico pequeño"
+      ],
+      "synonyms": [
+        "menaje de cocina",
+        "batería de cocina",
+        "utensilios gastronómicos"
+      ],
+      "exclusions": [
+        "servicio de alimentación",
+        "cocina industrial llave en mano"
+      ],
+      "rationale": "Menaje y equipos menores adquiribles sin operación alimentaria.",
+      "segments": [
+        "48",
+        "52"
+      ],
+      "families": {
+        "48100000": "Equipos institucionales de servicios de alimentos",
+        "52150000": "Menaje doméstico y utensilios de cocina"
+      }
+    },
+    {
+      "id": "comunicaciones",
+      "name": "Equipos de comunicaciones",
+      "priority": "B",
+      "classes": {
+        "43191500": "Dispositivos de comunicación personal",
+        "43191600": "Accesorios o piezas para dispositivos de comunicaciones personales"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "radioteléfono",
+        "radio portátil",
+        "radio de comunicación",
+        "teléfono",
+        "intercomunicador"
+      ],
+      "synonyms": [
+        "radio de dos vías",
+        "walkie talkie",
+        "equipo de comunicaciones"
+      ],
+      "exclusions": [
+        "servicio de conectividad",
+        "plan de telefonía"
+      ],
+      "rationale": "Terminales y accesorios físicos con compatibilidad técnica por revisar.",
+      "segments": [
+        "43"
+      ],
+      "families": {
+        "43190000": "Dispositivos y accesorios de comunicaciones"
+      }
+    },
+    {
+      "id": "repuestos",
+      "name": "Repuestos automotrices seleccionados",
+      "priority": "B",
+      "classes": {
+        "25171500": "Limpiaparabrisas",
+        "25172500": "Neumáticos y cámaras de neumáticos"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "repuestos automotrices",
+        "limpiaparabrisas",
+        "neumático",
+        "llantas",
+        "filtro de aceite"
+      ],
+      "synonyms": [
+        "autoparte",
+        "repuesto vehicular",
+        "plumilla de limpiaparabrisas"
+      ],
+      "exclusions": [
+        "reparación de vehículos",
+        "mantenimiento integral de flota"
+      ],
+      "rationale": "Consumibles y repuestos simples de referencia comercial comprobable.",
+      "segments": [
+        "25"
+      ],
+      "families": {
+        "25170000": "Componentes y sistemas de transporte"
+      }
+    },
+    {
+      "id": "dotacion_institucional",
+      "name": "Dotaciones institucionales",
+      "priority": "B",
+      "classes": {
+        "52121500": "Ropa de cama",
+        "52121700": "Toallas",
+        "55121700": "Señalización"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "ropa de cama",
+        "toallas",
+        "señalética",
+        "señalización institucional",
+        "dotación institucional"
+      ],
+      "synonyms": [
+        "kit institucional",
+        "lencería institucional",
+        "señalización de oficina"
+      ],
+      "exclusions": [
+        "operación logística integral",
+        "dotación hospitalaria compleja"
+      ],
+      "rationale": "Bienes discretos de dotación con composición física verificable.",
+      "segments": [
+        "52",
+        "55"
+      ],
+      "families": {
+        "52120000": "Ropa de cama y mantelería y ropa de cocina y toallas",
+        "55120000": "Señalización y accesorios"
+      }
+    },
+    {
+      "id": "empaque",
+      "name": "Empaques y almacenamiento",
+      "priority": "B",
+      "classes": {
+        "24112000": "Papeleras y cestas",
+        "24112400": "Cofres y armarios de almacenamiento y baúles",
+        "24121500": "Cajas y bolsas de embalaje y bolsas"
+      },
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "empaque",
+        "embalaje",
+        "caja de cartón",
+        "contenedor de almacenamiento",
+        "papelera"
+      ],
+      "synonyms": [
+        "bolsa de embalaje",
+        "caja de almacenamiento",
+        "material de embalaje"
+      ],
+      "exclusions": [
+        "servicio de almacenamiento",
+        "bodega industrial llave en mano"
+      ],
+      "rationale": "Empaques y contenedores estándar con logística medible.",
+      "segments": [
+        "24"
+      ],
+      "families": {
+        "24110000": "Contenedores y almacenamiento",
+        "24120000": "Materiales de embalaje"
+      }
+    },
+    {
+      "id": "alimentacion",
+      "name": "Alimentación y refrigerios",
+      "priority": "B",
+      "segments": [],
+      "families": {},
+      "classes": {},
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "alimentación",
+        "alimentos",
+        "refrigerios",
+        "desayunos",
+        "almuerzos",
+        "cenas",
+        "raciones",
+        "paquetes alimentarios"
+      ],
+      "synonyms": [
+        "suministro de alimentos",
+        "kits alimentarios",
+        "mercados",
+        "víveres",
+        "hidratación",
+        "complemento alimentario",
+        "alimentos no perecederos"
+      ],
+      "exclusions": [
+        "alimento concentrado",
+        "alimento tipo concentrado",
+        "alimentos para animales",
+        "seguridad alimentaria"
+      ],
+      "rationale": "Suministro de alimentos y refrigerios institucionales; sin servicios ajenos."
+    },
+    {
+      "id": "eventos",
+      "name": "Eventos institucionales y su logística",
+      "priority": "B",
+      "segments": [],
+      "families": {},
+      "classes": {},
+      "products": {},
+      "context_classes": {},
+      "keywords": [
+        "logística de eventos",
+        "apoyo logístico",
+        "organización de eventos",
+        "atención de eventos",
+        "elementos para eventos",
+        "eventos institucionales"
+      ],
+      "synonyms": [
+        "servicios logísticos",
+        "bienes y servicios logísticos",
+        "organización y ejecución de actividades",
+        "realización de eventos"
+      ],
+      "exclusions": [
+        "producción audiovisual",
+        "operador de televisión"
+      ],
+      "rationale": "Eventos institucionales con suministro de bienes; revisables si son mixtos."
+    }
+  ],
+  "excluded_products": {
+    "25132102": "Dron militar",
+    "25132104": "Drone de aplicación de la ley",
+    "25131705": "Drones de objetivo o reconocimiento"
+  },
+  "mixed_review": true,
+  "hard_service_pattern": "\\b(?:consultoria|interventoria|asesoria|auditoria|servicios? profesionales?|capacitacion|vigilancia|transporte (?:escolar|terrestre|de pasajeros|de carga)|arrendamiento|obras? civiles?|construccion|servicios? de salud|mantenimiento (?:preventivo|correctivo)|servicios? (?:de|en) mantenimiento)\\b"
+}

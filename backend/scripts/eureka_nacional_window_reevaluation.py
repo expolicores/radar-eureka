@@ -26,6 +26,7 @@ COMMERCIAL_KEYS = (
     "excluded_product_codes",
     "description_available",
     "accessory_service_signal",
+    "commercial_confidence",
 )
 RUNTIME_KEYS = (
     "age_days",

@@ -9,9 +9,10 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from spike_licitaciones_info import ROOT, normalized
 
-DEFAULT_PROFILE = ROOT / "config" / "eureka_nacional_commercial.v1.json"
+DEFAULT_PROFILE = ROOT / "config" / "eureka_nacional_commercial.v2.json"
 CODE = re.compile(r"(?<![\w.])\d{8}(?![\w.])")
 METHODS = ("unspsc", "keywords", "both")
+SERVICE_WORD = re.compile(r"\b(?:servicios?|logistic[oa]s?)\b")
 
 
 class Exclusion(BaseModel):
@@ -66,6 +67,10 @@ class CommercialProfile(BaseModel):
     exclusions: list[Exclusion]
     excluded_products: dict[str, str]
     categories: list[Category] = Field(min_length=1)
+    # v2: objects mixing a commercial category with service wording stay as reviewable
+    # candidates, unless the service matches `hard_service_pattern`. v1 keeps both off.
+    mixed_review: bool = False
+    hard_service_pattern: str = ""
 
     @model_validator(mode="after")
     def validate_rules(self):
@@ -76,6 +81,7 @@ class CommercialProfile(BaseModel):
         for pattern in (
             self.supply_pattern,
             self.service_pattern,
+            self.hard_service_pattern,
             *(r.pattern for r in self.exclusions),
         ):
             re.compile(pattern)
@@ -186,9 +192,32 @@ def assess_commercial(profile, obj, description, codes):
         )
     ):
         reason = "primary_service"
+    confidence = "goods"
+    if (
+        reason == "primary_service"
+        and profile.mixed_review
+        and matches
+        and not (profile.hard_service_pattern and re.search(profile.hard_service_pattern, scope))
+    ):
+        # A relevant category is present: keep it reviewable, never as a confirmed supply.
+        reason, confidence = None, "mixed_review"
+    elif (
+        profile.mixed_review
+        and not reason
+        and matches
+        and (not supply or SERVICE_WORD.search(scope))
+    ):
+        # No explicit supply, or goods plus a service component (hosting, logistics):
+        # reviewable, never a confirmed supply.
+        confidence = "mixed_review"
     if not reason and not matches:
         reason = "category_excluded" if category_exclusions else "outside_commercial_profile"
-    if not reason and not supply and (first_product_at is None or first_product_at > 12):
+    if (
+        not reason
+        and confidence != "mixed_review"
+        and not supply
+        and (first_product_at is None or first_product_at > 12)
+    ):
         reason = "goods_object_not_clear"
 
     if reason:
@@ -211,12 +240,18 @@ def assess_commercial(profile, obj, description, codes):
         "excluded_product_codes": excluded_codes,
         "description_available": bool(description),
         "accessory_service_signal": bool(service and not reason),
+        "commercial_confidence": None if reason else confidence,
     }
 
 
 def selection_rank(process):
     status = {"open": 0, "unknown": 1, "closed": 2}[process["validity_status"]]
-    return status, not process["preferred_modality"], process["commercial_priority"]
+    return (
+        status,
+        not process["preferred_modality"],
+        process["commercial_priority"],
+        process.get("commercial_confidence") == "mixed_review",
+    )
 
 
 def commercial_metrics(processes, results, profile):
