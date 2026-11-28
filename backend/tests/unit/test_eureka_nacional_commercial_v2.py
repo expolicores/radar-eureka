@@ -20,8 +20,8 @@ def assess(profile, obj):
     return commercial.assess_commercial(profile, obj, "", [])
 
 
-def test_default_profile_is_v2_and_v1_is_preserved():
-    assert commercial.load_commercial_profile().version == "eureka-nacional-commercial-v2"
+def test_v2_and_v1_are_preserved():
+    assert V2.version == "eureka-nacional-commercial-v2"
     assert V1.version == "eureka-nacional-commercial-v1"
     assert V1.mixed_review is False
 

@@ -9,10 +9,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from spike_licitaciones_info import ROOT, normalized
 
-DEFAULT_PROFILE = ROOT / "config" / "eureka_nacional_commercial.v2.json"
+DEFAULT_PROFILE = ROOT / "config" / "eureka_nacional_commercial.v3.json"
 CODE = re.compile(r"(?<![\w.])\d{8}(?![\w.])")
 METHODS = ("unspsc", "keywords", "both")
 SERVICE_WORD = re.compile(r"\b(?:servicios?|logistic[oa]s?)\b")
+SUPPLY_WORD = re.compile(
+    r"\b(?:adquisicion|adquirir|suministro|suministrar|compra|compraventa|dotacion|"
+    r"entrega|entregar|venta)\b"
+)
 
 
 class Exclusion(BaseModel):
@@ -35,6 +39,9 @@ class Category(BaseModel):
     synonyms: list[str]
     exclusions: list[str]
     rationale: str
+    # v3: a category whose terms are generic (e.g. «apoyo logístico») only applies when the
+    # object also names one of these contexts; otherwise the match is dropped explicitly.
+    context_terms: list[str] = []
 
     @model_validator(mode="after")
     def validate_code_levels(self):
@@ -71,6 +78,9 @@ class CommercialProfile(BaseModel):
     # candidates, unless the service matches `hard_service_pattern`. v1 keeps both off.
     mixed_review: bool = False
     hard_service_pattern: str = ""
+    # v3: an unrelated service with no explicit supply verb is a primary service even when
+    # its wording escapes `service_pattern` (typos such as «mantenimento»).
+    hard_service_without_supply: bool = False
 
     @model_validator(mode="after")
     def validate_rules(self):
@@ -155,6 +165,12 @@ def assess_commercial(profile, obj, description, codes):
         ]
         if not unspsc and not terms:
             continue
+        if category.context_terms and not any(
+            phrase_match(obj, term) or phrase_match(description, term)
+            for term in category.context_terms
+        ):
+            category_exclusions.append({"category": category.id, "phrase": "sin_contexto"})
+            continue
         excluded = next((term for term in category.exclusions if phrase_match(obj, term)), None)
         # A documented physical item ahead of an accessory service remains in scope.
         accessory = (
@@ -192,12 +208,31 @@ def assess_commercial(profile, obj, description, codes):
         )
     ):
         reason = "primary_service"
+    hard = re.search(profile.hard_service_pattern, scope) if profile.hard_service_pattern else None
+    if (
+        not reason
+        and profile.hard_service_without_supply
+        and not SUPPLY_WORD.search(scope)
+        and hard
+        # Only when the unrelated service is the object itself, ahead of any product term.
+        and (first_product_at is None or hard.start() < first_product_at)
+    ):
+        reason = "primary_service"
     confidence = "goods"
     if (
         reason == "primary_service"
         and profile.mixed_review
         and matches
-        and not (profile.hard_service_pattern and re.search(profile.hard_service_pattern, scope))
+        and not (
+            hard
+            # v3 only blocks an unrelated service that is the object itself (ahead of any
+            # product term); v2 blocks any mention.
+            and (
+                not profile.hard_service_without_supply
+                or first_product_at is None
+                or hard.start() < first_product_at
+            )
+        )
     ):
         # A relevant category is present: keep it reviewable, never as a confirmed supply.
         reason, confidence = None, "mixed_review"
