@@ -5,9 +5,10 @@ module reads the classification together with document coverage and a generaliza
 of apparently exhaustive habilitating-requirement lists, and decides how a process is shown:
 
 - confirmed: formal ``no_experience_required``.
-- priority_review: not formally resolved, but the governing documents carry a closed
-  habilitating-requirement list without contractual experience (or an explicit waiver that
-  still needs corroboration) and no documentary gap is known.
+- priority_review: not formally resolved, but the governing documents carry an explicit
+  waiver that still needs corroboration (shown even with unverified documents, as a
+  warning), or a closed habilitating-requirement list without contractual experience and
+  no known documentary gap.
 - uncertain: no documentary signal either way strong enough to prioritize. Always visible.
 - experience_indications: documentary signals of an experience requirement without a formal
   conclusion (a requirement clause, an explicit-requirement review or contractual-experience
@@ -346,8 +347,9 @@ def assess_finding(classification, documents, *, identifiers=(), human_reviews=N
     elif status != "not_resolved":
         category, basis = "uncertain", f"formal_{status}"
     elif review == "explicit_favorable" and not requirement_signals:
-        category = "priority_review" if not coverage["not_verified_by_system"] else "uncertain"
-        basis = "explicit_waiver_pending_corroboration"
+        # An explicit waiver is a favorable candidate for human review even while other
+        # documents are unverified; the gap stays as a warning, never as a demotion.
+        category, basis = "priority_review", "explicit_waiver_pending_corroboration"
     elif (
         closed_without_experience
         and not sections_with_experience

@@ -55,14 +55,22 @@ PREFERENCE_SHARE = re.compile(
     r"reincorporacion|reintegracion|discapacidad|victimas? de violencia)\b.{0,250}"
     r"\baport[a-z ]{1,35}.{0,110}\bde la experiencia\b.{0,45}\bacreditada en la oferta\b"
 )
+# The same statutory tie-break written without naming the protected subject: a member of a
+# plural bidder contributing «el veinticinco por ciento (25 %) de la experiencia».
+TIEBREAK_SHARE = re.compile(
+    r"\b(?:integrantes?|miembros?)\b.{0,250}\baport[a-z ]{1,35}.{0,20}"
+    r"\bveinticinco por ciento\b.{0,15}\bde la experiencia\b"
+)
 NEGATIVE = re.compile(
-    r"\b(?:no se (?:exige|exigira|requiere|requerira|solicita|solicitara)(?: acreditar)?|"
+    # Singular and plural verbs: «no se exige experiencia», «no se exigen experiencia, …».
+    r"\b(?:no se (?:exigen?|exigiran?|requieren?|requeriran?|solicitan?|solicitaran?)"
+    r"(?: acreditar)?|"
     r"no (?:se )?debe(?:ra)? acreditar|no sera necesario acreditar)"
     r"\s+(?:de\s+)?(?:(?:la|una|ninguna)\s+)?experiencia\b|"
     r"\bexperiencia(?: contractual| habilitante)?(?: del (?:proponente|oferente))?"
     r"\s+no (?:aplica|(?:es|sera) (?:un )?requisito(?: habilitante)?)\b"
 )
-SHORT_NEGATIVE = re.compile(r"^(?:no aplica|no se (?:exige|requiere|solicita))\s*[.!]?$")
+SHORT_NEGATIVE = re.compile(r"^(?:no aplica|no se (?:exigen?|requieren?|solicitan?))\s*[.!]?$")
 POSITIVE = re.compile(
     r"\b(?:debe(?:ra|ran)?\s+(?:acreditar|certificar|demostrar|presentar|contar con)|"
     r"se (?:exige|exigira|requiere|requerira)|requisito obligatori[ao]|"
@@ -160,6 +168,13 @@ BIDDER_MANDATE = re.compile(
     r"debe(?:ra|ran)? (?:aportar|acreditar|demostrar|certificar) "
     r"(?:(?:su|la|una) )?experiencia\b"
 )
+# The bidder must attach executed contracts or their certifications (in a clause about
+# experience): «el proponente deberá anexar copia de dos (2) contratos ejecutados…».
+BIDDER_CONTRACT_SUBMISSION = re.compile(
+    r"\b(?:el|los) (?:proponentes?|oferentes?) debe(?:ra|ran|n)? "
+    r"(?:anexar|aportar|allegar|adjuntar|presentar)\b.{0,90}"
+    r"\b(?:contratos?|certificaciones? de (?:contratos?|cumplimiento|experiencia))\b"
+)
 PASSIVE_BIDDER_MANDATE = re.compile(
     r"\b(?:la )?experiencia(?: (?:minima|general|especifica|habilitante|contractual))? "
     r"del (?:proponente|oferente|licitante) se (?:acreditara|demostrara) "
@@ -214,7 +229,11 @@ PARTICIPATION_CONTENT = re.compile(
     r"condiciones (?:generales )?(?:de|para)(?: la)? participacion|"
     r"presentacion de (?:la |las )?(?:ofertas?|propuestas?))\b"
 )
-MANDATE_BASES = {"bidder_experience_mandate", "ocr_corroborated_bidder_mandate"}
+MANDATE_BASES = {
+    "bidder_experience_mandate",
+    "ocr_corroborated_bidder_mandate",
+    "bidder_contract_submission",
+}
 DEPENDENCY_BASES = {"document_dependency", "requirement_with_document_dependency"}
 CONTRACT_EVIDENCE = re.compile(r"\bcontratos?\b")
 ADMISSIBILITY = re.compile(r"^acreditar experiencia\b.{0,180}\bcontratos?\b")
@@ -367,6 +386,10 @@ def assertion(
         and not re.search(r"\bno\b", text)
     ):
         return REQ, "differential_experience_requirement"
+    # Statutory tie-break shares are another criterion even inside plural-bidder sections;
+    # they must never read as a restricted habilitating requirement.
+    if experience and (PREFERENCE_SHARE.search(text) or TIEBREAK_SHARE.search(text)):
+        return OTHER, "other_subject_or_criterion"
     if experience and (
         LIMITED_SUBJECT.search(text)
         or (
@@ -415,8 +438,16 @@ def assertion(
         and not re.search(r"\bno\b", text)
     ):
         return REQ, "minimum_experience_in_heading"
+    mandate = BIDDER_MANDATE.search(text) or PASSIVE_BIDDER_MANDATE.search(text)
+    # A negation after the mandate («…cuyo valor no sea inferior…», «No se aceptarán
+    # copias…») qualifies it; only a negation before it can cancel it.
+    if mandate and not re.search(r"\bno\b", text[: mandate.start()]):
+        if MANDATE_LIMITED.search(text):
+            return CONDITIONAL, "limited_applicability"
+        if NON_BIDDER_ACTOR.search(text):
+            return CONDITIONAL, "scope_or_obligation_unclear"
+        return REQ, "bidder_experience_mandate"
     if not re.search(r"\bno\b", text):
-        mandate = BIDDER_MANDATE.search(text) or PASSIVE_BIDDER_MANDATE.search(text)
         contextual = (
             method == "ocr_text"
             and heading == "experience"
@@ -424,13 +455,12 @@ def assertion(
             and bidder_checklist
             and OCR_CONTEXTUAL_MANDATE.search(text)
         )
-        if mandate or contextual:
+        if contextual:
             if MANDATE_LIMITED.search(text):
                 return CONDITIONAL, "limited_applicability"
             if NON_BIDDER_ACTOR.search(text):
                 return CONDITIONAL, "scope_or_obligation_unclear"
-            basis = "bidder_experience_mandate" if mandate else "ocr_corroborated_bidder_mandate"
-            return REQ, basis
+            return REQ, "ocr_corroborated_bidder_mandate"
         if OFFER_EXPERIENCE_CERTIFICATES.search(text):
             return REQ, "mandatory_offer_certificates"
         if section_text == "condiciones de experiencia" and CONTRACT_SUBMISSION.search(text):
@@ -453,6 +483,17 @@ def assertion(
             )
         ):
             return NEG, "explicit_waiver"
+    submission = BIDDER_CONTRACT_SUBMISSION.search(text)
+    if (
+        submission
+        and not re.search(r"\bno\b", text[: submission.start()])
+        and not NON_BIDDER_ACTOR.search(text)
+        and not MANDATE_LIMITED.search(text)
+        and not (POSITIVE.search(text) and not re.search(r"\bno\b", text) and SCOPE.search(text))
+    ):
+        # Only where the clause would otherwise stay unclear; recognized requirements keep
+        # their earlier basis.
+        return REQ, "bidder_contract_submission"
     if NON_BIDDER_ACTOR.search(text) or ACCREDITATION_METHOD.search(text):
         return CONDITIONAL, "scope_or_obligation_unclear"
     if (
@@ -784,7 +825,7 @@ def classify_experience(documents, *, inventory_complete=True):
             "insufficient_evidence": 4,
             "explicit_requirement": 5,
         }[review],
-        "classification_method": "en01-contextual-v3",
+        "classification_method": "en01-contextual-v4",
         "inventory_complete": inventory_complete,
         "evidence": evidence,
         "pending_document_ids": pending,

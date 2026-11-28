@@ -45,6 +45,39 @@
       ],
       "note": "El titular dio el proceso por resuelto comercialmente: la invitación, página 24, exige anexar un contrato o certificado de experiencia específica en suministro de equipos tecnológicos por más del 100 % del presupuesto. El sistema no lo concluye formalmente: esa cláusula es un imperativo sin sujeto fuera de una sección detectada.",
       "system_verified": false
+    },
+    {
+      "identifiers": [
+        "CO1.NTC.11292238"
+      ],
+      "recorded_on": "2026-11-28",
+      "reviewer": "titular EN-01",
+      "observation": "no_experience_requirement_found",
+      "documents_reviewed": [
+        "Invitacion_Publica_CMD-MC-003-2026_Impresora (página 2)"
+      ],
+      "note": "Revisión humana favorable: el titular confirma que el proceso no exige experiencia contractual. La invitación pública declara en la página 2 «No se exigen experiencia, capacidad financiera ni Registro Único de Proponentes». Eureka lo detectó por esa declaración expresa. No se descargó el estudio previo ni se hará más análisis documental; la conveniencia económica y logística la evalúa el titular. El estado formal del clasificador se conserva aparte.",
+      "mpne_observation": {
+        "label": "positive_control_candidate",
+        "label_source": "human_review",
+        "source_attributes": {
+          "entity": "CONCEJO DE DURANIA NORTE DE SANTANDER",
+          "entity_type_inferred": "concejo municipal (inferido del nombre)",
+          "department": "Norte de Santander",
+          "budget_cop": 5500000,
+          "modality": "Contratación mínima cuantía",
+          "commercial_category": "informatica",
+          "object": "ADQUISICIÓN IMPRESORA MULTIFUNCIONAL PARA EL CONCEJO MUNICIPAL DE DURANIA, NS",
+          "published_at": "2026-11-27T12:54:16",
+          "source_run": "en01-2fxt0cm7"
+        },
+        "missing": [
+          "plazo de ejecución",
+          "forma de pago",
+          "lugar de entrega"
+        ]
+      },
+      "system_verified": false
     }
   ]
 }
