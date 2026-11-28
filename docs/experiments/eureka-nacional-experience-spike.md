@@ -6063,3 +6063,118 @@ eureka_nacional_en01.py --exploratory --discovery-only --include-secop1 \
   - propuesta de inventarios.
 - La ventana de 10 días sólo se declarará cubierta si la paginación
   llega a su inicio.
+
+### Búsqueda de sólo descubrimiento con Vila Frontier actualizado (en01-1u44f6p7)
+
+Boyacá y Huila son una muestra experimental. El alcance objetivo de
+Eureka Nacional es todo Colombia; estas ubicaciones no son límites
+permanentes.
+
+#### Ejecución
+
+- Controles previos:
+  - rama `experiment/eureka-nacional` limpia;
+  - una sola pestaña, en `/cliente/contratos`;
+  - sin marcador;
+  - preflight con sesión válida, `only_configured`,
+    `profile_count: 1` y sin cambio de perfil.
+- Parámetros: `--exploratory --discovery-only --include-secop1
+  --processes 15 --discovery-pages 8 --recent-days 10` y la
+  geografía de Boyacá y Huila.
+- Resultado: `discovery_completed`, 10 créditos de 30 en 21 s.
+- Sin inventarios, descargas, streaming, POST documentales ni cola
+  SECOP I. Esta corrida no analiza documentos: la ausencia de
+  hallazgos no significa ausencia de oportunidades.
+
+#### 1. Cobertura temporal
+
+- 240 avisos en 8 páginas de 30, publicados entre el 18-11 a las
+  14:29 y el 27-11 a las 18:02. El proveedor seguía reportando más
+  avisos: la corrida paró por presupuesto de páginas.
+- **Aparecen 165 avisos del 21 al 26 de noviembre**, el periodo
+  antes ausente: 1 del 22, 47 del 23, 46 del 24, 47 del 25 y 24 del
+  26. Ninguno del 21. Es coherente con la reactivación del perfil y
+  la recuperación histórica solicitada.
+- **La ventana de 10 días no quedó cubierta.** Empieza el 17-11 a
+  las 23:53 y lo más antiguo leído es del 18-11 a las 14:29. Faltan
+  unas 14,6 horas del inicio, además de los avisos que quedaron más
+  allá de la página 8.
+
+#### 2. Descubiertos y elegibles
+
+| Fuente / departamento | Descubiertos | Elegibles |
+|---|---|---|
+| SECOP II Boyacá | 110 | 3 |
+| SECOP II Huila | 44 | 4 |
+| SECOP I Boyacá | 67 | 1 |
+| SECOP I Huila | 8 | 1 |
+| Otros portales y otras geografías | 11 | 0 |
+
+- Exclusiones:
+  - 141 fuera del perfil comercial;
+  - 39 procesos cerrados;
+  - 36 de servicio principal;
+  - 7 con objeto no claro;
+  - 6 fuera de la geografía;
+  - 1 de perecederos;
+  - 1 de servicio digital.
+- Los 9 elegibles quedan dentro de las cuotas (15 SECOP II y 5 SECOP
+  I): **ninguno queda fuera por cuota**.
+- La selección es reproducible offline con
+  `window_reevaluation_10d.json`, idéntica a la corrida.
+
+#### 3. Nuevos frente a históricos
+
+- El perfil cambió después de las corridas anteriores (actividades
+  concentradas en bienes y eventos, y recuperación histórica). Las
+  muestras no son universos idénticos.
+- De los 240 avisos, 170 ya aparecían en alguna corrida anterior.
+
+| Prioridad | Proceso | Departamento | Cierre | Modalidad | Categoría | Historial |
+|---|---|---|---|---|---|---|
+| A | secop1:26-13-14853212 Jericó (equipo de cómputo) | Boyacá | 28-11 17:55 | Mínima cuantía | informática | analizado: indicios de experiencia |
+| A | CO1.NTC.11288255 Chitaraque (aseo, dotación y tecnología) | Boyacá | 01-12 10:30 | Mínima cuantía | aseo | analizado: con incertidumbre, sin rector descargado |
+| A | CO1.NTC.11278746 I. E. Anacleto García (material pedagógico, deportivo, aseo) | Huila | desconocido | Régimen especial | educación | visto antes (fuera por cuota); nunca inventariado |
+| A | **CO1.NTC.11266200** I. E. Municipal Windsor (ventiladores, portátiles) | Huila | desconocido | Régimen especial | informática | **nuevo** |
+| A | CO1.NTC.11257086 I. E. José Miguel Montalvo | Huila | desconocido | Régimen especial | informática | analizado: exigencia textual de experiencia |
+| B | **secop1:26-13-14853466** Elías (menaje) | Huila | 30-11 10:30 | Mínima cuantía | gastronomía | **nuevo** |
+| B | CO1.NTC.11288021 Briceño (instrumentos musicales) | Boyacá | 30-11 17:30 | Mínima cuantía | música | visto antes; nunca inventariado |
+| B | CO1.NTC.11285436 Ramiriquí (escritorios y sillas) | Boyacá | 30-11 15:30 | Mínima cuantía | mobiliario | visto antes; nunca inventariado |
+| B | CO1.NTC.11281640 Yaguará (mobiliario) | Huila | 30-11 10:00 | Mínima cuantía | mobiliario | visto antes; nunca inventariado |
+
+#### 4. Oportunidades a considerar
+
+- Motivo común de selección: suministro de bienes dentro del perfil
+  comercial, abiertos o con vigencia desconocida, preferentemente de
+  mínima cuantía o régimen especial.
+- Sin análisis documental previo:
+  - Windsor (nuevo, prioridad A);
+  - Anacleto García (prioridad A);
+  - Elías, Briceño, Ramiriquí y Yaguará (prioridad B). Todos cierran
+    entre el 30-11 y el 01-12.
+- Jericó y José Miguel Montalvo ya muestran indicios de experiencia.
+  Chitaraque sigue con incertidumbre por falta de rector.
+
+#### 5. Limitaciones
+
+- Ventana de 10 días no cubierta; el feed continúa más allá de la
+  página 8.
+- 165 de los 240 avisos son del periodo recuperado. El orden y la
+  densidad dependen de la configuración actual del perfil.
+- No hay análisis documental en esta corrida.
+
+#### 6. Propuesta de inventarios (preparada, no ejecutada)
+
+- Plan `en01-inv_1u44f6p7`, hash
+  `81e84048822e86a1ea4d9fda3df0b1709c6a08d0f9afbb5c984e5312e6052da1`.
+- Procesos (los 5 elegibles de SECOP II nunca inventariados):
+  CO1.NTC.11266200, CO1.NTC.11278746, CO1.NTC.11281640,
+  CO1.NTC.11285436 y CO1.NTC.11288021.
+- Límite de 15 créditos y 180 s; se esperan unos 11.
+- Con el lector actual, una tabla vacía al final deja el inventario
+  incompleto pero conserva sus documentos.
+- Aparte, sin plan todavía: inventario SECOP I de Elías
+  (26-13-14853466) por la vía de recuperación SECOP I, que no
+  descarga, y descarga del rector de Chitaraque si se quiere
+  resolverlo.
+- Antes de cualquier descarga, plan y hash propios por tanda.

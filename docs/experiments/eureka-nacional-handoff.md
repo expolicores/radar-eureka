@@ -1420,3 +1420,16 @@ Pendiente de autorización.
 `--discovery-only` (`d88aee8`): sesión, feed y selección; sin
 inventarios ni descargas; 30 créditos. Corrida de Boyacá y Huila con
 8 páginas y 10 días preparada, pendiente de autorización.
+
+### Descubrimiento con Vila Frontier actualizado
+
+- `en01-1u44f6p7`: 10 créditos; 240 avisos del 18 al 27 de
+  noviembre, 165 de ellos del periodo antes ausente (21 al 26).
+- La ventana de 10 días no queda cubierta: falta su inicio y hay más
+  páginas.
+- 9 elegibles, ninguno fuera por cuota. 2 son nuevos: Windsor
+  (CO1.NTC.11266200) y Elías (SECOP I 26-13-14853466). 4 se habían
+  visto pero nunca inventariado.
+- Plan de 5 inventarios SECOP II: `81e84048…`, 15 créditos. Pendiente
+  de autorización.
+- Boyacá y Huila son sólo una muestra; el alcance es Colombia.
