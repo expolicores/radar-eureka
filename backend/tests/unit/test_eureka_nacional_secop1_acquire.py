@@ -424,7 +424,17 @@ class FakeContext:
         self.handlers[event] = handler
 
 
-def fake_worker_env(monkeypatch, tmp_path, *, perfiles=PROFILE, dedicated=True, confirm=True):
+def fake_worker_env(
+    monkeypatch,
+    tmp_path,
+    *,
+    perfiles=PROFILE,
+    dedicated=True,
+    confirm=True,
+    late=False,
+    stop_while_waiting=False,
+    aexit_error=None,
+):
     run, queue = queued_run(tmp_path, count=2)
     work = run / acquire.WORKDIR
     work.mkdir()
@@ -461,6 +471,8 @@ def fake_worker_env(monkeypatch, tmp_path, *, perfiles=PROFILE, dedicated=True, 
             return self
 
         async def __aexit__(self, *_exc):
+            if aexit_error is not None:
+                raise aexit_error
             return False
 
     async def fake_run_batch(guard, items, run_dir, storage, digest, *, log=None):
@@ -470,7 +482,18 @@ def fake_worker_env(monkeypatch, tmp_path, *, perfiles=PROFILE, dedicated=True, 
     monkeypatch.setattr("playwright.async_api.async_playwright", lambda: Manager())
     monkeypatch.setattr("eureka_nacional_secop1_popup.Secop1PopupGuard", Guard)
     monkeypatch.setattr(acquire, "run_batch", fake_run_batch)
-    monkeypatch.setattr(acquire.asyncio, "sleep", _no_sleep)
+
+    async def sleep(_seconds):
+        # Late signals arrive only once the preflight has been written.
+        if (work / "preflight.json").is_file():
+            if late:
+                (work / "confirmed-batch.flag").write_text(queue["batch_sha256"], "utf-8")
+            if stop_while_waiting:
+                (work / "stop.flag").write_text("", "utf-8")
+
+    monkeypatch.setattr(acquire.asyncio, "sleep", sleep)
+    waits = late or stop_while_waiting
+    monkeypatch.setattr(acquire, "CONFIRMATION_WAIT_SECONDS", 60 if waits else 0)
     command = (
         f"msedge.exe --remote-debugging-port=9232 --user-data-dir={acquire.PROFILE_DIR}"
         if dedicated
@@ -486,7 +509,10 @@ def fake_worker_env(monkeypatch, tmp_path, *, perfiles=PROFILE, dedicated=True, 
             "command_line": command,
         },
     )
-    asyncio.run(acquire.worker(run, tmp_path / "marker.lock", lambda: PROFILE))
+    try:
+        asyncio.run(acquire.worker(run, tmp_path / "marker.lock", lambda: PROFILE))
+    except BaseException as error:
+        seen["raised"] = type(error).__name__
     trace = json.loads((work / "result.json").read_text(encoding="utf-8"))
     closure = json.loads((work / "closure.json").read_text(encoding="utf-8"))
     flags = sorted(p.name for p in work.glob("*.flag"))
@@ -535,3 +561,74 @@ def test_worker_aborts_on_non_dedicated_browser_before_any_context(tmp_path, mon
     assert trace["reason"] == "not_dedicated_browser"
     assert "context" not in seen
     assert closure == {"marker_owned": False, "context_closed": False, "disconnected": False}
+
+
+def test_early_stop_without_confirmation_records_a_verified_disconnection(tmp_path, monkeypatch):
+    # Arrange / Act: ready preflight, no confirmation within the wait.
+    trace, closure, flags, seen = fake_worker_env(monkeypatch, tmp_path, confirm=False)
+
+    # Assert: no POST, and the clean exit is evidence enough to release the marker.
+    assert trace["reason"] == "batch_confirmation_missing_or_mismatch"
+    assert trace["confirmation"] == "timeout"
+    assert "batch" not in seen
+    assert closure == {"marker_owned": True, "context_closed": True, "disconnected": True}
+    assert acquire.marker_release_allowed(
+        closure, worker_exit_code=0, marker_text="secop1-disposable-context"
+    )
+    assert flags == []
+
+
+def test_preflight_not_ready_also_records_the_disconnection(tmp_path, monkeypatch):
+    trace, closure, _, seen = fake_worker_env(monkeypatch, tmp_path, perfiles=f"{PROFILE},999")
+
+    assert trace["reason"] == "preflight_not_ready"
+    assert "batch" not in seen
+    assert closure["disconnected"] is True
+
+
+def test_late_confirmation_after_a_ready_preflight_runs_the_batch(tmp_path, monkeypatch):
+    trace, closure, _, seen = fake_worker_env(monkeypatch, tmp_path, confirm=False, late=True)
+
+    assert trace["preflight"]["ready_for_acquisition"] is True
+    assert seen["batch"]["items"] == 2
+    assert trace["stage"] == "batch_done"
+    assert closure["disconnected"] is True
+
+
+def test_confirmation_never_unlocks_a_batch_when_the_preflight_failed(tmp_path, monkeypatch):
+    trace, _, _, seen = fake_worker_env(
+        monkeypatch, tmp_path, perfiles=f"{PROFILE},999", confirm=True
+    )
+
+    assert trace["reason"] == "preflight_not_ready"
+    assert "batch" not in seen
+
+
+def test_wrong_digest_stops_immediately_as_a_mismatch(tmp_path, monkeypatch):
+    trace, _, _, seen = fake_worker_env(monkeypatch, tmp_path, confirm="wrong")
+
+    assert trace["confirmation"] == "mismatch"
+    assert "batch" not in seen
+
+
+def test_stop_flag_while_waiting_for_confirmation_ends_without_batch(tmp_path, monkeypatch):
+    trace, closure, _, seen = fake_worker_env(
+        monkeypatch, tmp_path, confirm=False, stop_while_waiting=True
+    )
+
+    assert trace["confirmation"] == "stopped"
+    assert "batch" not in seen
+    assert closure["disconnected"] is True
+
+
+def test_failed_disconnection_keeps_the_marker_held(tmp_path, monkeypatch):
+    _trace, closure, _, seen = fake_worker_env(
+        monkeypatch, tmp_path, confirm=False, aexit_error=RuntimeError("cdp")
+    )
+
+    assert seen["raised"] == "RuntimeError"
+    assert closure["context_closed"] is True
+    assert closure["disconnected"] is False
+    assert not acquire.marker_release_allowed(
+        closure, worker_exit_code=0, marker_text="secop1-disposable-context"
+    )

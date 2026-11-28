@@ -39,6 +39,7 @@ VERDOCUMENTO = "https://www.contratos.gov.co/consultas/VerDocumento"
 WORKDIR = "secop1_acquisition"
 ATTEMPTS_DIR = "secop1_attempts"
 CONSECUTIVE_FAILURE_LIMIT = 2
+CONFIRMATION_WAIT_SECONDS = 600
 OPERATOR_FLAGS = ("operator-ready.flag", "stop.flag", "confirmed-batch.flag")
 PROVIDER_HOSTS = re.compile(r"^https?://(?:[A-Za-z0-9-]+\.)*licitaciones\.info(?::\d+)?/")
 OFFICIAL_HOSTS = re.compile(
@@ -306,6 +307,14 @@ def listener_info():
     return info
 
 
+class _EarlyStop(BaseException):
+    """Leave the playwright block normally before any acquisition.
+
+    A `return` inside the block skipped the line that records the verified disconnection,
+    so a clean early stop left the preventive marker held. BaseException keeps it out of
+    the block's `except Exception` diagnostics."""
+
+
 async def worker(run, marker, profile_id_resolver):
     from eureka_nacional_secop1_popup import Secop1PopupGuard
     from playwright.async_api import async_playwright
@@ -340,105 +349,133 @@ async def worker(run, marker, profile_id_resolver):
             trace.update(stage="aborted", reason="not_dedicated_browser")
             return
         storage = LocalBinaryStorage(run / "binaries")
-        async with async_playwright() as playwright:
-            guard = Secop1PopupGuard(marker)
-            aborted = set()
-            browser = await playwright.chromium.connect_over_cdp(
-                CDP, timeout=5000, no_defaults=True
-            )
-            habitual = [p for c in browser.contexts for p in c.pages]
-            try:
-                source = await guard.start(browser)
-                context = guard.context
-
-                async def restrict(route):
-                    request = route.request
-                    body = (
-                        request.post_data
-                        if request.method == "POST" and is_provider(request.url)
-                        else None
-                    )
-                    decision = preflight.observe_request(request.url, body)
-                    del body
-                    if decision != "allowed":
-                        aborted.add(request)
-                        return await route.abort("blockedbyclient")
-                    return await route.continue_()
-
-                def on_response(response):
-                    if is_provider(response.url):
-                        preflight.observe_response(
-                            response.url,
-                            method=response.request.method,
-                            resource_type=response.request.resource_type,
-                            status=response.status,
-                            json="json" in response.headers.get("content-type", ""),
-                        )
-
-                def on_failed(request):
-                    if request.resource_type in ("document", "xhr", "fetch"):
-                        preflight.observe_failure(request.url, blocked_by_us=request in aborted)
-
-                await context.route(PROVIDER_HOSTS, restrict)
-                await context.route(OFFICIAL_HOSTS, restrict)
-                context.on("response", on_response)
-                context.on("requestfailed", on_failed)
-                preflight.record_own_navigation(LANDING)
+        try:
+            async with async_playwright() as playwright:
+                guard = Secop1PopupGuard(marker)
+                aborted = set()
+                browser = await playwright.chromium.connect_over_cdp(
+                    CDP, timeout=5000, no_defaults=True
+                )
+                habitual = [p for c in browser.contexts for p in c.pages]
                 try:
-                    await source.goto(LANDING, wait_until="domcontentloaded", timeout=20000)
-                except Exception as error:
-                    trace["landing_navigation_error"] = type(error).__name__
-                trace.update(
-                    stage="awaiting_manual_login",
-                    native_downloads_denied=guard.native_downloads_denied,
-                )
-                log()
-                print("manual_login_window_ready=true; posts=0", flush=True)
-                async with asyncio.timeout(1800):
-                    while not (work / "operator-ready.flag").is_file():
-                        if (work / "stop.flag").is_file():
-                            trace["stage"] = "manual_login_stopped"
-                            return
+                    source = await guard.start(browser)
+                    context = guard.context
+
+                    async def restrict(route):
+                        request = route.request
+                        body = (
+                            request.post_data
+                            if request.method == "POST" and is_provider(request.url)
+                            else None
+                        )
+                        decision = preflight.observe_request(request.url, body)
+                        del body
+                        if decision != "allowed":
+                            aborted.add(request)
+                            return await route.abort("blockedbyclient")
+                        return await route.continue_()
+
+                    def on_response(response):
+                        if is_provider(response.url):
+                            preflight.observe_response(
+                                response.url,
+                                method=response.request.method,
+                                resource_type=response.request.resource_type,
+                                status=response.status,
+                                json="json" in response.headers.get("content-type", ""),
+                            )
+
+                    def on_failed(request):
+                        if request.resource_type in ("document", "xhr", "fetch"):
+                            preflight.observe_failure(request.url, blocked_by_us=request in aborted)
+
+                    await context.route(PROVIDER_HOSTS, restrict)
+                    await context.route(OFFICIAL_HOSTS, restrict)
+                    context.on("response", on_response)
+                    context.on("requestfailed", on_failed)
+                    preflight.record_own_navigation(LANDING)
+                    try:
+                        await source.goto(LANDING, wait_until="domcontentloaded", timeout=20000)
+                    except Exception as error:
+                        trace["landing_navigation_error"] = type(error).__name__
+                    trace.update(
+                        stage="awaiting_manual_login",
+                        native_downloads_denied=guard.native_downloads_denied,
+                    )
+                    log()
+                    print("manual_login_window_ready=true; posts=0", flush=True)
+                    async with asyncio.timeout(1800):
+                        while not (work / "operator-ready.flag").is_file():
+                            if (work / "stop.flag").is_file():
+                                trace["stage"] = "manual_login_stopped"
+                                raise _EarlyStop
+                            await asyncio.sleep(0.5)
+                    await asyncio.sleep(3)
+                    tabs = [
+                        p for p in context.pages if not p.is_closed() and is_contracts_url(p.url)
+                    ]
+                    if len(tabs) == 1:
+                        async with asyncio.timeout(5):
+                            preflight.observe_page(await tabs[0].evaluate(PAGE_STATE))
+                    verdict = preflight.verdict()
+                    if len(tabs) != 1:
+                        verdict["ready_for_acquisition"] = False
+                        verdict["reasons"].append("contracts_tab_missing_or_ambiguous")
+                    write_json_atomic(work / "preflight.json", verdict)
+                    trace.update(stage="preflight_done", preflight=verdict)
+                    if not verdict["ready_for_acquisition"]:
+                        trace["reason"] = "preflight_not_ready"
+                        raise _EarlyStop
+                    # Only after a satisfactory preflight: wait (bounded) for the operator's
+                    # confirmation bound to the digest. A different digest, the stop flag or
+                    # the deadline end the worker without any POST.
+                    trace["stage"] = "awaiting_batch_confirmation"
+                    log()
+                    confirmation = work / "confirmed-batch.flag"
+                    deadline = time.monotonic() + CONFIRMATION_WAIT_SECONDS
+                    while not confirmation_valid(confirmation, queue):
+                        outcome = (
+                            "mismatch"
+                            if confirmation.is_file()
+                            else "stopped"
+                            if (work / "stop.flag").is_file()
+                            else "timeout"
+                            if time.monotonic() >= deadline
+                            else None
+                        )
+                        if outcome:
+                            trace.update(
+                                reason="batch_confirmation_missing_or_mismatch",
+                                confirmation=outcome,
+                            )
+                            raise _EarlyStop
                         await asyncio.sleep(0.5)
-                await asyncio.sleep(3)
-                tabs = [p for p in context.pages if not p.is_closed() and is_contracts_url(p.url)]
-                if len(tabs) == 1:
-                    async with asyncio.timeout(5):
-                        preflight.observe_page(await tabs[0].evaluate(PAGE_STATE))
-                verdict = preflight.verdict()
-                if len(tabs) != 1:
-                    verdict["ready_for_acquisition"] = False
-                    verdict["reasons"].append("contracts_tab_missing_or_ambiguous")
-                write_json_atomic(work / "preflight.json", verdict)
-                trace.update(stage="preflight_done", preflight=verdict)
-                if not verdict["ready_for_acquisition"]:
-                    trace["reason"] = "preflight_not_ready"
-                    return
-                if not confirmation_valid(work / "confirmed-batch.flag", queue):
-                    trace["reason"] = "batch_confirmation_missing_or_mismatch"
-                    return
-                await context.unroute(OFFICIAL_HOSTS, restrict)
-                guard.source = tabs[0]
-                trace["stage"] = "batch"
-                report = await run_batch(guard, items, run, storage, queue["batch_sha256"], log=log)
-                trace.update(
-                    stage="batch_done",
-                    batch=report,
-                    posts_forwarded=sum(i.get("posts_forwarded", 0) for i in report["items"]),
-                )
-            except UncertainCloseError as error:
-                trace.update(reason="uncertain_close", error_code=str(error))
-            except Exception as error:
-                trace["error_type"] = type(error).__name__
-                if code := getattr(error, "code", None):
-                    trace["error_code"] = code
-            finally:
-                state["marker_owned"] = guard._owns_marker is True
-                if guard.context is not None:
-                    state["context_closed"] = await guard.close() is True
-                trace["context_closed"] = state["context_closed"]
-                trace["habitual_pages_untouched"] = all(not p.is_closed() for p in habitual)
-                log()
+                    await context.unroute(OFFICIAL_HOSTS, restrict)
+                    guard.source = tabs[0]
+                    trace["stage"] = "batch"
+                    report = await run_batch(
+                        guard, items, run, storage, queue["batch_sha256"], log=log
+                    )
+                    trace.update(
+                        stage="batch_done",
+                        batch=report,
+                        posts_forwarded=sum(i.get("posts_forwarded", 0) for i in report["items"]),
+                    )
+                except UncertainCloseError as error:
+                    trace.update(reason="uncertain_close", error_code=str(error))
+                except Exception as error:
+                    trace["error_type"] = type(error).__name__
+                    if code := getattr(error, "code", None):
+                        trace["error_code"] = code
+                finally:
+                    state["marker_owned"] = guard._owns_marker is True
+                    if guard.context is not None:
+                        state["context_closed"] = await guard.close() is True
+                    trace["context_closed"] = state["context_closed"]
+                    trace["habitual_pages_untouched"] = all(not p.is_closed() for p in habitual)
+                    log()
+        except _EarlyStop:
+            pass
         state["disconnected"] = True
     finally:
         evidence = closure_record(**state)
